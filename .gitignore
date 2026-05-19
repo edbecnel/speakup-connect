@@ -1,0 +1,60 @@
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.buildlog/
+.history
+.svn/
+.swp
+migrate_working_dir/
+
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# VS Code related
+.vscode/launch.json
+.vscode/tasks.json
+
+# Flutter/Dart/Pub related
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+/build/
+
+# Symbolication related
+app.*.symbols
+
+# Obfuscation related
+app.*.map.json
+
+# Android Studio will place build artifacts here
+/android/app/debug
+/android/app/profile
+/android/app/release
+
+# Firebase
+google-services.json
+GoogleService-Info.plist
+lib/config/firebase_options.dart
+
+# Environment files
+.env
+.env.local
+.env.staging
+.env.production
+
+# Generated files (keep in .gitignore to avoid committing build artifacts)
+# Note: *.g.dart and *.freezed.dart are typically committed for reliability
+# but can be excluded from diffs with the following:
+# *.g.dart linguist-generated=true
+# *.freezed.dart linguist-generated=true
