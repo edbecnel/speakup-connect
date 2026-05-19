@@ -1,5 +1,4 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:speakup_connect/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:speakup_connect/features/auth/domain/entities/user_entity.dart';
@@ -27,7 +26,7 @@ Stream<UserEntity?> authStateChanges(Ref ref) {
 /// Returns the currently signed-in [UserEntity] synchronously, or null.
 @riverpod
 UserEntity? currentUser(Ref ref) {
-  return ref.watch(authStateChangesProvider).valueOrNull;
+  return ref.watch(authStateChangesProvider).value;
 }
 
 // --- Auth Notifier (Sign In / Sign Up / Sign Out) ---

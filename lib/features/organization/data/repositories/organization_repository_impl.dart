@@ -33,7 +33,7 @@ class OrganizationRepositoryImpl implements OrganizationRepository {
       if (e.code == 'permission-denied') {
         throw const PermissionException();
       }
-      throw DatabaseException(message: e.message, code: e.code);
+      throw DatabaseException(message: e.message ?? 'Database error', code: e.code);
     } catch (e) {
       throw DatabaseException(message: e.toString());
     }

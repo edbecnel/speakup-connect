@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:speakup_connect/core/constants/route_constants.dart';
 import 'package:speakup_connect/features/auth/presentation/providers/auth_provider.dart';
@@ -30,7 +29,7 @@ GoRouter appRouter(Ref ref) {
     initialLocation: Routes.splash,
     refreshListenable: _AuthStateListenable(ref),
     redirect: (BuildContext context, GoRouterState state) {
-      final isAuthenticated = authState.valueOrNull != null;
+      final isAuthenticated = authState.value != null;
       final isLoading = authState.isLoading;
 
       // Don't redirect while auth state is loading
@@ -145,7 +144,7 @@ class _AuthStateListenable extends ChangeNotifier {
 /// Placeholder for admin report detail screen (defined in admin feature).
 /// This stub prevents circular imports at the router level.
 class AdminReportDetailScreen extends StatelessWidget {
-  const AdminReportDetailScreen({super.key, required this.reportId});
+  const AdminReportDetailScreen({required this.reportId, super.key});
   final String reportId;
 
   @override

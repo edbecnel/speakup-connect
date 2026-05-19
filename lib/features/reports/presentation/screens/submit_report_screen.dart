@@ -45,12 +45,12 @@ class _SubmitReportScreenState extends ConsumerState<SubmitReportScreen> {
       maxWidth: 1280,
     );
     if (picked != null) {
-      ref.read(submitReportFormNotifierProvider.notifier).addPhoto(picked.path);
+      ref.read(submitReportFormProvider.notifier).addPhoto(picked.path);
     }
   }
 
   Future<void> _submit() async {
-    final report = await ref.read(submitReportNotifierProvider.notifier).submit();
+    final report = await ref.read(submitReportProvider.notifier).submit();
     if (report != null && mounted) {
       context.go(Routes.reportConfirmation, extra: report.referenceNumber);
     }
@@ -58,11 +58,11 @@ class _SubmitReportScreenState extends ConsumerState<SubmitReportScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final formState = ref.watch(submitReportFormNotifierProvider);
-    final submitState = ref.watch(submitReportNotifierProvider);
+    final formState = ref.watch(submitReportFormProvider);
+    final submitState = ref.watch(submitReportProvider);
     final theme = Theme.of(context);
 
-    ref.listen(submitReportNotifierProvider, (_, next) {
+    ref.listen(submitReportProvider, (_, next) {
       if (next is AsyncError) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -110,9 +110,9 @@ class _SubmitReportScreenState extends ConsumerState<SubmitReportScreen> {
             canProceedStep1: () {
               if (!_step1FormKey.currentState!.validate()) return false;
               // sync title/description into provider
-              ref.read(submitReportFormNotifierProvider.notifier)
+              ref.read(submitReportFormProvider.notifier)
                   .updateTitle(_titleController.text.trim());
-              ref.read(submitReportFormNotifierProvider.notifier)
+              ref.read(submitReportFormProvider.notifier)
                   .updateDescription(_descriptionController.text.trim());
               return formState.categoryId != null &&
                   _titleController.text.trim().length >= 5 &&
@@ -144,7 +144,7 @@ class _Step1CategoryDetails extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final categoriesAsync = ref.watch(reportCategoriesProvider);
-    final formState = ref.watch(submitReportFormNotifierProvider);
+    final formState = ref.watch(submitReportFormProvider);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -176,7 +176,7 @@ class _Step1CategoryDetails extends ConsumerWidget {
                     selected: selected,
                     onSelected: (_) {
                       ref
-                          .read(submitReportFormNotifierProvider.notifier)
+                          .read(submitReportFormProvider.notifier)
                           .updateCategory(cat.categoryId);
                     },
                   );
@@ -228,8 +228,8 @@ class _Step2PhotosAnonymous extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final formState = ref.watch(submitReportFormNotifierProvider);
-    final notifier = ref.read(submitReportFormNotifierProvider.notifier);
+    final formState = ref.watch(submitReportFormProvider);
+    final notifier = ref.read(submitReportFormProvider.notifier);
     final theme = Theme.of(context);
     final canAddMore = formState.photoPaths.length < AppConstants.maxPhotosPerReport;
 
@@ -373,11 +373,11 @@ class _Step3Review extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final formState = ref.watch(submitReportFormNotifierProvider);
+    final formState = ref.watch(submitReportFormProvider);
     final categoriesAsync = ref.watch(reportCategoriesProvider);
     final theme = Theme.of(context);
 
-    final categoryLabel = categoriesAsync.valueOrNull
+    final categoryLabel = categoriesAsync.value
         ?.firstWhere(
           (c) => c.categoryId == formState.categoryId,
           orElse: () => const ReportCategoryEntity(
@@ -409,7 +409,7 @@ class _Step3Review extends ConsumerWidget {
               margin: const EdgeInsets.only(top: 16),
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: theme.colorScheme.secondaryContainer.withOpacity(0.5),
+                color: theme.colorScheme.secondaryContainer.withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
@@ -596,3 +596,4 @@ class _WizardNavBar extends StatelessWidget {
     );
   }
 }
+

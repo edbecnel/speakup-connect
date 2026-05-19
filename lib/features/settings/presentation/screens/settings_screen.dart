@@ -15,10 +15,10 @@ class SettingsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(currentUserProvider);
     final orgConfigAsync = ref.watch(organizationConfigProvider);
-    final themeMode = ref.watch(themeModeNotifierProvider);
+    final themeMode = ref.watch(themeModeProvider);
     final theme = Theme.of(context);
 
-    final orgName = orgConfigAsync.valueOrNull?.displayName ?? '—';
+    final orgName = orgConfigAsync.value?.displayName ?? '—';
 
     return Scaffold(
       appBar: AppBar(
@@ -139,7 +139,7 @@ class SettingsScreen extends ConsumerWidget {
             child: AppButton.text(
               label: 'Sign Out',
               onPressed: () async {
-                await ref.read(authNotifierProvider.notifier).signOut();
+                await ref.read(authProvider.notifier).signOut();
                 if (context.mounted) {
                   context.go(Routes.splash);
                 }
@@ -157,21 +157,23 @@ class SettingsScreen extends ConsumerWidget {
     showModalBottomSheet<void>(
       context: context,
       builder: (_) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: ThemeMode.values
-              .map((mode) => RadioListTile<ThemeMode>(
-                    value: mode,
-                    groupValue: current,
-                    title: Text(mode.label),
-                    onChanged: (v) {
-                      if (v != null) {
-                        ref.read(themeModeNotifierProvider.notifier).setThemeMode(v);
-                      }
-                      Navigator.pop(context);
-                    },
-                  ))
-              .toList(),
+        child: RadioGroup<ThemeMode>(
+          groupValue: current,
+          onChanged: (v) {
+            if (v != null) {
+              ref.read(themeModeProvider.notifier).setThemeMode(v);
+            }
+            Navigator.pop(context);
+          },
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: ThemeMode.values
+                .map((mode) => RadioListTile<ThemeMode>(
+                      value: mode,
+                      title: Text(mode.label),
+                    ))
+                .toList(),
+          ),
         ),
       ),
     );

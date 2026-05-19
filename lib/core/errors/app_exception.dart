@@ -5,7 +5,7 @@ import 'package:speakup_connect/core/errors/failure.dart';
 /// These are thrown by the data layer and caught at the repository boundary,
 /// where they are converted to [Failure] types for the domain layer.
 class AppException implements Exception {
-  const AppException(this.message, {this.code});
+  const AppException({required this.message, this.code});
 
   final String message;
   final String? code;
@@ -18,7 +18,7 @@ class AppException implements Exception {
 }
 
 class NetworkException extends AppException {
-  const NetworkException() : super('No internet connection');
+  const NetworkException() : super(message: 'No internet connection');
 
   @override
   Failure toFailure() => const NetworkFailure();
@@ -65,7 +65,7 @@ class DatabaseException extends AppException {
 }
 
 class PermissionException extends AppException {
-  const PermissionException() : super('Permission denied');
+  const PermissionException() : super(message: 'Permission denied');
 
   @override
   Failure toFailure() => const PermissionFailure();

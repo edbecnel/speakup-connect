@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:speakup_connect/config/app_config.dart';
 import 'package:speakup_connect/features/auth/presentation/providers/auth_provider.dart';
 import 'package:speakup_connect/features/reports/domain/entities/report_entity.dart';
@@ -73,8 +72,8 @@ class _AdminReportsList extends ConsumerWidget {
         if (reports.isEmpty) {
           return AppEmptyState(
             icon: Icons.assignment_outlined,
-            title: 'No reports',
-            message: filterStatus == null
+            message: 'No reports',
+            subtitle: filterStatus == null
                 ? 'No reports submitted yet.'
                 : 'No "${filterStatus!.label}" reports.',
           );
@@ -171,7 +170,7 @@ class _StatusDropdown extends ConsumerWidget {
     final user = ref.read(currentUserProvider);
 
     return DropdownButtonFormField<ReportStatus>(
-      value: report.status,
+      initialValue: report.status,
       decoration: const InputDecoration(
         labelText: 'Status',
         contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),

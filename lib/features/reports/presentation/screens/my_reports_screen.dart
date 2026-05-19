@@ -72,8 +72,8 @@ class _ReportsList extends ConsumerWidget {
         if (filtered.isEmpty) {
           return AppEmptyState(
             icon: Icons.assignment_outlined,
-            title: 'No reports yet',
-            message: filterStatus == null
+            message: 'No reports yet',
+            subtitle: filterStatus == null
                 ? 'You haven\'t submitted any reports yet.'
                 : 'No reports with status "${filterStatus!.label}".',
           );

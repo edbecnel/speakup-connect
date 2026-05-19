@@ -20,7 +20,7 @@ abstract class AppConfig {
   static const String defaultOrganizationId = 'monhs-ph-001';
 
   /// Default fallback theme colors used before org config loads.
-  static final OrgThemeColors defaultThemeColors = OrgThemeColors(
+  static const OrgThemeColors defaultThemeColors = OrgThemeColors(
     primary: AppColors.primary,
     secondary: AppColors.secondary,
   );

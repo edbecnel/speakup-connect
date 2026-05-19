@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
@@ -6,7 +8,6 @@ import 'package:speakup_connect/core/errors/app_exception.dart';
 import 'package:speakup_connect/features/reports/domain/entities/report_category_entity.dart';
 import 'package:speakup_connect/features/reports/domain/entities/report_entity.dart';
 import 'package:speakup_connect/features/reports/domain/repositories/report_repository.dart';
-import 'dart:io';
 import 'package:uuid/uuid.dart';
 
 class ReportRepositoryImpl implements ReportRepository {
@@ -59,7 +60,7 @@ class ReportRepositoryImpl implements ReportRepository {
             params.isAnonymous ? null : params.submitterDisplayName,
         'referenceNumber': referenceNumber,
         'photoUrls': photoUrls,
-        'adminNotes': [],
+        'adminNotes': <Map<String, dynamic>>[],
         'statusHistory': [
           {
             'fromStatus': null,
@@ -96,7 +97,7 @@ class ReportRepositoryImpl implements ReportRepository {
       );
     } on FirebaseException catch (e) {
       if (e.code == 'permission-denied') throw const PermissionException();
-      throw DatabaseException(message: e.message, code: e.code);
+      throw DatabaseException(message: e.message ?? 'Database error', code: e.code);
     } catch (e) {
       throw DatabaseException(message: e.toString());
     }
@@ -129,7 +130,7 @@ class ReportRepositoryImpl implements ReportRepository {
     } on NotFoundException {
       rethrow;
     } on FirebaseException catch (e) {
-      throw DatabaseException(message: e.message, code: e.code);
+      throw DatabaseException(message: e.message ?? 'Database error', code: e.code);
     }
   }
 
@@ -154,7 +155,7 @@ class ReportRepositoryImpl implements ReportRepository {
         );
       }).toList();
     } on FirebaseException catch (e) {
-      throw DatabaseException(message: e.message, code: e.code);
+      throw DatabaseException(message: e.message ?? 'Database error', code: e.code);
     }
   }
 
@@ -210,7 +211,7 @@ class ReportRepositoryImpl implements ReportRepository {
         });
       });
     } on FirebaseException catch (e) {
-      throw DatabaseException(message: e.message, code: e.code);
+      throw DatabaseException(message: e.message ?? 'Database error', code: e.code);
     }
   }
 
@@ -236,7 +237,7 @@ class ReportRepositoryImpl implements ReportRepository {
         AppConstants.fieldUpdatedAt: FieldValue.serverTimestamp(),
       });
     } on FirebaseException catch (e) {
-      throw DatabaseException(message: e.message, code: e.code);
+      throw DatabaseException(message: e.message ?? 'Database error', code: e.code);
     }
   }
 
@@ -252,7 +253,7 @@ class ReportRepositoryImpl implements ReportRepository {
         AppConstants.fieldUpdatedAt: FieldValue.serverTimestamp(),
       });
     } on FirebaseException catch (e) {
-      throw DatabaseException(message: e.message, code: e.code);
+      throw DatabaseException(message: e.message ?? 'Database error', code: e.code);
     }
   }
 
@@ -373,3 +374,4 @@ class ReportRepositoryImpl implements ReportRepository {
     );
   }
 }
+

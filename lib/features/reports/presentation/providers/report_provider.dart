@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:speakup_connect/config/app_config.dart';
 import 'package:speakup_connect/features/auth/presentation/providers/auth_provider.dart';
@@ -134,7 +133,7 @@ class SubmitReportNotifier extends _$SubmitReportNotifier {
   AsyncValue<ReportEntity?> build() => const AsyncData(null);
 
   Future<ReportEntity?> submit() async {
-    final formState = ref.read(submitReportFormNotifierProvider);
+    final formState = ref.read(submitReportFormProvider);
     final user = ref.read(currentUserProvider);
     final orgId = AppConfig.defaultOrganizationId;
 
@@ -157,7 +156,7 @@ class SubmitReportNotifier extends _$SubmitReportNotifier {
       state = AsyncData(report);
 
       // Reset form after successful submission
-      ref.read(submitReportFormNotifierProvider.notifier).reset();
+      ref.read(submitReportFormProvider.notifier).reset();
 
       return report;
     } catch (e, st) {

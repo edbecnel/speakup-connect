@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
-import 'package:speakup_connect/core/constants/route_constants.dart';
 import 'package:speakup_connect/core/errors/failure.dart';
 import 'package:speakup_connect/core/extensions/context_extensions.dart';
 import 'package:speakup_connect/core/utils/validators.dart';
@@ -65,7 +63,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
 
   Future<void> _onLogin() async {
     if (!_loginFormKey.currentState!.validate()) return;
-    await ref.read(authNotifierProvider.notifier).signInWithEmail(
+    await ref.read(authProvider.notifier).signInWithEmail(
           email: _loginEmailController.text,
           password: _loginPasswordController.text,
         );
@@ -77,7 +75,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
       context.showSnackBar('Please accept the Terms & Privacy Policy', isError: true);
       return;
     }
-    await ref.read(authNotifierProvider.notifier).signUpWithEmail(
+    await ref.read(authProvider.notifier).signUpWithEmail(
           email: _registerEmailController.text,
           password: _registerPasswordController.text,
           displayName: _registerNameController.text,
@@ -86,12 +84,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
 
   @override
   Widget build(BuildContext context) {
-    final authState = ref.watch(authNotifierProvider);
+    final authState = ref.watch(authProvider);
     final orgConfigAsync = ref.watch(organizationConfigProvider);
     final isLoading = authState.isLoading;
 
     // Show error from auth state
-    ref.listen(authNotifierProvider, (_, next) {
+    ref.listen(authProvider, (_, next) {
       if (next is AsyncError) {
         final error = next.error;
         final message = error is Failure ? error.message : 'Sign in failed. Please try again.';
@@ -100,7 +98,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
     });
 
     final theme = Theme.of(context);
-    final orgName = orgConfigAsync.valueOrNull?.displayName ?? 'Connect';
+    final orgName = orgConfigAsync.value?.displayName ?? 'Connect';
 
     return Scaffold(
       appBar: AppBar(
@@ -118,7 +116,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
               // --- Tab Bar ---
               Container(
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.4),
+                  color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: TabBar(

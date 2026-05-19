@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -34,11 +33,4 @@ class ThemeModeNotifier extends _$ThemeModeNotifier {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_kThemeModeKey, mode.name);
   }
-}
-
-/// Convenience provider — the current [ThemeMode] value.
-/// Imported by `lib/app.dart` as `themeModeProvider`.
-@riverpod
-ThemeMode themeMode(Ref ref) {
-  return ref.watch(themeModeNotifierProvider);
 }

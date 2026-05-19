@@ -23,7 +23,7 @@ class SpeakUpConnectApp extends ConsumerWidget {
     // Watch org config to apply dynamic branding.
     // Falls back to default theme if org config is not yet loaded.
     final orgConfigAsync = ref.watch(organizationConfigProvider);
-    final orgColors = orgConfigAsync.valueOrNull?.themeColors;
+    final orgColors = orgConfigAsync.value?.themeColors;
 
     return MaterialApp.router(
       title: 'SpeakUp Connect',
