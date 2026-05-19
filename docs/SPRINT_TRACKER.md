@@ -6,12 +6,48 @@
 
 ---
 
+## How to Use This Tracker
+
+Each sprint entry follows this format:
+
+```
+### Sprint [N] — [Title]
+- **Date/Time:** YYYY-MM-DD (X-hour block)
+- **GitHub Issue(s):** #N, #N
+- **Status:** 🔄 In Progress | ✅ Complete | 🚫 Blocked
+
+#### 🚀 AI Context Prompt
+> Paste the prompt used to start this sprint with GitHub Copilot / Cursor
+
+#### 📝 Done
+- [x] Completed task
+
+#### 👁️ Stakeholder Demo Asset
+- **Asset Type:** Screenshot / Screen Recording / APK build
+- **Location:** ./docs/demos/sprint-NNN-[slug].png
+- **Stakeholder Note:** What this delivers from the roadmap perspective
+```
+
+---
+
 ## Active Sprint
 
 ### Sprint 1 — Foundation & Architecture
+- **Date/Time:** May 19, 2026 (ongoing)
+- **GitHub Issues:** #1, #2, #3, #4, #5, #7, #8, #9, #10
+- **Status:** 🔄 In Progress
+
 **Goal:** Complete all project documentation, scaffold the Flutter project, and establish the folder architecture. No Firebase integration yet — just structure and placeholder code that compiles and runs.
 
 **Sprint Period:** May 19, 2026 → June 2, 2026
+
+#### 🚀 AI Context Prompt
+> "Act as a senior Flutter architect. We are working on SpeakUp Connect — a multi-tenant community reporting app. We are on Sprint 1 (Foundation & Architecture). The stack is Flutter + Dart, Riverpod 2.x, go_router, Firebase, and Material Design 3. Refer to docs/ARCHITECTURE.md for design decisions and docs/FOLDER_STRUCTURE.md for conventions. Current task: [paste task title from GitHub Issue]."
+
+#### 👁️ Stakeholder Demo Asset
+- **Asset Type:** *(To be added on sprint completion — screenshot of running app on emulator)*
+- **Location:** `./docs/demos/sprint-001-scaffold.png`
+- **Stakeholder Note:** Delivers the foundational architecture and documentation for the MONHS pilot project, establishing the multi-tenant SaaS structure from day one.
 
 #### Sprint 1 Tasks
 
@@ -203,7 +239,33 @@
 
 ## Completed Sprints
 
-*(None yet — Sprint 1 in progress)*
+> Completed sprint entries are moved here from the Active Sprint section.
+> Each entry should include the AI Context Prompt used, all completed tasks, and a Stakeholder Demo Asset.
+
+### [Sprint Log Entry Template]
+
+```markdown
+### Sprint [N] — [Title]
+- **Date/Time:** YYYY-MM-DD (X-hour block)
+- **GitHub Issues:** #N
+- **Status:** ✅ Complete
+
+#### 🚀 AI Context Prompt
+> "Act as a senior Flutter engineer. We are on Sprint [N] of SpeakUp Connect..."
+
+#### 📝 Done
+- [x] Task 1
+- [x] Task 2
+
+#### 👁️ Stakeholder Demo Asset
+- **Asset Type:** Screenshot / Screen Recording / APK
+- **Location:** ./docs/demos/sprint-NNN-[slug].png
+- **Stakeholder Note:** What was delivered and why it matters.
+```
+
+---
+
+*(No sprints completed yet — Sprint 1 in progress)*
 
 ---
 
