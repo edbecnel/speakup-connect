@@ -1,6 +1,6 @@
 {
-    "name": "speakup_connect",
-    "short_name": "speakup_connect",
+    "name": "Speakup Connect",
+    "short_name": "Speakup Connect",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
