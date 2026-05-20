@@ -4,10 +4,11 @@
 
 ## Platform Description
 
-SpeakUp Connect is a **multi-tenant community reporting and communication platform** that bridges the gap between community members and their organization's leadership.
+SpeakUp Connect is a **multi-tenant community reporting and communications platform** that bridges the gap between community members and their organization's leadership. It is more than an issue-reporting tool — it is a **full community communications hub** for schools, organizations, and institutions.
 
-The platform provides a structured, safe channel for individuals to:
+The platform provides:
 
+**Reporting & Safety**
 - Report safety concerns, incidents, and hazards
 - Submit complaints and grievances
 - Make suggestions and improvement requests
@@ -15,7 +16,24 @@ The platform provides a structured, safe channel for individuals to:
 - Request maintenance or facilities support
 - Submit anonymous tips when personal safety may be at risk
 
-At its core, SpeakUp Connect is built on the belief that **every voice matters** — and that communities become stronger when people have accessible, trustworthy ways to be heard.
+**Communications & Community**
+- Peer-to-peer direct messaging between members
+- Group messaging for admin-defined groups and organizations
+- News board where school groups and organizations post updates
+- Bulletin board for organization-wide admin announcements
+- Student/member reminders broadcast by teachers, admins, or role-authorized users
+- Admin-defined groups and clubs (e.g., Journalism Club, Chess Club, Drum and Lyre Corps)
+
+**Organization & Administration**
+- Custom app name per organization (e.g., "SpeakUp MONHSIAN")
+- Student/member roster management with import support (CSV, text, Word, PDF)
+- Apply-to-join signup flow: students find their school and apply using their name and school-issued ID
+- Multi-language support with per-user language selection
+- Customizable community rules displayed at signup and on the main page
+- Abuse blocking for both anonymous and authenticated users (temporary or permanent)
+- Role-based permissions for broadcasting, moderation, and group management
+
+At its core, SpeakUp Connect is built on the belief that **every voice matters** — and that communities become stronger when people have accessible, trustworthy, and structured ways to be heard and to communicate.
 
 ---
 
@@ -78,10 +96,14 @@ SpeakUp Connect is architected as a **multi-tenant SaaS platform** from day one.
 - All data is scoped and isolated per organization
 - Organizations can customize:
   - Branding (logo, colors, name)
+  - Custom app name (e.g., "SpeakUp MONHSIAN")
   - Report categories
   - User roles and admin assignments
   - Notification settings
   - Privacy and moderation policies
+  - Community rules (customizable, shown at signup and on main page)
+  - Default language and supported languages
+  - Student/member roster (importable from CSV, text, Word, PDF)
 
 ### Future SaaS Features
 
@@ -99,15 +121,30 @@ SpeakUp Connect is architected as a **multi-tenant SaaS platform** from day one.
 ### End Users (Community Members)
 
 - Students, residents, employees, congregation members
+- Apply to join their organization using their full name and organization-issued ID
 - Can submit reports (authenticated or anonymous)
 - Can track the status of their own reports
-- Receive notifications on status updates
+- Can send and receive direct messages and participate in group messaging
+- Receive notifications on status updates and broadcasts
+- Can change their display language via a language selector on the home page
+
+### Role-Authorized Users
+
+- Users granted specific permissions by an admin (e.g., club leader, journalism editor)
+- Can broadcast reminders and post news to the groups they manage
+- Permissions are defined per role and assigned by administrators
 
 ### Administrators
 
 - Teachers, staff, government officers, community managers
 - Can view and manage all reports for their organization
 - Can update report status, assign personnel, add notes
+- Can define student groups and organizations with member lists
+- Can post bulletin board announcements (org-wide)
+- Can broadcast reminders to all members or specific groups
+- Can import student/member rosters from CSV, text, Word, or PDF files
+- Can manage user roles and permissions
+- Can block abusive users (temporarily or permanently)
 - Receive push notifications for new reports
 - Cannot access data from other organizations
 
@@ -125,9 +162,13 @@ SpeakUp Connect is architected as a **multi-tenant SaaS platform** from day one.
 1. **Privacy-First Design** — Anonymous reporting is a first-class feature, not an afterthought
 2. **Multi-Tenant from Day One** — No rearchitecting needed for scaling
 3. **Mobile-First** — Built in Flutter for cross-platform native performance
-4. **Configurable Per Organization** — Categories, branding, and roles adapt to each organization
-5. **Designed for Minors** — Special considerations for student privacy and safety
+4. **Configurable Per Organization** — Categories, branding, custom app name, rules, and roles adapt to each organization
+5. **Designed for Minors** — Special considerations for student privacy, safety, and abuse prevention
 6. **Audit-Ready** — Built with audit logging and compliance in mind
+7. **Full Communications Hub** — Not just reporting: direct messaging, group messaging, news board, bulletin board, and reminders
+8. **Multi-Language** — All UI strings are indexed to a language database; users can switch languages from the home page
+9. **Controlled Onboarding** — Students find and apply to join their organization; signup requires admin-issued ID verification
+10. **Role-Based Broadcasting** — Reminders and news posts are controlled by role permissions, not just admin status
 
 ---
 
@@ -140,6 +181,7 @@ SpeakUp Connect is architected as a **multi-tenant SaaS platform** from day one.
 - Admin response time under 48 hours per report
 - Zero unauthorized data access incidents
 - Positive feedback from administrators on usability
+- At least 3 active groups/clubs using the news board or group messaging
 
 ### Platform Success (Long-Term)
 
@@ -147,3 +189,5 @@ SpeakUp Connect is architected as a **multi-tenant SaaS platform** from day one.
 - 95%+ uptime SLA
 - Sub-3-second report submission
 - Successful anonymous report delivery rate > 99%
+- Active daily use of messaging and bulletin features
+- At least 3 supported languages at public launch

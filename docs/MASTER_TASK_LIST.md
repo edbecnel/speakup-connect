@@ -417,19 +417,21 @@
 - [ ] Build `SettingsScreen`
   - [ ] Theme toggle (dark/light)
   - [ ] Notification preferences
-  - [ ] Language selection (placeholder)
+  - [ ] Language selector dropdown (switches app language)
   - [ ] About section (app version, organization info)
   - [ ] Sign out button
 - [ ] Build `ProfileScreen`
   - [ ] Display name
-  - [ ] Email
+  - [ ] Email / School ID
   - [ ] Change password link
   - [ ] Account info
+  - [ ] Groups membership list
 - [ ] Implement theme persistence (SharedPreferences)
+- [ ] Implement language preference persistence (SharedPreferences + Firestore sync)
 
 ---
 
-## Phase 2 — Pilot Expansion
+## Phase 2 — Pilot Expansion & Communications
 
 ### Epic 2.1 — Organization Onboarding
 
@@ -437,6 +439,7 @@
 - [ ] Firebase function to create organization document
 - [ ] Admin notification on new org registration
 - [ ] Organization activation workflow
+- [ ] Custom app name (`appCustomName`) configuration in org setup wizard (e.g., "SpeakUp MONHSIAN")
 
 ### Epic 2.2 — Branding Customization
 
@@ -446,21 +449,260 @@
 - [ ] Custom tagline per org
 - [ ] Configurable category management UI
 
-### Epic 2.3 — Announcements
+### Epic 2.3 — Organization Finder & Apply-to-Join Flow
+
+**Organization Discovery**
+- [ ] Build `FindSchoolScreen` — search for organizations by name, code, or region
+- [ ] Firestore query: search `organizations` collection by `displayName` or `appCustomName`
+- [ ] Display org card: logo, name, city/region, type
+- [ ] "Apply to Join" button on org card
+
+**Apply-to-Join Signup**
+- [ ] Build `ApplyToJoinScreen` — full name + school-issued ID input
+- [ ] Validate `studentId` against org `roster` collection on submission
+- [ ] Create user with `approvalStatus: 'pending'` if roster match found
+- [ ] Admin notification: new signup application pending review
+- [ ] Build `PendingApprovalScreen` — shown after apply, explains next steps
+- [ ] Admin: view and approve/reject pending applications
+- [ ] Notify user on approval or rejection (push + in-app)
+
+**Roster Management**
+- [ ] Build `RosterManagementScreen` (admin)
+- [ ] Import roster from CSV file (parse name + ID columns)
+- [ ] Import roster from plain text (line-by-line or tab-separated)
+- [ ] Import roster from Word (.docx) file
+- [ ] Import roster from PDF file
+- [ ] Import roster by pasting into a text window (auto-parse)
+- [ ] Show import preview before confirming
+- [ ] Bulk write roster entries to Firestore `roster` subcollection
+- [ ] Admin: view, search, and remove roster entries
+- [ ] Mark roster entry `isRegistered: true` when user completes signup
+
+### Epic 2.4 — Community Rules
+
+- [ ] Create `communityRules` Firestore collection per org
+- [ ] Seed default rules on org creation
+- [ ] Build `CommunityRulesScreen` (admin) — create, edit, reorder, delete rules
+- [ ] Display rules on `RegisterScreen` / apply-to-join form (with checkbox acceptance)
+- [ ] Display rules on home page / info section
+- [ ] Enforce `communityRulesEnabled` flag from org config
+
+### Epic 2.5 — Multi-Language Support
+
+**Data Layer**
+- [ ] Create `languages` top-level Firestore collection
+- [ ] Seed `en` (English) language document and string entries
+- [ ] Seed `fil` (Filipino) language document and string entries
+- [ ] Define string key conventions (e.g., `home.welcomeMessage`, `auth.loginButton`)
+- [ ] Implement all English UI strings via string keys (no hardcoded text)
+
+**Presentation**
+- [ ] Language selector dropdown on home/main page
+- [ ] Language selector in Settings screen
+- [ ] Write selected language to `users/{id}.preferredLanguage` in Firestore
+- [ ] Persist language selection locally (SharedPreferences)
+- [ ] Build `LanguageProvider` (Riverpod) — loads and serves string values
+- [ ] Fallback to `en` when a key is missing in selected language
+- [ ] Admin: set org default language in org config
+
+**Asset Bundling**
+- [ ] Bundle English + Filipino strings as JSON assets for offline use
+- [ ] Implement hot-reload of language strings from Firestore (without app update)
+
+### Epic 2.6 — Groups & Clubs
+
+**Domain**
+- [ ] Create `GroupEntity`
+- [ ] Create `GroupMemberEntity`
+- [ ] Create `GroupRepository` abstract interface
+- [ ] Create `CreateGroupUseCase`
+- [ ] Create `AddGroupMemberUseCase`
+- [ ] Create `GetGroupsUseCase`
+- [ ] Create `GetMyGroupsUseCase`
+
+**Data**
+- [ ] Create `GroupModel` (with `fromJson`/`toJson`)
+- [ ] Create `GroupMemberModel`
+- [ ] Create `GroupRemoteDataSource`
+- [ ] Create `GroupRepositoryImpl`
+
+**Presentation**
+- [ ] Build `GroupsListScreen` — all org groups, searchable
+- [ ] Build `GroupDetailScreen` — group info, member list, news posts, group chat
+- [ ] Build `CreateGroupScreen` (admin) — name, description, avatar
+- [ ] Build `GroupMembersScreen` (admin/leader) — add/remove members, assign leader
+- [ ] Show user's groups on home dashboard and profile
+- [ ] Group role badge: leader vs. member
+
+**Testing**
+- [ ] Unit test: `CreateGroupUseCase`
+- [ ] Unit test: `GroupRepositoryImpl`
+- [ ] Widget test: `GroupsListScreen`
+
+### Epic 2.7 — Bulletin Board
+
+**Domain**
+- [ ] Create `BulletinEntity`
+- [ ] Create `BulletinRepository` abstract interface
+- [ ] Create `PostBulletinUseCase`
+- [ ] Create `GetBulletinsUseCase`
+
+**Data**
+- [ ] Create `BulletinModel`
+- [ ] Create `BulletinRemoteDataSource`
+- [ ] Create `BulletinRepositoryImpl`
+
+**Presentation**
+- [ ] Build `BulletinBoardScreen` — paginated list of org-wide bulletins
+- [ ] Build `BulletinDetailScreen` — full bulletin content
+- [ ] Build `PostBulletinScreen` (admin) — title, body, pin toggle, expiry date
+- [ ] Pinned bulletins shown at top
+- [ ] Push notification to all members on new bulletin
+- [ ] Show bulletin count badge on home dashboard
+
+**Testing**
+- [ ] Unit test: `PostBulletinUseCase`
+- [ ] Widget test: `BulletinBoardScreen`
+
+### Epic 2.8 — News Board
+
+**Domain**
+- [ ] Create `NewsPostEntity`
+- [ ] Create `NewsPostRepository` abstract interface
+- [ ] Create `PostNewsUseCase` (requires `canPostNews` permission)
+- [ ] Create `GetNewsFeedUseCase`
+
+**Data**
+- [ ] Create `NewsPostModel`
+- [ ] Create `NewsPostRemoteDataSource`
+- [ ] Create `NewsPostRepositoryImpl`
+
+**Presentation**
+- [ ] Build `NewsBoardScreen` — combined feed of org-wide and group news posts
+- [ ] Build `NewsPostDetailScreen` — full post content
+- [ ] Build `CreateNewsPostScreen` (group leader / role-authorized user) — title, body, group, visibility
+- [ ] Filter feed: All / My Groups / Org-Wide
+- [ ] Push notification to group members on new group post
+
+**Testing**
+- [ ] Unit test: `PostNewsUseCase`
+- [ ] Widget test: `NewsBoardScreen`
+
+### Epic 2.9 — Reminders
+
+**Domain**
+- [ ] Create `ReminderEntity`
+- [ ] Create `ReminderRepository` abstract interface
+- [ ] Create `BroadcastReminderUseCase` (requires `canBroadcastReminders` permission)
+- [ ] Create `GetRemindersUseCase`
+
+**Data**
+- [ ] Create `ReminderModel`
+- [ ] Create `ReminderRemoteDataSource`
+- [ ] Create `ReminderRepositoryImpl`
+
+**Presentation**
+- [ ] Build `SendReminderScreen` — title, body, audience selector (all / group / role)
+- [ ] Audience picker: all org, specific group, or role
+- [ ] Build `RemindersHistoryScreen` — list of sent reminders (sender view)
+- [ ] Reminders appear in user notification feed
+- [ ] Push notification delivered to audience on broadcast
+- [ ] Enforce `canBroadcastReminders` permission via Firestore Security Rules
+
+**Testing**
+- [ ] Unit test: `BroadcastReminderUseCase`
+
+### Epic 2.10 — Peer-to-Peer Messaging
+
+**Domain**
+- [ ] Create `DirectMessageThreadEntity`
+- [ ] Create `MessageEntity`
+- [ ] Create `DirectMessageRepository` abstract interface
+- [ ] Create `SendDirectMessageUseCase`
+- [ ] Create `GetDirectThreadsUseCase`
+- [ ] Create `WatchDirectThreadUseCase` (real-time stream)
+
+**Data**
+- [ ] Create `DirectMessageThreadModel`
+- [ ] Create `MessageModel`
+- [ ] Create `DirectMessageRemoteDataSource`
+- [ ] Create `DirectMessageRepositoryImpl`
+- [ ] Deterministic thread ID generation (`sorted([uidA, uidB]).join('_')`)
+
+**Presentation**
+- [ ] Build `MessagesInboxScreen` — list of DM threads, sorted by `lastMessageAt`
+- [ ] Build `DirectMessageChatScreen` — real-time chat UI for a thread
+- [ ] Compose new message: user picker (org member search)
+- [ ] Message bubble UI (sent/received alignment, timestamp)
+- [ ] Read receipts display
+- [ ] Unread message badge on inbox icon
+- [ ] Push notification for new DM
+
+**Testing**
+- [ ] Unit test: `SendDirectMessageUseCase`
+- [ ] Widget test: `DirectMessageChatScreen`
+
+### Epic 2.11 — Group Messaging
+
+**Domain**
+- [ ] Create `GroupMessageThreadEntity`
+- [ ] Create `GroupMessageRepository` abstract interface
+- [ ] Create `SendGroupMessageUseCase`
+- [ ] Create `WatchGroupMessagesUseCase` (real-time stream)
+
+**Data**
+- [ ] Create `GroupMessageModel`
+- [ ] Create `GroupMessageRemoteDataSource`
+- [ ] Create `GroupMessageRepositoryImpl`
+
+**Presentation**
+- [ ] Build `GroupChatScreen` — real-time group chat (accessible from `GroupDetailScreen`)
+- [ ] Group name and avatar in chat header
+- [ ] Member list accessible from chat
+- [ ] Push notification for new group message (to group members)
+
+**Testing**
+- [ ] Unit test: `SendGroupMessageUseCase`
+- [ ] Widget test: `GroupChatScreen`
+
+### Epic 2.12 — Role-Based Permissions
+
+- [ ] Create `roles` Firestore collection per org
+- [ ] Seed default roles on org creation (e.g., "Club Leader", "Teacher")
+- [ ] Build `RolesManagementScreen` (admin) — create, edit, delete roles and permission sets
+- [ ] Build `AssignRoleScreen` (admin) — assign custom roles to users
+- [ ] `PermissionProvider` (Riverpod) — checks user's effective permissions
+- [ ] Enforce permissions via Firestore Security Rules:
+  - `canBroadcastReminders` — reminders collection write
+  - `canPostNews` — newsPosts collection write
+  - `canManageGroup` — groups subcollection write
+  - `canBlockUsers` — blockedUsers collection write
+
+### Epic 2.13 — Abuse Blocking & Moderation
+
+- [ ] Create `blockedUsers` Firestore collection per org
+- [ ] Build `BlockUserDialog` — reason, block type (permanent / temporary + duration)
+- [ ] Build `BlockedUsersScreen` (admin) — view, unblock, manage all blocks
+- [ ] Enforce block on login: blocked users get a "your account has been restricted" screen
+- [ ] Anonymous user block: device fingerprint or IP hash stored in `targetIdentifier`
+- [ ] Block expiry: Firebase scheduled function to auto-unblock when `expiresAt` passes
+- [ ] Report-a-message feature: users can flag messages for admin review
+
+### Epic 2.14 — Announcements (Original)
 
 - [ ] Announcement Firestore collection schema
 - [ ] Admin: create/publish announcement
 - [ ] User: view announcements list
 - [ ] Push notification for new announcements
 
-### Epic 2.4 — Anonymous Report Reference Code
+### Epic 2.15 — Anonymous Report Reference Code
 
 - [ ] Generate random 8-character reference code on anonymous submit
 - [ ] Store code locally (SharedPreferences or encrypted storage)
 - [ ] "Track by reference code" lookup screen
 - [ ] Status retrieval by code (without auth)
 
-### Epic 2.5 — Analytics & Reporting (Admin)
+### Epic 2.16 — Analytics & Reporting (Admin)
 
 - [ ] Admin: report counts by category
 - [ ] Admin: report counts by status
@@ -495,6 +737,20 @@
 - [ ] Privacy policy & terms of service screens
 - [ ] Consent management
 
+### Epic 3.4 — Advanced Language Support
+
+- [ ] Community-contributed language translation workflow
+- [ ] Admin-side language string editor
+- [ ] Language completion dashboard (per-language % complete)
+- [ ] Add additional language packs (Spanish, Cebuano, etc.)
+
+### Epic 3.5 — Advanced Messaging
+
+- [ ] Media attachments in DM and group messages (images)
+- [ ] Message deletion (sender can retract)
+- [ ] Message reactions (emoji)
+- [ ] Threaded replies in news posts and bulletins
+
 ---
 
 ## Phase 4 — Enterprise
@@ -505,11 +761,11 @@
 - [ ] Firebase Functions API implementation
 - [ ] API key management
 - [ ] Webhook delivery system
-- [ ] SCIM user provisioning
+- [ ] SCIM user provisioning (replaces CSV import for large enterprises)
 
 ### Epic 4.2 — Advanced Features
 
-- [ ] AI content screening (spam detection)
+- [ ] AI content screening (spam/inappropriate content detection)
 - [ ] SMS notification delivery
 - [ ] QR code report trigger
 - [ ] Video attachment support

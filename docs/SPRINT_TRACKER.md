@@ -1,8 +1,10 @@
 # Sprint Tracker — SpeakUp Connect
 
-> Last Updated: May 19, 2026  
+> Last Updated: May 20, 2026  
 > Current Sprint: **Sprint 1**  
 > Sprint Duration: 2 weeks
+
+> **Requirements Expansion (May 20, 2026 — Sheenaia):** SpeakUp Connect is now a full community communications platform, not only an issue-reporting tool. Added: admin-defined groups/clubs, peer-to-peer and group messaging, news board, bulletin board, broadcast reminders, multi-language support with home-page language selector, apply-to-join signup with school-ID verification, student roster import (CSV / text / Word / PDF / paste), customizable community rules, abuse blocking (temp + permanent), role-based permissions, and custom org app name (e.g., "SpeakUp MONHSIAN"). All docs updated: PROJECT_OVERVIEW, ROADMAP, DATABASE_DESIGN, MASTER_TASK_LIST.
 
 ---
 
