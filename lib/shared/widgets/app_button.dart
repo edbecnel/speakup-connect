@@ -8,27 +8,27 @@ import 'package:flutter/material.dart';
 /// - [AppButton.text] — text-only button (tertiary/link action)
 class AppButton extends StatelessWidget {
   const AppButton.primary({
-    super.key,
     required this.label,
     required this.onPressed,
+    super.key,
     this.isLoading = false,
     this.icon,
     this.minimumWidth,
   }) : _variant = _ButtonVariant.primary;
 
   const AppButton.secondary({
-    super.key,
     required this.label,
     required this.onPressed,
+    super.key,
     this.isLoading = false,
     this.icon,
     this.minimumWidth,
   }) : _variant = _ButtonVariant.secondary;
 
   const AppButton.text({
-    super.key,
     required this.label,
     required this.onPressed,
+    super.key,
     this.isLoading = false,
     this.icon,
     this.minimumWidth,

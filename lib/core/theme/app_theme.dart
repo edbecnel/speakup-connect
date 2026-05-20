@@ -16,7 +16,6 @@ abstract class AppTheme {
     final colorScheme = ColorScheme.fromSeed(
       seedColor: primary,
       secondary: secondary,
-      brightness: Brightness.light,
     );
 
     return _buildTheme(colorScheme: colorScheme, isDark: false);

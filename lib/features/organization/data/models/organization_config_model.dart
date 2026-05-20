@@ -70,8 +70,7 @@ class OrganizationConfigModel extends OrganizationConfigEntity {
 
   /// Returns a hardcoded config for the MONHS pilot deployment.
   /// Used as fallback when Firestore is unreachable during development.
-  static OrganizationConfigModel get monhsDevConfig =>
-      OrganizationConfigModel(
+  factory OrganizationConfigModel.monhsDev() => const OrganizationConfigModel(
         organizationId: 'monhs-ph-001',
         displayName: 'MONHS',
         type: OrganizationType.school,
@@ -83,7 +82,5 @@ class OrganizationConfigModel extends OrganizationConfigEntity {
         reportCodePrefix: 'MONHS',
         tagline: 'Your voice. Our action. A better school for all.',
         welcomeMessage: 'How can we help make our school better?',
-        country: 'PH',
-        isActive: true,
       );
 }

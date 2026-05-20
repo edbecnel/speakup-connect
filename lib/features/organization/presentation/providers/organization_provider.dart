@@ -29,7 +29,7 @@ class OrganizationConfig extends _$OrganizationConfig {
     // In a full multi-tenant app, the org ID would be determined by
     // deep link, stored preference, or org selection screen.
     // For the MONHS pilot, we use the default org ID from AppConfig.
-    final orgId = AppConfig.defaultOrganizationId;
+    const orgId = AppConfig.defaultOrganizationId;
     final repository = ref.read(organizationRepositoryProvider);
 
     try {
@@ -37,7 +37,7 @@ class OrganizationConfig extends _$OrganizationConfig {
     } catch (_) {
       // During development, fall back to the dev config if Firestore is
       // unreachable (e.g., emulator not running).
-      return OrganizationConfigModel.monhsDevConfig;
+      return OrganizationConfigModel.monhsDev();
     }
   }
 }

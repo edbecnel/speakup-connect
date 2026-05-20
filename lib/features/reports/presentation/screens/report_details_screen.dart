@@ -8,7 +8,7 @@ import 'package:speakup_connect/shared/widgets/app_loading_indicator.dart';
 
 /// Report Details screen — deep view of a single report.
 class ReportDetailsScreen extends ConsumerWidget {
-  const ReportDetailsScreen({super.key, required this.reportId});
+  const ReportDetailsScreen({required this.reportId, super.key});
 
   final String reportId;
 
@@ -112,7 +112,7 @@ class _ReportDetailView extends StatelessWidget {
           const SizedBox(height: 16),
 
           // Description
-          _SectionHeader(title: 'Description'),
+          const _SectionHeader(title: 'Description'),
           const SizedBox(height: 8),
           Text(report.description, style: theme.textTheme.bodyMedium),
 
@@ -149,7 +149,7 @@ class _ReportDetailView extends StatelessWidget {
           // Status Timeline
           if (report.statusHistory.isNotEmpty) ...[
             const SizedBox(height: 24),
-            _SectionHeader(title: 'Status History'),
+            const _SectionHeader(title: 'Status History'),
             const SizedBox(height: 8),
             ...report.statusHistory.reversed.map(
               (entry) => _TimelineEntry(entry: entry),

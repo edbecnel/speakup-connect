@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -10,7 +12,6 @@ import 'package:speakup_connect/shared/widgets/app_button.dart';
 import 'package:speakup_connect/shared/widgets/app_error_widget.dart';
 import 'package:speakup_connect/shared/widgets/app_loading_indicator.dart';
 import 'package:speakup_connect/shared/widgets/app_text_field.dart';
-import 'dart:io';
 
 /// 3-step "Submit a Concern" wizard.
 ///
@@ -297,7 +298,6 @@ class _Step2PhotosAnonymous extends ConsumerWidget {
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
                         color: theme.colorScheme.outline,
-                        style: BorderStyle.solid,
                       ),
                     ),
                     child: Icon(

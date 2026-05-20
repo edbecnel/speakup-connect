@@ -40,9 +40,9 @@ class AdminDashboardScreen extends ConsumerWidget {
             ],
           ),
         ),
-        body: TabBarView(
+        body: const TabBarView(
           children: [
-            _AdminReportsList(filterStatus: null),
+            _AdminReportsList(),
             _AdminReportsList(filterStatus: ReportStatus.submitted),
             _AdminReportsList(filterStatus: ReportStatus.inProgress),
             _AdminReportsList(filterStatus: ReportStatus.resolved),

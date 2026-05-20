@@ -24,7 +24,7 @@ ReportRepository reportRepository(Ref ref) {
 
 @riverpod
 Future<List<ReportCategoryEntity>> reportCategories(Ref ref) async {
-  final orgId = AppConfig.defaultOrganizationId;
+  const orgId = AppConfig.defaultOrganizationId;
   return ref.watch(reportRepositoryProvider).getCategories(orgId);
 }
 
@@ -135,7 +135,7 @@ class SubmitReportNotifier extends _$SubmitReportNotifier {
   Future<ReportEntity?> submit() async {
     final formState = ref.read(submitReportFormProvider);
     final user = ref.read(currentUserProvider);
-    final orgId = AppConfig.defaultOrganizationId;
+    const orgId = AppConfig.defaultOrganizationId;
 
     if (!formState.isStep1Valid) return null;
 

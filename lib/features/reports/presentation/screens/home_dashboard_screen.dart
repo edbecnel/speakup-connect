@@ -111,7 +111,7 @@ class HomeDashboardScreen extends ConsumerWidget {
           ),
         ),
       ),
-      bottomNavigationBar: _AppBottomNavBar(currentIndex: 0),
+      bottomNavigationBar: const _AppBottomNavBar(currentIndex: 0),
       floatingActionButton: FloatingActionButton(
         onPressed: () => context.push(Routes.submitReport),
         child: const Icon(Icons.add_rounded),

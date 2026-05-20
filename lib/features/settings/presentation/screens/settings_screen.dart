@@ -77,7 +77,7 @@ class SettingsScreen extends ConsumerWidget {
           const Divider(),
 
           // --- Appearance ---
-          _SectionHeader(title: 'Appearance'),
+          const _SectionHeader(title: 'Appearance'),
           ListTile(
             leading: const Icon(Icons.brightness_6_outlined),
             title: const Text('Theme'),
@@ -89,7 +89,7 @@ class SettingsScreen extends ConsumerWidget {
           const Divider(),
 
           // --- Account ---
-          _SectionHeader(title: 'Account'),
+          const _SectionHeader(title: 'Account'),
           ListTile(
             leading: const Icon(Icons.lock_outline_rounded),
             title: const Text('Change Password'),
@@ -116,7 +116,7 @@ class SettingsScreen extends ConsumerWidget {
           const Divider(),
 
           // --- About ---
-          _SectionHeader(title: 'About'),
+          const _SectionHeader(title: 'About'),
           ListTile(
             leading: const Icon(Icons.info_outline_rounded),
             title: const Text('About SpeakUp Connect'),

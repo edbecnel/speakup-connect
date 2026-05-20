@@ -39,10 +39,9 @@ class SplashScreen extends ConsumerWidget {
       body: SafeArea(
         child: orgConfigAsync.when(
           loading: () => const AppLoadingIndicator(),
-          error: (_, __) => _SplashContent(
+          error: (_, __) => const _SplashContent(
             orgName: 'Connect',
             tagline: 'Your voice. Our action.',
-            logoUrl: null,
           ),
           data: (config) => _SplashContent(
             orgName: config.displayName,

@@ -1,9 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:speakup_connect/core/errors/app_exception.dart';
 import 'package:speakup_connect/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:speakup_connect/features/auth/domain/entities/user_entity.dart';
 import 'package:speakup_connect/features/auth/domain/repositories/auth_repository.dart';
-import 'package:speakup_connect/core/errors/app_exception.dart';
 
 part 'auth_provider.g.dart';
 

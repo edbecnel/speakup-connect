@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 /// Used when an [AsyncValue] is in the error state.
 class AppErrorWidget extends StatelessWidget {
   const AppErrorWidget({
-    super.key,
     required this.message,
+    super.key,
     this.onRetry,
   });
 
@@ -60,8 +60,8 @@ class AppErrorWidget extends StatelessWidget {
 /// Used when a list has no items to show.
 class AppEmptyState extends StatelessWidget {
   const AppEmptyState({
-    super.key,
     required this.message,
+    super.key,
     this.subtitle,
     this.icon = Icons.inbox_outlined,
     this.action,

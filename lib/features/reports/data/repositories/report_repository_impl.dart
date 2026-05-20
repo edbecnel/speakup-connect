@@ -124,7 +124,7 @@ class ReportRepositoryImpl implements ReportRepository {
       final doc =
           await _reportsRef(organizationId).doc(reportId).get();
       if (!doc.exists) {
-        throw NotFoundException(message: 'Report not found');
+        throw const NotFoundException(message: 'Report not found');
       }
       return _documentToEntity(doc);
     } on NotFoundException {
@@ -192,7 +192,7 @@ class ReportRepositoryImpl implements ReportRepository {
       final docRef = _reportsRef(organizationId).doc(reportId);
       await _firestore.runTransaction((transaction) async {
         final snap = await transaction.get(docRef);
-        if (!snap.exists) throw NotFoundException(message: 'Report not found');
+        if (!snap.exists) throw const NotFoundException(message: 'Report not found');
 
         final historyEntry = {
           'fromStatus': snap.data()?[AppConstants.fieldStatus],

@@ -2,16 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:speakup_connect/core/constants/route_constants.dart';
+import 'package:speakup_connect/features/admin/presentation/screens/admin_dashboard_screen.dart';
 import 'package:speakup_connect/features/auth/presentation/providers/auth_provider.dart';
-import 'package:speakup_connect/features/auth/presentation/screens/login_screen.dart';
 import 'package:speakup_connect/features/auth/presentation/screens/register_screen.dart';
 import 'package:speakup_connect/features/auth/presentation/screens/splash_screen.dart';
 import 'package:speakup_connect/features/reports/presentation/screens/home_dashboard_screen.dart';
 import 'package:speakup_connect/features/reports/presentation/screens/my_reports_screen.dart';
+import 'package:speakup_connect/features/reports/presentation/screens/report_confirmation_screen.dart';
 import 'package:speakup_connect/features/reports/presentation/screens/report_details_screen.dart';
 import 'package:speakup_connect/features/reports/presentation/screens/submit_report_screen.dart';
-import 'package:speakup_connect/features/reports/presentation/screens/report_confirmation_screen.dart';
-import 'package:speakup_connect/features/admin/presentation/screens/admin_dashboard_screen.dart';
 import 'package:speakup_connect/features/settings/presentation/screens/settings_screen.dart';
 
 part 'app_router.g.dart';
