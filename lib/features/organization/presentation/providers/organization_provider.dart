@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -20,23 +22,44 @@ OrganizationRepository organizationRepository(Ref ref) {
 
 /// Loads and caches the active organization's configuration.
 ///
-/// This is an [AsyncNotifier] so the UI can react to loading/error/data states.
-/// The loaded config drives the app theme, branding, and feature availability.
+/// After the initial load, a Firestore snapshot listener is kept alive for
+/// the lifetime of this provider. Any time a super_admin writes new theme
+/// fields to the org document, all widgets watching this provider automatically
+/// rebuild — the new colors propagate to every connected client in real time
+/// without an app restart.
 @riverpod
 class OrganizationConfig extends _$OrganizationConfig {
+  StreamSubscription<OrganizationConfigEntity>? _configSub;
+
   @override
   Future<OrganizationConfigEntity> build() async {
-    // In a full multi-tenant app, the org ID would be determined by
-    // deep link, stored preference, or org selection screen.
-    // For the MONHS pilot, we use the default org ID from AppConfig.
     const orgId = AppConfig.defaultOrganizationId;
     final repository = ref.read(organizationRepositoryProvider);
 
+    // Cancel any previous subscription when this provider is rebuilt or
+    // disposed (e.g., after a hot-reload or when the ProviderScope is
+    // destroyed).
+    ref.onDispose(() => _configSub?.cancel());
+
+    // Set up a live Firestore listener. Any subsequent document change
+    // (e.g., admin updating primaryColor) pushes a new AsyncValue.data to
+    // all watchers, which triggers MaterialApp to rebuild with the new theme.
+    _configSub?.cancel();
+    _configSub = repository
+        .watchOrganizationConfig(orgId)
+        .listen(
+          (config) => state = AsyncValue.data(config),
+          onError: (Object err, StackTrace st) =>
+              state = AsyncValue.error(err, st),
+        );
+
+    // Perform the initial fetch (may resolve faster than the first snapshot
+    // event on slow connections).
     try {
       return await repository.getOrganizationConfig(orgId);
     } catch (_) {
-      // During development, fall back to the dev config if Firestore is
-      // unreachable (e.g., emulator not running).
+      // During development / if Firestore is unreachable, fall back to the
+      // hard-coded MONHS dev preset so the app remains usable.
       return OrganizationConfigModel.monhsDev();
     }
   }

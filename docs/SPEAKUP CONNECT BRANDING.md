@@ -769,3 +769,168 @@ Defines the server-side structure that drives runtime theming and branding.
 - `logoUrl` must point to a path within `/tenants/{tenantId}/assets/` in Firebase Storage (prevents external URL injection)
 - `orgNameSuffix` must not exceed 40 characters
 - `orgName` must not exceed 80 characters
+
+> ⚠️ **Implementation note:** The `/tenants/{tenantId}/branding` path above is a
+> planning placeholder. The actual deployed Firestore structure stores theme fields
+> (`primaryColor`, `secondaryColor`, `logoUrl`, `tagline`, `welcomeMessage`) directly
+> on the `organizations/{organizationId}` root document — see §19 below.
+
+---
+
+# 19. Runtime Theming — Implementation Specification
+
+> ✅ **Implemented as of May 21, 2026.**
+>
+> This section is the authoritative developer reference for how runtime theming
+> works end-to-end: who changes it, where it's stored, how it propagates, and
+> what its limits are.
+
+---
+
+## 19.1 Who Can Change the Theme
+
+Only users with role `super_admin` within an organization may write theme fields.
+`admin` and all lower roles are read-only for theme data.
+
+This is enforced at two layers:
+1. **Client UI** — The "Theme Settings" screen in the admin app is only rendered
+   when `UserProfileEntity.role == 'super_admin'`.
+2. **Firestore Security Rules** — The `organizations/{organizationId}` document
+   write rule restricts updates to `primaryColor`, `secondaryColor`, `logoUrl`,
+   `tagline`, and `welcomeMessage` to `super_admin` callers only.
+
+---
+
+## 19.2 What Can Be Changed at Runtime
+
+The following fields on `organizations/{organizationId}` drive runtime theming
+and can be updated by a super_admin without any app release:
+
+| Field | Type | Effect | Approval palette required? |
+|---|---|---|---|
+| `primaryColor` | `#RRGGBB` string | Primary buttons, links, app bar background, active tab indicator | ✅ Yes — must be from §11.3 |
+| `secondaryColor` | `#RRGGBB` string | Success states, secondary actions, FAB | ✅ Yes — must be from §11.3 |
+| `logoUrl` | Firebase Storage URL | Org logo shown in header, drawer, splash "powered by" area | No — uploaded via Storage |
+| `tagline` | string ≤ 120 chars | Splash screen subtitle | No |
+| `welcomeMessage` | string ≤ 200 chars | Home dashboard hero greeting | No |
+
+---
+
+## 19.3 What Cannot Be Changed at Runtime
+
+| Property | Reason | How to Change |
+|---|---|---|
+| App launcher icon | Platform OS caches icons at install time | Requires a new client build (§CLIENT_BUILDS.md) |
+| App name in OS / app drawer | iOS: set at build time only; Android: inconsistent | Requires a new client build |
+| App Store / Play Store listing name | Controlled by store accounts | Requires a new app listing |
+| `organizationId` | Primary key — changing it would orphan all data | Contact platform super-admin |
+| Font family | Bundled in the app binary | Requires an app release |
+
+---
+
+## 19.4 Firestore Document Path
+
+```
+organizations/{organizationId}
+```
+
+Theme fields written by a super_admin:
+
+```json
+{
+  "primaryColor":    "#CC0000",
+  "secondaryColor":  "#1A1A1A",
+  "logoUrl":         "https://storage.googleapis.com/...",
+  "tagline":         "One Voice. Better MONHS.",
+  "welcomeMessage":  "What would you like to improve at our school?",
+  "updatedAt":       "<server timestamp>"
+}
+```
+
+---
+
+## 19.5 Real-Time Propagation — How It Works
+
+When a super_admin saves new theme colors in the Admin settings screen:
+
+```
+super_admin writes primaryColor → organizations/{orgId} in Firestore
+  └─► Firestore triggers snapshot update
+      └─► OrganizationRepositoryImpl.watchOrganizationConfig() emits new entity
+          └─► OrganizationConfig notifier: state = AsyncValue.data(newConfig)
+              └─► organizationConfigProvider notifies all watchers
+                  └─► app.dart rebuilds MaterialApp.router with new AppTheme.light/dark(orgColors)
+                      └─► All screens rebuild with new ColorScheme
+                          ← user sees new theme within ~1–2 seconds, no restart needed
+```
+
+**Key code locations:**
+
+| Layer | File | What it does |
+|---|---|---|
+| Repository stream | `organization/data/repositories/organization_repository_impl.dart` | Firestore `.snapshots()` → entity stream |
+| Provider live update | `organization/presentation/providers/organization_provider.dart` | `_configSub.listen()` → updates `state` |
+| Theme application | `lib/app.dart` | `ref.watch(organizationConfigProvider)` → `AppTheme.light(orgColors)` |
+| Theme builder | `lib/core/theme/app_theme.dart` | Builds `ThemeData` from `OrgThemeColors` |
+
+---
+
+## 19.6 Admin UI Workflow (to be built — Sprint: Admin Settings)
+
+The "Branding & Theme" settings screen in the admin app will provide:
+
+1. **Color theme selector** — grid of approved palette cards (§11.3).
+   Super_admin taps a card to preview, then taps "Apply to all users".
+2. **Logo upload** — file picker → upload to
+   `organizations/{orgId}/assets/logo.{ext}` in Firebase Storage →
+   writes returned download URL to `logoUrl` field.
+3. **Tagline editor** — single-line text field, 120-char limit.
+4. **Welcome message editor** — multi-line text field, 200-char limit.
+5. **Live preview panel** — renders a miniature version of the home screen
+   using the selected theme before saving.
+6. **"Save & Broadcast"** button — calls
+   `OrganizationRepository.updateThemeColors()` which writes all changed
+   fields in a single Firestore `update()` call.
+
+All connected user clients update automatically within ~1–2 seconds of saving.
+Users do not need to restart the app or pull-to-refresh.
+
+---
+
+## 19.7 New User Experience
+
+When a user registers (or opens the app for the first time after installation),
+the theme is loaded as part of the normal app startup sequence:
+
+1. `main.dart` → Firebase init → `ProviderScope` created
+2. `organizationConfigProvider` fires an initial `getOrganizationConfig` fetch
+3. `app.dart` receives the org config and builds `MaterialApp` with the correct
+   `OrgThemeColors`
+4. All screens the user sees — login, apply-to-join, pending approval, home — are
+   already rendered with the organization's chosen theme
+
+There is no "default blue then flash to red" — the theme is applied before any
+screen is shown because the router's splash route waits for the config to resolve.
+
+---
+
+## 19.8 Fallback Behavior
+
+If Firestore is unreachable (no network, cold start before cache warms):
+
+- The provider falls back to `OrganizationConfigModel.monhsDev()` which uses the
+  default Speakup Blue/Green palette.
+- Once connectivity is restored, the Firestore stream reconnects automatically and
+  the correct org theme is applied within seconds.
+- No user action is required.
+
+---
+
+## 19.9 Color Validation
+
+Before writing, the admin UI must validate that the selected `primaryColor` and
+`secondaryColor` combination passes WCAG 2.1 AA contrast (§17.1).
+
+Only colors from the approved palette (§11.3) are selectable in the UI, so
+they are pre-validated. If a future feature allows custom hex input (enterprise
+tier only), contrast must be checked client-side before the write is permitted.

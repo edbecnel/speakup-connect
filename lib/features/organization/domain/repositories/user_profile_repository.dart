@@ -27,4 +27,24 @@ abstract class UserProfileRepository {
     String? studentId,
     String? email,
   });
+
+  /// Grants [permission] to [targetUserId] in [orgId].
+  ///
+  /// Uses Firestore `arrayUnion` so concurrent writes are safe.
+  /// Only a `super_admin` caller should invoke this; enforcement is
+  /// also applied in Firestore Security Rules.
+  Future<void> grantPermission({
+    required String orgId,
+    required String targetUserId,
+    required String permission,
+  });
+
+  /// Revokes [permission] from [targetUserId] in [orgId].
+  ///
+  /// Uses Firestore `arrayRemove`. Safe to call when permission is not present.
+  Future<void> revokePermission({
+    required String orgId,
+    required String targetUserId,
+    required String permission,
+  });
 }

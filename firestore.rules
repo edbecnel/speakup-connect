@@ -42,12 +42,37 @@ service cloud.firestore {
       return isSuperAdmin() || isOrgModerator(orgId);
     }
 
+    // Returns true when [orgId] member [uid] has [permission] in their
+    // user profile document.  Used to check delegated permissions granted
+    // by a super_admin (e.g. 'edit_theme' granted to an admin).
+    function hasPermission(orgId, permission) {
+      let profile = get(/databases/$(database)/documents/organizations/$(orgId)/users/$(request.auth.uid)).data;
+      return permission in profile.get('permissions', []);
+    }
+
+    // True when the update only touches the five theme fields (+ updatedAt).
+    // Used to allow delegated admins to update the visual theme without
+    // being able to change any other org settings.
+    function onlyThemeFields() {
+      return request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['primaryColor', 'secondaryColor', 'logoUrl', 'tagline', 'welcomeMessage', 'updatedAt']);
+    }
+
     // ── Organizations ─────────────────────────────────────────────────────────
 
     match /organizations/{orgId} {
-      // Members can read their own org's metadata; only Super Admin can write
-      allow read:  if isSuperAdmin() || isOrgMember(orgId);
-      allow write: if isSuperAdmin();
+      // Members can read their own org's metadata
+      allow read: if isSuperAdmin() || isOrgMember(orgId);
+
+      // Super Admin has unrestricted write access
+      allow create, delete: if isSuperAdmin();
+
+      // Full update: super_admin only
+      // Partial update (theme fields only): super_admin OR admin with 'edit_theme' permission
+      allow update: if isSuperAdmin()
+                    || (isOrgAdmin(orgId)
+                        && hasPermission(orgId, 'edit_theme')
+                        && onlyThemeFields());
 
       // ── Config ─────────────────────────────────────────────────────────────
       match /config/{configId} {
@@ -99,9 +124,17 @@ service cloud.firestore {
                           && request.auth.uid == userId
                           && request.resource.data.organizationId == orgId);
 
-        // Users may update their own profile; admins may update any
-        allow update: if isAdminOrAbove(orgId)
-                      || (isOrgMember(orgId) && request.auth.uid == userId);
+        // Users may update their own profile; admins may update any.
+        // IMPORTANT: only super_admin may modify the 'permissions' field —
+        // prevents privilege escalation by admins or self-granting.
+        allow update: if isSuperAdmin()
+                      || (isAdminOrAbove(orgId)
+                          && !request.resource.data.diff(resource.data)
+                              .affectedKeys().hasAny(['permissions']))
+                      || (isOrgMember(orgId)
+                          && request.auth.uid == userId
+                          && !request.resource.data.diff(resource.data)
+                              .affectedKeys().hasAny(['permissions', 'role']));
 
         allow delete: if isAdminOrAbove(orgId);
       }

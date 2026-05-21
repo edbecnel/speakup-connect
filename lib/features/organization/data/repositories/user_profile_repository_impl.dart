@@ -75,4 +75,42 @@ class UserProfileRepositoryImpl implements UserProfileRepository {
       );
     }
   }
+
+  @override
+  Future<void> grantPermission({
+    required String orgId,
+    required String targetUserId,
+    required String permission,
+  }) async {
+    try {
+      await _usersRef(orgId).doc(targetUserId).update({
+        'permissions': FieldValue.arrayUnion([permission]),
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+    } on FirebaseException catch (e) {
+      throw DatabaseException(
+        message: e.message ?? 'Failed to grant permission',
+        code: e.code,
+      );
+    }
+  }
+
+  @override
+  Future<void> revokePermission({
+    required String orgId,
+    required String targetUserId,
+    required String permission,
+  }) async {
+    try {
+      await _usersRef(orgId).doc(targetUserId).update({
+        'permissions': FieldValue.arrayRemove([permission]),
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+    } on FirebaseException catch (e) {
+      throw DatabaseException(
+        message: e.message ?? 'Failed to revoke permission',
+        code: e.code,
+      );
+    }
+  }
 }

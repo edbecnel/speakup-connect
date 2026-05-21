@@ -15,6 +15,7 @@ class UserProfileModel extends UserProfileEntity {
     super.role,
     super.approvalStatus,
     super.isActive,
+    super.permissions,
     required super.createdAt,
     required super.updatedAt,
   });
@@ -37,6 +38,9 @@ class UserProfileModel extends UserProfileEntity {
         data['approvalStatus'] as String?,
       ),
       isActive: data['isActive'] as bool? ?? true,
+      permissions: Set<String>.from(
+        (data['permissions'] as List<dynamic>?) ?? [],
+      ),
       createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       updatedAt: (data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
     );
@@ -55,6 +59,7 @@ class UserProfileModel extends UserProfileEntity {
       'role': role,
       'approvalStatus': approvalStatus.name,
       'isActive': isActive,
+      'permissions': permissions.toList(),
       'createdAt': FieldValue.serverTimestamp(),
       'updatedAt': FieldValue.serverTimestamp(),
     };

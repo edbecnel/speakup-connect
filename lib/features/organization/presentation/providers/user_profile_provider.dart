@@ -67,3 +67,59 @@ final joinApplicationProvider =
     StateNotifierProvider.autoDispose<JoinApplicationNotifier, AsyncValue<void>>(
   (ref) => JoinApplicationNotifier(ref.read(userProfileRepositoryProvider)),
 );
+
+// --- Permission Delegation Notifier ---
+
+/// Allows a [super_admin] to grant or revoke delegated permissions on
+/// another user's profile (e.g. [UserPermission.editTheme] for an `admin`).
+///
+/// Usage:
+/// ```dart
+/// ref.read(permissionDelegationProvider.notifier).grant(
+///   orgId: AppConfig.defaultOrganizationId,
+///   targetUserId: someAdminUid,
+///   permission: UserPermission.editTheme,
+/// );
+/// ```
+class PermissionDelegationNotifier
+    extends StateNotifier<AsyncValue<void>> {
+  PermissionDelegationNotifier(this._repository)
+      : super(const AsyncValue.data(null));
+
+  final UserProfileRepository _repository;
+
+  Future<void> grant({
+    required String orgId,
+    required String targetUserId,
+    required String permission,
+  }) async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(
+      () => _repository.grantPermission(
+        orgId: orgId,
+        targetUserId: targetUserId,
+        permission: permission,
+      ),
+    );
+  }
+
+  Future<void> revoke({
+    required String orgId,
+    required String targetUserId,
+    required String permission,
+  }) async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(
+      () => _repository.revokePermission(
+        orgId: orgId,
+        targetUserId: targetUserId,
+        permission: permission,
+      ),
+    );
+  }
+}
+
+final permissionDelegationProvider = StateNotifierProvider.autoDispose<
+    PermissionDelegationNotifier, AsyncValue<void>>(
+  (ref) => PermissionDelegationNotifier(ref.read(userProfileRepositoryProvider)),
+);

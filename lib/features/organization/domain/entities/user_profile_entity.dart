@@ -9,6 +9,19 @@
 ///   - [ApprovalStatus.rejected] → pending-approval screen (with rejection note)
 enum ApprovalStatus { pending, approved, rejected }
 
+/// Typed constants for delegated permissions.
+///
+/// A [super_admin] may grant any of these to an [admin] user, allowing
+/// them to perform privileged actions without full super_admin access.
+/// Stored as a list of strings in the `permissions` field on the user document.
+abstract class UserPermission {
+  UserPermission._();
+
+  /// Allows an `admin` to update `primaryColor`, `secondaryColor`, `logoUrl`,
+  /// `tagline`, and `welcomeMessage` on the organization document.
+  static const String editTheme = 'edit_theme';
+}
+
 class UserProfileEntity {
   const UserProfileEntity({
     required this.userId,
@@ -20,6 +33,7 @@ class UserProfileEntity {
     this.role = 'user',
     this.approvalStatus = ApprovalStatus.pending,
     this.isActive = true,
+    this.permissions = const {},
     required this.createdAt,
     required this.updatedAt,
   });
@@ -51,6 +65,13 @@ class UserProfileEntity {
   /// Whether this account is currently active.
   final bool isActive;
 
+  /// Delegated permissions granted by a [super_admin].
+  ///
+  /// Use [UserPermission] constants as values, e.g. [UserPermission.editTheme].
+  /// Always empty for regular users; [super_admin] is not restricted by this
+  /// field (they have all permissions implicitly).
+  final Set<String> permissions;
+
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -58,4 +79,12 @@ class UserProfileEntity {
   bool get isApproved => approvalStatus == ApprovalStatus.approved;
   bool get isRejected => approvalStatus == ApprovalStatus.rejected;
   bool get isAdmin => role == 'admin' || role == 'super_admin';
+
+  /// Whether this user may edit the organisation's visual theme.
+  ///
+  /// Always `true` for `super_admin`.
+  /// For `admin`, only `true` if [UserPermission.editTheme] has been
+  /// explicitly granted by a `super_admin`.
+  bool get canEditTheme =>
+      role == 'super_admin' || permissions.contains(UserPermission.editTheme);
 }
