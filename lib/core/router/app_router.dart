@@ -4,8 +4,12 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:speakup_connect/core/constants/route_constants.dart';
 import 'package:speakup_connect/features/admin/presentation/screens/admin_dashboard_screen.dart';
 import 'package:speakup_connect/features/auth/presentation/providers/auth_provider.dart';
+import 'package:speakup_connect/features/auth/presentation/screens/apply_to_join_screen.dart';
+import 'package:speakup_connect/features/auth/presentation/screens/login_screen.dart';
+import 'package:speakup_connect/features/auth/presentation/screens/pending_approval_screen.dart';
 import 'package:speakup_connect/features/auth/presentation/screens/register_screen.dart';
 import 'package:speakup_connect/features/auth/presentation/screens/splash_screen.dart';
+import 'package:speakup_connect/features/organization/presentation/providers/user_profile_provider.dart';
 import 'package:speakup_connect/features/reports/presentation/screens/home_dashboard_screen.dart';
 import 'package:speakup_connect/features/reports/presentation/screens/my_reports_screen.dart';
 import 'package:speakup_connect/features/reports/presentation/screens/report_confirmation_screen.dart';
@@ -21,34 +25,58 @@ part 'app_router.g.dart';
 /// to determine whether to redirect to login or admin screens.
 @riverpod
 GoRouter appRouter(Ref ref) {
-  // Listen to auth state for reactive redirects
+  // Listen to auth state and user profile for reactive redirects.
   final authState = ref.watch(authStateChangesProvider);
+  final profileAsync = ref.watch(userProfileProvider);
 
   return GoRouter(
     initialLocation: Routes.splash,
     refreshListenable: _AuthStateListenable(ref),
     redirect: (BuildContext context, GoRouterState state) {
       final isAuthenticated = authState.value != null;
-      final isLoading = authState.isLoading;
+      final isAuthLoading = authState.isLoading;
+      final isProfileLoading = profileAsync.isLoading;
 
-      // Don't redirect while auth state is loading
-      if (isLoading) return null;
+      // Don't redirect while auth or profile state is loading.
+      if (isAuthLoading || isProfileLoading) return null;
 
-      final isOnAuthPage = state.matchedLocation == Routes.login ||
-          state.matchedLocation == Routes.register ||
-          state.matchedLocation == Routes.splash;
+      final loc = state.matchedLocation;
 
-      // Redirect unauthenticated users to login
+      final isOnAuthPage = loc == Routes.login ||
+          loc == Routes.register ||
+          loc == Routes.splash;
+
+      final isOnJoinFlow = loc == Routes.applyToJoin ||
+          loc == Routes.pendingApproval;
+
+      // Unauthenticated → login.
       if (!isAuthenticated && !isOnAuthPage) {
         return Routes.login;
       }
 
-      // Redirect authenticated users away from auth pages
-      if (isAuthenticated && state.matchedLocation == Routes.login) {
-        return Routes.home;
-      }
-      if (isAuthenticated && state.matchedLocation == Routes.register) {
-        return Routes.home;
+      if (isAuthenticated) {
+        final profile = profileAsync.valueOrNull;
+
+        // No profile yet → prompt to apply.
+        if (profile == null && !isOnJoinFlow && !isOnAuthPage) {
+          return Routes.applyToJoin;
+        }
+
+        // Profile pending or rejected → pending screen.
+        if (profile != null && !profile.isApproved && !isOnJoinFlow) {
+          return Routes.pendingApproval;
+        }
+
+        // Profile approved → redirect away from auth/join pages.
+        if (profile != null && profile.isApproved) {
+          if (isOnAuthPage || isOnJoinFlow) return Routes.home;
+        }
+
+        // Move authenticated user off login/register to apply-to-join
+        // (profile hasn't loaded yet but they are on an auth page).
+        if (profile == null && isOnAuthPage && loc != Routes.splash) {
+          return null; // let profile load first
+        }
       }
 
       return null;
@@ -71,6 +99,18 @@ GoRouter appRouter(Ref ref) {
         path: Routes.register,
         name: 'register',
         builder: (context, state) => const RegisterScreen(),
+      ),
+
+      // --- Join Flow ---
+      GoRoute(
+        path: Routes.applyToJoin,
+        name: 'applyToJoin',
+        builder: (context, state) => const ApplyToJoinScreen(),
+      ),
+      GoRoute(
+        path: Routes.pendingApproval,
+        name: 'pendingApproval',
+        builder: (context, state) => const PendingApprovalScreen(),
       ),
 
       // --- Main App ---
@@ -135,6 +175,7 @@ GoRouter appRouter(Ref ref) {
 class _AuthStateListenable extends ChangeNotifier {
   _AuthStateListenable(this._ref) {
     _ref.listen(authStateChangesProvider, (_, __) => notifyListeners());
+    _ref.listen(userProfileProvider, (_, __) => notifyListeners());
   }
 
   final Ref _ref;

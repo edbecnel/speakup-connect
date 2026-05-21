@@ -7,31 +7,35 @@ import 'package:flutter/material.dart';
 /// Firestore config document.
 abstract class AppColors {
   // --- Primary Palette (Default — overridden per organization) ---
+  // Confirmed branding §11 — May 21, 2026
 
-  /// Default primary color. Organizations replace this with their brand color.
-  static const Color primary = Color(0xFF1565C0); // Deep Blue
-  static const Color primaryLight = Color(0xFF1E88E5);
-  static const Color primaryDark = Color(0xFF0D47A1);
+  /// Default primary color: Speakup Blue. Organizations replace this with their brand color.
+  static const Color primary = Color(0xFF2563EB); // Speakup Blue
+  static const Color primaryLight = Color(0xFF3B82F6); // blue-500
+  static const Color primaryDark = Color(0xFF1D4ED8); // blue-700
   static const Color onPrimary = Color(0xFFFFFFFF);
 
-  /// Default secondary/accent color.
-  static const Color secondary = Color(0xFF00897B); // Teal
-  static const Color secondaryLight = Color(0xFF26A69A);
-  static const Color secondaryDark = Color(0xFF00695C);
+  /// Default secondary/accent color: Speakup Green.
+  static const Color secondary = Color(0xFF10B981); // Speakup Green
+  static const Color secondaryLight = Color(0xFF34D399); // emerald-400
+  static const Color secondaryDark = Color(0xFF059669); // emerald-600
   static const Color onSecondary = Color(0xFFFFFFFF);
 
   // --- Surface & Background ---
   static const Color surface = Color(0xFFFFFFFF);
-  static const Color surfaceVariant = Color(0xFFF5F5F5);
-  static const Color background = Color(0xFFF8F9FA);
-  static const Color onSurface = Color(0xFF1C1B1F);
-  static const Color onBackground = Color(0xFF1C1B1F);
+  static const Color surfaceVariant = Color(0xFFF3F4F6); // Card Grey
+  static const Color background = Color(0xFFFAFAFA); // Surface White
+  static const Color onSurface = Color(0xFF111827); // Text Primary
+  static const Color onBackground = Color(0xFF111827);
+  static const Color textSecondary = Color(0xFF6B7280); // Neutral Mid
+  static const Color dividerColor = Color(0xFFE5E7EB); // Neutral Light
 
   // --- Dark Theme ---
-  static const Color surfaceDark = Color(0xFF1E1E2E);
-  static const Color surfaceVariantDark = Color(0xFF2A2A3E);
-  static const Color backgroundDark = Color(0xFF121212);
-  static const Color onSurfaceDark = Color(0xFFE6E1E5);
+  static const Color surfaceDark = Color(0xFF1F2937); // gray-800
+  static const Color surfaceVariantDark = Color(0xFF374151); // gray-700
+  static const Color backgroundDark = Color(0xFF111827); // gray-900
+  static const Color onSurfaceDark = Color(0xFFF9FAFB); // gray-50
+  static const Color primaryDarkMode = Color(0xFF60A5FA); // Speakup Blue Light
 
   // --- Status Colors (Report statuses) ---
   static const Color statusSubmitted = Color(0xFF1565C0);   // Blue
@@ -41,12 +45,12 @@ abstract class AppColors {
   static const Color statusClosed = Color(0xFF616161);      // Grey
 
   // --- Semantic Colors ---
-  static const Color error = Color(0xFFB71C1C);
-  static const Color errorLight = Color(0xFFEF5350);
+  static const Color error = Color(0xFFDC2626); // Alert Red
+  static const Color errorLight = Color(0xFFEF4444);
   static const Color onError = Color(0xFFFFFFFF);
-  static const Color success = Color(0xFF2E7D32);
-  static const Color warning = Color(0xFFF57C00);
-  static const Color info = Color(0xFF1565C0);
+  static const Color success = Color(0xFF10B981); // matches secondary
+  static const Color warning = Color(0xFFF59E0B); // Caution Amber
+  static const Color info = Color(0xFF2563EB); // matches primary
 
   // --- Neutral ---
   static const Color grey50 = Color(0xFFFAFAFA);

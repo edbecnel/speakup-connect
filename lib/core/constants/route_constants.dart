@@ -9,6 +9,10 @@ abstract class Routes {
   static const String register = '/register';
   static const String forgotPassword = '/forgot-password';
 
+  // --- Onboarding / Join Flow ---
+  static const String applyToJoin = '/apply-to-join';
+  static const String pendingApproval = '/pending-approval';
+
   // --- Main App (User) ---
   static const String home = '/home';
   static const String submitReport = '/report/submit';
