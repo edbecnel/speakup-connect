@@ -15,11 +15,8 @@ Future<void> main() async {
     DeviceOrientation.portraitDown,
   ]);
 
-  // Initialize Firebase only on supported platforms (Android, iOS, web).
-  // Desktop platforms are not yet configured — skipped for UI development.
-  final bool firebaseSupported = kIsWeb ||
-      defaultTargetPlatform == TargetPlatform.android ||
-      defaultTargetPlatform == TargetPlatform.iOS;
+  // Initialize Firebase — all platforms are configured except Linux.
+  final bool firebaseSupported = defaultTargetPlatform != TargetPlatform.linux;
 
   if (firebaseSupported) {
     await Firebase.initializeApp(

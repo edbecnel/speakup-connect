@@ -170,7 +170,7 @@ This is the core document of the platform.
   "description": "string",
   "categoryId": "string (references categories collection)",
   "status": "submitted | under_review | in_progress | resolved | closed",
-  "priority": "low | medium | high | urgent",
+  "priority": "critical | urgent | low | manual",
   "isAnonymous": "boolean",
   "submittedBy": "string | null (Firebase Auth UID, null if anonymous)",
   "submitterDisplayName": "string | null",

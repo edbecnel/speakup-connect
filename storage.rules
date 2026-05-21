@@ -1,0 +1,93 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // ── Helper functions ──────────────────────────────────────────────────────
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isSuperAdmin() {
+      return isSignedIn() && request.auth.token.get('role', '') == 'super_admin';
+    }
+
+    function isOrgAdmin(orgId) {
+      return isSignedIn()
+          && request.auth.token.get('organizationId', '') == orgId
+          && request.auth.token.get('role', '') == 'admin';
+    }
+
+    function isOrgMember(orgId) {
+      return isSignedIn()
+          && request.auth.token.get('organizationId', '') == orgId;
+    }
+
+    function isAdminOrAbove(orgId) {
+      return isSuperAdmin() || isOrgAdmin(orgId);
+    }
+
+    function isImage() {
+      return request.resource.contentType.matches('image/.*');
+    }
+
+    function isUnderSizeLimit(maxMB) {
+      return request.resource.size <= maxMB * 1024 * 1024;
+    }
+
+    // ── Organization branding assets ──────────────────────────────────────────
+    // Path: organizations/{orgId}/assets/{fileName}
+    // e.g.: organizations/ph-monhs-001/assets/logo.png
+    match /organizations/{orgId}/assets/{fileName} {
+      allow read:  if isSuperAdmin() || isOrgMember(orgId);
+      allow write: if isAdminOrAbove(orgId)
+                   && isImage()
+                   && isUnderSizeLimit(5);
+    }
+
+    // ── Report photo attachments ──────────────────────────────────────────────
+    // Path: organizations/{orgId}/reports/{reportId}/{fileName}
+    match /organizations/{orgId}/reports/{reportId}/{fileName} {
+      allow read:  if isSuperAdmin() || isOrgMember(orgId);
+      allow write: if isOrgMember(orgId)
+                   && isImage()
+                   && isUnderSizeLimit(10);
+    }
+
+    // ── User avatars ──────────────────────────────────────────────────────────
+    // Path: organizations/{orgId}/users/{userId}/{fileName}
+    match /organizations/{orgId}/users/{userId}/{fileName} {
+      allow read:  if isSuperAdmin() || isOrgMember(orgId);
+      allow write: if isOrgMember(orgId)
+                   && request.auth.uid == userId
+                   && isImage()
+                   && isUnderSizeLimit(5);
+    }
+
+    // ── Bulletin / news post attachments ─────────────────────────────────────
+    // Path: organizations/{orgId}/bulletins/{bulletinId}/{fileName}
+    match /organizations/{orgId}/bulletins/{bulletinId}/{fileName} {
+      allow read:  if isSuperAdmin() || isOrgMember(orgId);
+      allow write: if isAdminOrAbove(orgId)
+                   && isImage()
+                   && isUnderSizeLimit(10);
+    }
+
+    // ── Apply-to-join: school ID photo uploads ────────────────────────────────
+    // Path: organizations/{orgId}/applications/{userId}/{fileName}
+    // Written by the applicant at signup BEFORE they have the org claim.
+    // Read restricted to org admins (for review in approval queue).
+    match /organizations/{orgId}/applications/{userId}/{fileName} {
+      allow read:  if isAdminOrAbove(orgId);
+      allow write: if isSignedIn()
+                   && request.auth.uid == userId
+                   && isImage()
+                   && isUnderSizeLimit(5);
+    }
+
+    // ── Deny all other paths ──────────────────────────────────────────────────
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

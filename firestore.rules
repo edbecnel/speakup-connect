@@ -1,0 +1,267 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Helper functions ──────────────────────────────────────────────────────
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // Global Super Admin — manages all organizations (web portal only)
+    function isSuperAdmin() {
+      return isSignedIn() && request.auth.token.get('role', '') == 'super_admin';
+    }
+
+    // Org Admin — full access within their own org
+    function isOrgAdmin(orgId) {
+      return isSignedIn()
+          && request.auth.token.get('organizationId', '') == orgId
+          && request.auth.token.get('role', '') == 'admin';
+    }
+
+    // Moderator or above — can triage reports within their org
+    function isOrgModerator(orgId) {
+      return isSignedIn()
+          && request.auth.token.get('organizationId', '') == orgId
+          && request.auth.token.get('role', '') in ['admin', 'moderator'];
+    }
+
+    // Any authenticated member of the org
+    function isOrgMember(orgId) {
+      return isSignedIn()
+          && request.auth.token.get('organizationId', '') == orgId;
+    }
+
+    // Convenience aliases
+    function isAdminOrAbove(orgId) {
+      return isSuperAdmin() || isOrgAdmin(orgId);
+    }
+
+    function isModeratorOrAbove(orgId) {
+      return isSuperAdmin() || isOrgModerator(orgId);
+    }
+
+    // ── Organizations ─────────────────────────────────────────────────────────
+
+    match /organizations/{orgId} {
+      // Members can read their own org's metadata; only Super Admin can write
+      allow read:  if isSuperAdmin() || isOrgMember(orgId);
+      allow write: if isSuperAdmin();
+
+      // ── Config ─────────────────────────────────────────────────────────────
+      match /config/{configId} {
+        allow read:  if isSuperAdmin() || isOrgMember(orgId);
+        allow write: if isAdminOrAbove(orgId);
+      }
+
+      // ── Report Categories ───────────────────────────────────────────────────
+      match /categories/{categoryId} {
+        allow read:  if isSuperAdmin() || isOrgMember(orgId);
+        allow write: if isAdminOrAbove(orgId);
+      }
+
+      // ── Reports ─────────────────────────────────────────────────────────────
+      // Security model:
+      //   - Moderators+ can read all reports in the org
+      //   - Normal members can only read their own non-anonymous reports
+      //   - adminNotes field is never returned to non-admin users
+      //     (field-level filtering is enforced in app code + Cloud Functions;
+      //      Firestore Security Rules do not support field-level redaction natively)
+      match /reports/{reportId} {
+        allow read: if isModeratorOrAbove(orgId)
+                    || (isOrgMember(orgId)
+                        && resource.data.isAnonymous == false
+                        && resource.data.submittedBy == request.auth.uid);
+
+        allow create: if isOrgMember(orgId)
+                      && request.resource.data.organizationId == orgId
+                      && (request.resource.data.isAnonymous == true
+                          || request.resource.data.submittedBy == request.auth.uid);
+
+        // Only moderators+ may update (status changes, triage, notes)
+        allow update: if isModeratorOrAbove(orgId);
+
+        // Only org admin+ may delete
+        allow delete: if isAdminOrAbove(orgId);
+      }
+
+      // ── User Profiles ───────────────────────────────────────────────────────
+      match /users/{userId} {
+        // Admins can read all profiles; users can read their own
+        allow read: if isAdminOrAbove(orgId)
+                    || (isOrgMember(orgId) && request.auth.uid == userId);
+
+        // Users may create their own profile; admins may create any
+        allow create: if isSuperAdmin()
+                      || isAdminOrAbove(orgId)
+                      || (isSignedIn()
+                          && request.auth.uid == userId
+                          && request.resource.data.organizationId == orgId);
+
+        // Users may update their own profile; admins may update any
+        allow update: if isAdminOrAbove(orgId)
+                      || (isOrgMember(orgId) && request.auth.uid == userId);
+
+        allow delete: if isAdminOrAbove(orgId);
+      }
+
+      // ── Admin Records ───────────────────────────────────────────────────────
+      match /admins/{adminId} {
+        allow read: if isAdminOrAbove(orgId)
+                    || (isOrgMember(orgId) && request.auth.uid == adminId);
+        allow write: if isAdminOrAbove(orgId);
+      }
+
+      // ── Student/Member Roster ───────────────────────────────────────────────
+      // Roster is sensitive (student IDs + names). Admin-only reads.
+      // Roster verification at signup is done server-side via Admin SDK.
+      match /roster/{studentId} {
+        allow read:  if isAdminOrAbove(orgId);
+        allow write: if isAdminOrAbove(orgId);
+      }
+
+      // ── Custom Roles ────────────────────────────────────────────────────────
+      match /roles/{roleId} {
+        allow read:  if isSuperAdmin() || isOrgMember(orgId);
+        allow write: if isAdminOrAbove(orgId);
+      }
+
+      // ── Groups ──────────────────────────────────────────────────────────────
+      match /groups/{groupId} {
+        allow read:   if isSuperAdmin() || isOrgMember(orgId);
+        allow create: if isAdminOrAbove(orgId);
+        allow update: if isAdminOrAbove(orgId);
+        allow delete: if isAdminOrAbove(orgId);
+
+        // Group membership
+        match /members/{memberId} {
+          allow read:  if isSuperAdmin() || isOrgMember(orgId);
+          allow write: if isAdminOrAbove(orgId);
+        }
+      }
+
+      // ── Bulletins ───────────────────────────────────────────────────────────
+      match /bulletins/{bulletinId} {
+        allow read:  if isSuperAdmin() || isOrgMember(orgId);
+        allow write: if isModeratorOrAbove(orgId);
+      }
+
+      // ── News Posts ──────────────────────────────────────────────────────────
+      match /newsPosts/{postId} {
+        allow read:   if isSuperAdmin() || isOrgMember(orgId);
+
+        // Members can create their own posts (group leader/teacher permissions
+        // enforced at app layer via customRoles field)
+        allow create: if isOrgMember(orgId)
+                      && request.resource.data.organizationId == orgId
+                      && request.resource.data.authorId == request.auth.uid;
+
+        // Authors can edit their own posts; admins can edit any
+        allow update: if isAdminOrAbove(orgId)
+                      || (isOrgMember(orgId)
+                          && resource.data.authorId == request.auth.uid);
+
+        allow delete: if isAdminOrAbove(orgId)
+                      || (isOrgMember(orgId)
+                          && resource.data.authorId == request.auth.uid);
+      }
+
+      // ── Reminders / Broadcasts ──────────────────────────────────────────────
+      match /reminders/{reminderId} {
+        allow read:   if isSuperAdmin() || isOrgMember(orgId);
+        allow create: if isAdminOrAbove(orgId);
+        allow update: if isAdminOrAbove(orgId);
+        allow delete: if isAdminOrAbove(orgId);
+      }
+
+      // ── Group Chat Messages ─────────────────────────────────────────────────
+      match /messages/{threadId} {
+        allow read:   if isSuperAdmin() || isOrgMember(orgId);
+        allow create: if isAdminOrAbove(orgId);
+        allow update: if isAdminOrAbove(orgId);
+        allow delete: if isAdminOrAbove(orgId);
+
+        match /entries/{messageId} {
+          allow read:   if isSuperAdmin() || isOrgMember(orgId);
+          allow create: if isOrgMember(orgId)
+                        && request.resource.data.senderId == request.auth.uid;
+          allow update: if isAdminOrAbove(orgId)
+                        || (isOrgMember(orgId)
+                            && resource.data.senderId == request.auth.uid);
+          allow delete: if isAdminOrAbove(orgId);
+        }
+      }
+
+      // ── Direct Messages ─────────────────────────────────────────────────────
+      match /directMessages/{threadId} {
+        allow read: if isSuperAdmin()
+                    || (isOrgMember(orgId)
+                        && request.auth.uid in resource.data.participantIds);
+
+        allow create: if isOrgMember(orgId)
+                      && request.auth.uid in request.resource.data.participantIds
+                      && request.resource.data.organizationId == orgId;
+
+        allow update: if isSuperAdmin()
+                      || (isOrgMember(orgId)
+                          && request.auth.uid in resource.data.participantIds);
+
+        allow delete: if isAdminOrAbove(orgId);
+
+        match /entries/{messageId} {
+          // get() check validates the user is a thread participant before reading messages
+          allow read: if isSuperAdmin()
+                      || (isOrgMember(orgId)
+                          && request.auth.uid in
+                             get(/databases/$(database)/documents/organizations/$(orgId)/directMessages/$(threadId)).data.participantIds);
+
+          allow create: if isOrgMember(orgId)
+                        && request.resource.data.senderId == request.auth.uid
+                        && request.auth.uid in
+                           get(/databases/$(database)/documents/organizations/$(orgId)/directMessages/$(threadId)).data.participantIds;
+
+          allow update: if isAdminOrAbove(orgId)
+                        || (isOrgMember(orgId)
+                            && resource.data.senderId == request.auth.uid);
+
+          allow delete: if isAdminOrAbove(orgId);
+        }
+      }
+
+      // ── Blocked Users ───────────────────────────────────────────────────────
+      match /blockedUsers/{blockId} {
+        allow read:  if isAdminOrAbove(orgId);
+        allow write: if isAdminOrAbove(orgId);
+      }
+
+      // ── Community Rules ─────────────────────────────────────────────────────
+      match /communityRules/{ruleId} {
+        allow read:  if isSuperAdmin() || isOrgMember(orgId);
+        allow write: if isAdminOrAbove(orgId);
+      }
+    }
+
+    // ── Global Language Database ──────────────────────────────────────────────
+    // Read by any authenticated user; write by Super Admin only
+    match /languages/{languageCode} {
+      allow read:  if isSignedIn();
+      allow write: if isSuperAdmin();
+
+      match /strings/{stringKey} {
+        allow read:  if isSignedIn();
+        allow write: if isSuperAdmin();
+      }
+    }
+
+    // ── Platform Collection (Super Admin only) ────────────────────────────────
+    match /platform/{document=**} {
+      allow read, write: if isSuperAdmin();
+    }
+
+    // ── Default deny — reject all unmatched paths ─────────────────────────────
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
