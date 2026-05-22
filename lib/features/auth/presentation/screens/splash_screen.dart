@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:speakup_connect/core/constants/route_constants.dart';
+import 'package:speakup_connect/config/app_config.dart';
 import 'package:speakup_connect/features/organization/presentation/providers/organization_provider.dart';
 
 /// Splash / Welcome screen — the first screen the user sees.
@@ -32,11 +33,11 @@ class SplashScreen extends ConsumerWidget {
           // on subsequent launches. Show the generic app tagline with no
           // org name until the config arrives.
           loading: () => const _SplashContent(
-            orgName: '',
+            orgName: AppConfig.clientDisplayName,
             tagline: 'Your voice. Our action.',
           ),
           error: (_, __) => const _SplashContent(
-            orgName: '',
+            orgName: AppConfig.clientDisplayName,
             tagline: 'Your voice. Our action.',
           ),
           data: (config) => _SplashContent(

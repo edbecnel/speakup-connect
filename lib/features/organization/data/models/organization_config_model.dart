@@ -81,7 +81,7 @@ class OrganizationConfigModel extends OrganizationConfigEntity {
   /// the only place in the codebase where a specific org ID is configured.
   factory OrganizationConfigModel.offline() => OrganizationConfigModel(
         organizationId: AppConfig.defaultOrganizationId,
-        displayName: '',
+        displayName: AppConfig.clientDisplayName,
         type: OrganizationType.other,
         themeColors: AppConfig.defaultThemeColors,
         allowAnonymousReports: false,

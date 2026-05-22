@@ -19,6 +19,12 @@ abstract class AppConfig {
   /// 3. An organization selection screen
   static const String defaultOrganizationId = 'monhs-ph-001';
 
+  /// Short human-readable name for the client organisation.
+  /// Shown on the splash screen and used as the offline display-name
+  /// fallback before Firestore config loads.
+  /// Change this for each client deployment.
+  static const String clientDisplayName = 'MONHS';
+
   /// Default fallback theme colors used before org config loads.
   static const OrgThemeColors defaultThemeColors = OrgThemeColors(
     primary: AppColors.primary,
