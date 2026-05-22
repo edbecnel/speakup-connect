@@ -32,7 +32,9 @@ class OrganizationConfigModel extends OrganizationConfigEntity {
 
     return OrganizationConfigModel(
       organizationId: organizationId,
-      displayName: json['displayName'] as String? ?? '',
+      displayName: (json['displayName'] as String?)?.trim().isNotEmpty == true
+          ? json['displayName'] as String
+          : AppConfig.clientDisplayName,
       type: OrganizationType.fromValue(json['type'] as String? ?? 'other'),
       themeColors: OrgThemeColors(
         primary: primaryHex != null
