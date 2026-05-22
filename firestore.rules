@@ -13,24 +13,58 @@ service cloud.firestore {
       return isSignedIn() && request.auth.token.get('role', '') == 'super_admin';
     }
 
+    // ── Profile-document fallbacks ────────────────────────────────────────────
+    // Used when Cloud Functions have not yet set JWT custom claims.
+    // Firebase rules short-circuit ||, so these get() calls are only executed
+    // when the JWT claim check (left side) is false.
+
+    function isOrgAdminByProfile(orgId) {
+      let p = get(/databases/$(database)/documents/organizations/$(orgId)/users/$(request.auth.uid)).data;
+      return p.get('organizationId', '') == orgId
+          && p.get('role', '') in ['admin', 'super_admin', 'owner']
+          && p.get('approvalStatus', '') == 'approved';
+    }
+
+    function isOrgModeratorByProfile(orgId) {
+      let p = get(/databases/$(database)/documents/organizations/$(orgId)/users/$(request.auth.uid)).data;
+      return p.get('organizationId', '') == orgId
+          && p.get('role', '') in ['admin', 'moderator', 'super_admin', 'owner']
+          && p.get('approvalStatus', '') == 'approved';
+    }
+
+    function isOrgMemberByProfile(orgId) {
+      let p = get(/databases/$(database)/documents/organizations/$(orgId)/users/$(request.auth.uid)).data;
+      return p.get('organizationId', '') == orgId
+          && p.get('approvalStatus', '') == 'approved';
+    }
+
     // Org Admin — full access within their own org
     function isOrgAdmin(orgId) {
       return isSignedIn()
-          && request.auth.token.get('organizationId', '') == orgId
-          && request.auth.token.get('role', '') == 'admin';
+          && (
+            (request.auth.token.get('organizationId', '') == orgId
+                && request.auth.token.get('role', '') == 'admin')
+            || isOrgAdminByProfile(orgId)
+          );
     }
 
     // Moderator or above — can triage reports within their org
     function isOrgModerator(orgId) {
       return isSignedIn()
-          && request.auth.token.get('organizationId', '') == orgId
-          && request.auth.token.get('role', '') in ['admin', 'moderator'];
+          && (
+            (request.auth.token.get('organizationId', '') == orgId
+                && request.auth.token.get('role', '') in ['admin', 'moderator'])
+            || isOrgModeratorByProfile(orgId)
+          );
     }
 
     // Any authenticated member of the org
     function isOrgMember(orgId) {
       return isSignedIn()
-          && request.auth.token.get('organizationId', '') == orgId;
+          && (
+            request.auth.token.get('organizationId', '') == orgId
+            || isOrgMemberByProfile(orgId)
+          );
     }
 
     // Convenience aliases
@@ -86,8 +120,12 @@ service cloud.firestore {
       }
 
       // ── Report Categories ───────────────────────────────────────────────────
+      // Categories are non-sensitive (display names + icons only). Any
+      // signed-in user may read them — needed before custom claims propagate
+      // and for the Apply-to-Join flow where the user has no organizationId
+      // claim yet. Same rationale as the /config rule above.
       match /categories/{categoryId} {
-        allow read:  if isSuperAdmin() || isOrgMember(orgId);
+        allow read:  if isSignedIn();
         allow write: if isAdminOrAbove(orgId);
       }
 

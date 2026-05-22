@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:speakup_connect/features/admin/presentation/providers/admin_branding_provider.dart';
 import 'package:speakup_connect/features/organization/presentation/providers/organization_provider.dart';
+import 'package:speakup_connect/features/reports/presentation/providers/report_provider.dart';
 
 /// Admin screen for updating the organization's display name and brand colors.
 ///
@@ -158,6 +159,8 @@ class _AdminBrandingScreenState extends ConsumerState<AdminBrandingScreen> {
                     'also written to local storage, so it loads correctly on '
                     'the next app launch before Firestore responds.',
               ),
+              const SizedBox(height: 32),
+              _SetupCategoriesCard(),
             ],
           ),
         ),
@@ -415,3 +418,84 @@ class _InfoBox extends StatelessWidget {
     );
   }
 }
+
+// ── Setup: seed default categories ──────────────────────────────────────────
+
+class _SetupCategoriesCard extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final categoriesAsync = ref.watch(reportCategoriesProvider);
+    final seedState = ref.watch(seedCategoriesProvider);
+
+    ref.listen(seedCategoriesProvider, (prev, next) {
+      if (!next.isLoading && prev?.isLoading == true) {
+        if (next.hasError) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text('Seed failed: ${next.error}'),
+            backgroundColor: theme.colorScheme.error,
+          ));
+        } else {
+          // Refresh category list after seeding.
+          ref.invalidate(reportCategoriesProvider);
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text('Default categories added successfully'),
+            backgroundColor: Colors.green,
+          ));
+        }
+      }
+    });
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _SectionHeader(
+          icon: Icons.category_outlined,
+          title: 'Report Categories',
+          subtitle:
+              'Categories are required for users to submit concerns. '
+              'Tap the button below to populate the default set.',
+        ),
+        const SizedBox(height: 12),
+        categoriesAsync.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (_, __) => const SizedBox.shrink(),
+          data: (cats) {
+            if (cats.isNotEmpty) {
+              return Row(
+                children: [
+                  const Icon(Icons.check_circle, color: Colors.green, size: 20),
+                  const SizedBox(width: 8),
+                  Text(
+                    '${cats.length} categories configured',
+                    style: theme.textTheme.bodyMedium
+                        ?.copyWith(color: Colors.green.shade700),
+                  ),
+                ],
+              );
+            }
+            return SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: seedState.isLoading
+                    ? null
+                    : () => ref.read(seedCategoriesProvider.notifier).seed(),
+                icon: seedState.isLoading
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.add_circle_outline),
+                label: Text(
+                  seedState.isLoading ? 'Adding…' : 'Add Default Categories',
+                ),
+              ),
+            );
+          },
+        ),
+      ],
+    );
+  }
+}
+

@@ -28,6 +28,34 @@ class ReportRepositoryImpl implements ReportRepository {
           .doc(orgId)
           .collection(AppConstants.categoriesCollection);
 
+  static const _defaultCategories = [
+    {'categoryId': 'facility',      'label': 'Facility & Infrastructure', 'icon': 'build_outlined',                  'color': '#F59E0B', 'sortOrder': 1, 'isActive': true, 'requiresPhoto': false},
+    {'categoryId': 'safety',        'label': 'Safety & Security',         'icon': 'security_outlined',               'color': '#EF4444', 'sortOrder': 2, 'isActive': true, 'requiresPhoto': false},
+    {'categoryId': 'academic',      'label': 'Academic Concern',          'icon': 'school_outlined',                 'color': '#3B82F6', 'sortOrder': 3, 'isActive': true, 'requiresPhoto': false},
+    {'categoryId': 'bullying',      'label': 'Bullying & Harassment',     'icon': 'report_problem_outlined',         'color': '#8B5CF6', 'sortOrder': 4, 'isActive': true, 'requiresPhoto': false},
+    {'categoryId': 'sanitation',    'label': 'Sanitation & Cleanliness',  'icon': 'cleaning_services_outlined',      'color': '#10B981', 'sortOrder': 5, 'isActive': true, 'requiresPhoto': true},
+    {'categoryId': 'conduct',       'label': 'Staff / Teacher Conduct',   'icon': 'person_outlined',                 'color': '#F97316', 'sortOrder': 6, 'isActive': true, 'requiresPhoto': false},
+    {'categoryId': 'administrative','label': 'Administrative',            'icon': 'admin_panel_settings_outlined',   'color': '#6B7280', 'sortOrder': 7, 'isActive': true, 'requiresPhoto': false},
+    {'categoryId': 'other',         'label': 'Other',                     'icon': 'help_outline',                    'color': '#9CA3AF', 'sortOrder': 8, 'isActive': true, 'requiresPhoto': false},
+  ];
+
+  @override
+  Future<void> seedDefaultCategories(String organizationId) async {
+    try {
+      final ref = _categoriesRef(organizationId);
+      final existing = await ref.limit(1).get();
+      if (existing.docs.isNotEmpty) return; // already seeded
+
+      final batch = _firestore.batch();
+      for (final cat in _defaultCategories) {
+        batch.set(ref.doc(cat['categoryId'] as String), cat);
+      }
+      await batch.commit();
+    } catch (e) {
+      throw DatabaseException(message: 'Failed to seed categories: $e');
+    }
+  }
+
   @override
   Future<ReportEntity> submitReport(SubmitReportParams params) async {
     try {

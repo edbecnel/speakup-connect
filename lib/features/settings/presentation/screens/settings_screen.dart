@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:speakup_connect/core/constants/route_constants.dart';
 import 'package:speakup_connect/features/auth/presentation/providers/auth_provider.dart';
 import 'package:speakup_connect/features/organization/presentation/providers/organization_provider.dart';
+import 'package:speakup_connect/features/organization/presentation/providers/user_profile_provider.dart';
 import 'package:speakup_connect/features/settings/presentation/providers/settings_provider.dart';
 import 'package:speakup_connect/shared/widgets/app_button.dart';
 
@@ -16,6 +17,7 @@ class SettingsScreen extends ConsumerWidget {
     final user = ref.watch(currentUserProvider);
     final orgConfigAsync = ref.watch(organizationConfigProvider);
     final themeMode = ref.watch(themeModeProvider);
+    final profile = ref.watch(userProfileProvider).value;
     final theme = Theme.of(context);
 
     final orgName = orgConfigAsync.value?.displayName ?? '—';
@@ -132,6 +134,19 @@ class SettingsScreen extends ConsumerWidget {
           ),
 
           const Divider(),
+
+          // --- Admin ---
+          if (profile?.isAdmin == true) ...[  
+            const _SectionHeader(title: 'Administration'),
+            ListTile(
+              leading: const Icon(Icons.admin_panel_settings_outlined),
+              title: const Text('Admin Dashboard'),
+              subtitle: const Text('Manage reports and settings'),
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () => context.push(Routes.adminDashboard),
+            ),
+            const Divider(),
+          ],
 
           // --- Danger Zone ---
           Padding(

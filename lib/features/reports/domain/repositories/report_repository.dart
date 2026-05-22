@@ -45,6 +45,10 @@ abstract class ReportRepository {
   /// Returns all active categories for [organizationId].
   Future<List<ReportCategoryEntity>> getCategories(String organizationId);
 
+  /// Writes the built-in default categories to Firestore for [organizationId].
+  /// Safe to call multiple times — skips write if categories already exist.
+  Future<void> seedDefaultCategories(String organizationId);
+
   // --- Admin operations ---
 
   /// Returns a real-time stream of ALL reports for [organizationId] (admin only).

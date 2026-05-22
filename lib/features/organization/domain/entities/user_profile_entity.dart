@@ -78,7 +78,7 @@ class UserProfileEntity {
   bool get isPending => approvalStatus == ApprovalStatus.pending;
   bool get isApproved => approvalStatus == ApprovalStatus.approved;
   bool get isRejected => approvalStatus == ApprovalStatus.rejected;
-  bool get isAdmin => role == 'admin' || role == 'super_admin';
+  bool get isAdmin => role == 'admin' || role == 'super_admin' || role == 'owner';
 
   /// Whether this user may edit the organisation's visual theme.
   ///

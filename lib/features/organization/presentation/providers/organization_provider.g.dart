@@ -56,13 +56,14 @@ String _$organizationRepositoryHash() =>
 /// Loads and caches the active organization's configuration.
 ///
 /// Startup strategy:
-/// 1. SharedPreferences cache is read first (~1 ms) and set as the immediate
-///    state, so the correct brand colors appear from frame 1 on subsequent
-///    launches — no loading flash.
-/// 2. A live Firestore listener is then started. Every time the org document
-///    changes, all widgets rebuild with the new config in real time.
-/// 3. After each Firestore load the cache is refreshed, so the next launch
-///    is always up to date.
+/// 1. SharedPreferences cache is read first (~1 ms). If present, it is
+///    returned immediately as the build value so the correct brand colors
+///    are applied from the very first frame on subsequent launches.
+/// 2. A live Firestore stream is started in the background (deferred with
+///    Future.microtask so it never races the build return). Every update
+///    refreshes both the UI state and the local cache.
+/// 3. If Firestore fails and no cache exists, an offline placeholder is
+///    returned so the app stays usable.
 
 @ProviderFor(OrganizationConfig)
 final organizationConfigProvider = OrganizationConfigProvider._();
@@ -70,25 +71,27 @@ final organizationConfigProvider = OrganizationConfigProvider._();
 /// Loads and caches the active organization's configuration.
 ///
 /// Startup strategy:
-/// 1. SharedPreferences cache is read first (~1 ms) and set as the immediate
-///    state, so the correct brand colors appear from frame 1 on subsequent
-///    launches — no loading flash.
-/// 2. A live Firestore listener is then started. Every time the org document
-///    changes, all widgets rebuild with the new config in real time.
-/// 3. After each Firestore load the cache is refreshed, so the next launch
-///    is always up to date.
+/// 1. SharedPreferences cache is read first (~1 ms). If present, it is
+///    returned immediately as the build value so the correct brand colors
+///    are applied from the very first frame on subsequent launches.
+/// 2. A live Firestore stream is started in the background (deferred with
+///    Future.microtask so it never races the build return). Every update
+///    refreshes both the UI state and the local cache.
+/// 3. If Firestore fails and no cache exists, an offline placeholder is
+///    returned so the app stays usable.
 final class OrganizationConfigProvider extends $AsyncNotifierProvider<
     OrganizationConfig, OrganizationConfigEntity> {
   /// Loads and caches the active organization's configuration.
   ///
   /// Startup strategy:
-  /// 1. SharedPreferences cache is read first (~1 ms) and set as the immediate
-  ///    state, so the correct brand colors appear from frame 1 on subsequent
-  ///    launches — no loading flash.
-  /// 2. A live Firestore listener is then started. Every time the org document
-  ///    changes, all widgets rebuild with the new config in real time.
-  /// 3. After each Firestore load the cache is refreshed, so the next launch
-  ///    is always up to date.
+  /// 1. SharedPreferences cache is read first (~1 ms). If present, it is
+  ///    returned immediately as the build value so the correct brand colors
+  ///    are applied from the very first frame on subsequent launches.
+  /// 2. A live Firestore stream is started in the background (deferred with
+  ///    Future.microtask so it never races the build return). Every update
+  ///    refreshes both the UI state and the local cache.
+  /// 3. If Firestore fails and no cache exists, an offline placeholder is
+  ///    returned so the app stays usable.
   OrganizationConfigProvider._()
       : super(
           from: null,
@@ -109,18 +112,19 @@ final class OrganizationConfigProvider extends $AsyncNotifierProvider<
 }
 
 String _$organizationConfigHash() =>
-    r'2f0e7eb7bdd645bfc72aecc6e3b770b0cbf2e598';
+    r'708bf0faa9b8a4382baa4ea5d9eba95568f43563';
 
 /// Loads and caches the active organization's configuration.
 ///
 /// Startup strategy:
-/// 1. SharedPreferences cache is read first (~1 ms) and set as the immediate
-///    state, so the correct brand colors appear from frame 1 on subsequent
-///    launches — no loading flash.
-/// 2. A live Firestore listener is then started. Every time the org document
-///    changes, all widgets rebuild with the new config in real time.
-/// 3. After each Firestore load the cache is refreshed, so the next launch
-///    is always up to date.
+/// 1. SharedPreferences cache is read first (~1 ms). If present, it is
+///    returned immediately as the build value so the correct brand colors
+///    are applied from the very first frame on subsequent launches.
+/// 2. A live Firestore stream is started in the background (deferred with
+///    Future.microtask so it never races the build return). Every update
+///    refreshes both the UI state and the local cache.
+/// 3. If Firestore fails and no cache exists, an offline placeholder is
+///    returned so the app stays usable.
 
 abstract class _$OrganizationConfig
     extends $AsyncNotifier<OrganizationConfigEntity> {

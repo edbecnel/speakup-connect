@@ -2,6 +2,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:speakup_connect/config/app_config.dart';
 import 'package:speakup_connect/features/organization/presentation/providers/organization_provider.dart';
+import 'package:speakup_connect/features/reports/presentation/providers/report_provider.dart'
+    show reportRepositoryProvider;
 
 part 'admin_branding_provider.g.dart';
 
@@ -37,6 +39,25 @@ class AdminBranding extends _$AdminBranding {
         primaryHex: primaryHex,
         secondaryHex: secondaryHex,
       );
+      state = const AsyncData(null);
+    } catch (e, st) {
+      state = AsyncError(e, st);
+    }
+  }
+}
+
+/// State for the one-time "seed default categories" operation.
+@riverpod
+class SeedCategories extends _$SeedCategories {
+  @override
+  AsyncValue<void> build() => const AsyncData(null);
+
+  Future<void> seed() async {
+    state = const AsyncLoading();
+    try {
+      await ref
+          .read(reportRepositoryProvider)
+          .seedDefaultCategories(AppConfig.defaultOrganizationId);
       state = const AsyncData(null);
     } catch (e, st) {
       state = AsyncError(e, st);

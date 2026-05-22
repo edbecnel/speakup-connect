@@ -78,3 +78,58 @@ abstract class _$AdminBranding extends $Notifier<AsyncValue<void>> {
     element.handleCreate(ref, build);
   }
 }
+
+/// State for the one-time "seed default categories" operation.
+
+@ProviderFor(SeedCategories)
+final seedCategoriesProvider = SeedCategoriesProvider._();
+
+/// State for the one-time "seed default categories" operation.
+final class SeedCategoriesProvider
+    extends $NotifierProvider<SeedCategories, AsyncValue<void>> {
+  /// State for the one-time "seed default categories" operation.
+  SeedCategoriesProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'seedCategoriesProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$seedCategoriesHash();
+
+  @$internal
+  @override
+  SeedCategories create() => SeedCategories();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(AsyncValue<void> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<AsyncValue<void>>(value),
+    );
+  }
+}
+
+String _$seedCategoriesHash() => r'414697bec98ed474ae23a64425e990dcd3c870a7';
+
+/// State for the one-time "seed default categories" operation.
+
+abstract class _$SeedCategories extends $Notifier<AsyncValue<void>> {
+  AsyncValue<void> build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref = this.ref as $Ref<AsyncValue<void>, AsyncValue<void>>;
+    final element = ref.element as $ClassProviderElement<
+        AnyNotifier<AsyncValue<void>, AsyncValue<void>>,
+        AsyncValue<void>,
+        Object?,
+        Object?>;
+    element.handleCreate(ref, build);
+  }
+}
