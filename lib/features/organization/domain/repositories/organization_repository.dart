@@ -28,4 +28,17 @@ abstract class OrganizationRepository {
     required String primaryHex,
     required String secondaryHex,
   });
+
+  /// Writes all branding fields (display name + theme colors) to Firestore.
+  ///
+  /// Used by the admin branding screen so a single save updates both the
+  /// Firestore document (real-time propagation to all connected clients) and
+  /// the local SharedPreferences cache (instant startup colors on the device
+  /// where the change was made).
+  Future<void> updateBranding({
+    required String organizationId,
+    required String displayName,
+    required String primaryHex,
+    required String secondaryHex,
+  });
 }

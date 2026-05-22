@@ -50,19 +50,21 @@ service cloud.firestore {
       return permission in profile.get('permissions', []);
     }
 
-    // True when the update only touches the five theme fields (+ updatedAt).
-    // Used to allow delegated admins to update the visual theme without
+    // True when the update only touches branding fields (+ updatedAt).
+    // Used to allow delegated admins to update the visual branding without
     // being able to change any other org settings.
     function onlyThemeFields() {
       return request.resource.data.diff(resource.data).affectedKeys()
-          .hasOnly(['primaryColor', 'secondaryColor', 'logoUrl', 'tagline', 'welcomeMessage', 'updatedAt']);
+          .hasOnly(['displayName', 'primaryColor', 'secondaryColor', 'logoUrl', 'tagline', 'welcomeMessage', 'updatedAt']);
     }
 
     // ── Organizations ─────────────────────────────────────────────────────────
 
     match /organizations/{orgId} {
-      // Members can read their own org's metadata
-      allow read: if isSuperAdmin() || isOrgMember(orgId);
+      // Any signed-in user can read org metadata (branding, name, colors).
+      // isOrgMember requires the organizationId custom claim which new users
+      // don't have yet, so we allow any authenticated user to read org docs.
+      allow read: if isSuperAdmin() || isSignedIn();
 
       // Super Admin has unrestricted write access
       allow create, delete: if isSuperAdmin();
@@ -76,7 +78,10 @@ service cloud.firestore {
 
       // ── Config ─────────────────────────────────────────────────────────────
       match /config/{configId} {
-        allow read:  if isSuperAdmin() || isOrgMember(orgId);
+        // Any signed-in user can read org config (branding, name, tagline).
+        // Needed so the Apply-to-Join screen shows org info before the user
+        // has an organizationId custom claim.
+        allow read:  if isSuperAdmin() || isSignedIn();
         allow write: if isAdminOrAbove(orgId);
       }
 
@@ -113,9 +118,12 @@ service cloud.firestore {
 
       // ── User Profiles ───────────────────────────────────────────────────────
       match /users/{userId} {
-        // Admins can read all profiles; users can read their own
+        // Admins can read all profiles; users can read their own.
+        // Note: isSignedIn() only (not isOrgMember) so that newly signed-up
+        // users without an organizationId custom claim can still watch their
+        // own profile during the pending-approval flow.
         allow read: if isAdminOrAbove(orgId)
-                    || (isOrgMember(orgId) && request.auth.uid == userId);
+                    || (isSignedIn() && request.auth.uid == userId);
 
         // Users may create their own profile; admins may create any
         allow create: if isSuperAdmin()

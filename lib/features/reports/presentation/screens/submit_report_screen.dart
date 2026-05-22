@@ -76,7 +76,7 @@ class _SubmitReportScreenState extends ConsumerState<SubmitReportScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        leading: const BackButton(),
+        leading: BackButton(onPressed: () => context.pop()),
         title: const Text('Submit a Concern'),
       ),
       body: Column(

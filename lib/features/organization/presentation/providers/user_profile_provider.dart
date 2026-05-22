@@ -35,11 +35,9 @@ final userProfileProvider = StreamProvider<UserProfileEntity?>((ref) {
 // --- Join Application Notifier ---
 
 /// State for the apply-to-join form submission.
-class JoinApplicationNotifier
-    extends StateNotifier<AsyncValue<void>> {
-  JoinApplicationNotifier(this._repository) : super(const AsyncValue.data(null));
-
-  final UserProfileRepository _repository;
+class JoinApplicationNotifier extends Notifier<AsyncValue<void>> {
+  @override
+  AsyncValue<void> build() => const AsyncValue.data(null);
 
   Future<void> submitApplication({
     required String orgId,
@@ -51,21 +49,21 @@ class JoinApplicationNotifier
   }) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(
-      () => _repository.createUserProfile(
-        orgId: orgId,
-        userId: userId,
-        displayName: displayName,
-        fullName: fullName,
-        studentId: studentId,
-        email: email,
-      ),
+      () => ref.read(userProfileRepositoryProvider).createUserProfile(
+            orgId: orgId,
+            userId: userId,
+            displayName: displayName,
+            fullName: fullName,
+            studentId: studentId,
+            email: email,
+          ),
     );
   }
 }
 
 final joinApplicationProvider =
-    StateNotifierProvider.autoDispose<JoinApplicationNotifier, AsyncValue<void>>(
-  (ref) => JoinApplicationNotifier(ref.read(userProfileRepositoryProvider)),
+    NotifierProvider.autoDispose<JoinApplicationNotifier, AsyncValue<void>>(
+  JoinApplicationNotifier.new,
 );
 
 // --- Permission Delegation Notifier ---
@@ -82,11 +80,9 @@ final joinApplicationProvider =
 /// );
 /// ```
 class PermissionDelegationNotifier
-    extends StateNotifier<AsyncValue<void>> {
-  PermissionDelegationNotifier(this._repository)
-      : super(const AsyncValue.data(null));
-
-  final UserProfileRepository _repository;
+    extends Notifier<AsyncValue<void>> {
+  @override
+  AsyncValue<void> build() => const AsyncValue.data(null);
 
   Future<void> grant({
     required String orgId,
@@ -95,11 +91,11 @@ class PermissionDelegationNotifier
   }) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(
-      () => _repository.grantPermission(
-        orgId: orgId,
-        targetUserId: targetUserId,
-        permission: permission,
-      ),
+      () => ref.read(userProfileRepositoryProvider).grantPermission(
+            orgId: orgId,
+            targetUserId: targetUserId,
+            permission: permission,
+          ),
     );
   }
 
@@ -110,16 +106,16 @@ class PermissionDelegationNotifier
   }) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(
-      () => _repository.revokePermission(
-        orgId: orgId,
-        targetUserId: targetUserId,
-        permission: permission,
-      ),
+      () => ref.read(userProfileRepositoryProvider).revokePermission(
+            orgId: orgId,
+            targetUserId: targetUserId,
+            permission: permission,
+          ),
     );
   }
 }
 
-final permissionDelegationProvider = StateNotifierProvider.autoDispose<
+final permissionDelegationProvider = NotifierProvider.autoDispose<
     PermissionDelegationNotifier, AsyncValue<void>>(
-  (ref) => PermissionDelegationNotifier(ref.read(userProfileRepositoryProvider)),
+  PermissionDelegationNotifier.new,
 );

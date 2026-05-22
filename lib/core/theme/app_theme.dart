@@ -15,6 +15,7 @@ abstract class AppTheme {
 
     final colorScheme = ColorScheme.fromSeed(
       seedColor: primary,
+      primary: primary,
       secondary: secondary,
     );
 
@@ -28,6 +29,7 @@ abstract class AppTheme {
 
     final colorScheme = ColorScheme.fromSeed(
       seedColor: primary,
+      primary: primary,
       secondary: secondary,
       brightness: Brightness.dark,
     );

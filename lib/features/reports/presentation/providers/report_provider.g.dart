@@ -87,7 +87,7 @@ final class ReportCategoriesProvider extends $FunctionalProvider<
   }
 }
 
-String _$reportCategoriesHash() => r'23067f1402d317489e98606ed35dab20bb58e2fd';
+String _$reportCategoriesHash() => r'b980c61f29017ae90ee7e61589209c049e622f65';
 
 @ProviderFor(myReports)
 final myReportsProvider = MyReportsProvider._();
@@ -267,7 +267,7 @@ final class SubmitReportNotifierProvider
 }
 
 String _$submitReportNotifierHash() =>
-    r'f0981d5ec949e8e67acfcf84fdddfaa7a07df6a6';
+    r'554f84d34a7416fed187190cc3ca4f8b0f64f396';
 
 abstract class _$SubmitReportNotifier
     extends $Notifier<AsyncValue<ReportEntity?>> {

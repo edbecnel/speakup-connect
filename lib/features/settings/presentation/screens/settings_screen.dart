@@ -22,7 +22,7 @@ class SettingsScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        leading: const BackButton(),
+        leading: BackButton(onPressed: () => context.go(Routes.home)),
         title: const Text('Settings'),
       ),
       body: ListView(

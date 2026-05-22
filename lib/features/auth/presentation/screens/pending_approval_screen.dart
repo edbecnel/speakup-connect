@@ -22,7 +22,7 @@ class PendingApprovalScreen extends ConsumerWidget {
 
     // Navigate to home when admin approves.
     ref.listen<AsyncValue<UserProfileEntity?>>(userProfileProvider, (_, next) {
-      final profile = next.valueOrNull;
+      final profile = next.asData?.value;
       if (profile != null && profile.isApproved) {
         context.go(Routes.home);
       }

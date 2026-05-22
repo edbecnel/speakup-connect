@@ -76,7 +76,7 @@ class _ApplyToJoinScreenState extends ConsumerState<ApplyToJoinScreen> {
   @override
   Widget build(BuildContext context) {
     final orgConfig = ref.watch(organizationConfigProvider);
-    final orgName = orgConfig.valueOrNull?.displayName ?? AppConfig.appName;
+    final orgName = orgConfig.asData?.value?.displayName ?? AppConfig.appName;
 
     final submissionState = ref.watch(joinApplicationProvider);
 

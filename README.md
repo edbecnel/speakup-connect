@@ -81,12 +81,7 @@ cd speakup-connect
 # 2. Install Flutter dependencies
 flutter pub get
 
-# 3. Configure Firebase
-# Create a Firebase project at https://console.firebase.google.com
-# Enable Authentication, Firestore, Storage, and Cloud Messaging
-# Run FlutterFire CLI to generate firebase_options.dart:
-dart pub global activate flutterfire_cli
-flutterfire configure
+# 3. Configure Firebase  ← SEE "Firebase Setup" SECTION BELOW — required before running
 
 # 4. Run the application
 flutter run
@@ -101,6 +96,71 @@ cp .env.example .env
 ```
 
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for full environment configuration details.
+
+---
+
+## 🔴 Firebase Setup — REQUIRED BEFORE RUNNING
+
+> **This step is mandatory. The app will crash on launch without these files.**
+>
+> `google-services.json` and `firebase_options.dart` are **intentionally excluded
+> from git** because this is a public repository. They contain API keys and
+> project identifiers that must not be committed to version control.
+
+### Files you need (not in the repo)
+
+| File | Where it goes | What it does |
+|---|---|---|
+| `google-services.json` | `android/app/google-services.json` | Connects the Android app to Firebase |
+| `firebase_options.dart` | `lib/config/firebase_options.dart` | Dart-side Firebase initialization config |
+
+### How to generate them
+
+**Option A — FlutterFire CLI (recommended)**
+
+```bash
+# Install the FlutterFire CLI (once)
+dart pub global activate flutterfire_cli
+
+# Log in to Firebase
+firebase login
+
+# Generate both files for the existing Firebase project
+flutterfire configure --project=speakup-connect-891dd
+```
+
+This writes both files to the correct locations automatically.
+
+**Option B — Manual download**
+
+1. Go to [Firebase Console](https://console.firebase.google.com) → project **speakup-connect-891dd**
+2. **Project Settings → Your Apps → Android app** → Download `google-services.json`
+3. Place it at `android/app/google-services.json`
+4. For `firebase_options.dart`, Option A is still required (it cannot be downloaded manually)
+
+### CI/CD (GitHub Actions)
+
+Store the file contents as repository secrets and write them before building:
+
+```yaml
+- name: Write Firebase config
+  run: |
+    echo "${{ secrets.GOOGLE_SERVICES_JSON }}" > android/app/google-services.json
+    echo "${{ secrets.FIREBASE_OPTIONS_DART }}" > lib/config/firebase_options.dart
+```
+
+Required secrets to add in **GitHub → Settings → Secrets and variables → Actions**:
+- `GOOGLE_SERVICES_JSON` — full content of `android/app/google-services.json`
+- `FIREBASE_OPTIONS_DART` — full content of `lib/config/firebase_options.dart`
+
+### Verify your setup
+
+Before running, confirm both files exist:
+
+```powershell
+Test-Path android\app\google-services.json   # must return True
+Test-Path lib\config\firebase_options.dart    # must return True
+```
 
 ---
 

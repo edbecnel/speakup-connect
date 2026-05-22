@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:speakup_connect/config/app_config.dart';
 import 'package:speakup_connect/features/reports/domain/entities/report_entity.dart';
 import 'package:speakup_connect/features/reports/presentation/providers/report_provider.dart';
@@ -18,7 +19,7 @@ class ReportDetailsScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        leading: const BackButton(),
+        leading: BackButton(onPressed: () => context.pop()),
         title: const Text('Report Details'),
       ),
       body: reportAsync.when(

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:speakup_connect/config/app_config.dart';
+import 'package:speakup_connect/core/constants/route_constants.dart';
 import 'package:speakup_connect/features/auth/presentation/providers/auth_provider.dart';
 import 'package:speakup_connect/features/reports/domain/entities/report_entity.dart';
 import 'package:speakup_connect/features/reports/presentation/providers/report_provider.dart';
@@ -19,14 +21,13 @@ class AdminDashboardScreen extends ConsumerWidget {
       length: 4,
       child: Scaffold(
         appBar: AppBar(
-          leading: const BackButton(),
+          leading: BackButton(onPressed: () => context.go(Routes.home)),
           title: const Text('Admin Dashboard'),
           actions: [
             IconButton(
               icon: const Icon(Icons.settings_outlined),
-              onPressed: () {
-                // TODO: Admin settings — Sprint 2
-              },
+              tooltip: 'Branding Settings',
+              onPressed: () => context.push(Routes.adminSettings),
             ),
           ],
           bottom: const TabBar(

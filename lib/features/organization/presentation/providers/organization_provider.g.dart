@@ -55,22 +55,40 @@ String _$organizationRepositoryHash() =>
 
 /// Loads and caches the active organization's configuration.
 ///
-/// This is an [AsyncNotifier] so the UI can react to loading/error/data states.
-/// The loaded config drives the app theme, branding, and feature availability.
+/// Startup strategy:
+/// 1. SharedPreferences cache is read first (~1 ms) and set as the immediate
+///    state, so the correct brand colors appear from frame 1 on subsequent
+///    launches — no loading flash.
+/// 2. A live Firestore listener is then started. Every time the org document
+///    changes, all widgets rebuild with the new config in real time.
+/// 3. After each Firestore load the cache is refreshed, so the next launch
+///    is always up to date.
 
 @ProviderFor(OrganizationConfig)
 final organizationConfigProvider = OrganizationConfigProvider._();
 
 /// Loads and caches the active organization's configuration.
 ///
-/// This is an [AsyncNotifier] so the UI can react to loading/error/data states.
-/// The loaded config drives the app theme, branding, and feature availability.
+/// Startup strategy:
+/// 1. SharedPreferences cache is read first (~1 ms) and set as the immediate
+///    state, so the correct brand colors appear from frame 1 on subsequent
+///    launches — no loading flash.
+/// 2. A live Firestore listener is then started. Every time the org document
+///    changes, all widgets rebuild with the new config in real time.
+/// 3. After each Firestore load the cache is refreshed, so the next launch
+///    is always up to date.
 final class OrganizationConfigProvider extends $AsyncNotifierProvider<
     OrganizationConfig, OrganizationConfigEntity> {
   /// Loads and caches the active organization's configuration.
   ///
-  /// This is an [AsyncNotifier] so the UI can react to loading/error/data states.
-  /// The loaded config drives the app theme, branding, and feature availability.
+  /// Startup strategy:
+  /// 1. SharedPreferences cache is read first (~1 ms) and set as the immediate
+  ///    state, so the correct brand colors appear from frame 1 on subsequent
+  ///    launches — no loading flash.
+  /// 2. A live Firestore listener is then started. Every time the org document
+  ///    changes, all widgets rebuild with the new config in real time.
+  /// 3. After each Firestore load the cache is refreshed, so the next launch
+  ///    is always up to date.
   OrganizationConfigProvider._()
       : super(
           from: null,
@@ -91,12 +109,18 @@ final class OrganizationConfigProvider extends $AsyncNotifierProvider<
 }
 
 String _$organizationConfigHash() =>
-    r'd466dfc4912d78fb98828dbe446d5577bc516539';
+    r'2f0e7eb7bdd645bfc72aecc6e3b770b0cbf2e598';
 
 /// Loads and caches the active organization's configuration.
 ///
-/// This is an [AsyncNotifier] so the UI can react to loading/error/data states.
-/// The loaded config drives the app theme, branding, and feature availability.
+/// Startup strategy:
+/// 1. SharedPreferences cache is read first (~1 ms) and set as the immediate
+///    state, so the correct brand colors appear from frame 1 on subsequent
+///    launches — no loading flash.
+/// 2. A live Firestore listener is then started. Every time the org document
+///    changes, all widgets rebuild with the new config in real time.
+/// 3. After each Firestore load the cache is refreshed, so the next launch
+///    is always up to date.
 
 abstract class _$OrganizationConfig
     extends $AsyncNotifier<OrganizationConfigEntity> {

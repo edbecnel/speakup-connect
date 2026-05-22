@@ -83,4 +83,32 @@ class OrganizationRepositoryImpl implements OrganizationRepository {
       );
     }
   }
+
+  @override
+  Future<void> updateBranding({
+    required String organizationId,
+    required String displayName,
+    required String primaryHex,
+    required String secondaryHex,
+  }) async {
+    try {
+      await _firestore
+          .collection(AppConstants.organizationsCollection)
+          .doc(organizationId)
+          .update({
+        'displayName': displayName,
+        'primaryColor': primaryHex,
+        'secondaryColor': secondaryHex,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+    } on FirebaseException catch (e) {
+      if (e.code == 'permission-denied') {
+        throw const PermissionException();
+      }
+      throw DatabaseException(
+        message: e.message ?? 'Failed to update branding',
+        code: e.code,
+      );
+    }
+  }
 }

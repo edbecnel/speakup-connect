@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:speakup_connect/config/app_config.dart';
 import 'package:speakup_connect/core/router/app_router.dart';
 import 'package:speakup_connect/core/theme/app_theme.dart';
 import 'package:speakup_connect/features/organization/presentation/providers/organization_provider.dart';
@@ -21,9 +22,12 @@ class SpeakUpConnectApp extends ConsumerWidget {
     final themeMode = ref.watch(themeModeProvider);
 
     // Watch org config to apply dynamic branding.
-    // Falls back to default theme if org config is not yet loaded.
+    // Falls back to AppConfig.defaultThemeColors while the config is loading.
+    // After the first launch the local cache warms up and the org config
+    // provider sets the correct branding before the first frame is painted.
     final orgConfigAsync = ref.watch(organizationConfigProvider);
-    final orgColors = orgConfigAsync.value?.themeColors;
+    final orgColors =
+        orgConfigAsync.value?.themeColors ?? AppConfig.defaultThemeColors;
 
     return MaterialApp.router(
       title: 'SpeakUp Connect',

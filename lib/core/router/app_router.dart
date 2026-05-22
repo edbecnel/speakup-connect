@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:speakup_connect/core/constants/route_constants.dart';
+import 'package:speakup_connect/features/admin/presentation/screens/admin_branding_screen.dart';
 import 'package:speakup_connect/features/admin/presentation/screens/admin_dashboard_screen.dart';
 import 'package:speakup_connect/features/auth/presentation/providers/auth_provider.dart';
 import 'package:speakup_connect/features/auth/presentation/screens/apply_to_join_screen.dart';
@@ -23,16 +24,19 @@ part 'app_router.g.dart';
 ///
 /// The router watches [authStateChangesProvider] and [currentUserRoleProvider]
 /// to determine whether to redirect to login or admin screens.
-@riverpod
+@Riverpod(keepAlive: true)
 GoRouter appRouter(Ref ref) {
-  // Listen to auth state and user profile for reactive redirects.
-  final authState = ref.watch(authStateChangesProvider);
-  final profileAsync = ref.watch(userProfileProvider);
-
+  // Do NOT use ref.watch here — watching auth/profile state would recreate
+  // the entire GoRouter on every auth change, resetting navigation to
+  // initialLocation. The _AuthStateListenable already triggers redirect
+  // re-evaluation via notifyListeners(); we only need ref.read inside redirect.
   return GoRouter(
     initialLocation: Routes.splash,
     refreshListenable: _AuthStateListenable(ref),
     redirect: (BuildContext context, GoRouterState state) {
+      final authState = ref.read(authStateChangesProvider);
+      final profileAsync = ref.read(userProfileProvider);
+
       final isAuthenticated = authState.value != null;
       final isAuthLoading = authState.isLoading;
       final isProfileLoading = profileAsync.isLoading;
@@ -55,10 +59,11 @@ GoRouter appRouter(Ref ref) {
       }
 
       if (isAuthenticated) {
-        final profile = profileAsync.valueOrNull;
+        final profile = profileAsync.asData?.value;
 
-        // No profile yet → prompt to apply.
-        if (profile == null && !isOnJoinFlow && !isOnAuthPage) {
+        // No profile yet → prompt to apply (regardless of which page they
+        // are on, including login — this handles the post-signup redirect).
+        if (profile == null && !isOnJoinFlow) {
           return Routes.applyToJoin;
         }
 
@@ -70,12 +75,6 @@ GoRouter appRouter(Ref ref) {
         // Profile approved → redirect away from auth/join pages.
         if (profile != null && profile.isApproved) {
           if (isOnAuthPage || isOnJoinFlow) return Routes.home;
-        }
-
-        // Move authenticated user off login/register to apply-to-join
-        // (profile hasn't loaded yet but they are on an auth page).
-        if (profile == null && isOnAuthPage && loc != Routes.splash) {
-          return null; // let profile load first
         }
       }
 
@@ -166,6 +165,11 @@ GoRouter appRouter(Ref ref) {
           return AdminReportDetailScreen(reportId: reportId);
         },
       ),
+      GoRoute(
+        path: Routes.adminSettings,
+        name: 'adminSettings',
+        builder: (context, state) => const AdminBrandingScreen(),
+      ),
     ],
   );
 }
@@ -174,11 +178,22 @@ GoRouter appRouter(Ref ref) {
 /// triggering a redirect evaluation.
 class _AuthStateListenable extends ChangeNotifier {
   _AuthStateListenable(this._ref) {
-    _ref.listen(authStateChangesProvider, (_, __) => notifyListeners());
-    _ref.listen(userProfileProvider, (_, __) => notifyListeners());
+    _ref.listen(authStateChangesProvider, (_, __) => _maybeNotify());
+    _ref.listen(userProfileProvider, (_, __) => _maybeNotify());
+    // Hold off redirecting for 3 seconds so the splash screen is always
+    // visible long enough to read, even when auth resolves from cache.
+    Future.delayed(const Duration(seconds: 3), () {
+      _splashLockExpired = true;
+      _maybeNotify();
+    });
   }
 
+  bool _splashLockExpired = false;
   final Ref _ref;
+
+  void _maybeNotify() {
+    if (_splashLockExpired) notifyListeners();
+  }
 }
 
 /// Placeholder for admin report detail screen (defined in admin feature).

@@ -9,9 +9,9 @@ abstract class AppConfig {
   static const String appVersion = '1.0.0';
   static const int appBuildNumber = 1;
 
-  /// The default organization ID loaded when no deep-link org is specified.
-  /// This is the MONHS pilot organization. Change this before deploying
-  /// for other organizations.
+  /// The organization ID to load when no deep-link org is specified.
+  /// Set this to the client's Firestore document ID before building
+  /// for a specific deployment.
   ///
   /// In a full multi-tenant deployment, this is determined by:
   /// 1. A deep link / dynamic link containing the org ID

@@ -28,7 +28,12 @@ class MyReportsScreen extends ConsumerWidget {
       length: _tabs.length,
       child: Scaffold(
         appBar: AppBar(
-          leading: const BackButton(),
+          leading: BackButton(
+            onPressed: () {
+              if (context.canPop()) context.pop();
+              else context.go(Routes.home);
+            },
+          ),
           title: const Text('My Reports'),
           bottom: TabBar(
             isScrollable: true,

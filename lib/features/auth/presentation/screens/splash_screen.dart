@@ -2,15 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:speakup_connect/core/constants/route_constants.dart';
-import 'package:speakup_connect/features/auth/presentation/providers/auth_provider.dart';
 import 'package:speakup_connect/features/organization/presentation/providers/organization_provider.dart';
-import 'package:speakup_connect/shared/widgets/app_loading_indicator.dart';
 
 /// Splash / Welcome screen — the first screen the user sees.
 ///
 /// Displays the organization's branding:
 /// - Logo (from org config, or a default placeholder)
-/// - App title: "SpeakUp {orgDisplayName}" (e.g., "SpeakUp MONHS")
+/// - App title: "SpeakUp {orgDisplayName}" (e.g., "SpeakUp Riverside High")
 /// - Tagline (from org config)
 /// - "Get Started" button
 ///
@@ -23,24 +21,22 @@ class SplashScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final orgConfigAsync = ref.watch(organizationConfigProvider);
-    final authState = ref.watch(authStateChangesProvider);
 
-    // If auth state is still loading, show full-screen loader
-    if (authState.isLoading) {
-      return const Scaffold(
-        body: AppLoadingIndicator(),
-      );
-    }
-
-    // If auth state is loaded and user is signed in, go_router handles redirect.
-    // We just show the splash in case the redirect hasn't fired yet.
-
+    // Always show branded content immediately — the 3-second
+    // _AuthStateListenable delay prevents early redirect, so the user
+    // will always see the splash for at least 3 seconds.
     return Scaffold(
       body: SafeArea(
         child: orgConfigAsync.when(
-          loading: () => const AppLoadingIndicator(),
+          // Brief loading state — local cache warms this up quickly
+          // on subsequent launches. Show the generic app tagline with no
+          // org name until the config arrives.
+          loading: () => const _SplashContent(
+            orgName: '',
+            tagline: 'Your voice. Our action.',
+          ),
           error: (_, __) => const _SplashContent(
-            orgName: 'Connect',
+            orgName: '',
             tagline: 'Your voice. Our action.',
           ),
           data: (config) => _SplashContent(
@@ -79,7 +75,7 @@ class _SplashContent extends StatelessWidget {
           _OrgLogo(logoUrl: logoUrl),
           const SizedBox(height: 32),
 
-          // --- App Title: "SpeakUp MONHS" ---
+          // --- App Title: "SpeakUp {orgName}" ---
           Text(
             'SpeakUp',
             style: theme.textTheme.displaySmall?.copyWith(
