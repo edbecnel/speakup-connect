@@ -131,6 +131,16 @@ service cloud.firestore {
         allow write: if isAdminOrAbove(orgId);
       }
 
+      // ── Reference Number Counters ───────────────────────────────────────────
+      // Counters are used by _generateReferenceNumber() to produce sequential,
+      // unique report reference numbers (e.g. MONHS-2026-000001) via a
+      // Firestore transaction. Any org member may read+write — the transaction
+      // itself ensures atomicity; the worst-case race produces a higher number,
+      // not a collision. Admins must also be allowed to reset counters.
+      match /counters/{counterId} {
+        allow read, write: if isOrgMember(orgId);
+      }
+
       // ── Reports ─────────────────────────────────────────────────────────────
       // Security model:
       //   - Moderators+ can read all reports in the org

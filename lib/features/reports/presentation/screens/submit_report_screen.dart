@@ -51,6 +51,20 @@ class _SubmitReportScreenState extends ConsumerState<SubmitReportScreen> {
   }
 
   Future<void> _submit() async {
+    // Guard: surface form-validation failures that would otherwise be silent.
+    final formState = ref.read(submitReportFormProvider);
+    if (!formState.isStep1Valid) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Please complete Step 1: select a category, '
+            'title (min 5 chars), and description (min 10 chars).',
+          ),
+        ),
+      );
+      return;
+    }
+
     final report = await ref.read(submitReportProvider.notifier).submit();
     if (report != null && mounted) {
       context.go(Routes.reportConfirmation, extra: report.referenceNumber);
