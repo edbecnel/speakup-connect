@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:speakup_connect/config/app_config.dart';
 import 'package:speakup_connect/core/constants/route_constants.dart';
+import 'package:speakup_connect/features/admin/presentation/widgets/admin_filter_bar.dart';
 import 'package:speakup_connect/features/auth/presentation/providers/auth_provider.dart';
 import 'package:speakup_connect/features/reports/domain/entities/report_entity.dart';
 import 'package:speakup_connect/features/reports/presentation/providers/report_provider.dart';
@@ -41,12 +42,20 @@ class AdminDashboardScreen extends ConsumerWidget {
             ],
           ),
         ),
-        body: const TabBarView(
+        body: const Column(
           children: [
-            _AdminReportsList(),
-            _AdminReportsList(filterStatus: ReportStatus.submitted),
-            _AdminReportsList(filterStatus: ReportStatus.inProgress),
-            _AdminReportsList(filterStatus: ReportStatus.resolved),
+            AdminFilterBar(),
+            Divider(height: 1),
+            Expanded(
+              child: TabBarView(
+                children: [
+                  _AdminReportsList(),
+                  _AdminReportsList(filterStatus: ReportStatus.submitted),
+                  _AdminReportsList(filterStatus: ReportStatus.inProgress),
+                  _AdminReportsList(filterStatus: ReportStatus.resolved),
+                ],
+              ),
+            ),
           ],
         ),
       ),
@@ -70,7 +79,12 @@ class _AdminReportsList extends ConsumerWidget {
         onRetry: () => ref.invalidate(allReportsProvider(filterStatus)),
       ),
       data: (reports) {
-        if (reports.isEmpty) {
+        final categoryFilter = ref.watch(adminCategoryFilterProvider);
+        final filtered = categoryFilter.isEmpty
+            ? reports
+            : reports.where((r) => categoryFilter.contains(r.categoryId)).toList();
+
+        if (filtered.isEmpty) {
           return AppEmptyState(
             icon: Icons.assignment_outlined,
             message: 'No reports',
@@ -82,8 +96,8 @@ class _AdminReportsList extends ConsumerWidget {
 
         return ListView.builder(
           padding: const EdgeInsets.all(16),
-          itemCount: reports.length,
-          itemBuilder: (_, i) => _AdminReportCard(report: reports[i]),
+          itemCount: filtered.length,
+          itemBuilder: (_, i) => _AdminReportCard(report: filtered[i]),
         );
       },
     );
@@ -107,7 +121,10 @@ class _AdminReportCard extends ConsumerWidget {
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
-      child: Padding(
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () => context.push(Routes.adminReportDetailPath(report.reportId)),
+        child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -155,6 +172,7 @@ class _AdminReportCard extends ConsumerWidget {
               ],
             ),
           ],
+        ),
         ),
       ),
     );

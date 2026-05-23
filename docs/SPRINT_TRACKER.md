@@ -1,14 +1,57 @@
 # Sprint Tracker — SpeakUp Connect
 
 > Last Updated: May 23, 2026  
-> Current Sprint: **Sprint 1** (Foundation & Architecture — advanced tasks in-flight)  
+> Current Sprint: **Sprint 6** (Admin Dashboard — core features complete)  
 > Sprint Duration: 2 weeks
 
-> **Requirements Expansion (May 20, 2026 — Sheenaia):** SpeakUp Connect is now a full community communications platform, not only an issue-reporting tool. Added: admin-defined groups/clubs, peer-to-peer and group messaging, news board, bulletin board, broadcast reminders, multi-language support with home-page language selector, apply-to-join signup with school-ID verification, student roster import (CSV / text / Word / PDF / paste), customizable community rules, abuse blocking (temp + permanent), role-based permissions, and custom org app name (e.g., "SpeakUp MONHSIAN"). All docs updated: PROJECT_OVERVIEW, ROADMAP, DATABASE_DESIGN, MASTER_TASK_LIST.
+> **Development Velocity Note:** Development has significantly outpaced the original planned schedule. As of May 23, 2026 (day 5 of the project), the codebase covers work originally scoped for Sprints 1–6. Sprint numbering below reflects original plan order but completion dates reflect actual delivery dates.
 
 ---
 
-## How to Use This Tracker
+## Active Sprint
+
+### Sprint 6 — Admin Dashboard
+- **Date/Time:** May 23, 2026
+- **GitHub Issues:** #22, #23, #24, #25, #26
+- **Status:** ✅ Complete (core features)
+
+**Goal:** Admin dashboard fully functional: view all org reports, filter by category and status, navigate to full report detail, update status with history, add internal admin notes.
+
+**Sprint Period:** May 22–23, 2026 (accelerated delivery)
+
+#### 🚀 AI Context Prompt
+> "We are building the Admin Dashboard feature for SpeakUp Connect. Stack: Flutter 3.44, Riverpod 3.x (NotifierProvider pattern), go_router, Firebase Firestore. The admin can see all reports for their org, filter by category/status, tap a report to see the full detail, update the status (with history append), and add internal admin notes. DefaultOrganizationId is `monhs-ph-001`. Admin UID is `4kuMOm3BZDT9oZpALIDjCnPT8Gk1`."
+
+#### 📝 Done
+- [x] Build `AdminDashboardScreen` — tab bar (All / Submitted / In Review / Resolved / Closed), report list, tap-to-detail navigation
+- [x] Build `AdminFilterBar` — horizontal multi-select category filter chips (empty set = All; tapping All clears all)
+- [x] Apply `adminCategoryFilterProvider` client-side filter to report list
+- [x] Build `AdminReportDetailScreen` — full report view: header card (title, ref, status badge, priority badge, submitter, timestamps), description, photo gallery, admin action buttons, notes thread, status history timeline
+- [x] Build `_StatusUpdateDialog` — status dropdown + optional note field, calls `updateReportStatus()`
+- [x] Build `_AddNoteDialog` — multi-line note entry, calls `addAdminNote()`, resolves author name from `userProfileProvider`
+- [x] Wire `adminReportByIdProvider` (FutureProvider.family) for detail data loading
+- [x] Auto-refresh detail screen after status update or note via `ref.invalidate(adminReportByIdProvider(reportId))`
+- [x] Implement Firestore Security Rules with `isAdminOrAbove()` guard on all report admin operations
+- [x] Implement admin role check: `UserProfileEntity.isAdmin` getter, settings screen admin link gating
+- [x] Fix `Timestamp.now()` in `statusHistory` array (serverTimestamp() not allowed in arrays)
+- [x] Fix launch color to brand navy `#002673`
+- [x] Remove debug logging from settings screen
+- [x] Seed report categories for `monhs-ph-001`
+
+#### 👁️ Stakeholder Demo Asset
+- **Asset Type:** *(To be added — screen recording of admin dashboard + detail + filter)*
+- **Location:** `./docs/demos/sprint-006-admin-dashboard.mp4`
+- **Stakeholder Note:** Admins can now fully manage submitted reports — view all, filter by category, update status with audit trail, and add internal notes. All Firestore access is secured by role-based rules.
+
+#### Remaining Sprint 6 Items (deferred to next sprint)
+- [ ] Admin dashboard search bar
+- [ ] Quick stats header (total, pending, in-progress counts)
+- [ ] Assign report to admin personnel
+- [ ] Push notification to reporter on status change
+
+---
+
+## Upcoming Sprints
 
 Each sprint entry follows this format:
 
@@ -32,87 +75,36 @@ Each sprint entry follows this format:
 
 ---
 
-## Active Sprint
+## How to Use This Tracker
 
-### Sprint 1 — Foundation & Architecture
-- **Date/Time:** May 19, 2026 (ongoing)
-- **GitHub Issues:** #1, #2, #3, #4, #5, #7, #8, #9, #10
-- **Status:** 🔄 In Progress
+Each sprint entry follows this format:
 
-**Goal:** Complete all project documentation, scaffold the Flutter project, and establish the folder architecture. No Firebase integration yet — just structure and placeholder code that compiles and runs.
-
-**Sprint Period:** May 19, 2026 → June 2, 2026
+```
+### Sprint [N] — [Title]
+- **Date/Time:** YYYY-MM-DD
+- **GitHub Issue(s):** #N, #N
+- **Status:** 🔄 In Progress | ✅ Complete | 🚫 Blocked
 
 #### 🚀 AI Context Prompt
-> "Act as a senior Flutter architect. We are working on SpeakUp Connect — a multi-tenant community reporting app. We are on Sprint 1 (Foundation & Architecture). The stack is Flutter + Dart, Riverpod 2.x, go_router, Firebase, and Material Design 3. Refer to docs/ARCHITECTURE.md for design decisions and docs/FOLDER_STRUCTURE.md for conventions. Current task: [paste task title from GitHub Issue]."
+> Paste the prompt used to start this sprint
+
+#### 📝 Done
+- [x] Completed task
 
 #### 👁️ Stakeholder Demo Asset
-- **Asset Type:** *(To be added on sprint completion — screenshot of running app on emulator)*
-- **Location:** `./docs/demos/sprint-001-scaffold.png`
-- **Stakeholder Note:** Delivers the foundational architecture and documentation for the MONHS pilot project, establishing the multi-tenant SaaS structure from day one.
+- **Asset Type:** Screenshot / Screen Recording / APK build
+```
 
-#### Sprint 1 Tasks
+---
 
-**Documentation**
-- [x] Create README.md
-- [x] Create docs/PROJECT_OVERVIEW.md
-- [x] Create docs/ARCHITECTURE.md
-- [x] Create docs/FOLDER_STRUCTURE.md
-- [x] Create docs/DATABASE_DESIGN.md
-- [x] Create docs/SECURITY_AND_PRIVACY.md
-- [x] Create docs/ROADMAP.md
-- [x] Create docs/SPRINT_TRACKER.md
-- [x] Create docs/MASTER_TASK_LIST.md
-- [x] Create docs/CODING_STANDARDS.md
-- [x] Create docs/AI_DEVELOPMENT_WORKFLOW.md
+## Completed Sprints
 
-**Flutter Project Setup**
-- [ ] Initialize Flutter project (`flutter create`)
-- [ ] Configure pubspec.yaml with all required dependencies
-- [ ] Configure analysis_options.yaml (strict linting)
-- [ ] Create folder structure (all feature directories)
-- [ ] Verify project compiles and runs on Android emulator
+### Sprint 1–5 — Foundation through My Reports (✅ Completed)
+- **Date/Time:** May 19–22, 2026
+- **GitHub Issues:** #1–#21
+- **Status:** ✅ Complete
 
-**Core Layer**
-- [ ] Create `lib/core/theme/app_colors.dart`
-- [ ] Create `lib/core/theme/app_typography.dart`
-- [ ] Create `lib/core/theme/app_theme.dart`
-- [ ] Create `lib/core/constants/app_constants.dart`
-- [ ] Create `lib/core/constants/route_constants.dart`
-- [ ] Create `lib/core/errors/app_exception.dart`
-- [ ] Create `lib/core/errors/failure.dart`
-- [ ] Create `lib/core/router/app_router.dart` (placeholder routes)
-- [ ] Create `lib/core/utils/validators.dart`
-- [ ] Create `lib/core/extensions/context_extensions.dart`
-
-**Config Layer**
-- [ ] Create `lib/config/app_config.dart`
-- [ ] Create `lib/config/env_config.dart`
-- [ ] Create `lib/config/firebase_options.dart` (placeholder)
-
-**Shared Layer**
-- [ ] Create `lib/shared/widgets/app_button.dart`
-- [ ] Create `lib/shared/widgets/app_text_field.dart`
-- [ ] Create `lib/shared/widgets/app_loading_indicator.dart`
-- [ ] Create `lib/shared/widgets/app_error_widget.dart`
-- [ ] Create `lib/shared/widgets/app_empty_state.dart`
-- [ ] Create `lib/shared/models/pagination_model.dart`
-
-**Models & Entities (Domain)**
-- [ ] Create `OrganizationConfigEntity`
-- [ ] Create `UserEntity`
-- [ ] Create `ReportEntity`
-- [ ] Create `ReportCategoryEntity`
-
-**Entry Point**
-- [ ] Create `lib/main.dart`
-- [ ] Create `lib/app.dart`
-
-**Sprint 1 Definition of Done:**
-- All documentation files created
-- Flutter project compiles without errors
-- App launches to splash screen on Android emulator
-- Folder structure matches `docs/FOLDER_STRUCTURE.md`
+All foundational work delivered ahead of schedule in the first few days of development: project setup, pubspec, linting, folder structure, theme system, router with auth/admin guards, Firebase integration (Auth, Firestore, Storage, Messaging), org config, authentication flow, home dashboard, report submission wizard with photo upload, My Reports screen, report detail screen, reference number generation, Firestore security rules, categories seeded for `monhs-ph-001`.
 
 ---
 

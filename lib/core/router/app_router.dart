@@ -4,6 +4,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:speakup_connect/core/constants/route_constants.dart';
 import 'package:speakup_connect/features/admin/presentation/screens/admin_branding_screen.dart';
 import 'package:speakup_connect/features/admin/presentation/screens/admin_dashboard_screen.dart';
+import 'package:speakup_connect/features/admin/presentation/screens/admin_report_detail_screen.dart';
 import 'package:speakup_connect/features/auth/presentation/providers/auth_provider.dart';
 import 'package:speakup_connect/features/auth/presentation/screens/apply_to_join_screen.dart';
 import 'package:speakup_connect/features/auth/presentation/screens/login_screen.dart';
@@ -196,17 +197,4 @@ class _AuthStateListenable extends ChangeNotifier {
   }
 }
 
-/// Placeholder for admin report detail screen (defined in admin feature).
-/// This stub prevents circular imports at the router level.
-class AdminReportDetailScreen extends StatelessWidget {
-  const AdminReportDetailScreen({required this.reportId, super.key});
-  final String reportId;
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Report Detail')),
-      body: Center(child: Text('Report: $reportId')),
-    );
-  }
-}

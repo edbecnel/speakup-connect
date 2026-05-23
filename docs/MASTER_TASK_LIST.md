@@ -346,45 +346,47 @@
 ### Epic 1.11 — Admin Dashboard Feature
 
 **Domain**
-- [ ] Create `AdminEntity`
-- [ ] Create `AdminRepository` abstract interface
-- [ ] Create `GetAllReportsUseCase` (admin: all org reports)
-- [ ] Create `UpdateReportStatusUseCase`
-- [ ] Create `AddAdminNoteUseCase`
+- [ ] Create `AdminEntity` *(using `ReportEntity` directly — separate entity deferred)*
+- [ ] Create `AdminRepository` abstract interface *(admin ops added to `ReportRepository`)*
+- [x] Create `GetAllReportsUseCase` (admin: all org reports) — via `allReportsProvider`
+- [x] Create `UpdateReportStatusUseCase` — `updateReportStatus()` in report provider
+- [x] Create `AddAdminNoteUseCase` — `addAdminNote()` in report provider
 - [ ] Create `AssignReportUseCase`
 
 **Data**
-- [ ] Create `AdminModel`
-- [ ] Create `AdminRemoteDataSource` (Firestore reads for all org reports)
-- [ ] Create `AdminRepositoryImpl`
+- [ ] Create `AdminModel` *(deferred — using ReportModel)*
+- [x] Create `AdminRemoteDataSource` — admin methods added to `ReportRepositoryImpl`
+- [ ] Create `AdminRepositoryImpl` *(deferred — merged into ReportRepositoryImpl)*
 
 **Presentation — Providers**
-- [ ] Create `adminReportsProvider` (StreamProvider for all org reports)
-- [ ] Create `adminFilterProvider` (StateNotifier for category/status filters)
-- [ ] Create `adminNotifierProvider` (AsyncNotifier for status updates/notes)
+- [x] Create `allReportsProvider` (StreamProvider for all org reports)
+- [x] Create `adminCategoryFilterProvider` (NotifierProvider — multi-select Set<String>)
+- [x] Create `adminReportByIdProvider` (FutureProvider.family for detail screen)
 
 **Presentation — Screens**
-- [ ] Build `AdminDashboardScreen`
-  - [ ] Filter bar (by category, by status)
+- [x] Build `AdminDashboardScreen`
+  - [x] Filter bar (by category — multi-select chips)
+  - [x] Filter by status (tab bar: All / Submitted / In Review / Resolved / Closed)
   - [ ] Search bar
-  - [ ] Report list (all org reports)
+  - [x] Report list (all org reports, tap to navigate to detail)
   - [ ] Quick stats header (total, pending, in-progress)
-- [ ] Build `AdminReportDetailScreen`
-  - [ ] Full report view
-  - [ ] Status update control
+- [x] Build `AdminReportDetailScreen`
+  - [x] Full report view (title, ref number, status badge, priority badge, submitter, description)
+  - [x] Photo gallery (horizontal scroll, full-screen tap)
+  - [x] Status update control (`_StatusUpdateDialog`)
   - [ ] Assign to dropdown
-  - [ ] Notes/reply thread
-  - [ ] Status history
+  - [x] Notes/reply thread (`_AdminNoteCard` list + `_AddNoteDialog`)
+  - [x] Status history timeline
 
 **Presentation — Widgets**
-- [ ] Create `AdminReportCard` — admin-view report card (with action buttons)
-- [ ] Create `StatusUpdateDialog` — modal for changing report status
-- [ ] Create `AdminFilterBar` — horizontal filter chips
-- [ ] Create `AdminNoteThread` — admin notes list + add note input
+- [x] Create `AdminReportCard` — tappable card navigating to detail screen
+- [x] Create `StatusUpdateDialog` — modal with status dropdown + optional note
+- [x] Create `AdminFilterBar` — horizontal multi-select filter chips
+- [x] Create `AdminNoteCard` + `AddNoteDialog` — notes thread UI
 
 **Firestore**
-- [ ] Implement admin status update (with `statusHistory` append)
-- [ ] Implement admin note creation
+- [x] Implement admin status update (with `statusHistory` append)
+- [x] Implement admin note creation
 - [ ] Implement assign report to admin user
 
 **Push Notifications**
