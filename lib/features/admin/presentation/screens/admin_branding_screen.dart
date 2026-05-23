@@ -183,11 +183,55 @@ class _AdminBrandingScreenState extends ConsumerState<AdminBrandingScreen> {
       return;
     }
 
+    // Reject colors that would be invisible against light or dark surfaces.
+    // We check contrast against both white (#FFF) and dark (#1F2937) surfaces
+    // and require at least 3:1 (WCAG AA for UI components) against one of them.
+    final primaryColor = Color(int.parse('FF${primaryHex.substring(1)}', radix: 16));
+    if (!_hasAdequateContrast(primaryColor)) {
+      _showFieldError(
+        'Primary color has insufficient contrast — it would be invisible on '
+        'light or dark backgrounds. Choose a mid-range color (avoid near-white '
+        'or near-black).',
+      );
+      return;
+    }
+
     ref.read(adminBrandingProvider.notifier).save(
           displayName: _nameCtrl.text.trim(),
           primaryHex: primaryHex,
           secondaryHex: secondaryHex,
         );
+  }
+
+  /// Returns true when [color] achieves at least 3:1 contrast ratio
+  /// (WCAG AA for non-text UI components) against EITHER the light surface
+  /// (#FFFFFF) OR the dark surface (#1F2937).  A color that fails both is
+  /// effectively invisible in at least one theme mode.
+  bool _hasAdequateContrast(Color color) {
+    const lightSurface = Color(0xFFFFFFFF);
+    const darkSurface  = Color(0xFF1F2937);
+    const minRatio = 3.0;
+    return _contrastRatio(color, lightSurface) >= minRatio ||
+           _contrastRatio(color, darkSurface)  >= minRatio;
+  }
+
+  /// WCAG relative luminance contrast ratio between two colors.
+  double _contrastRatio(Color a, Color b) {
+    final la = _relativeLuminance(a);
+    final lb = _relativeLuminance(b);
+    final lighter = la > lb ? la : lb;
+    final darker  = la > lb ? lb : la;
+    return (lighter + 0.05) / (darker + 0.05);
+  }
+
+  double _relativeLuminance(Color c) {
+    double linearize(double channel) {
+      final s = channel / 255.0;
+      return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) * ((s + 0.055) / 1.055);
+    }
+    return 0.2126 * linearize(c.r * 255) +
+           0.7152 * linearize(c.g * 255) +
+           0.0722 * linearize(c.b * 255);
   }
 
   void _showFieldError(String message) {
