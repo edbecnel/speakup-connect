@@ -3,5 +3,5 @@
     <!-- Native launch / splash background. Matches AppColors.primary (Speakup Blue).
          Update this to match the deployed organization's primary brand color
          by editing AppConfig and this file together when onboarding a new client. -->
-    <color name="launchBackground">#2563EB</color>
+    <color name="launchBackground">#002673</color>
 </resources>
