@@ -1,7 +1,7 @@
 # Sprint Tracker — SpeakUp Connect
 
-> Last Updated: May 20, 2026  
-> Current Sprint: **Sprint 1**  
+> Last Updated: May 23, 2026  
+> Current Sprint: **Sprint 1** (Foundation & Architecture — advanced tasks in-flight)  
 > Sprint Duration: 2 weeks
 
 > **Requirements Expansion (May 20, 2026 — Sheenaia):** SpeakUp Connect is now a full community communications platform, not only an issue-reporting tool. Added: admin-defined groups/clubs, peer-to-peer and group messaging, news board, bulletin board, broadcast reminders, multi-language support with home-page language selector, apply-to-join signup with school-ID verification, student roster import (CSV / text / Word / PDF / paste), customizable community rules, abuse blocking (temp + permanent), role-based permissions, and custom org app name (e.g., "SpeakUp MONHSIAN"). All docs updated: PROJECT_OVERVIEW, ROADMAP, DATABASE_DESIGN, MASTER_TASK_LIST.
@@ -267,13 +267,38 @@ Each sprint entry follows this format:
 
 ---
 
-*(No sprints completed yet — Sprint 1 in progress)*
+### Session Log — May 23, 2026 (Branding, Splash, Native Spinner)
+- **Date/Time:** May 23, 2026
+- **GitHub Issues:** #TBD (tech debt items to be filed)
+- **Status:** ✅ Committed — 4 commits pushed to `origin/master` (HEAD = `225a92b`)
+
+#### 📝 Done
+- [x] `app_theme.dart` — added `chipTheme`, `switchTheme`, `checkboxTheme`, `radioTheme` so selected state uses `colorScheme.secondary` (#F5DC0F gold) with `colorScheme.onSecondary` for content
+- [x] `MainActivity.kt` — moved native `ProgressBar` from `onStart()` to `onCreate()` so spinner appears immediately at app launch (~1s before Flutter engine); removed in `onFlutterUiDisplayed()`
+- [x] `splash_screen.dart` — 700ms minimum timer; `_LoadingScreen` (full blue #2563EB Scaffold + white `CircularProgressIndicator`) while loading; `_SplashContent` (branded: logo, "SpeakUp {orgName}", tagline, "Get Started") after
+- [x] `app_router.dart` — `_AuthStateListenable` holds off ALL go_router redirects for 5 seconds from app start; ensures authenticated users see splash before redirect to home
+
+#### Known Limitations from This Session
+- Launch background color still `#2563EB` (old blue) in `colors.xml` — should be `#002673`. Tracked as tech debt.
+- Splash experience (~4s combined blue + spinner) is acceptable but not ideal. Proper fix needs Android SplashScreen API (blocked — see Blocked Items).
+
+#### 👁️ Stakeholder Demo Asset
+- **Asset Type:** Device test on Samsung Galaxy S9 (SM-G960U, API 29)
+- **Result:** Blue screen ~4s, spinner ~0.5s, branded splash OK. Accepted as interim state.
+- **Stakeholder Note:** Branding now fully applied — gold secondary color on all selection widgets; loading experience shows school branding before navigating to home.
+
+---
+
+*(Sprint 1 in progress — session log entries above represent work completed within Sprint 1 scope and beyond)*
 
 ---
 
 ## Blocked Items
 
-*(None currently)*
+| # | Item | Reason | Notes |
+|---|---|---|---|
+| 1 | Splash loading experience (timing) | `FlutterSurfaceView` composites independently — native `ProgressBar` doesn't reliably overlay Flutter surface on all devices | Needs Android 12+ SplashScreen API (`androidx.core:core-splashscreen`) or dedicated pre-Flutter Activity. **Do NOT retry** `Handler.postDelayed` or removing `_LoadingScreen` — both failed. |
+| 2 | Seed default categories | Needs manual admin action | Admin Dashboard → Branding Settings → "Add Default Categories" for `monhs-ph-001` |
 
 ---
 
@@ -287,3 +312,8 @@ Each sprint entry follows this format:
 | May 19, 2026 | Reference number format: `{ORG_CODE}-{YEAR}-{SEQ}` | Based on wireframe (MONHS-2024-000123) |
 | May 19, 2026 | 3-step report submission wizard | Based on wireframe: Details → Photos → Review |
 | May 19, 2026 | MONHS as first pilot | Originated by MONHS Student Council President |
+| May 20, 2026 | SpeakUp Connect is now a full community communications platform | Added groups, messaging, news board, multi-language, apply-to-join, roster import, etc. |
+| May 23, 2026 | 5-second router splash lock via `_AuthStateListenable` | Ensures authenticated users see branded splash (~4s) before auto-redirect to home |
+| May 23, 2026 | `_LoadingScreen` approach for pre-content state | Full blue Scaffold matching native launch background — avoids white flash between native and Flutter |
+| May 23, 2026 | Native spinner in `onCreate()` not `onStart()` | `onStart()` fires after Flutter engine starts on some devices — `onCreate()` guarantees it appears at cold start |
+| May 23, 2026 | Do NOT use `Handler.postDelayed` for splash timing | `FlutterSurfaceView` composites independently; native views don't reliably overlay Flutter surface on S9 (API 29) |

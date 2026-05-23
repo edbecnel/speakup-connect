@@ -816,3 +816,22 @@
 - [ ] App bundle signing configuration
 - [ ] Internal test track on Play Store
 - [ ] Production release on Play Store
+
+---
+
+## Tech Debt & Housekeeping
+
+> Items identified during development that don't fit an active sprint epic but must not be forgotten.  
+> Linked to GitHub issues where applicable.
+
+### Android / Native
+
+- [ ] Fix launch background color mismatch — `android/app/src/main/res/values/colors.xml` has `#2563EB` (old blue); should be `#002673` (current primary navy) so the native splash matches the app theme
+
+### Dart / Flutter
+
+- [ ] Remove debug logging from `lib/features/settings/presentation/screens/settings_screen.dart` (profile debug `print` statements added in commit `17f6fdb`)
+
+### Data / Firebase
+
+- [ ] Seed default report categories for MONHS org — navigate to Admin Dashboard → Branding Settings → "Add Default Categories" while logged in as admin (`monhs-ph-001`)
