@@ -82,9 +82,11 @@ class UserProfileEntity {
 
   /// Whether this user may edit the organisation's visual theme.
   ///
-  /// Always `true` for `super_admin`.
+  /// Always `true` for `super_admin` and `owner`.
   /// For `admin`, only `true` if [UserPermission.editTheme] has been
   /// explicitly granted by a `super_admin`.
   bool get canEditTheme =>
-      role == 'super_admin' || permissions.contains(UserPermission.editTheme);
+      role == 'super_admin' ||
+      role == 'owner' ||
+      permissions.contains(UserPermission.editTheme);
 }

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -17,10 +18,28 @@ class SettingsScreen extends ConsumerWidget {
     final user = ref.watch(currentUserProvider);
     final orgConfigAsync = ref.watch(organizationConfigProvider);
     final themeMode = ref.watch(themeModeProvider);
-    final profile = ref.watch(userProfileProvider).value;
-    final theme = Theme.of(context);
+    final profileAsync = ref.watch(userProfileProvider);
+    final profile = profileAsync.valueOrNull;
+
+    // Debug: surface profile state in the Flutter console.
+    if (kDebugMode) {
+      if (profileAsync.hasError) {
+        debugPrint('[Settings] userProfileProvider error: ${profileAsync.error}');
+      } else if (profile != null) {
+        debugPrint(
+          '[Settings] Profile loaded — uid=${profile.userId} '
+          'role=${profile.role} isAdmin=${profile.isAdmin} '
+          'status=${profile.approvalStatus.name}',
+        );
+      } else if (profileAsync.isLoading) {
+        debugPrint('[Settings] userProfileProvider is still loading');
+      } else {
+        debugPrint('[Settings] userProfileProvider returned null (no document?)');
+      }
+    }
 
     final orgName = orgConfigAsync.value?.displayName ?? '—';
+    final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(
