@@ -225,19 +225,20 @@ abstract class AppTheme {
       ),
 
       // --- Chip ---
-      // Selected chips use secondary (school accent color) so both brand
-      // colors are visible: unselected chips sit on surface, selected chips
-      // fill with secondary and show onSecondary text.
+      // Selected chips fill with the brand's effective foreground color so the
+      // selection state is always readable: unselected chips sit on the surface
+      // with normal text, selected chips invert (effectiveFg background +
+      // effectiveFgContent text), mirroring the filled-button convention.
       chipTheme: ChipThemeData(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
         ),
         labelStyle: textTheme.labelMedium,
-        selectedColor: colorScheme.secondary,
-        secondarySelectedColor: colorScheme.secondary,
-        checkmarkColor: colorScheme.onSecondary,
+        selectedColor: effectiveFg,
+        secondarySelectedColor: effectiveFg,
+        checkmarkColor: effectiveFgContent,
         secondaryLabelStyle: textTheme.labelMedium?.copyWith(
-          color: colorScheme.onSecondary,
+          color: effectiveFgContent,
         ),
       ),
 

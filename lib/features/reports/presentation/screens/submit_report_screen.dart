@@ -160,6 +160,7 @@ class _Step1CategoryDetails extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final categoriesAsync = ref.watch(reportCategoriesProvider);
     final formState = ref.watch(submitReportFormProvider);
+    final theme = Theme.of(context);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -187,8 +188,17 @@ class _Step1CategoryDetails extends ConsumerWidget {
                 children: categories.map((cat) {
                   final selected = formState.categoryId == cat.categoryId;
                   return FilterChip(
-                    label: Text(cat.label),
+                    label: Text(
+                      cat.label,
+                      style: TextStyle(
+                        color: selected
+                            ? theme.colorScheme.onPrimary
+                            : theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
                     selected: selected,
+                    selectedColor: theme.colorScheme.primary,
+                    checkmarkColor: theme.colorScheme.onPrimary,
                     onSelected: (_) {
                       ref
                           .read(submitReportFormProvider.notifier)
