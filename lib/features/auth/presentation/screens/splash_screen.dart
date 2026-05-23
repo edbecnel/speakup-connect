@@ -16,22 +16,45 @@ import 'package:speakup_connect/features/organization/presentation/providers/org
 /// Automatically redirects authenticated users to the Home screen.
 /// The go_router redirect guard handles this, but we also check here
 /// to show appropriate UI while auth state loads.
-class SplashScreen extends ConsumerWidget {
+class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<SplashScreen> createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends ConsumerState<SplashScreen> {
+  // Ensures the blue loading screen is always visible long enough for the
+  // spinner to be seen — even when org config resolves from cache instantly.
+  bool _minTimeElapsed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(const Duration(milliseconds: 700), () {
+      if (mounted) setState(() => _minTimeElapsed = true);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final orgConfigAsync = ref.watch(organizationConfigProvider);
 
-    // Always show branded content immediately — the 3-second
-    // _AuthStateListenable delay prevents early redirect, so the user
-    // will always see the splash for at least 3 seconds.
+    // Show the blue loading screen until BOTH conditions are met:
+    //  1. org config has resolved (data or error)
+    //  2. minimum display time has elapsed
+    // This guarantees the spinner is always visible from the very first frame.
+    if (!_minTimeElapsed || orgConfigAsync.isLoading) {
+      return const _LoadingScreen();
+    }
+
     return Scaffold(
       body: SafeArea(
         child: orgConfigAsync.when(
-          // While org config loads, show the same blue as the native Android
-          // launch screen so the transition feels seamless.
-          loading: () => const _LoadingScreen(),
+          loading: () => const _SplashContent(
+            orgName: AppConfig.clientDisplayName,
+            tagline: 'Your voice. Our action.',
+          ),
           error: (_, __) => const _SplashContent(
             orgName: AppConfig.clientDisplayName,
             tagline: 'Your voice. Our action.',
@@ -133,22 +156,19 @@ class _SplashContent extends StatelessWidget {
   }
 }
 
-/// Shown while org config is loading — matches the native Android launch
-/// background color for a seamless blue → spinner → content transition.
+/// Shown until org config resolves — a full-screen Scaffold matching the
+/// native Android launch background so the blue → spinner transition is
+/// seamless from the very first Flutter frame.
 class _LoadingScreen extends StatelessWidget {
   const _LoadingScreen();
 
-  // Speakup Blue — must match launchBackground in res/values/colors.xml
-  static const Color _launchBlue = Color(0xFF2563EB);
-
   @override
   Widget build(BuildContext context) {
-    return const ColoredBox(
-      color: _launchBlue,
-      child: Center(
-        child: CircularProgressIndicator(
-          color: Colors.white,
-        ),
+    // Must match launchBackground in res/values/colors.xml
+    return const Scaffold(
+      backgroundColor: Color(0xFF2563EB),
+      body: Center(
+        child: CircularProgressIndicator(color: Colors.white),
       ),
     );
   }
