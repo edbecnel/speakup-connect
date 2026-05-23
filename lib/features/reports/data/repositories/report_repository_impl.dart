@@ -94,7 +94,7 @@ class ReportRepositoryImpl implements ReportRepository {
             'fromStatus': null,
             'toStatus': AppConstants.statusSubmitted,
             'changedBy': params.submittedBy ?? 'anonymous',
-            'changedAt': FieldValue.serverTimestamp(),
+            'changedAt': Timestamp.now(),
             'note': null,
           }
         ],
