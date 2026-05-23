@@ -292,3 +292,27 @@ All open questions answered. Sprint planning for the admin app flavor can procee
 
 Safety/emergency report categories always default to **Critical**.  
 Admins can override urgency during triage. Reporters set urgency at submission time.
+
+---
+
+## Open Questions — Awaiting MONHS Feedback
+
+> These questions must be resolved before Epic 2.12 (Role-Based Permissions) can be sprint-planned.
+
+### Q1 — Teacher / Staff Role Granularity (May 23, 2026)
+
+The current role hierarchy lists a single **Teacher / Staff** role, but real-world use at MONHS may require more granular distinctions. A "Teacher Admin" sub-role has been identified that would be class-scoped rather than org-wide:
+
+- Post bulletins **only to their own class/group** (not org-wide)
+- Manage the student roster **for their own class only**
+- Cannot access other classes' data or org-level settings
+
+**Questions for MONHS:**
+1. How many distinct elevated roles exist in practice? (e.g., Subject Teacher, Homeroom Teacher, Department Head, Guidance Counselor, School Admin)
+2. Should a Homeroom Teacher's class-scoped access differ from a Subject Teacher's?
+3. Can a teacher belong to multiple classes simultaneously (co-teacher / advisory split)?
+4. Who at MONHS has authority to assign/revoke teacher-level roles — Org Admin only, or also a Department Head?
+5. Are there any roles that should have read-only visibility into org-wide data without any write access?
+6. Should the concept of "groups" (clubs, etc.) and "classes" be unified or kept as separate constructs in the data model?
+
+**Impact:** The answers will determine whether Teacher/Staff remains one role with scoped permissions, or splits into multiple distinct roles. This directly affects the Firestore data model, Security Rules, and Epic 2.12 task breakdown.

@@ -80,6 +80,9 @@ All Firebase SDK communication uses TLS/HTTPS. No custom HTTP endpoints are used
 | `admin` | Organization administrators | View all reports, update status, add notes, assign personnel, manage categories |
 | `super_admin` | Organization owner/IT | Manage organization settings, manage admin users, view audit logs |
 | `platform_admin` | SpeakUp Connect team | Manage organizations, platform-level monitoring (never accesses org data) |
+| `teacher` *(planned)* | Class-level staff | Post bulletins and manage roster scoped to their own class/group only — **exact capabilities TBD pending MONHS feedback** |
+
+> **⚠ Role definitions are not final.** The Teacher/Staff role in particular may split into multiple granular roles (e.g., Homeroom Teacher, Subject Teacher, Department Head) depending on MONHS requirements. Do not implement Epic 2.12 until open questions in `ADMIN_APP_REQUIREMENTS.md → Open Questions — Awaiting MONHS Feedback` are resolved.
 
 ### How Roles Are Enforced
 
