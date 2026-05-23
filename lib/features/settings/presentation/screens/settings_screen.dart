@@ -19,7 +19,7 @@ class SettingsScreen extends ConsumerWidget {
     final orgConfigAsync = ref.watch(organizationConfigProvider);
     final themeMode = ref.watch(themeModeProvider);
     final profileAsync = ref.watch(userProfileProvider);
-    final profile = profileAsync.valueOrNull;
+    final profile = profileAsync.value;
 
     // Debug: surface profile state in the Flutter console.
     if (kDebugMode) {

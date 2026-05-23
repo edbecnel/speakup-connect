@@ -180,9 +180,9 @@ class _AuthStateListenable extends ChangeNotifier {
   _AuthStateListenable(this._ref) {
     _ref.listen(authStateChangesProvider, (_, __) => _maybeNotify());
     _ref.listen(userProfileProvider, (_, __) => _maybeNotify());
-    // Hold off redirecting for 3 seconds so the splash screen is always
-    // visible long enough to read, even when auth resolves from cache.
-    Future.delayed(const Duration(seconds: 4), () {
+    // Hold off redirecting for 5 seconds so the branded splash content is
+    // always visible long enough to read, even when auth resolves from cache.
+    Future.delayed(const Duration(seconds: 5), () {
       _splashLockExpired = true;
       _maybeNotify();
     });

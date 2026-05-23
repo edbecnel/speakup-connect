@@ -104,9 +104,11 @@ service cloud.firestore {
       allow create, delete: if isSuperAdmin();
 
       // Full update: super_admin only
-      // Partial update (theme fields only): super_admin OR admin with 'edit_theme' permission
+      // Partial update (theme fields only): super_admin OR org admin OR
+      // any role that has been explicitly granted the 'edit_theme' permission
       allow update: if isSuperAdmin()
-                    || (isOrgAdmin(orgId)
+                    || (isAdminOrAbove(orgId) && onlyThemeFields())
+                    || (isOrgModerator(orgId)
                         && hasPermission(orgId, 'edit_theme')
                         && onlyThemeFields());
 

@@ -225,11 +225,65 @@ abstract class AppTheme {
       ),
 
       // --- Chip ---
+      // Selected chips use secondary (school accent color) so both brand
+      // colors are visible: unselected chips sit on surface, selected chips
+      // fill with secondary and show onSecondary text.
       chipTheme: ChipThemeData(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
         ),
         labelStyle: textTheme.labelMedium,
+        selectedColor: colorScheme.secondary,
+        secondarySelectedColor: colorScheme.secondary,
+        checkmarkColor: colorScheme.onSecondary,
+        secondaryLabelStyle: textTheme.labelMedium?.copyWith(
+          color: colorScheme.onSecondary,
+        ),
+      ),
+
+      // --- Switch ---
+      // Active (on) track = secondary; thumb tinted with onSecondary.
+      switchTheme: SwitchThemeData(
+        trackColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return colorScheme.secondary;
+          }
+          return null; // defer to M3 default
+        }),
+        thumbColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return colorScheme.onSecondary;
+          }
+          return null;
+        }),
+      ),
+
+      // --- Checkbox ---
+      // Checked fill = secondary; checkmark = onSecondary.
+      checkboxTheme: CheckboxThemeData(
+        fillColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return colorScheme.secondary;
+          }
+          return null;
+        }),
+        checkColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return colorScheme.onSecondary;
+          }
+          return null;
+        }),
+      ),
+
+      // --- Radio ---
+      // Selected fill = secondary, consistent with Checkbox.
+      radioTheme: RadioThemeData(
+        fillColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return colorScheme.secondary;
+          }
+          return null;
+        }),
       ),
 
       // --- FloatingActionButton ---

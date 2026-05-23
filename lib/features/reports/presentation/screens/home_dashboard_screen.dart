@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:speakup_connect/core/constants/route_constants.dart';
+import 'package:speakup_connect/core/theme/app_theme.dart';
 import 'package:speakup_connect/features/auth/presentation/providers/auth_provider.dart';
 import 'package:speakup_connect/features/organization/presentation/providers/organization_provider.dart';
 
@@ -151,7 +152,7 @@ class _WelcomeCard extends StatelessWidget {
           Text(
             'Welcome, $firstName!',
             style: theme.textTheme.titleLarge?.copyWith(
-              color: Colors.white,
+              color: theme.colorScheme.onPrimary,
               fontWeight: FontWeight.w700,
             ),
           ),
@@ -159,7 +160,7 @@ class _WelcomeCard extends StatelessWidget {
           Text(
             message,
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: Colors.white.withValues(alpha: 0.9),
+              color: theme.colorScheme.onPrimary.withValues(alpha: 0.9),
             ),
           ),
         ],
@@ -184,6 +185,13 @@ class _DashboardTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    // Ensure the tile color is visible on the current surface — e.g. a black
+    // secondary in dark mode would be invisible without this adjustment.
+    final effectiveColor = AppTheme.effectiveForeground(
+      color,
+      theme.colorScheme.onSurface,
+      theme.colorScheme.surface,
+    );
 
     return Material(
       color: theme.colorScheme.surface,
@@ -205,10 +213,10 @@ class _DashboardTile extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.12),
+                  color: effectiveColor.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(icon, color: color, size: 28),
+                child: Icon(icon, color: effectiveColor, size: 28),
               ),
               const SizedBox(height: 12),
               Text(

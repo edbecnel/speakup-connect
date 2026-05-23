@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:speakup_connect/core/theme/app_theme.dart';
 import 'package:speakup_connect/features/admin/presentation/providers/admin_branding_provider.dart';
 import 'package:speakup_connect/features/organization/presentation/providers/organization_provider.dart';
 import 'package:speakup_connect/features/reports/presentation/providers/report_provider.dart';
@@ -183,19 +184,38 @@ class _AdminBrandingScreenState extends ConsumerState<AdminBrandingScreen> {
       return;
     }
 
-    // Reject colors that would be invisible against light or dark surfaces.
-    // We check contrast against both white (#FFF) and dark (#1F2937) surfaces
-    // and require at least 3:1 (WCAG AA for UI components) against one of them.
-    final primaryColor = Color(int.parse('FF${primaryHex.substring(1)}', radix: 16));
-    if (!_hasAdequateContrast(primaryColor)) {
-      _showFieldError(
-        'Primary color has insufficient contrast — it would be invisible on '
-        'light or dark backgrounds. Choose a mid-range color (avoid near-white '
-        'or near-black).',
+    final primary = Color(int.parse('FF${primaryHex.substring(1)}', radix: 16));
+    final secondary = Color(int.parse('FF${secondaryHex.substring(1)}', radix: 16));
+
+    // Approximate M3 surface colors for each theme mode.
+    const lightSurface = Color(0xFFFFFBFE);
+    const darkSurface = Color(0xFF141218);
+
+    // Warn whenever the primary itself fails — even if secondary can rescue it
+    // at runtime, the admin should know their brand color isn't truly visible.
+    final lightIssue = AppTheme.primaryNeedsContrastWarning(primary, lightSurface);
+    final darkIssue = AppTheme.primaryNeedsContrastWarning(primary, darkSurface);
+
+    if (lightIssue || darkIssue) {
+      // Does secondary at least provide a fallback for the affected surface(s)?
+      final secondaryCanResolve =
+          (lightIssue && !AppTheme.primaryNeedsContrastWarning(secondary, lightSurface)) ||
+          (darkIssue && !AppTheme.primaryNeedsContrastWarning(secondary, darkSurface));
+      _showContrastWarningDialog(
+        primaryHex: primaryHex,
+        secondaryHex: secondaryHex,
+        primary: primary,
+        lightIssue: lightIssue,
+        darkIssue: darkIssue,
+        secondaryCanResolve: secondaryCanResolve,
       );
       return;
     }
 
+    _performSave(primaryHex, secondaryHex);
+  }
+
+  void _performSave(String primaryHex, String secondaryHex) {
     ref.read(adminBrandingProvider.notifier).save(
           displayName: _nameCtrl.text.trim(),
           primaryHex: primaryHex,
@@ -203,35 +223,72 @@ class _AdminBrandingScreenState extends ConsumerState<AdminBrandingScreen> {
         );
   }
 
-  /// Returns true when [color] achieves at least 3:1 contrast ratio
-  /// (WCAG AA for non-text UI components) against EITHER the light surface
-  /// (#FFFFFF) OR the dark surface (#1F2937).  A color that fails both is
-  /// effectively invisible in at least one theme mode.
-  bool _hasAdequateContrast(Color color) {
-    const lightSurface = Color(0xFFFFFFFF);
-    const darkSurface  = Color(0xFF1F2937);
-    const minRatio = 3.0;
-    return _contrastRatio(color, lightSurface) >= minRatio ||
-           _contrastRatio(color, darkSurface)  >= minRatio;
-  }
+  void _showContrastWarningDialog({
+    required String primaryHex,
+    required String secondaryHex,
+    required Color primary,
+    required bool lightIssue,
+    required bool darkIssue,
+    required bool secondaryCanResolve,
+  }) {
+    final surfaces = [
+      if (lightIssue) 'light',
+      if (darkIssue) 'dark',
+    ];
+    final surfaceLabel = surfaces.length == 1
+        ? '${surfaces[0]} backgrounds'
+        : 'light and dark backgrounds';
 
-  /// WCAG relative luminance contrast ratio between two colors.
-  double _contrastRatio(Color a, Color b) {
-    final la = _relativeLuminance(a);
-    final lb = _relativeLuminance(b);
-    final lighter = la > lb ? la : lb;
-    final darker  = la > lb ? lb : la;
-    return (lighter + 0.05) / (darker + 0.05);
-  }
+    final message = secondaryCanResolve
+        ? 'Your primary color ($primaryHex) isn\'t visible enough on '
+          '$surfaceLabel — it will blend into the background.\n\n'
+          'Your secondary color ($secondaryHex) will be used as a fallback '
+          'for buttons and icons, but you may want a more suitable primary.\n\n'
+          'You can save anyway or let the app shift the primary to the '
+          'nearest contrast-safe shade.'
+        : 'Neither your primary ($primaryHex) nor secondary ($secondaryHex) '
+          'color provides enough contrast against $surfaceLabel. '
+          'Buttons, links, and icons may be hard to see.\n\n'
+          'You can save anyway, or let the app shift the primary color to '
+          'the nearest contrast-safe shade.';
 
-  double _relativeLuminance(Color c) {
-    double linearize(double channel) {
-      final s = channel / 255.0;
-      return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) * ((s + 0.055) / 1.055);
-    }
-    return 0.2126 * linearize(c.r * 255) +
-           0.7152 * linearize(c.g * 255) +
-           0.0722 * linearize(c.b * 255);
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Contrast Warning'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(ctx).pop();
+              _performSave(primaryHex, secondaryHex);
+            },
+            child: const Text('Save Anyway'),
+          ),
+          FilledButton(
+            onPressed: () {
+              Navigator.of(ctx).pop();
+              final adjustSurface = lightIssue
+                  ? const Color(0xFFFFFBFE)
+                  : const Color(0xFF141218);
+              final adjusted =
+                  AppTheme.autoAdjustForContrast(primary, adjustSurface);
+              final r = (adjusted.r * 255).round().toRadixString(16).padLeft(2, '0');
+              final g = (adjusted.g * 255).round().toRadixString(16).padLeft(2, '0');
+              final b = (adjusted.b * 255).round().toRadixString(16).padLeft(2, '0');
+              final adjustedHex = '#$r$g$b'.toUpperCase();
+              setState(() => _primaryCtrl.text = adjustedHex);
+              _performSave(adjustedHex, secondaryHex);
+            },
+            child: const Text('Auto-adjust & Save'),
+          ),
+        ],
+      ),
+    );
   }
 
   void _showFieldError(String message) {
