@@ -29,13 +29,9 @@ class SplashScreen extends ConsumerWidget {
     return Scaffold(
       body: SafeArea(
         child: orgConfigAsync.when(
-          // Brief loading state — local cache warms this up quickly
-          // on subsequent launches. Show the generic app tagline with no
-          // org name until the config arrives.
-          loading: () => const _SplashContent(
-            orgName: AppConfig.clientDisplayName,
-            tagline: 'Your voice. Our action.',
-          ),
+          // While org config loads, show the same blue as the native Android
+          // launch screen so the transition feels seamless.
+          loading: () => const _LoadingScreen(),
           error: (_, __) => const _SplashContent(
             orgName: AppConfig.clientDisplayName,
             tagline: 'Your voice. Our action.',
@@ -132,6 +128,27 @@ class _SplashContent extends StatelessWidget {
 
           const SizedBox(height: 32),
         ],
+      ),
+    );
+  }
+}
+
+/// Shown while org config is loading — matches the native Android launch
+/// background color for a seamless blue → spinner → content transition.
+class _LoadingScreen extends StatelessWidget {
+  const _LoadingScreen();
+
+  // Speakup Blue — must match launchBackground in res/values/colors.xml
+  static const Color _launchBlue = Color(0xFF2563EB);
+
+  @override
+  Widget build(BuildContext context) {
+    return const ColoredBox(
+      color: _launchBlue,
+      child: Center(
+        child: CircularProgressIndicator(
+          color: Colors.white,
+        ),
       ),
     );
   }
