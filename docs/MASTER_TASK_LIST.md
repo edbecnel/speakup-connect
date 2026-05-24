@@ -30,6 +30,7 @@
 - [x] Create docs/MASTER_TASK_LIST.md
 - [x] Create docs/CODING_STANDARDS.md
 - [x] Create docs/AI_DEVELOPMENT_WORKFLOW.md
+- [x] Create docs/RBAC_ARCHITECTURE.md
 - [ ] Create docs/WIREFRAMES.md (annotated wireframe notes)
 - [ ] Create docs/API_CONTRACTS.md (Firestore read/write contract docs)
 - [ ] Create docs/TESTING_STRATEGY.md
@@ -669,16 +670,24 @@
 
 ### Epic 2.12 — Role-Based Permissions
 
-- [ ] Create `roles` Firestore collection per org
-- [ ] Seed default roles on org creation (e.g., "Club Leader", "Teacher")
-- [ ] Build `RolesManagementScreen` (admin) — create, edit, delete roles and permission sets
-- [ ] Build `AssignRoleScreen` (admin) — assign custom roles to users
-- [ ] `PermissionProvider` (Riverpod) — checks user's effective permissions
-- [ ] Enforce permissions via Firestore Security Rules:
-  - `canBroadcastReminders` — reminders collection write
-  - `canPostNews` — newsPosts collection write
-  - `canManageGroup` — groups subcollection write
-  - `canBlockUsers` — blockedUsers collection write
+> Architecture fully designed. See **[docs/RBAC_ARCHITECTURE.md](RBAC_ARCHITECTURE.md)** for the two-tier RBAC model, `AppPermission` enum design, custom capabilities, and enforcement strategy.  
+> **⚠ Do not begin until open questions in [ADMIN_APP_REQUIREMENTS.md](ADMIN_APP_REQUIREMENTS.md) are resolved with MONHS.**
+
+- [ ] Define `AppPermission` enum in `lib/core/permissions/app_permission.dart`
+- [ ] Create `roles` Firestore collection per org (schema in RBAC_ARCHITECTURE.md)
+- [ ] Create `customCapabilities` Firestore collection per org
+- [ ] Seed default system roles on org creation (`org-admin`, `member`)
+- [ ] Build `PermissionProvider` (Riverpod) — resolves effective capabilities from role assignments + custom cap registry
+- [ ] Implement Firebase Auth Custom Claims Cloud Function (writes permissions array on role change)
+- [ ] Build `RolesManagementScreen` (admin) — create, edit, delete roles and capability sets
+- [ ] Build `AssignRoleScreen` (admin) — assign custom roles to users with optional tag scope
+- [ ] Build `CapabilitiesScreen` (admin) — view built-ins, create custom capability aliases
+- [ ] Enforce permissions via Firestore Security Rules (using Custom Claims):
+  - `broadcastReminders` — reminders collection write
+  - `postBulletinToGroup` / `postBulletinOrgWide` — bulletins / newsPosts write
+  - `manageGroupRoster` — groups subcollection write
+  - `blockUsers` — blockedUsers collection write
+  - `approveReport` / `manageReports` — report status update write
 
 ### Epic 2.13 — Abuse Blocking & Moderation
 

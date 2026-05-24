@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SpeakUp Connect — Roles & Permissions Mockup</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #ffffff; color: #1a202c; }
+
+  /* ── Layout ── */
+  .shell { display: flex; height: 100vh; overflow: hidden; }
+  .sidebar { width: 220px; background: #CE1126; color: #fff; display: flex; flex-direction: column; flex-shrink: 0; }
+  .sidebar-logo { padding: 20px 16px 12px; font-size: 15px; font-weight: 700; letter-spacing: 0.3px; border-bottom: 1px solid rgba(255,255,255,0.15); }
+  .sidebar-logo span { color: #fff; opacity: 0.85; }
+  .sidebar-section { padding: 10px 0; }
+  .sidebar-label { font-size: 10px; font-weight: 600; color: rgba(255,255,255,0.5); padding: 6px 16px 4px; letter-spacing: 0.8px; text-transform: uppercase; }
+  .sidebar-item { padding: 9px 16px; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 9px; color: rgba(255,255,255,0.8); border-left: 3px solid transparent; }
+  .sidebar-item:hover { background: rgba(0,0,0,0.12); color: #fff; }
+  .sidebar-item.active { background: rgba(0,0,0,0.22); color: #fff; border-left-color: #fff; }
+  .sidebar-icon { font-size: 15px; width: 18px; text-align: center; }
+
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  .topbar { background: #fff; border-bottom: 1px solid #e2e8f0; padding: 0 24px; height: 52px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+  .topbar-title { font-size: 16px; font-weight: 600; color: #CE1126; }
+  .topbar-breadcrumb { font-size: 12px; color: #718096; }
+  .avatar { width: 32px; height: 32px; background: #CE1126; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 12px; }
+
+  .content { flex: 1; overflow-y: auto; padding: 24px; }
+
+  /* ── Screens ── */
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* ── Cards & panels ── */
+  .card { background: #fff; border-radius: 10px; border: 1px solid #e2e8f0; margin-bottom: 16px; }
+  .card-header { padding: 14px 20px; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; }
+  .card-title { font-size: 14px; font-weight: 600; color: #1a202c; }
+  .card-body { padding: 20px; }
+
+  /* ── Roles list ── */
+  .role-row { display: flex; align-items: center; padding: 12px 20px; border-bottom: 1px solid #f0f4f8; gap: 12px; }
+  .role-row:last-child { border-bottom: none; }
+  .role-badge { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+  .role-info { flex: 1; }
+  .role-name { font-size: 13px; font-weight: 600; color: #1a202c; }
+  .role-desc { font-size: 12px; color: #718096; margin-top: 2px; }
+  .role-perms { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 5px; }
+  .perm-chip { font-size: 10px; background: #fdf2f4; color: #CE1126; border-radius: 4px; padding: 2px 7px; font-weight: 500; }
+  .perm-chip.green { background: #f0fff4; color: #276749; }
+  .perm-chip.yellow { background: #fffff0; color: #975a16; }
+  .perm-chip.red { background: #fff5f5; color: #c53030; }
+  .system-badge { font-size: 10px; background: #edf2f7; color: #4a5568; border-radius: 4px; padding: 2px 7px; font-weight: 600; }
+  .users-count { font-size: 11px; color: #718096; text-align: right; white-space: nowrap; }
+
+  /* ── Buttons ── */
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 7px; font-size: 13px; font-weight: 500; cursor: pointer; border: none; transition: all 0.15s; }
+  .btn-primary { background: #CE1126; color: #fff; }
+  .btn-primary:hover { background: #a50d1e; }
+  .btn-secondary { background: #edf2f7; color: #4a5568; }
+  .btn-secondary:hover { background: #e2e8f0; }
+  .btn-ghost { background: transparent; color: #CE1126; border: 1px solid #CE1126; }
+  .btn-ghost:hover { background: #fdf2f4; }
+  .btn-danger { background: #fff5f5; color: #c53030; border: 1px solid #fed7d7; }
+  .btn-sm { padding: 4px 10px; font-size: 12px; }
+  .btn-gold { background: #111111; color: #fff; font-weight: 600; }
+  .btn-gold:hover { background: #333333; }
+  .btn-approve { background: #f0fff4; color: #276749; border: 1px solid #9ae6b4; }
+  .btn-approve:hover { background: #c6f6d5; }
+  .btn-escalate { background: #fffaf0; color: #c05621; border: 1px solid #fbd38d; }
+  .btn-escalate:hover { background: #feebc8; }
+  .btn-reject { background: #fff5f5; color: #c53030; border: 1px solid #fed7d7; }
+  .btn-reject:hover { background: #fed7d7; }
+
+  /* ── Form elements ── */
+  .form-group { margin-bottom: 16px; }
+  .form-label { font-size: 12px; font-weight: 600; color: #4a5568; margin-bottom: 5px; display: block; }
+  .form-input { width: 100%; border: 1px solid #e2e8f0; border-radius: 7px; padding: 8px 12px; font-size: 13px; color: #1a202c; outline: none; }
+  .form-input:focus { border-color: #CE1126; box-shadow: 0 0 0 3px rgba(206,17,38,0.1); }
+  .form-hint { font-size: 11px; color: #a0aec0; margin-top: 4px; }
+
+  /* ── Capability checklist ── */
+  .cap-section { margin-bottom: 18px; }
+  .cap-section-title { font-size: 11px; font-weight: 700; color: #718096; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 8px; }
+  .cap-item { display: flex; align-items: flex-start; gap: 10px; padding: 8px 10px; border-radius: 7px; margin-bottom: 3px; }
+  .cap-item:hover { background: #f7fafc; }
+  .cap-item input[type=checkbox] { accent-color: #CE1126; width: 15px; height: 15px; margin-top: 1px; flex-shrink: 0; cursor: pointer; }
+  .cap-item-info { flex: 1; }
+  .cap-item-name { font-size: 13px; font-weight: 500; color: #1a202c; }
+  .cap-item-key { font-size: 10px; color: #a0aec0; font-family: monospace; }
+
+  /* ── Tag pills ── */
+  .tag-input-area { display: flex; flex-wrap: wrap; gap: 6px; padding: 8px 10px; border: 1px solid #e2e8f0; border-radius: 7px; min-height: 40px; align-items: center; cursor: text; }
+  .tag-pill { display: inline-flex; align-items: center; gap: 5px; background: #fdf2f4; color: #CE1126; border-radius: 5px; padding: 3px 9px; font-size: 12px; font-weight: 500; }
+  .tag-pill .remove { cursor: pointer; color: #f0929e; font-size: 14px; line-height: 1; }
+  .tag-pill .remove:hover { color: #CE1126; }
+
+  /* ── Scope selector ── */
+  .scope-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .scope-option { border: 2px solid #e2e8f0; border-radius: 8px; padding: 12px; cursor: pointer; transition: all 0.15s; }
+  .scope-option:hover { border-color: #f0929e; }
+  .scope-option.selected { border-color: #CE1126; background: #fdf2f4; }
+  .scope-option-title { font-size: 13px; font-weight: 600; color: #1a202c; }
+  .scope-option-desc { font-size: 11px; color: #718096; margin-top: 3px; }
+
+  /* ── User row ── */
+  .user-row { display: flex; align-items: center; gap: 12px; padding: 10px 20px; border-bottom: 1px solid #f0f4f8; }
+  .user-row:last-child { border-bottom: none; }
+  .user-avatar { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; flex-shrink: 0; }
+  .user-name { font-size: 13px; font-weight: 500; }
+  .user-meta { font-size: 11px; color: #718096; margin-top: 1px; }
+  .role-tag { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 500; border-radius: 4px; padding: 2px 8px; }
+
+  /* ── Report detail ── */
+  .report-header { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 20px; }
+  .report-icon { width: 48px; height: 48px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+  .status-pill { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; border-radius: 20px; padding: 3px 10px; }
+  .status-open { background: #ebf8ff; color: #2b6cb0; }
+  .status-pending { background: #fffff0; color: #975a16; }
+  .status-resolved { background: #f0fff4; color: #276749; }
+  .action-bar { display: flex; gap: 8px; flex-wrap: wrap; padding: 14px 0 0; border-top: 1px solid #e2e8f0; margin-top: 16px; }
+  .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+  .info-cell { background: #f7fafc; border-radius: 7px; padding: 10px 12px; }
+  .info-cell-label { font-size: 10px; font-weight: 600; color: #a0aec0; text-transform: uppercase; letter-spacing: 0.5px; }
+  .info-cell-value { font-size: 13px; font-weight: 500; color: #1a202c; margin-top: 3px; }
+  .section-title { font-size: 13px; font-weight: 600; color: #4a5568; margin-bottom: 10px; }
+  .gated-notice { background: #fff5f5; border: 1px dashed #feb2b2; border-radius: 7px; padding: 10px 14px; font-size: 12px; color: #c53030; display: flex; align-items: center; gap: 8px; }
+  .allowed-notice { background: #f0fff4; border: 1px dashed #9ae6b4; border-radius: 7px; padding: 10px 14px; font-size: 12px; color: #276749; display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+
+  /* ── User switcher ── */
+  .user-switcher { display: flex; gap: 8px; margin-bottom: 20px; }
+  .user-switch-btn { display: flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 8px; border: 2px solid #e2e8f0; cursor: pointer; font-size: 13px; font-weight: 500; background: #fff; }
+  .user-switch-btn.active { border-color: #CE1126; background: #fdf2f4; color: #CE1126; }
+  .user-switch-btn:hover:not(.active) { border-color: #f0929e; }
+
+  /* ── Nav tabs ── */
+  .nav-tabs { display: flex; gap: 2px; border-bottom: 2px solid #e2e8f0; margin-bottom: 20px; }
+  .nav-tab { padding: 8px 16px; font-size: 13px; font-weight: 500; color: #718096; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; }
+  .nav-tab:hover { color: #1a202c; }
+  .nav-tab.active { color: #CE1126; border-bottom-color: #CE1126; font-weight: 600; }
+
+  /* ── Flow diagram ── */
+  .flow { display: flex; align-items: stretch; gap: 0; margin-bottom: 20px; overflow-x: auto; padding-bottom: 4px; }
+  .flow-step { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px 16px; min-width: 160px; flex-shrink: 0; }
+  .flow-arrow { display: flex; align-items: center; padding: 0 6px; color: #a0aec0; font-size: 18px; }
+  .flow-step-num { font-size: 10px; font-weight: 700; color: #a0aec0; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+  .flow-step-title { font-size: 13px; font-weight: 600; color: #1a202c; }
+  .flow-step-desc { font-size: 11px; color: #718096; margin-top: 4px; }
+  .flow-step.highlight { border-color: #CE1126; background: #fdf2f4; }
+  .flow-step.highlight .flow-step-title { color: #CE1126; }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 900px) { .two-col { grid-template-columns: 1fr; } }
+
+  .divider { height: 1px; background: #e2e8f0; margin: 16px 0; }
+  .helper-text { font-size: 12px; color: #718096; line-height: 1.5; margin-bottom: 12px; }
+  .info-box { background: #ebf8ff; border-left: 3px solid #4299e1; border-radius: 0 7px 7px 0; padding: 10px 14px; font-size: 12px; color: #2b6cb0; margin-bottom: 16px; line-height: 1.6; }
+  .warn-box { background: #fffff0; border-left: 3px solid #ecc94b; border-radius: 0 7px 7px 0; padding: 10px 14px; font-size: 12px; color: #975a16; margin-bottom: 16px; line-height: 1.6; }
+
+  .page-title { font-size: 20px; font-weight: 700; color: #1a202c; margin-bottom: 4px; }
+  .page-subtitle { font-size: 13px; color: #718096; margin-bottom: 20px; }
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-logo">Speakup <span>Connect</span><br><small style="font-weight:400;font-size:11px;color:rgba(255,255,255,0.6)">MONHS Admin</small></div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Reports</div>
+      <div class="sidebar-item" onclick="showScreen('dashboard')"><span class="sidebar-icon">📋</span>Dashboard</div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">People</div>
+      <div class="sidebar-item" onclick="showScreen('users')"><span class="sidebar-icon">👥</span>Users</div>
+      <div class="sidebar-item active" onclick="showScreen('roles')"><span class="sidebar-icon">🔐</span>Roles & Permissions</div>      <div class="sidebar-item" onclick="showScreen('capabilities')"><span class="sidebar-icon">⚡</span>Capabilities</div>    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Content</div>
+      <div class="sidebar-item" onclick="showScreen('groups')"><span class="sidebar-icon">🏫</span>Groups / Classes</div>
+      <div class="sidebar-item" onclick="showScreen('tags')"><span class="sidebar-icon">🏷️</span>Content Tags</div>
+    </div>
+  </div>
+
+  <!-- Main area -->
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title" id="topbar-title">Roles &amp; Permissions</div>
+        <div class="topbar-breadcrumb" id="topbar-bc">Admin → People → Roles &amp; Permissions</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-size:12px;color:#718096">MONHS Principal</span>
+        <div class="avatar">MP</div>
+      </div>
+    </div>
+    <div class="content">
+
+      <!-- ════════════════════════════════════════════
+           SCREEN: Roles List
+      ═════════════════════════════════════════════ -->
+      <div class="screen active" id="screen-roles">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px">
+          <div>
+            <div class="page-title">Roles &amp; Permissions</div>
+            <div class="page-subtitle">Define what each role can do, then assign roles to users with optional scope restrictions.</div>
+          </div>
+          <button class="btn btn-primary" onclick="showScreen('role-editor')">＋ Create Role</button>
+        </div>
+
+        <div class="info-box" style="background:#fdf2f4;border-left-color:#CE1126;color:#7a0a15">
+          <strong>How it works:</strong> A <em>role</em> is a named bundle of capabilities. A <em>capability</em> is a fixed feature (post bulletin, approve report, etc.). You can further scope a role to specific content tags — e.g., "Guidance Counselor" can view reports, but only those tagged <strong>Guidance</strong>.
+        </div>
+
+        <div class="nav-tabs">
+          <div class="nav-tab active">All Roles (6)</div>
+          <div class="nav-tab">System Roles (2)</div>
+          <div class="nav-tab">Custom Roles (4)</div>
+        </div>
+
+        <div class="card">
+          <!-- System: Org Admin -->
+          <div class="role-row">
+            <div class="role-badge" style="background:#fdf2f4">💬</div>
+            <div class="role-info">
+              <div class="role-name">Org Admin <span class="system-badge">System</span></div>
+              <div class="role-desc">Full access within MONHS. Manages settings, roles, rosters.</div>
+              <div class="role-perms">
+                <span class="perm-chip">All capabilities</span>
+              </div>
+            </div>
+            <div class="users-count">3 users<br><span style="color:#a0aec0;font-size:10px">Cannot edit</span></div>
+          </div>
+          <!-- System: Member -->
+          <div class="role-row">
+            <div class="role-badge" style="background:#f0fff4">👤</div>
+            <div class="role-info">
+              <div class="role-name">Member <span class="system-badge">System</span></div>
+              <div class="role-desc">Standard student/community member. Submit &amp; track own reports.</div>
+              <div class="role-perms">
+                <span class="perm-chip green">submitReport</span>
+                <span class="perm-chip green">viewOwnReports</span>
+              </div>
+            </div>
+            <div class="users-count">847 users<br><span style="color:#a0aec0;font-size:10px">Cannot edit</span></div>
+          </div>
+          <!-- Custom: Guidance Counselor -->
+          <div class="role-row">
+            <div class="role-badge" style="background:#fef9e7">💬</div>
+            <div class="role-info">
+              <div class="role-name">Guidance Counselor</div>
+              <div class="role-desc">Views &amp; approves guidance-tagged reports only. Posts to Guidance board.</div>
+              <div class="role-perms">
+                <span class="perm-chip">viewGroupReports</span>
+                <span class="perm-chip">approveReport</span>
+                <span class="perm-chip yellow">postBulletinToGroup</span>
+                <span style="font-size:10px;color:#a0aec0;padding:2px 4px">📌 Tag scope: guidance</span>
+              </div>
+            </div>
+            <div class="users-count">2 users<br><a onclick="showScreen('role-editor')" style="color:#CE1126;font-size:11px;cursor:pointer">Edit</a></div>
+          </div>
+          <!-- Custom: Homeroom Teacher -->
+          <div class="role-row">
+            <div class="role-badge" style="background:#e9f7ef">🏫</div>
+            <div class="role-info">
+              <div class="role-name">Homeroom Teacher</div>
+              <div class="role-desc">Posts bulletins and manages roster for their assigned class only.</div>
+              <div class="role-perms">
+                <span class="perm-chip green">postBulletinToGroup</span>
+                <span class="perm-chip green">manageGroupRoster</span>
+                <span class="perm-chip green">viewGroupReports</span>
+                <span style="font-size:10px;color:#a0aec0;padding:2px 4px">📌 Scope: assigned group</span>
+              </div>
+            </div>
+            <div class="users-count">32 users<br><a onclick="showScreen('role-editor')" style="color:#CE1126;font-size:11px;cursor:pointer">Edit</a></div>
+          </div>
+          <!-- Custom: Subject Teacher -->
+          <div class="role-row">
+            <div class="role-badge" style="background:#e8f4fd">📚</div>
+            <div class="role-info">
+              <div class="role-name">Subject Teacher</div>
+              <div class="role-desc">Posts bulletins to assigned class groups only. No roster access.</div>
+              <div class="role-perms">
+                <span class="perm-chip">postBulletinToGroup</span>
+                <span class="perm-chip">viewGroupReports</span>
+                <span style="font-size:10px;color:#a0aec0;padding:2px 4px">📌 Scope: assigned groups</span>
+              </div>
+            </div>
+            <div class="users-count">58 users<br><a onclick="showScreen('role-editor')" style="color:#CE1126;font-size:11px;cursor:pointer">Edit</a></div>
+          </div>
+          <!-- Custom: Discipline Officer -->
+          <div class="role-row">
+            <div class="role-badge" style="background:#fff5f5">⚖️</div>
+            <div class="role-info">
+              <div class="role-name">Discipline Officer</div>
+              <div class="role-desc">Views all discipline-tagged reports. Can block users.</div>
+              <div class="role-perms">
+                <span class="perm-chip red">viewAllReports</span>
+                <span class="perm-chip red">blockUsers</span>
+                <span style="font-size:10px;color:#a0aec0;padding:2px 4px">📌 Tag scope: discipline</span>
+              </div>
+            </div>
+            <div class="users-count">1 user<br><a onclick="showScreen('role-editor')" style="color:#CE1126;font-size:11px;cursor:pointer">Edit</a></div>
+          </div>
+        </div>
+
+        <div style="text-align:center;margin-top:12px">
+          <button class="btn btn-ghost" onclick="showScreen('assign')">👤 Go to User Assignment →</button>
+        </div>
+      </div>
+
+      <!-- ════════════════════════════════════════════
+           SCREEN: Role Editor
+      ═════════════════════════════════════════════ -->
+      <div class="screen" id="screen-role-editor">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px">
+          <button class="btn btn-secondary btn-sm" onclick="showScreen('roles')">← Back</button>
+          <div>
+            <div class="page-title">Edit Role: Guidance Counselor</div>
+            <div class="page-subtitle">Define what this role can do and which content it can access.</div>
+          </div>
+        </div>
+
+        <div class="two-col">
+          <!-- Left: Details + Capabilities -->
+          <div>
+            <div class="card">
+              <div class="card-header"><span class="card-title">Role Details</span></div>
+              <div class="card-body">
+                <div class="form-group">
+                  <label class="form-label">Role Name</label>
+                  <input class="form-input" value="Guidance Counselor" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Description</label>
+                  <input class="form-input" value="Views and approves guidance-tagged reports. Posts to Guidance board." />
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <span class="card-title">Capabilities</span>
+                <span style="font-size:11px;color:#718096">What can this role DO?</span>
+              </div>
+              <div class="card-body">
+                <div class="warn-box">These are fixed features built into the app. You pick which ones this role can access. New capabilities require an app update.</div>
+
+                <div class="cap-section">
+                  <div class="cap-section-title">📋 Reports</div>
+                  <div class="cap-item">
+                    <input type="checkbox" id="c1" />
+                    <div class="cap-item-info">
+                      <div class="cap-item-name">View all org reports</div>
+                      <div class="cap-item-key">viewAllReports</div>
+                    </div>
+                  </div>
+                  <div class="cap-item">
+                    <input type="checkbox" id="c2" checked />
+                    <div class="cap-item-info">
+                      <div class="cap-item-name">View reports in assigned groups</div>
+                      <div class="cap-item-key">viewGroupReports</div>
+                    </div>
+                  </div>
+                  <div class="cap-item">
+                    <input type="checkbox" id="c3" checked />
+                    <div class="cap-item-info">
+                      <div class="cap-item-name">Approve / close reports</div>
+                      <div class="cap-item-key">approveReport</div>
+                    </div>
+                  </div>
+                  <div class="cap-item">
+                    <input type="checkbox" id="c4" />
+                    <div class="cap-item-info">
+                      <div class="cap-item-name">Update report status &amp; add notes</div>
+                      <div class="cap-item-key">manageReports</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="cap-section" id="custom-caps-section" style="margin-top:4px">
+                  <div class="cap-section-title" style="display:flex;justify-content:space-between;align-items:center">
+                    <span>⚡ MONHS Custom Capabilities</span>
+                    <a onclick="showScreen('capabilities')" style="font-size:10px;color:#CE1126;cursor:pointer;text-transform:none;font-weight:500">Manage →</a>
+                  </div>
+                  <div style="font-size:11px;color:#718096;margin-bottom:8px">Defined by MONHS admins. Each is backed by a pre-built action.</div>
+                  <div class="cap-item">
+                    <input type="checkbox" checked />
+                    <div class="cap-item-info">
+                      <div class="cap-item-name">Review Guidance Referral</div>
+                      <div class="cap-item-key">custom · backed by: <span style="color:#CE1126">approveReport</span> · tag scope: guidance</div>
+                    </div>
+                  </div>
+                  <div class="cap-item">
+                    <input type="checkbox" checked />
+                    <div class="cap-item-info">
+                      <div class="cap-item-name">Post to Guidance Board</div>
+                      <div class="cap-item-key">custom · backed by: <span style="color:#CE1126">postBulletinToGroup</span> · tag scope: guidance</div>
+                    </div>
+                  </div>
+                  <div class="cap-item">
+                    <input type="checkbox" />
+                    <div class="cap-item-info">
+                      <div class="cap-item-name">Flag Discipline Incident</div>
+                      <div class="cap-item-key">custom · backed by: <span style="color:#CE1126">manageReports</span> · tag scope: discipline</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="cap-section">
+                  <div class="cap-section-title">💬 Bulletins &amp; News</div>
+                  <div class="cap-item">
+                    <input type="checkbox" id="c5" />
+                    <div class="cap-item-info">
+                      <div class="cap-item-name">Post bulletins org-wide</div>
+                      <div class="cap-item-key">postBulletinOrgWide</div>
+                    </div>
+                  </div>
+                  <div class="cap-item">
+                    <input type="checkbox" id="c6" checked />
+                    <div class="cap-item-info">
+                      <div class="cap-item-name">Post bulletins to own groups</div>
+                      <div class="cap-item-key">postBulletinToGroup</div>
+                    </div>
+                  </div>
+                  <div class="cap-item">
+                    <input type="checkbox" id="c7" />
+                    <div class="cap-item-info">
+                      <div class="cap-item-name">Broadcast reminders</div>
+                      <div class="cap-item-key">broadcastReminders</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="cap-section">
+                  <div class="cap-section-title">👥 Roster &amp; Users</div>
+                  <div class="cap-item">
+                    <input type="checkbox" id="c8" />
+                    <div class="cap-item-info">
+                      <div class="cap-item-name">Manage own group roster</div>
+                      <div class="cap-item-key">manageGroupRoster</div>
+                    </div>
+                  </div>
+                  <div class="cap-item">
+                    <input type="checkbox" id="c9" />
+                    <div class="cap-item-info">
+                      <div class="cap-item-name">Block users</div>
+                      <div class="cap-item-key">blockUsers</div>
+                    </div>
+                  </div>
+                  <div class="cap-item">
+                    <input type="checkbox" id="c10" />
+                    <div class="cap-item-info">
+                      <div class="cap-item-name">Approve join applications</div>
+                      <div class="cap-item-key">approveApplications</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Scope / Tags -->
+          <div>
+            <div class="card">
+              <div class="card-header">
+                <span class="card-title">Content Scope (Tags)</span>
+                <span style="font-size:11px;color:#718096">Which data can they access?</span>
+              </div>
+              <div class="card-body">
+                <div class="info-box" style="background:#fdf2f4;border-left-color:#CE1126;color:#7a0a15">This is fully customizable. Create any tags you need in <strong>Content Tags</strong>, then apply them here. Unlimited — no code change required.</div>
+
+                <div class="form-group">
+                  <label class="form-label">This role can only access content tagged with:</label>
+                  <div class="tag-input-area">
+                    <div class="tag-pill">guidance <span class="remove">×</span></div>
+                    <span style="font-size:12px;color:#a0aec0">+ add tag…</span>
+                  </div>
+                  <div class="form-hint">Leave empty = no tag restriction (access all content the capability allows)</div>
+                </div>
+
+                <div class="divider"></div>
+                <div class="form-group">
+                  <label class="form-label">Group / Class Scope</label>
+                  <div class="scope-grid">
+                    <div class="scope-option">
+                      <div class="scope-option-title">🌐 Org-wide</div>
+                      <div class="scope-option-desc">Applies across all groups in MONHS</div>
+                    </div>
+                    <div class="scope-option selected">
+                      <div class="scope-option-title">🏫 Assigned Groups</div>
+                      <div class="scope-option-desc">Only applies within groups this user is assigned to</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card" style="margin-top:0">
+              <div class="card-header"><span class="card-title">Policy Summary</span></div>
+              <div class="card-body">
+                <div style="font-size:12px;line-height:1.8;color:#4a5568">
+                  A user with this role <strong>within their assigned groups</strong> can:<br>
+                  ✅ View reports tagged <code style="background:#edf2f7;padding:1px 5px;border-radius:3px">guidance</code><br>
+                  ✅ Approve reports tagged <code style="background:#edf2f7;padding:1px 5px;border-radius:3px">guidance</code><br>
+                  ✅ Post bulletins to their assigned groups<br>
+                  ❌ Cannot see reports tagged <code style="background:#edf2f7;padding:1px 5px;border-radius:3px">discipline</code> or others<br>
+                  ❌ Cannot post org-wide bulletins<br>
+                  ❌ Cannot manage rosters
+                </div>
+              </div>
+            </div>
+
+            <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:4px">
+              <button class="btn btn-secondary" onclick="showScreen('roles')">Cancel</button>
+              <button class="btn btn-primary" onclick="showScreen('assign')">Save &amp; Assign Users →</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════════════════════════════════════════
+           SCREEN: User Assignment
+      ═════════════════════════════════════════════ -->
+      <div class="screen" id="screen-assign">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px">
+          <button class="btn btn-secondary btn-sm" onclick="showScreen('role-editor')">← Back</button>
+          <div>
+            <div class="page-title">Assign Role: Guidance Counselor</div>
+            <div class="page-subtitle">Assign this role to users. Each assignment can be scoped to a specific group.</div>
+          </div>
+        </div>
+
+        <div class="two-col">
+          <div>
+            <div class="card">
+              <div class="card-header">
+                <span class="card-title">Current Assignments</span>
+                <button class="btn btn-primary btn-sm">＋ Add User</button>
+              </div>
+              <div class="user-row">
+                <div class="user-avatar" style="background:#d6bcfa;color:#553c9a">MS</div>
+                <div style="flex:1">
+                  <div class="user-name">Ms. Ana Santos</div>
+                  <div class="user-meta">Guidance Counselor · Grade 10</div>
+                  <div style="margin-top:4px">
+                    <span class="role-tag" style="background:#fdf2f4;color:#CE1126">💬 Guidance Counselor</span>
+                    <span style="font-size:10px;color:#a0aec0;margin-left:6px">📌 Tag: guidance · Scope: assigned groups</span>
+                  </div>
+                </div>
+                <button class="btn btn-danger btn-sm">Remove</button>
+              </div>
+              <div class="user-row">
+                <div class="user-avatar" style="background:#bee3f8;color:#2b6cb0">RC</div>
+                <div style="flex:1">
+                  <div class="user-name">Mr. Roy Cruz</div>
+                  <div class="user-meta">Guidance Counselor · Grade 9</div>
+                  <div style="margin-top:4px">
+                    <span class="role-tag" style="background:#fdf2f4;color:#CE1126">💬 Guidance Counselor</span>
+                    <span style="font-size:10px;color:#a0aec0;margin-left:6px">📌 Tag: guidance · Scope: assigned groups</span>
+                  </div>
+                </div>
+                <button class="btn btn-danger btn-sm">Remove</button>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div class="card">
+              <div class="card-header"><span class="card-title">What this means for Ms. Santos</span></div>
+              <div class="card-body">
+                <div class="flow" style="flex-direction:column;gap:8px">
+                  <div class="flow-step highlight">
+                    <div class="flow-step-num">Step 1 — Admin defined</div>
+                    <div class="flow-step-title">Capability: approveReport</div>
+                    <div class="flow-step-desc">Built into the app. Cannot change without update.</div>
+                  </div>
+                  <div style="color:#a0aec0;text-align:center">↓</div>
+                  <div class="flow-step highlight">
+                    <div class="flow-step-num">Step 2 — You defined (no code)</div>
+                    <div class="flow-step-title">Tag scope: "guidance"</div>
+                    <div class="flow-step-desc">Only reports tagged guidance are visible.</div>
+                  </div>
+                  <div style="color:#a0aec0;text-align:center">↓</div>
+                  <div class="flow-step highlight">
+                    <div class="flow-step-num">Step 3 — Result in app</div>
+                    <div class="flow-step-title">"Approve" button appears</div>
+                    <div class="flow-step-desc">Only on guidance-tagged reports Ms. Santos can see.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div style="text-align:right;margin-top:8px">
+              <button class="btn btn-gold" onclick="showScreen('report-view')">See Ms. Santos's App View →</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════════════════════════════════════════
+           SCREEN: App View (Report Detail)
+      ═════════════════════════════════════════════ -->
+      <div class="screen" id="screen-report-view">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px">
+          <button class="btn btn-secondary btn-sm" onclick="showScreen('assign')">← Back to Assignment</button>
+          <div>
+            <div class="page-title">Live App Simulation</div>
+            <div class="page-subtitle">See how the same report looks to different users based on their role &amp; tag scope.</div>
+          </div>
+        </div>
+
+        <div class="info-box" style="margin-bottom:16px">
+          Switch between users below. The report content is identical — only the available <strong>actions</strong> change based on each user's resolved permissions. No code changed between users — only the policy engine output differs.
+        </div>
+        <!-- hidden: close the old info-box div that was closed after this -->
+        </div>
+
+        <!-- User switcher -->
+        <div class="user-switcher">
+          <div class="user-switch-btn active" id="sw-santos" onclick="switchUser('santos')">
+            <div class="user-avatar" style="width:26px;height:26px;font-size:11px;background:#d6bcfa;color:#553c9a">MS</div>
+            Ms. Santos <span style="font-size:11px;color:#718096">(Guidance Counselor)</span>
+          </div>
+          <div class="user-switch-btn" id="sw-reyes" onclick="switchUser('reyes')">
+            <div class="user-avatar" style="width:26px;height:26px;font-size:11px;background:#bee3f8;color:#2b6cb0">TR</div>
+            Mr. Reyes <span style="font-size:11px;color:#718096">(Homeroom Teacher)</span>
+          </div>
+          <div class="user-switch-btn" id="sw-member" onclick="switchUser('member')">
+            <div class="user-avatar" style="width:26px;height:26px;font-size:11px;background:#c6f6d5;color:#276749">JD</div>
+            Juan Dela Cruz <span style="font-size:11px;color:#718096">(Member)</span>
+          </div>
+        </div>
+
+        <div class="two-col">
+          <!-- Report: Guidance-tagged -->
+          <div>
+            <div style="font-size:12px;font-weight:700;color:#718096;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">
+              Report A — Tagged: <span style="color:#975a16">guidance</span>
+            </div>
+            <div class="card">
+              <div class="card-body">
+                <div class="report-header">
+                  <div class="report-icon" style="background:#fef9e7">😟</div>
+                  <div>
+                    <div style="font-size:14px;font-weight:600">Student feeling overwhelmed</div>
+                    <div style="margin-top:4px;display:flex;gap:6px;flex-wrap:wrap">
+                      <span class="status-pill status-open">● Open</span>
+                      <span class="perm-chip yellow">guidance</span>
+                      <span style="font-size:11px;color:#a0aec0">Grade 10 · 2h ago</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="info-grid">
+                  <div class="info-cell">
+                    <div class="info-cell-label">Submitted by</div>
+                    <div class="info-cell-value">Anonymous</div>
+                  </div>
+                  <div class="info-cell">
+                    <div class="info-cell-label">Category</div>
+                    <div class="info-cell-value">Guidance Referral</div>
+                  </div>
+                </div>
+                <p style="font-size:13px;color:#4a5568;line-height:1.6">A student in Grade 10 - Section A has expressed feeling overwhelmed with schoolwork and personal issues. Requesting a counseling session.</p>
+
+                <!-- Actions - shown dynamically -->
+                <div class="action-bar" id="actions-guidance">
+                  <!-- Populated by JS -->
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Report: Discipline-tagged -->
+          <div>
+            <div style="font-size:12px;font-weight:700;color:#718096;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">
+              Report B — Tagged: <span style="color:#c53030">discipline</span>
+            </div>
+            <div class="card">
+              <div class="card-body">
+                <div class="report-header">
+                  <div class="report-icon" style="background:#fff5f5">⚠️</div>
+                  <div>
+                    <div style="font-size:14px;font-weight:600">Bullying incident in hallway</div>
+                    <div style="margin-top:4px;display:flex;gap:6px;flex-wrap:wrap">
+                      <span class="status-pill status-pending">● In Review</span>
+                      <span class="perm-chip red">discipline</span>
+                      <span style="font-size:11px;color:#a0aec0">Grade 9 · 5h ago</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="info-grid">
+                  <div class="info-cell">
+                    <div class="info-cell-label">Submitted by</div>
+                    <div class="info-cell-value">Anonymous</div>
+                  </div>
+                  <div class="info-cell">
+                    <div class="info-cell-label">Category</div>
+                    <div class="info-cell-value">Bullying / Harassment</div>
+                  </div>
+                </div>
+                <p style="font-size:13px;color:#4a5568;line-height:1.6">A student reported witnessing a bullying incident near the Grade 9 corridor during lunch break.</p>
+
+                <!-- Actions -->
+                <div class="action-bar" id="actions-discipline">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Policy engine output -->
+        <div class="card" style="margin-top:16px">
+          <div class="card-header"><span class="card-title">🔍 Policy Engine — Resolved Permissions</span><span style="font-size:11px;color:#718096">(What the app computed for the selected user)</span></div>
+          <div class="card-body" id="policy-debug" style="font-family:monospace;font-size:12px;line-height:1.8;color:#4a5568">
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /shell -->
+
+<!-- ════ CAPABILITIES SCREEN (injected via JS) ════ -->
+<template id="tpl-capabilities">
+<div>
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px">
+    <div>
+      <div class="page-title">Capabilities</div>
+      <div class="page-subtitle">Built-in capabilities come from the app. Custom capabilities are defined by MONHS and backed by a built-in action.</div>
+    </div>
+    <button class="btn btn-primary" onclick="showCreateForm()">⚡ Create Capability</button>
+  </div>
+
+  <div class="info-box" style="background:#fdf2f4;border-left-color:#CE1126;color:#7a0a15">
+    <strong>How custom capabilities work:</strong> You give a capability a name meaningful to MONHS (e.g. "Review Guidance Referral"). You then pick which <em>pre-built action</em> it uses — that action is the actual behaviour coded into the app. The name is yours; the behaviour comes from the catalog. Adding a <em>new</em> action to the catalog requires an app update.
+  </div>
+
+  <div class="nav-tabs">
+    <div class="nav-tab active" onclick="switchCapTab('custom',this)">Custom Capabilities — MONHS (3)</div>
+    <div class="nav-tab" onclick="switchCapTab('builtin',this)">App Built-ins — read only (10)</div>
+  </div>
+
+  <!-- Custom tab -->
+  <div id="cap-tab-custom">
+    <!-- Create form (hidden by default) -->
+    <div id="create-cap-form" style="display:none;margin-bottom:16px">
+      <div class="card">
+        <div class="card-header" style="background:#fdf2f4">
+          <span class="card-title" style="color:#CE1126">⚡ New Custom Capability</span>
+          <button class="btn btn-secondary btn-sm" onclick="hideCreateForm()">✕ Cancel</button>
+        </div>
+        <div class="card-body">
+          <div class="two-col">
+            <div>
+              <div class="form-group">
+                <label class="form-label">Capability Name <span style="color:#CE1126">*</span></label>
+                <input class="form-input" id="new-cap-name" placeholder="e.g. Review Mental Health Referral" />
+                <div class="form-hint">This is what org admins will see in the Role Editor checklist.</div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Description</label>
+                <input class="form-input" placeholder="Short explanation for other admins" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Pre-scope to tag (optional)</label>
+                <input class="form-input" id="new-cap-tag" placeholder="e.g. mental-health" />
+                <div class="form-hint">If set, this capability will automatically be limited to content with this tag.</div>
+              </div>
+            </div>
+            <div>
+              <div class="form-group">
+                <label class="form-label">Backed by action <span style="color:#CE1126">*</span></label>
+                <div class="warn-box" style="margin-bottom:10px">This is the pre-built behaviour from the app. You are giving it a custom name — not creating new behaviour. New actions require an app update.</div>
+                <select class="form-input" id="new-cap-action" size="10" style="height:auto;padding:0">
+                  <option value="approveReport" style="padding:8px 12px">✅ Approve / Close an Item</option>
+                  <option value="manageReports" style="padding:8px 12px">📝 Update Status &amp; Add Notes</option>
+                  <option value="viewGroupReports" style="padding:8px 12px">👁 View Content in Assigned Groups</option>
+                  <option value="viewAllReports" style="padding:8px 12px">👁 View All Content Org-wide</option>
+                  <option value="postBulletinToGroup" style="padding:8px 12px">📣 Post to a Board / Group</option>
+                  <option value="postBulletinOrgWide" style="padding:8px 12px">📣 Post Org-Wide</option>
+                  <option value="broadcastReminders" style="padding:8px 12px">🔔 Broadcast Reminder</option>
+                  <option value="manageGroupRoster" style="padding:8px 12px">👥 Manage Group Members</option>
+                  <option value="blockUsers" style="padding:8px 12px">🚫 Block a User</option>
+                  <option value="approveApplications" style="padding:8px 12px">✔ Approve Join Application</option>
+                </select>
+              </div>
+              <div id="action-preview" style="background:#f7fafc;border-radius:8px;padding:12px;font-size:12px;color:#4a5568;margin-top:4px">
+                Select an action above to see what it does in the app.
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:8px">
+            <button class="btn btn-secondary" onclick="hideCreateForm()">Cancel</button>
+            <button class="btn btn-primary" onclick="saveCustomCap()">Save Capability</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- List of custom caps -->
+    <div class="card" id="custom-cap-list">
+      <div style="display:flex;align-items:center;padding:12px 20px;border-bottom:1px solid #e2e8f0;gap:12px;font-size:11px;font-weight:600;color:#718096;text-transform:uppercase;letter-spacing:0.5px">
+        <div style="flex:2">Capability Name</div>
+        <div style="flex:2">Backed by Action</div>
+        <div style="flex:1">Tag Pre-scope</div>
+        <div style="flex:1">Used in Roles</div>
+        <div style="width:60px"></div>
+      </div>
+      <div id="custom-cap-rows"></div>
+    </div>
+  </div>
+
+  <!-- Built-in tab -->
+  <div id="cap-tab-builtin" style="display:none">
+    <div class="warn-box">These are hard-coded into the app. They cannot be renamed or deleted. Adding new ones requires an app update and deployment.</div>
+    <div class="card">
+      <div id="builtin-cap-rows"></div>
+    </div>
+  </div>
+</div>
+</template>
+
+<script>
+// ── Screen navigation ──
+const actionDescriptions = {
+  approveReport:       { label: 'Approve / Close an Item',         desc: 'Shows an ✅ Approve button on reports. Marks the report closed.' },
+  manageReports:       { label: 'Update Status & Add Notes',       desc: 'Shows Escalate / Reject buttons and allows adding admin notes.' },
+  viewGroupReports:    { label: 'View Content in Assigned Groups', desc: 'Unlocks report list filtered to the user\'s assigned groups.' },
+  viewAllReports:      { label: 'View All Content Org-wide',       desc: 'Unlocks full report list across all groups in the org.' },
+  postBulletinToGroup: { label: 'Post to a Board / Group',         desc: 'Enables the "New Bulletin" composer scoped to assigned groups.' },
+  postBulletinOrgWide: { label: 'Post Org-Wide',                   desc: 'Enables org-wide audience picker in the bulletin composer.' },
+  broadcastReminders:  { label: 'Broadcast Reminder',              desc: 'Unlocks the Reminders screen to send push notifications.' },
+  manageGroupRoster:   { label: 'Manage Group Members',            desc: 'Shows Add/Remove member controls on the group roster screen.' },
+  blockUsers:          { label: 'Block a User',                    desc: 'Shows the Block action on user profiles and report views.' },
+  approveApplications: { label: 'Approve Join Application',        desc: 'Unlocks the join applications queue and Approve/Reject buttons.' },
+};
+
+// Custom capabilities registry (simulates Firestore data)
+let customCaps = [
+  { id: 'cc1', name: 'Review Guidance Referral',  desc: 'For counselors to close guidance referral reports.', action: 'approveReport',       tagScope: 'guidance',   usedIn: ['Guidance Counselor'] },
+  { id: 'cc2', name: 'Post to Guidance Board',    desc: 'Post bulletins scoped to Guidance content only.',   action: 'postBulletinToGroup', tagScope: 'guidance',   usedIn: ['Guidance Counselor'] },
+  { id: 'cc3', name: 'Flag Discipline Incident',  desc: 'Add notes and update status on discipline reports.', action: 'manageReports',       tagScope: 'discipline', usedIn: ['Discipline Officer'] },
+];
+
+const builtinCaps = Object.entries(actionDescriptions).map(([k,v]) => ({ key: k, ...v }));
+
+function renderCustomCapRows() {
+  const el = document.getElementById('custom-cap-rows');
+  if (!el) return;
+  el.innerHTML = customCaps.map(c => `
+    <div style="display:flex;align-items:center;padding:12px 20px;border-bottom:1px solid #f0f4f8;gap:12px">
+      <div style="flex:2">
+        <div style="font-size:13px;font-weight:600">${c.name}</div>
+        <div style="font-size:11px;color:#718096;margin-top:2px">${c.desc}</div>
+      </div>
+      <div style="flex:2">
+        <span style="background:#fdf2f4;color:#CE1126;font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px">${actionDescriptions[c.action]?.label || c.action}</span>
+        <div style="font-size:10px;color:#a0aec0;margin-top:3px;font-family:monospace">${c.action}</div>
+      </div>
+      <div style="flex:1"><span style="background:#fffff0;color:#975a16;font-size:11px;font-weight:500;padding:2px 7px;border-radius:4px">${c.tagScope || '—'}</span></div>
+      <div style="flex:1;font-size:12px;color:#4a5568">${c.usedIn.join(', ') || '—'}</div>
+      <div style="width:60px;display:flex;gap:4px">
+        <button class="btn btn-secondary btn-sm">Edit</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderBuiltinCapRows() {
+  const el = document.getElementById('builtin-cap-rows');
+  if (!el) return;
+  el.innerHTML = builtinCaps.map(c => `
+    <div style="display:flex;align-items:center;padding:11px 20px;border-bottom:1px solid #f0f4f8;gap:12px">
+      <div style="flex:2">
+        <div style="font-size:13px;font-weight:500;color:#4a5568">${c.label}</div>
+        <div style="font-size:10px;color:#a0aec0;font-family:monospace;margin-top:2px">${c.key}</div>
+      </div>
+      <div style="flex:3;font-size:12px;color:#718096">${c.desc}</div>
+      <div style="width:80px;font-size:11px;color:#a0aec0;font-style:italic">App-defined</div>
+    </div>
+  `).join('');
+}
+
+function switchCapTab(tab, el) {
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('cap-tab-custom').style.display  = tab === 'custom'  ? 'block' : 'none';
+  document.getElementById('cap-tab-builtin').style.display = tab === 'builtin' ? 'block' : 'none';
+}
+
+function showCreateForm() {
+  document.getElementById('create-cap-form').style.display = 'block';
+  document.getElementById('new-cap-action').addEventListener('change', updateActionPreview);
+}
+function hideCreateForm() { document.getElementById('create-cap-form').style.display = 'none'; }
+function updateActionPreview() {
+  const v = document.getElementById('new-cap-action').value;
+  const d = actionDescriptions[v];
+  document.getElementById('action-preview').innerHTML = d
+    ? `<strong>What happens in the app:</strong><br>${d.desc}<br><span style="font-family:monospace;font-size:10px;color:#a0aec0">resolves to → ${v}</span>`
+    : 'Select an action above.';
+}
+function saveCustomCap() {
+  const name   = document.getElementById('new-cap-name').value.trim();
+  const action = document.getElementById('new-cap-action').value;
+  const tag    = document.getElementById('new-cap-tag').value.trim();
+  if (!name || !action) { alert('Name and action are required.'); return; }
+  customCaps.push({ id: 'cc' + Date.now(), name, desc: '', action, tagScope: tag || null, usedIn: [] });
+  hideCreateForm();
+  renderCustomCapRows();
+  document.getElementById('new-cap-name').value = '';
+  document.getElementById('new-cap-tag').value = '';
+}
+
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  let screen = document.getElementById('screen-' + name);
+  if (!screen) {
+    // Capability screen is injected from template on first visit
+    if (name === 'capabilities') {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'screen';
+      wrapper.id = 'screen-capabilities';
+      wrapper.innerHTML = document.getElementById('tpl-capabilities').innerHTML;
+      document.querySelector('.content').appendChild(wrapper);
+      screen = wrapper;
+      // Wire up action select preview
+      const sel = screen.querySelector('#new-cap-action');
+      if (sel) sel.addEventListener('change', updateActionPreview);
+      setTimeout(() => { renderCustomCapRows(); renderBuiltinCapRows(); }, 0);
+    } else {
+      return;
+    }
+  }
+  screen.classList.add('active');
+  if (name === 'capabilities') { setTimeout(() => { renderCustomCapRows(); renderBuiltinCapRows(); }, 0); }
+
+  const titles = {
+    roles: ['Roles &amp; Permissions', 'Admin → People → Roles &amp; Permissions'],
+    'role-editor': ['Edit Role', 'Admin → Roles → Edit: Guidance Counselor'],
+    assign: ['Assign Role', 'Admin → Roles → Guidance Counselor → Assign Users'],
+    'report-view': ['App Simulation', 'Admin → Roles → Live Preview'],
+    capabilities: ['Capabilities', 'Admin → People → Capabilities'],
+    users: ['Users', 'Admin → People → Users'],
+    dashboard: ['Dashboard', 'Admin → Reports → Dashboard'],
+    groups: ['Groups / Classes', 'Admin → Content → Groups'],
+    tags: ['Content Tags', 'Admin → Content → Tags'],
+  };
+  const [t, bc] = titles[name] || ['Admin', 'Admin'];
+  document.getElementById('topbar-title').textContent = t;
+  document.getElementById('topbar-bc').textContent = bc;
+
+  // Update sidebar active
+  document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+
+  if (name === 'report-view') switchUser('santos');
+}
+
+// ── User permission simulation ──
+// Ms. Santos has a CUSTOM capability (name defined by MONHS) that resolves
+// to the built-in approveReport action via the registry.
+const users = {
+  santos: {
+    name: 'Ms. Ana Santos',
+    role: 'Guidance Counselor',
+    permissions: ['viewGroupReports', 'postBulletinToGroup'],
+    // Custom caps: MONHS-named → resolved to built-in action by registry
+    customPermissions: [
+      { name: 'Review Guidance Referral', resolvedAction: 'approveReport',       tagScope: ['guidance'] },
+      { name: 'Post to Guidance Board',   resolvedAction: 'postBulletinToGroup', tagScope: ['guidance'] },
+    ],
+    tagScope: ['guidance'],
+    groupScope: 'assigned',
+  },
+  reyes: {
+    name: 'Mr. Jun Reyes',
+    role: 'Homeroom Teacher',
+    permissions: ['viewGroupReports', 'postBulletinToGroup', 'manageGroupRoster'],
+    tagScope: null, // no tag restriction
+    groupScope: 'assigned',
+  },
+  member: {
+    name: 'Juan Dela Cruz',
+    role: 'Member',
+    permissions: ['submitReport', 'viewOwnReports'],
+    tagScope: null,
+    groupScope: null,
+  },
+};
+
+function resolvedPermissions(user) {
+  // Built-in permissions + resolved custom permissions merged into one effective set.
+  // This is what the policy engine computes.
+  const resolved = new Set(user.permissions || []);
+  const customTagScopes = {};
+  for (const cp of (user.customPermissions || [])) {
+    resolved.add(cp.resolvedAction);
+    // Tag scope: if the same action appears from a custom cap with a tag scope,
+    // AND the user's base tagScope also covers it, intersect them.
+    if (cp.tagScope) {
+      if (!customTagScopes[cp.resolvedAction]) customTagScopes[cp.resolvedAction] = [];
+      customTagScopes[cp.resolvedAction].push(...cp.tagScope);
+    }
+  }
+  return { actions: resolved, customTagScopes };
+}
+
+function canDo(user, action, reportTag) {
+  const { actions, customTagScopes } = resolvedPermissions(user);
+  if (!actions.has(action)) return false;
+  // Tag scope check: use overall tagScope OR action-specific custom tag scope
+  const effectiveTagScope = user.tagScope || customTagScopes[action] || null;
+  if (effectiveTagScope && !effectiveTagScope.includes(reportTag)) return false;
+  return true;
+}
+
+function canSeeReport(user, reportTag) {
+  const { actions } = resolvedPermissions(user);
+  if (actions.has('viewAllReports')) {
+    if (user.tagScope && !user.tagScope.includes(reportTag)) return false;
+    return true;
+  }
+  if (actions.has('viewGroupReports')) {
+    if (user.tagScope && !user.tagScope.includes(reportTag)) return false;
+    return true;
+  }
+  if (user.permissions && user.permissions.includes('viewOwnReports')) return false;
+  return false;
+}
+
+function renderActions(containerId, user, reportTag) {
+  const el = document.getElementById(containerId);
+  el.innerHTML = '';
+
+  const canSee = canSeeReport(user, reportTag);
+
+  if (!canSee) {
+    el.innerHTML = '<div class="gated-notice">🔒 This report is not visible to ' + user.name + '. Tag scope <strong>' + reportTag + '</strong> is not in their allowed tags.</div>';
+    return;
+  }
+
+  el.innerHTML += '<div class="allowed-notice" style="width:100%">✅ ' + user.name + ' can view this report (tag: <strong>' + reportTag + '</strong> matches their scope)</div>';
+
+  const bar = document.createElement('div');
+  bar.style.display = 'flex';
+  bar.style.gap = '8px';
+  bar.style.flexWrap = 'wrap';
+
+  if (canDo(user, 'approveReport', reportTag)) {
+    bar.innerHTML += '<button class="btn btn-approve">✅ Approve</button>';
+  }
+  if (canDo(user, 'manageReports', reportTag)) {
+    bar.innerHTML += '<button class="btn btn-escalate">↑ Escalate</button>';
+    bar.innerHTML += '<button class="btn btn-reject">✗ Reject</button>';
+  }
+  const { actions } = resolvedPermissions(user);
+  if (actions.has('viewGroupReports') || actions.has('viewAllReports')) {
+    bar.innerHTML += '<button class="btn btn-secondary">💬 Add Note</button>';
+  }
+
+  if (bar.innerHTML === '') {
+    bar.innerHTML = '<span style="font-size:12px;color:#a0aec0;font-style:italic">No actions available for this role on this report.</span>';
+  }
+
+  el.appendChild(bar);
+}
+
+function renderPolicyDebug(user, reportTag1, reportTag2) {
+  const el = document.getElementById('policy-debug');
+  const check = (bool) => bool ? '<span style="color:#276749">✅ allow</span>' : '<span style="color:#c53030">❌ deny</span>';
+  const { actions } = resolvedPermissions(user);
+
+  const customLines = (user.customPermissions || []).map(cp =>
+    `<span style="color:#975a16">‣ custom cap "${cp.name}"</span> → resolves to <span style="color:#CE1126;font-family:monospace">${cp.resolvedAction}</span>${cp.tagScope ? ' (pre-scoped to: ' + cp.tagScope.join(', ') + ')' : ''}`
+  ).join('<br>');
+
+  el.innerHTML = `
+<strong>User:</strong> ${user.name} &nbsp;|&nbsp; <strong>Role:</strong> ${user.role}<br>
+<strong>Built-in permissions:</strong> [${(user.permissions||[]).join(', ')}]<br>
+${customLines ? '<strong>Custom capabilities → resolved:</strong><br>' + customLines + '<br>' : ''}
+<strong>Effective action set:</strong> [${[...actions].join(', ')}]<br>
+<strong>Tag scope:</strong> ${user.tagScope ? JSON.stringify(user.tagScope) : 'none (unrestricted)'}<br>
+<br>
+<strong>evaluate('viewReport', report_A tag="${reportTag1}")</strong> → ${check(canSeeReport(user, reportTag1))}<br>
+<strong>evaluate('approveReport', report_A tag="${reportTag1}")</strong> → ${check(canDo(user, 'approveReport', reportTag1))}<br>
+<strong>evaluate('viewReport', report_B tag="${reportTag2}")</strong> → ${check(canSeeReport(user, reportTag2))}<br>
+<strong>evaluate('approveReport', report_B tag="${reportTag2}")</strong> → ${check(canDo(user, 'approveReport', reportTag2))}<br>
+<strong>evaluate('manageGroupRoster', any)</strong> → ${check(actions.has('manageGroupRoster'))}<br>
+<strong>evaluate('postBulletinOrgWide', any)</strong> → ${check(actions.has('postBulletinOrgWide'))}<br>
+  `;
+}
+
+function switchUser(key) {
+  document.querySelectorAll('.user-switch-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('sw-' + key).classList.add('active');
+  const user = users[key];
+  renderActions('actions-guidance', user, 'guidance');
+  renderActions('actions-discipline', user, 'discipline');
+  renderPolicyDebug(user, 'guidance', 'discipline');
+}
+
+// Init
+switchUser('santos');
+</script>
+</body>
+</html>

@@ -299,23 +299,39 @@ Pre-loaded registry of valid student names and IDs used for apply-to-join signup
 
 ### `organizations/{organizationId}/roles/{roleId}` — Custom Roles
 
+> Full role model and capability design: see **[RBAC_ARCHITECTURE.md](RBAC_ARCHITECTURE.md)**.
+
 ```json
 {
-  "roleId": "string",
-  "name": "string (e.g. 'Club Leader', 'Teacher', 'Journalism Editor')",
+  "id": "string (e.g. 'guidance-counselor')",
+  "displayName": "string (e.g. 'Guidance Counselor')",
   "description": "string | null",
-  "permissions": {
-    "canBroadcastReminders": "boolean",
-    "canPostNews": "boolean",
-    "canManageGroup": "boolean",
-    "canModerateMessages": "boolean",
-    "canBlockUsers": "boolean",
-    "canViewAllReports": "boolean"
-  },
-  "isActive": "boolean",
+  "isSystemRole": "boolean (system roles cannot be deleted)",
+  "capabilities": ["string (AppPermission enum values, e.g. 'viewGroupReports', 'approveReport')"],
+  "customCapabilities": ["string (IDs referencing customCapabilities collection)"],
   "createdAt": "Timestamp",
   "updatedAt": "Timestamp"
 }
+```
+
+---
+
+### `organizations/{organizationId}/customCapabilities/{capId}` — Custom Capability Aliases
+
+> Org-defined human-readable capability names backed by pre-built actions from the app catalog. See [RBAC_ARCHITECTURE.md → Custom Capabilities](RBAC_ARCHITECTURE.md).
+
+```json
+{
+  "id": "string (e.g. 'cc_review-guidance-referral')",
+  "displayName": "string (e.g. 'Review Guidance Referral')",
+  "description": "string | null",
+  "resolvedAction": "string (AppPermission enum value this resolves to)",
+  "tagScope": "string | null (content tag this capability is pre-scoped to)",
+  "usedInRoles": ["string (roleIds that include this capability)"],
+  "createdBy": "string (userId)",
+  "createdAt": "Timestamp"
+}
+```
 ```
 
 ---

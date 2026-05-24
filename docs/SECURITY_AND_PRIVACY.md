@@ -71,7 +71,9 @@ All Firebase SDK communication uses TLS/HTTPS. No custom HTTP endpoints are used
 
 ## Role-Based Access Control (RBAC)
 
-### Role Definitions
+> The full RBAC architecture — including the two-tier permission model, `AppPermission` enum design, content tag scoping, custom capabilities, policy engine, and enforcement strategy — is documented in **[RBAC_ARCHITECTURE.md](RBAC_ARCHITECTURE.md)**.
+
+### Role Summary
 
 | Role | Who | Capabilities |
 |---|---|---|
@@ -88,14 +90,10 @@ All Firebase SDK communication uses TLS/HTTPS. No custom HTTP endpoints are used
 
 Roles are enforced at **two levels**:
 
-1. **App Level** — Riverpod providers check the user's role before displaying admin UI
-2. **Firestore Security Rules Level** — Rules validate role on every read/write operation (server-side enforcement)
+1. **App Level** — Riverpod `PermissionProvider` checks the user's effective capabilities before displaying admin UI. App-level checks are UX gates only.
+2. **Firestore Security Rules Level** — Rules validate permissions on every read/write (server-side enforcement via Firebase Auth Custom Claims). This is the actual security boundary.
 
-App-level checks are for UX only. Security Rule enforcement is the actual security boundary.
-
-### Custom Claims (Future)
-
-For performance, roles will be stored as Firebase Auth custom claims in a future sprint. This avoids a Firestore read on every security rule evaluation.
+See [RBAC_ARCHITECTURE.md → Enforcement Strategy](RBAC_ARCHITECTURE.md) for the Custom Claims implementation plan.
 
 ---
 

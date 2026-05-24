@@ -266,6 +266,13 @@ Check Firebase Auth State
 
 ### Role-Based Access Control
 
+> The full RBAC design is documented in **[RBAC_ARCHITECTURE.md](RBAC_ARCHITECTURE.md)**. Summary below.
+
+SpeakUp Connect uses a **two-tier permission-based RBAC** model:
+
+- **Tier 1 — Capabilities** (`AppPermission` enum, code-controlled): fixed capabilities that map to real app behaviour — UI widgets, Firestore writes, screen access. Cannot change without a code deploy.
+- **Tier 2 — Content Scope** (org-defined, Firestore): orgs create content tags (`guidance`, `discipline`) and attach them to categories and groups. Role assignments include an optional tag scope, restricting a user to content with matching tags. Zero code change required.
+
 | Role | Capabilities |
 |---|---|
 | `anonymous` | Submit reports only |
@@ -273,7 +280,7 @@ Check Firebase Auth State
 | `admin` | View all reports, update status, assign, add notes |
 | `super_admin` | Manage organization settings, manage admins |
 
-Roles are stored in Firestore under `organizations/{orgId}/users/{userId}` and validated server-side via Security Rules.
+Roles and capabilities are stored in Firestore under `organizations/{orgId}/roles/` and enforced server-side via Firestore Security Rules using Firebase Auth Custom Claims.
 
 ### Firestore Security Rules Strategy
 

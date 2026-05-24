@@ -14,6 +14,8 @@ The philosophy: **the web portal is the workbench; the mobile admin app is the p
 
 ## Role Hierarchy
 
+> For the full RBAC design — including the `AppPermission` enum, two-tier permission model, custom capabilities, and Firestore enforcement strategy — see **[RBAC_ARCHITECTURE.md](RBAC_ARCHITECTURE.md)**.
+
 | Role | Description |
 |---|---|
 | **Global Super Admin** | Speakup Connect platform owner and designated global admins. Full access across all organizations. **Web portal only — no cross-org mobile access.** |
@@ -297,7 +299,7 @@ Admins can override urgency during triage. Reporters set urgency at submission t
 
 ## Open Questions — Awaiting MONHS Feedback
 
-> These questions must be resolved before Epic 2.12 (Role-Based Permissions) can be sprint-planned.
+> These questions must be resolved before Epic 2.12 (Role-Based Permissions) can be sprint-planned. See [RBAC_ARCHITECTURE.md](RBAC_ARCHITECTURE.md) for the finalized architecture and [MASTER_TASK_LIST.md → Epic 2.12](MASTER_TASK_LIST.md) for the task breakdown.
 
 ### Q1 — Teacher / Staff Role Granularity (May 23, 2026)
 
