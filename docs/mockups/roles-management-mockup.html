@@ -104,8 +104,10 @@
   .scope-option-desc { font-size: 11px; color: #718096; margin-top: 3px; }
 
   /* ── User row ── */
-  .user-row { display: flex; align-items: center; gap: 12px; padding: 10px 20px; border-bottom: 1px solid #f0f4f8; }
+  .user-row { display: flex; align-items: center; gap: 12px; padding: 10px 20px; border-bottom: 1px solid #f0f4f8; cursor: pointer; transition: background 0.15s; }
   .user-row:last-child { border-bottom: none; }
+  .user-row:hover { background: #fdf8f8; }
+  .user-row.selected { background: #fdf2f4; border-left: 3px solid #CE1126; padding-left: 17px; }
   .user-avatar { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; flex-shrink: 0; }
   .user-name { font-size: 13px; font-weight: 500; }
   .user-meta { font-size: 11px; color: #718096; margin-top: 1px; }
@@ -159,6 +161,71 @@
 
   .page-title { font-size: 20px; font-weight: 700; color: #1a202c; margin-bottom: 4px; }
   .page-subtitle { font-size: 13px; color: #718096; margin-bottom: 20px; }
+
+  /* ── Dashboard ── */
+  .dash-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
+  @media (max-width: 960px) { .dash-stats { grid-template-columns: repeat(2, 1fr); } }
+  .stat-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px 20px; }
+  .stat-card.stat-danger  { border-left: 4px solid #CE1126; }
+  .stat-card.stat-warning { border-left: 4px solid #d69e2e; }
+  .stat-card.stat-success { border-left: 4px solid #38a169; }
+  .stat-value { font-size: 32px; font-weight: 800; color: #1a202c; line-height: 1; }
+  .stat-card.stat-danger  .stat-value { color: #CE1126; }
+  .stat-card.stat-warning .stat-value { color: #d69e2e; }
+  .stat-card.stat-success .stat-value { color: #38a169; }
+  .stat-label { font-size: 12px; color: #718096; margin-top: 6px; font-weight: 500; }
+  .dash-cat-chip { padding: 4px 12px; border-radius: 20px; border: 1px solid #e2e8f0; background: #fff; font-size: 12px; font-weight: 500; color: #4a5568; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+  .dash-cat-chip:hover { border-color: #f0929e; color: #CE1126; }
+  .dash-cat-chip.active { background: #CE1126; color: #fff; border-color: #CE1126; }
+  .report-row { display: flex; align-items: center; gap: 12px; padding: 11px 20px; border-bottom: 1px solid #f0f4f8; cursor: pointer; transition: background 0.1s; }
+  .report-row:last-child { border-bottom: none; }
+  .report-row:hover { background: #fdf8f8; }
+  .urgency-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .urgency-critical { background: #CE1126; }
+  .urgency-high     { background: #dd6b20; }
+  .urgency-medium   { background: #d69e2e; }
+  .urgency-low      { background: #a0aec0; }
+  .report-ref { font-family: monospace; font-size: 10px; color: #a0aec0; flex-shrink: 0; width: 136px; }
+  .report-title-cell { flex: 1; min-width: 0; }
+  .report-title-text { font-size: 13px; font-weight: 500; color: #1a202c; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .report-cat-label  { font-size: 11px; color: #718096; margin-top: 2px; }
+  .tab-count { display: inline-flex; align-items: center; justify-content: center; background: #e2e8f0; color: #4a5568; border-radius: 10px; font-size: 10px; font-weight: 600; padding: 1px 6px; margin-left: 4px; }
+  .nav-tab.active .tab-count { background: #fdf2f4; color: #CE1126; }
+
+  /* ── Users screen ── */
+  .users-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .users-table th { text-align: left; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #718096; padding: 8px 16px; border-bottom: 2px solid #e2e8f0; background: #f7fafc; }
+  .users-table td { padding: 11px 16px; border-bottom: 1px solid #f0f4f8; vertical-align: middle; }
+  .users-table tr:last-child td { border-bottom: none; }
+  .users-table tbody tr:hover td { background: #fdf8f8; }
+  .user-name-cell { font-weight: 600; color: #1a202c; }
+  .user-email-cell { font-size: 11px; color: #718096; margin-top: 2px; }
+  .role-badge { display: inline-block; padding: 2px 9px; border-radius: 20px; font-size: 11px; font-weight: 600; background: #edf2ff; color: #3c4fe0; white-space: nowrap; }
+  .role-badge.role-admin     { background: #fff5f5; color: #CE1126; }
+  .role-badge.role-counselor { background: #e6f7ee; color: #276749; }
+  .role-badge.role-teacher   { background: #fffbea; color: #7c5c0a; }
+  .role-badge.role-member    { background: #f0f4f8; color: #4a5568; }
+  .scope-tag { display: inline-block; padding: 2px 7px; border-radius: 4px; font-size: 10px; font-weight: 500; background: #e2e8f0; color: #4a5568; margin: 1px 2px; white-space: nowrap; }
+  .scope-tag.tag-guidance    { background: #e6f7ee; color: #276749; }
+  .scope-tag.tag-discipline  { background: #fff5f5; color: #9b1c1c; }
+  .scope-tag.tag-all         { background: #f0f4f8; color: #718096; }
+  .users-filter-bar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
+
+  /* ── Groups screen ── */
+  .groups-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  @media (max-width: 960px) { .groups-grid { grid-template-columns: repeat(2,1fr); } }
+  .group-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; overflow: hidden; transition: box-shadow 0.15s; cursor: default; }
+  .group-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,.08); }
+  .group-card-header { padding: 12px 16px; font-weight: 700; font-size: 14px; color: #fff; display: flex; justify-content: space-between; align-items: center; }
+  .group-card-body { padding: 12px 16px; }
+  .group-meta-row { display: flex; justify-content: space-between; font-size: 12px; color: #718096; margin-bottom: 8px; }
+  .group-members-list { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+  .group-member-chip { background: #f0f4f8; color: #4a5568; font-size: 11px; padding: 2px 8px; border-radius: 20px; }
+  .group-member-chip.chip-counselor { background: #e6f7ee; color: #276749; }
+  .group-member-chip.chip-teacher   { background: #fffbea; color: #7c5c0a; }
+  .group-member-chip.chip-admin     { background: #fff5f5; color: #CE1126; }
+  .group-tag-row { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 8px; }
+  .group-card-footer { padding: 8px 16px; border-top: 1px solid #f0f4f8; display: flex; justify-content: flex-end; gap: 6px; }
 </style>
 </head>
 <body>
@@ -539,7 +606,7 @@
                 <span class="card-title">Current Assignments</span>
                 <button class="btn btn-primary btn-sm">＋ Add User</button>
               </div>
-              <div class="user-row">
+              <div class="user-row selected" id="assignee-row-santos" onclick="selectAssignedUser('santos')">
                 <div class="user-avatar" style="background:#d6bcfa;color:#553c9a">MS</div>
                 <div style="flex:1">
                   <div class="user-name">Ms. Ana Santos</div>
@@ -549,9 +616,9 @@
                     <span style="font-size:10px;color:#a0aec0;margin-left:6px">📌 Tag: guidance · Scope: assigned groups</span>
                   </div>
                 </div>
-                <button class="btn btn-danger btn-sm">Remove</button>
+                <button class="btn btn-danger btn-sm" onclick="event.stopPropagation()">Remove</button>
               </div>
-              <div class="user-row">
+              <div class="user-row" id="assignee-row-cruz" onclick="selectAssignedUser('cruz')">
                 <div class="user-avatar" style="background:#bee3f8;color:#2b6cb0">RC</div>
                 <div style="flex:1">
                   <div class="user-name">Mr. Roy Cruz</div>
@@ -561,14 +628,14 @@
                     <span style="font-size:10px;color:#a0aec0;margin-left:6px">📌 Tag: guidance · Scope: assigned groups</span>
                   </div>
                 </div>
-                <button class="btn btn-danger btn-sm">Remove</button>
+                <button class="btn btn-danger btn-sm" onclick="event.stopPropagation()">Remove</button>
               </div>
             </div>
           </div>
 
           <div>
             <div class="card">
-              <div class="card-header"><span class="card-title">What this means for Ms. Santos</span></div>
+              <div class="card-header"><span class="card-title" id="assign-panel-title">What this means for Ms. Santos</span></div>
               <div class="card-body">
                 <div class="flow" style="flex-direction:column;gap:8px">
                   <div class="flow-step highlight">
@@ -579,20 +646,20 @@
                   <div style="color:#a0aec0;text-align:center">↓</div>
                   <div class="flow-step highlight">
                     <div class="flow-step-num">Step 2 — You defined (no code)</div>
-                    <div class="flow-step-title">Tag scope: "guidance"</div>
+                    <div class="flow-step-title" id="assign-panel-scope">Tag scope: "guidance"</div>
                     <div class="flow-step-desc">Only reports tagged guidance are visible.</div>
                   </div>
                   <div style="color:#a0aec0;text-align:center">↓</div>
                   <div class="flow-step highlight">
                     <div class="flow-step-num">Step 3 — Result in app</div>
                     <div class="flow-step-title">"Approve" button appears</div>
-                    <div class="flow-step-desc">Only on guidance-tagged reports Ms. Santos can see.</div>
+                    <div class="flow-step-desc" id="assign-panel-result">Only on guidance-tagged reports Ms. Santos can see.</div>
                   </div>
                 </div>
               </div>
             </div>
             <div style="text-align:right;margin-top:8px">
-              <button class="btn btn-gold" onclick="showScreen('report-view')">See Ms. Santos's App View →</button>
+              <button class="btn btn-gold" id="assign-preview-btn" onclick="launchAppView('santos')">See Ms. Santos's App View →</button>
             </div>
           </div>
         </div>
@@ -613,14 +680,16 @@
         <div class="info-box" style="margin-bottom:16px">
           Switch between users below. The report content is identical — only the available <strong>actions</strong> change based on each user's resolved permissions. No code changed between users — only the policy engine output differs.
         </div>
-        <!-- hidden: close the old info-box div that was closed after this -->
-        </div>
 
         <!-- User switcher -->
         <div class="user-switcher">
           <div class="user-switch-btn active" id="sw-santos" onclick="switchUser('santos')">
             <div class="user-avatar" style="width:26px;height:26px;font-size:11px;background:#d6bcfa;color:#553c9a">MS</div>
             Ms. Santos <span style="font-size:11px;color:#718096">(Guidance Counselor)</span>
+          </div>
+          <div class="user-switch-btn" id="sw-cruz" onclick="switchUser('cruz')">
+            <div class="user-avatar" style="width:26px;height:26px;font-size:11px;background:#bee3f8;color:#2b6cb0">RC</div>
+            Mr. Cruz <span style="font-size:11px;color:#718096">(Guidance Counselor)</span>
           </div>
           <div class="user-switch-btn" id="sw-reyes" onclick="switchUser('reyes')">
             <div class="user-avatar" style="width:26px;height:26px;font-size:11px;background:#bee3f8;color:#2b6cb0">TR</div>
@@ -720,6 +789,162 @@
     </div><!-- /content -->
   </div><!-- /main -->
 </div><!-- /shell -->
+
+<!-- ════ DASHBOARD SCREEN (injected via JS) ════ -->
+<template id="tpl-dashboard">
+<div>
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px">
+    <div>
+      <div class="page-title">Reports Dashboard</div>
+      <div class="page-subtitle">All reports submitted to MONHS. Triage, assign, and resolve.</div>
+    </div>
+    <button class="btn btn-secondary btn-sm">⬇ Export CSV</button>
+  </div>
+
+  <!-- Stats row -->
+  <div class="dash-stats">
+    <div class="stat-card">
+      <div class="stat-value">47</div>
+      <div class="stat-label">Total Reports (all time)</div>
+    </div>
+    <div class="stat-card stat-danger">
+      <div class="stat-value" id="stat-submitted">—</div>
+      <div class="stat-label">Awaiting Review</div>
+    </div>
+    <div class="stat-card stat-warning">
+      <div class="stat-value" id="stat-in-review">—</div>
+      <div class="stat-label">In Progress</div>
+    </div>
+    <div class="stat-card stat-success">
+      <div class="stat-value">27</div>
+      <div class="stat-label">Resolved this month</div>
+    </div>
+  </div>
+
+  <!-- Search + category filters -->
+  <div class="card" style="margin-bottom:12px">
+    <div class="card-body" style="padding:10px 16px">
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <input class="form-input" id="dash-search" placeholder="🔍 Search by title..." style="width:220px;flex-shrink:0;padding:6px 12px" oninput="filterDashboard()" />
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <button class="dash-cat-chip active" onclick="setCatFilter('all',this)">All categories</button>
+          <button class="dash-cat-chip" onclick="setCatFilter('Guidance Referral',this)">Guidance Referral</button>
+          <button class="dash-cat-chip" onclick="setCatFilter('Bullying / Harassment',this)">Bullying / Harassment</button>
+          <button class="dash-cat-chip" onclick="setCatFilter('Safety Concern',this)">Safety Concern</button>
+          <button class="dash-cat-chip" onclick="setCatFilter('Mental Health',this)">Mental Health</button>
+          <button class="dash-cat-chip" onclick="setCatFilter('Other',this)">Other</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Status tabs + list -->
+  <div class="card">
+    <div style="display:flex;gap:2px;border-bottom:2px solid #e2e8f0;padding:0 4px;overflow-x:auto">
+      <div class="nav-tab active" style="margin-bottom:-2px;white-space:nowrap" onclick="setStatusFilter('all',this)">All <span class="tab-count" id="tc-all"></span></div>
+      <div class="nav-tab" style="margin-bottom:-2px;white-space:nowrap" onclick="setStatusFilter('submitted',this)">Submitted <span class="tab-count" id="tc-submitted"></span></div>
+      <div class="nav-tab" style="margin-bottom:-2px;white-space:nowrap" onclick="setStatusFilter('in-review',this)">In Review <span class="tab-count" id="tc-in-review"></span></div>
+      <div class="nav-tab" style="margin-bottom:-2px;white-space:nowrap" onclick="setStatusFilter('resolved',this)">Resolved <span class="tab-count" id="tc-resolved"></span></div>
+      <div class="nav-tab" style="margin-bottom:-2px;white-space:nowrap" onclick="setStatusFilter('closed',this)">Closed <span class="tab-count" id="tc-closed"></span></div>
+    </div>
+    <div id="dash-report-list"></div>
+    <div id="dash-empty" style="display:none;text-align:center;padding:48px;color:#a0aec0;font-size:13px">
+      <div style="font-size:32px;margin-bottom:8px">🔍</div>No reports match the current filters.
+    </div>
+    <div id="dash-footer" style="padding:10px 20px;font-size:11px;color:#a0aec0;border-top:1px solid #f0f4f8;display:flex;justify-content:space-between;align-items:center">
+      <span></span>
+      <span>Showing sample data — 10 of 47 total</span>
+    </div>
+  </div>
+</div>
+</template>
+
+<!-- ════ USERS SCREEN (injected via JS) ════ -->
+<template id="tpl-users">
+<div>
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px">
+    <div>
+      <div class="page-title">Users</div>
+      <div class="page-subtitle">All members of MONHS. Assign roles and manage access scope from here.</div>
+    </div>
+    <button class="btn btn-primary" onclick="alert('\u2139\uFE0F Invite User would open a form in production.')">+ Invite User</button>
+  </div>
+
+  <!-- Filter bar -->
+  <div class="users-filter-bar">
+    <input class="form-input" id="users-search" placeholder="&#128269;&#8194;Search by name or email..." style="width:240px;padding:6px 12px" oninput="renderUsersTable()" />
+    <select class="form-input" id="users-role-filter" style="width:180px;padding:6px 10px" onchange="renderUsersTable()">
+      <option value="">All roles</option>
+      <option value="Admin">Admin</option>
+      <option value="Guidance Counselor">Guidance Counselor</option>
+      <option value="Homeroom Teacher">Homeroom Teacher</option>
+      <option value="Discipline Officer">Discipline Officer</option>
+      <option value="Member">Member</option>
+    </select>
+    <select class="form-input" id="users-status-filter" style="width:140px;padding:6px 10px" onchange="renderUsersTable()">
+      <option value="">All statuses</option>
+      <option value="active">Active</option>
+      <option value="inactive">Inactive</option>
+      <option value="pending">Pending</option>
+    </select>
+    <span id="users-count" style="font-size:12px;color:#718096;margin-left:4px"></span>
+  </div>
+
+  <!-- Table -->
+  <div class="card">
+    <table class="users-table">
+      <thead>
+        <tr>
+          <th style="width:32px"></th>
+          <th>Name / Email</th>
+          <th>Role</th>
+          <th>Content Scope</th>
+          <th>Group Scope</th>
+          <th>Custom Caps</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="users-tbody"></tbody>
+    </table>
+    <div id="users-empty" style="display:none;text-align:center;padding:40px;color:#a0aec0;font-size:13px">
+      <div style="font-size:28px;margin-bottom:8px">&#128100;</div>No users match the current filters.
+    </div>
+  </div>
+</div>
+</template>
+
+<!-- ════ GROUPS SCREEN (injected via JS) ════ -->
+<template id="tpl-groups">
+<div>
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px">
+    <div>
+      <div class="page-title">Groups / Classes</div>
+      <div class="page-subtitle">Each group maps to a class or advisory unit. Staff assigned here inherit group-scoped permissions.</div>
+    </div>
+    <button class="btn btn-primary" onclick="alert('\u2139\uFE0F Create Group form opens in production.')">+ New Group</button>
+  </div>
+
+  <!-- Filter bar -->
+  <div class="users-filter-bar" style="margin-bottom:16px">
+    <input class="form-input" id="groups-search" placeholder="&#128269;&#8194;Search groups..." style="width:220px;padding:6px 12px" oninput="renderGroupsGrid()" />
+    <select class="form-input" id="groups-level-filter" style="width:160px;padding:6px 10px" onchange="renderGroupsGrid()">
+      <option value="">All levels</option>
+      <option value="Grade 7">Grade 7</option>
+      <option value="Grade 8">Grade 8</option>
+      <option value="Grade 9">Grade 9</option>
+      <option value="Grade 10">Grade 10</option>
+      <option value="All Grades">All Grades (clubs / orgs)</option>
+    </select>
+    <span id="groups-count" style="font-size:12px;color:#718096;margin-left:4px"></span>
+  </div>
+
+  <div id="groups-grid" class="groups-grid"></div>
+  <div id="groups-empty" style="display:none;text-align:center;padding:60px;color:#a0aec0;font-size:13px">
+    <div style="font-size:32px;margin-bottom:8px">&#127979;</div>No groups match the current filters.
+  </div>
+</div>
+</template>
 
 <!-- ════ CAPABILITIES SCREEN (injected via JS) ════ -->
 <template id="tpl-capabilities">
@@ -821,6 +1046,61 @@
 </div>
 </template>
 
+<!-- ════ CONTENT TAGS SCREEN (injected via JS) ════ -->
+<template id="tpl-tags">
+<div>
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px">
+    <div>
+      <div class="page-title">Content Tags</div>
+      <div class="page-subtitle">Tags classify report content and drive capability scope. A staff member with a tag-scoped capability only sees reports carrying that tag.</div>
+    </div>
+    <button class="btn btn-primary" onclick="showTagForm()">+ New Tag</button>
+  </div>
+
+  <!-- Info box -->
+  <div class="info-box" style="margin-bottom:16px">
+    <strong>How tags work:</strong> When a custom capability is created, it is optionally bound to one or more content tags. Staff assigned that capability can only act on reports that carry a matching tag. Tags are set by the report submitter at submission time.
+  </div>
+
+  <!-- Tag cards -->
+  <div id="tags-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px"></div>
+
+  <!-- Create form (hidden by default) -->
+  <div id="tag-create-form" class="card" style="display:none;margin-top:20px">
+    <div class="card-header"><div class="card-title">New Content Tag</div></div>
+    <div class="card-body">
+      <div class="two-col" style="gap:16px">
+        <div>
+          <div class="form-group">
+            <label class="form-label">Tag ID <span style="color:#CE1126">*</span></label>
+            <input class="form-input" id="new-tag-id" placeholder="e.g. mental-health" />
+            <div class="form-hint">Lowercase, hyphens only. Used in Firestore and custom caps.</div>
+          </div>
+          <div class="form-group" style="margin-top:10px">
+            <label class="form-label">Display Name <span style="color:#CE1126">*</span></label>
+            <input class="form-input" id="new-tag-name" placeholder="e.g. Mental Health" />
+          </div>
+        </div>
+        <div>
+          <div class="form-group">
+            <label class="form-label">Description</label>
+            <textarea class="form-input" id="new-tag-desc" rows="3" placeholder="When is this tag applied?"></textarea>
+          </div>
+          <div class="form-group" style="margin-top:10px">
+            <label class="form-label">Accent Color</label>
+            <input type="color" id="new-tag-color" value="#3182ce" style="height:36px;width:60px;border:1px solid #e2e8f0;border-radius:6px;cursor:pointer" />
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:16px">
+        <button class="btn btn-primary" onclick="submitTagForm()">Create Tag</button>
+        <button class="btn btn-secondary" onclick="hideTagForm()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+</template>
+
 <script>
 // ── Screen navigation ──
 const actionDescriptions = {
@@ -914,28 +1194,6 @@ function saveCustomCap() {
 }
 
 function showScreen(name) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  let screen = document.getElementById('screen-' + name);
-  if (!screen) {
-    // Capability screen is injected from template on first visit
-    if (name === 'capabilities') {
-      const wrapper = document.createElement('div');
-      wrapper.className = 'screen';
-      wrapper.id = 'screen-capabilities';
-      wrapper.innerHTML = document.getElementById('tpl-capabilities').innerHTML;
-      document.querySelector('.content').appendChild(wrapper);
-      screen = wrapper;
-      // Wire up action select preview
-      const sel = screen.querySelector('#new-cap-action');
-      if (sel) sel.addEventListener('change', updateActionPreview);
-      setTimeout(() => { renderCustomCapRows(); renderBuiltinCapRows(); }, 0);
-    } else {
-      return;
-    }
-  }
-  screen.classList.add('active');
-  if (name === 'capabilities') { setTimeout(() => { renderCustomCapRows(); renderBuiltinCapRows(); }, 0); }
-
   const titles = {
     roles: ['Roles &amp; Permissions', 'Admin → People → Roles &amp; Permissions'],
     'role-editor': ['Edit Role', 'Admin → Roles → Edit: Guidance Counselor'],
@@ -947,6 +1205,50 @@ function showScreen(name) {
     groups: ['Groups / Classes', 'Admin → Content → Groups'],
     tags: ['Content Tags', 'Admin → Content → Tags'],
   };
+
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  let screen = document.getElementById('screen-' + name);
+  if (!screen) {
+    const tpl = document.getElementById('tpl-' + name);
+    if (tpl) {
+      // Template-based screen — inject on first visit
+      const wrapper = document.createElement('div');
+      wrapper.className = 'screen';
+      wrapper.id = 'screen-' + name;
+      wrapper.innerHTML = tpl.innerHTML;
+      document.querySelector('.content').appendChild(wrapper);
+      screen = wrapper;
+      // Per-screen post-inject hooks
+      if (name === 'capabilities') {
+        const sel = screen.querySelector('#new-cap-action');
+        if (sel) sel.addEventListener('change', updateActionPreview);
+        setTimeout(() => { renderCustomCapRows(); renderBuiltinCapRows(); }, 0);
+      }
+      if (name === 'dashboard') { setTimeout(() => initDashboard(), 0); }
+      if (name === 'users')     { setTimeout(() => renderUsersTable(), 0); }
+      if (name === 'groups')    { setTimeout(() => renderGroupsGrid(), 0); }
+      if (name === 'tags')      { setTimeout(() => renderTagsGrid(), 0); }
+    } else {
+      // Generic placeholder for unbuilt screens
+      const [stubTitle] = titles[name] || [name];
+      const wrapper = document.createElement('div');
+      wrapper.className = 'screen';
+      wrapper.id = 'screen-' + name;
+      wrapper.innerHTML = `
+        <div class="page-title">${stubTitle}</div>
+        <div style="margin-top:40px;text-align:center;padding:60px 0;color:#a0aec0">
+          <div style="font-size:48px;margin-bottom:16px">🚧</div>
+          <div style="font-size:16px;font-weight:600;color:#4a5568;margin-bottom:8px">${stubTitle} — Not in this mockup</div>
+          <div style="font-size:13px">This screen is outside the scope of the Roles &amp; Permissions mockup.</div>
+        </div>`;
+      document.querySelector('.content').appendChild(wrapper);
+      screen = wrapper;
+    }
+  }
+  screen.classList.add('active');
+  // Re-render on every visit for screens with live data
+  if (name === 'capabilities') { setTimeout(() => { renderCustomCapRows(); renderBuiltinCapRows(); }, 0); }
+
   const [t, bc] = titles[name] || ['Admin', 'Admin'];
   document.getElementById('topbar-title').textContent = t;
   document.getElementById('topbar-bc').textContent = bc;
@@ -969,6 +1271,16 @@ const users = {
     customPermissions: [
       { name: 'Review Guidance Referral', resolvedAction: 'approveReport',       tagScope: ['guidance'] },
       { name: 'Post to Guidance Board',   resolvedAction: 'postBulletinToGroup', tagScope: ['guidance'] },
+    ],
+    tagScope: ['guidance'],
+    groupScope: 'assigned',
+  },
+  cruz: {
+    name: 'Mr. Roy Cruz',
+    role: 'Guidance Counselor',
+    permissions: ['viewGroupReports'],
+    customPermissions: [
+      { name: 'Review Guidance Referral', resolvedAction: 'approveReport', tagScope: ['guidance'] },
     ],
     tagScope: ['guidance'],
     groupScope: 'assigned',
@@ -1098,6 +1410,462 @@ function switchUser(key) {
   renderActions('actions-guidance', user, 'guidance');
   renderActions('actions-discipline', user, 'discipline');
   renderPolicyDebug(user, 'guidance', 'discipline');
+}
+
+// ── Assign screen user selection ──
+const assigneeProfiles = {
+  santos: {
+    firstName: 'Ms. Santos',
+    fullName: 'Ms. Ana Santos',
+    scope: 'Tag scope: "guidance"',
+    result: 'Only on guidance-tagged reports Ms. Santos can see.',
+  },
+  cruz: {
+    firstName: 'Mr. Cruz',
+    fullName: 'Mr. Roy Cruz',
+    scope: 'Tag scope: "guidance"',
+    result: 'Only on guidance-tagged reports Mr. Cruz can see.',
+  },
+};
+
+function selectAssignedUser(key) {
+  // Highlight the selected row
+  document.querySelectorAll('#screen-assign .user-row').forEach(r => r.classList.remove('selected'));
+  const row = document.getElementById('assignee-row-' + key);
+  if (row) row.classList.add('selected');
+
+  // Update right panel
+  const p = assigneeProfiles[key];
+  if (!p) return;
+  document.getElementById('assign-panel-title').textContent   = 'What this means for ' + p.firstName;
+  document.getElementById('assign-panel-scope').textContent   = p.scope;
+  document.getElementById('assign-panel-result').textContent  = p.result;
+  const btn = document.getElementById('assign-preview-btn');
+  btn.textContent = 'See ' + p.firstName + '\u2019s App View \u2192';
+  btn.onclick = () => launchAppView(key);
+}
+
+function launchAppView(key) {
+  showScreen('report-view');
+  switchUser(key);
+}
+
+// ── Content Tags ──
+let allTags = [
+  {
+    id:'guidance',    name:'Guidance Referral', color:'#276749',
+    desc: 'Academic, personal, or family concerns referred to the guidance office.',
+    reports: 21, caps: ['Review Guidance Referral', 'Post to Guidance Board'],
+    roles:   ['Guidance Counselor'],
+    system: true,
+  },
+  {
+    id:'discipline',  name:'Discipline / Conduct', color:'#9b1c1c',
+    desc: 'Behavioral incidents including bullying, misconduct, and violations of school rules.',
+    reports: 14, caps: ['Flag Discipline Incident'],
+    roles:   ['Discipline Officer'],
+    system: true,
+  },
+  {
+    id:'safety',      name:'Safety Concern', color:'#dd6b20',
+    desc: 'Physical hazards, security threats, or emergency-related reports.',
+    reports: 6, caps: [],
+    roles:   ['Admin'],
+    system: true,
+  },
+  {
+    id:'mental-health', name:'Mental Health', color:'#553c9a',
+    desc: 'Reports related to emotional wellbeing, mental health crises, or psychological support needs.',
+    reports: 5, caps: [],
+    roles:   ['Guidance Counselor'],
+    system: true,
+  },
+  {
+    id:'other',       name:'Other', color:'#718096',
+    desc: 'Reports that do not fit any defined category.',
+    reports: 1, caps: [],
+    roles:   ['Admin'],
+    system: true,
+  },
+];
+
+function renderTagsGrid() {
+  const grid = document.getElementById('tags-grid');
+  if (!grid) return;
+  grid.innerHTML = allTags.map(t => {
+    const capChips = t.caps.length
+      ? t.caps.map(c => `<span class="perm-chip" style="font-size:10px">${c}</span>`).join('')
+      : `<span style="font-size:11px;color:#a0aec0">No custom caps</span>`;
+    const roleChips = t.roles.map(r => `<span class="role-tag" style="font-size:10px">${r}</span>`).join('');
+    const systemBadge = t.system
+      ? `<span style="font-size:10px;background:#edf2ff;color:#3c4fe0;padding:1px 7px;border-radius:10px;font-weight:600">system</span>`
+      : `<span style="font-size:10px;background:#f0fff4;color:#276749;padding:1px 7px;border-radius:10px;font-weight:600">custom</span>`;
+    const deleteBtn = t.system ? '' :
+      `<button class="btn btn-sm btn-danger" onclick="deleteTag('${t.id}')" style="margin-left:4px">Delete</button>`;
+    return `
+      <div class="card" style="border-top:3px solid ${t.color}">
+        <div class="card-body" style="padding:14px 16px">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
+            <div>
+              <span style="font-weight:700;font-size:14px;color:${t.color}">${t.name}</span>
+              <code style="font-size:10px;color:#a0aec0;margin-left:6px">#${t.id}</code>
+            </div>
+            ${systemBadge}
+          </div>
+          <div style="font-size:12px;color:#718096;margin-bottom:10px">${t.desc}</div>
+          <div style="display:flex;gap:16px;font-size:11px;color:#4a5568;margin-bottom:10px">
+            <span>📄 <strong>${t.reports}</strong> reports</span>
+          </div>
+          <div style="margin-bottom:6px">
+            <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:#a0aec0;margin-bottom:4px">Custom caps using this tag</div>
+            <div style="display:flex;gap:4px;flex-wrap:wrap">${capChips}</div>
+          </div>
+          <div>
+            <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:#a0aec0;margin-bottom:4px">Roles with access</div>
+            <div style="display:flex;gap:4px;flex-wrap:wrap">${roleChips}</div>
+          </div>
+        </div>
+        <div style="padding:8px 16px;border-top:1px solid #f0f4f8;display:flex;justify-content:flex-end;gap:6px">
+          <button class="btn btn-sm btn-secondary" onclick="alert('\u2139\uFE0F Tag editor opens in production.')">Edit</button>
+          ${deleteBtn}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function showTagForm() {
+  const f = document.getElementById('tag-create-form');
+  if (f) { f.style.display = 'block'; f.scrollIntoView({ behavior:'smooth', block:'start' }); }
+}
+function hideTagForm() {
+  const f = document.getElementById('tag-create-form');
+  if (f) f.style.display = 'none';
+}
+function submitTagForm() {
+  const id   = (document.getElementById('new-tag-id')?.value   || '').trim();
+  const name = (document.getElementById('new-tag-name')?.value || '').trim();
+  const desc = (document.getElementById('new-tag-desc')?.value || '').trim();
+  const color = document.getElementById('new-tag-color')?.value || '#718096';
+  if (!id || !name) { alert('Tag ID and Display Name are required.'); return; }
+  if (!/^[a-z0-9-]+$/.test(id)) { alert('Tag ID must be lowercase letters, numbers, and hyphens only.'); return; }
+  if (allTags.find(t => t.id === id)) { alert('A tag with that ID already exists.'); return; }
+  allTags.push({ id, name, color, desc: desc || '(no description)', reports: 0, caps: [], roles: [], system: false });
+  hideTagForm();
+  renderTagsGrid();
+}
+function deleteTag(id) {
+  if (!confirm('Delete tag \u201c' + id + '\u201d? This cannot be undone in production.')) return;
+  allTags = allTags.filter(t => t.id !== id);
+  renderTagsGrid();
+}
+
+// ── Groups ──
+const allGroups = [
+  {
+    id:'g7', name:'Grade 7 — Lapu-Lapu', level:'Grade 7', color:'#553c9a',
+    adviser:   { name:'Mr. Ben Torres',  role:'teacher'   },
+    counselor: { name:'Ms. Ana Santos',  role:'counselor' },
+    students: 46, tags: ['guidance', 'discipline'],
+    desc: 'Junior high first-year class.'
+  },
+  {
+    id:'g8', name:'Grade 8 — Del Pilar', level:'Grade 8', color:'#9b1c1c',
+    adviser:   { name:'Mr. Ben Torres',  role:'teacher'   },
+    counselor: { name:'Ms. Lina Garcia', role:'counselor' },
+    students: 41, tags: ['discipline'],
+    desc: 'Junior high second-year class.'
+  },
+  {
+    id:'g1', name:'Grade 9 — Mabini', level:'Grade 9', color:'#2b6cb0',
+    adviser:   { name:'Mr. Jun Reyes',   role:'teacher'   },
+    counselor: { name:'Ms. Ana Santos',  role:'counselor' },
+    students: 42, tags: ['guidance'],
+    desc: 'Homeroom advisory class under the Science track.'
+  },
+  {
+    id:'g2', name:'Grade 9 — Rizal', level:'Grade 9', color:'#2b6cb0',
+    adviser:   { name:'Mr. Jun Reyes',   role:'teacher'   },
+    counselor: { name:'Mr. Roy Cruz',    role:'counselor' },
+    students: 40, tags: ['guidance'],
+    desc: 'Homeroom advisory class under the Humanities track.'
+  },
+  {
+    id:'g3', name:'Grade 10 — Bonifacio', level:'Grade 10', color:'#276749',
+    adviser:   { name:'Ms. Carla Luna',  role:'teacher'   },
+    counselor: { name:'Ms. Ana Santos',  role:'counselor' },
+    students: 38, tags: ['guidance'],
+    desc: 'Homeroom advisory class preparing for senior high.'
+  },
+  {
+    id:'g4', name:'Grade 10 — Aguinaldo', level:'Grade 10', color:'#276749',
+    adviser:   { name:'Ms. Carla Luna',  role:'teacher'   },
+    counselor: { name:'Ms. Lina Garcia', role:'counselor' },
+    students: 39, tags: ['guidance'],
+    desc: 'Homeroom advisory class under STEM track.'
+  },
+  {
+    id:'g9', name:'Chess Club', level:'All Grades', color:'#2d3748',
+    adviser:   { name:'Mr. Jun Reyes',   role:'teacher'   },
+    counselor: { name:'Ms. Ana Santos',  role:'counselor' },
+    students: 28, tags: ['guidance'],
+    desc: 'School-wide chess club open to all grade levels.'
+  },
+  {
+    id:'g10', name:'Drum & Lyre Corps', level:'All Grades', color:'#702459',
+    adviser:   { name:'Mr. Ben Torres',  role:'teacher'   },
+    counselor: { name:'Ms. Lina Garcia', role:'counselor' },
+    students: 35, tags: ['guidance'],
+    desc: 'Marching band and drum corps representing MONHS in competitions and school events.'
+  },
+  {
+    id:'g11', name:'Journalism Group', level:'All Grades', color:'#1a535c',
+    adviser:   { name:'Ms. Carla Luna',  role:'teacher'   },
+    counselor: { name:'Mr. Roy Cruz',    role:'counselor' },
+    students: 22, tags: ['guidance'],
+    desc: 'School publication team covering campus news, features, and editorial content for all grade levels.'
+  },
+];
+
+const tagColorCls = { guidance: 'tag-guidance', discipline: 'tag-discipline' };
+
+function renderGroupsGrid() {
+  const q     = (document.getElementById('groups-search')?.value  || '').trim().toLowerCase();
+  const level = document.getElementById('groups-level-filter')?.value || '';
+
+  const filtered = allGroups.filter(g => {
+    if (q     && !g.name.toLowerCase().includes(q) && !g.desc.toLowerCase().includes(q)) return false;
+    if (level && g.level !== level && g.level !== 'All Grades') return false;
+    return true;
+  });
+
+  const gridEl  = document.getElementById('groups-grid');
+  const emptyEl = document.getElementById('groups-empty');
+  const countEl = document.getElementById('groups-count');
+  if (!gridEl) return;
+
+  if (countEl) countEl.textContent = filtered.length + ' of ' + allGroups.length + ' groups';
+
+  if (filtered.length === 0) {
+    gridEl.innerHTML = '';
+    if (emptyEl) emptyEl.style.display = 'block';
+    return;
+  }
+  if (emptyEl) emptyEl.style.display = 'none';
+
+  gridEl.innerHTML = filtered.map(g => {
+    const tagBadges = g.tags.map(t =>
+      `<span class="scope-tag ${tagColorCls[t] || ''}">${t}</span>`
+    ).join('');
+    const adviserChip = g.adviser.role
+      ? `<span class="group-member-chip chip-${g.adviser.role}">🏫 ${g.adviser.name}</span>`
+      : `<span class="group-member-chip" style="color:#a0aec0;font-style:italic">${g.adviser.name}</span>`;
+    const counselorChip = `<span class="group-member-chip chip-${g.counselor.role}">💼 ${g.counselor.name}</span>`;
+    return `
+      <div class="group-card">
+        <div class="group-card-header" style="background:${g.color}">
+          <span>${g.name}</span>
+          <span style="font-size:11px;font-weight:500;opacity:.85">${g.level}</span>
+        </div>
+        <div class="group-card-body">
+          <div class="group-meta-row">
+            <span>👥 ${g.students} students</span>
+            <div class="group-tag-row" style="margin-top:0">${tagBadges}</div>
+          </div>
+          <div style="font-size:11px;color:#718096;margin-bottom:8px">${g.desc}</div>
+          <div class="group-members-list">
+            ${adviserChip}
+            ${counselorChip}
+          </div>
+        </div>
+        <div class="group-card-footer">
+          <button class="btn btn-sm btn-secondary" onclick="alert('\u2139\uFE0F Roster view opens in production.')">Roster</button>
+          <button class="btn btn-sm btn-primary" onclick="alert('\u2139\uFE0F Edit group opens in production.')">Edit</button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// ── Users ──
+const allUsers = [
+  // Simulation users (keyed)
+  { key:'santos', name:'Ms. Ana Santos',     email:'a.santos@monhs.edu.ph',    role:'Guidance Counselor', tagScope:['guidance'],    groupScope:'Assigned groups', caps:2, status:'active'  },
+  { key:'cruz',   name:'Mr. Roy Cruz',       email:'r.cruz@monhs.edu.ph',      role:'Guidance Counselor', tagScope:['guidance'],    groupScope:'Assigned groups', caps:1, status:'active'  },
+  { key:'reyes',  name:'Mr. Jun Reyes',      email:'j.reyes@monhs.edu.ph',     role:'Homeroom Teacher',   tagScope:[],              groupScope:'Assigned groups', caps:0, status:'active'  },
+  { key:'member', name:'Juan Dela Cruz',     email:'j.delacruz@monhs.edu.ph',  role:'Member',             tagScope:[],              groupScope:'None',            caps:0, status:'active'  },
+  // Additional filler users
+  { key:'garcia', name:'Ms. Lina Garcia',    email:'l.garcia@monhs.edu.ph',    role:'Guidance Counselor', tagScope:['guidance'],    groupScope:'Assigned groups', caps:1, status:'active'  },
+  { key:'torres', name:'Mr. Ben Torres',     email:'b.torres@monhs.edu.ph',    role:'Discipline Officer', tagScope:['discipline'],  groupScope:'All groups',      caps:1, status:'active'  },
+  { key:'admin',  name:'Admin User',         email:'admin@monhs.edu.ph',       role:'Admin',              tagScope:[],              groupScope:'All groups',      caps:0, status:'active'  },
+  { key:'luna',   name:'Ms. Carla Luna',     email:'c.luna@monhs.edu.ph',      role:'Homeroom Teacher',   tagScope:[],              groupScope:'Assigned groups', caps:0, status:'inactive'},
+  { key:'santos2',name:'Mr. Paolo Santos',   email:'p.santos@monhs.edu.ph',    role:'Member',             tagScope:[],              groupScope:'None',            caps:0, status:'pending' },
+  { key:'villanu',name:'Ms. Rizza Villanueva',email:'r.villanueva@monhs.edu.ph',role:'Member',             tagScope:[],              groupScope:'None',            caps:0, status:'active'  },
+];
+
+const roleBadgeClass = {
+  'Admin':              'role-badge role-admin',
+  'Guidance Counselor': 'role-badge role-counselor',
+  'Homeroom Teacher':   'role-badge role-teacher',
+  'Discipline Officer': 'role-badge',
+  'Member':             'role-badge role-member',
+};
+const statusPillMap = {
+  active:   '<span class="status-pill status-resolved">Active</span>',
+  inactive: '<span class="status-pill">Inactive</span>',
+  pending:  '<span class="status-pill status-open">Pending</span>',
+};
+
+function renderUsersTable() {
+  const q    = (document.getElementById('users-search')?.value || '').trim().toLowerCase();
+  const role = document.getElementById('users-role-filter')?.value || '';
+  const stat = document.getElementById('users-status-filter')?.value || '';
+
+  const filtered = allUsers.filter(u => {
+    if (q    && !u.name.toLowerCase().includes(q) && !u.email.toLowerCase().includes(q)) return false;
+    if (role && u.role !== role)   return false;
+    if (stat && u.status !== stat) return false;
+    return true;
+  });
+
+  const tbody   = document.getElementById('users-tbody');
+  const emptyEl = document.getElementById('users-empty');
+  const countEl = document.getElementById('users-count');
+  if (!tbody) return;
+
+  if (countEl) countEl.textContent = filtered.length + ' of ' + allUsers.length + ' users';
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = '';
+    if (emptyEl) emptyEl.style.display = 'block';
+    return;
+  }
+  if (emptyEl) emptyEl.style.display = 'none';
+
+  tbody.innerHTML = filtered.map(u => {
+    const initials  = u.name.split(' ').filter(p => /^[A-Z]/.test(p)).slice(0,2).map(p => p[0]).join('');
+    const tagBadges = u.tagScope.length
+      ? u.tagScope.map(t => `<span class="scope-tag tag-${t}">${t}</span>`).join('')
+      : `<span class="scope-tag tag-all">all tags</span>`;
+    const capsBadge = u.caps > 0
+      ? `<span class="status-pill status-pending">${u.caps} custom</span>`
+      : `<span style="font-size:12px;color:#a0aec0">—</span>`;
+    const isSimUser = ['santos','cruz','reyes','member'].includes(u.key);
+    const viewBtn   = isSimUser
+      ? `<button class="btn btn-sm btn-secondary" onclick="showScreen('assign');selectAssignedUser('${u.key}')">View Role</button>`
+      : `<button class="btn btn-sm btn-secondary" onclick="alert('\u2139\uFE0F Role editor opens in the Roles screen in production.')">View Role</button>`;
+    return `
+      <tr>
+        <td><div class="user-avatar" style="width:30px;height:30px;font-size:12px;flex-shrink:0">${initials}</div></td>
+        <td>
+          <div class="user-name-cell">${u.name}</div>
+          <div class="user-email-cell">${u.email}</div>
+        </td>
+        <td><span class="${roleBadgeClass[u.role] || 'role-badge'}">${u.role}</span></td>
+        <td>${tagBadges}</td>
+        <td style="font-size:12px;color:#4a5568">${u.groupScope}</td>
+        <td>${capsBadge}</td>
+        <td>${statusPillMap[u.status] || u.status}</td>
+        <td>${viewBtn}</td>
+      </tr>`;
+  }).join('');
+}
+
+// ── Dashboard ──
+const dashReports = [
+  { id:'MONHS-2026-000047', title:'Student overwhelmed — exam pressure & family stress',  cat:'Guidance Referral',     status:'submitted',  urgency:'high',     by:'Anonymous',  ago:'12m ago' },
+  { id:'MONHS-2026-000046', title:'Bullying incident near Grade 9 corridor',               cat:'Bullying / Harassment', status:'in-review',  urgency:'critical', by:'Anonymous',  ago:'1h ago'  },
+  { id:'MONHS-2026-000045', title:'Counseling request — personal & family issues',         cat:'Guidance Referral',     status:'in-review',  urgency:'medium',   by:'Anonymous',  ago:'2h ago'  },
+  { id:'MONHS-2026-000044', title:'Exposed wiring near the science laboratory',            cat:'Safety Concern',        status:'submitted',  urgency:'high',     by:'Juan D.',    ago:'3h ago'  },
+  { id:'MONHS-2026-000043', title:'Theft reported inside Grade 8 classroom',              cat:'Bullying / Harassment', status:'in-review',  urgency:'medium',   by:'Anonymous',  ago:'5h ago'  },
+  { id:'MONHS-2026-000042', title:'Student reporting peer pressure re: substances',        cat:'Mental Health',         status:'submitted',  urgency:'critical', by:'Anonymous',  ago:'6h ago'  },
+  { id:'MONHS-2026-000041', title:'Online harassment via private group chat',              cat:'Bullying / Harassment', status:'resolved',   urgency:'medium',   by:'Anonymous',  ago:'1d ago'  },
+  { id:'MONHS-2026-000040', title:'Excessive absenteeism — student needs support',         cat:'Guidance Referral',     status:'resolved',   urgency:'low',      by:'Ms. Santos', ago:'1d ago'  },
+  { id:'MONHS-2026-000039', title:'Vandalism in 2nd floor comfort room',                  cat:'Safety Concern',        status:'closed',     urgency:'low',      by:'Anonymous',  ago:'2d ago'  },
+  { id:'MONHS-2026-000038', title:'Complaint: unfair treatment by class adviser',          cat:'Other',                 status:'closed',     urgency:'high',     by:'Anonymous',  ago:'3d ago'  },
+];
+
+const statusMeta = {
+  submitted:   { label: 'Submitted',  cls: 'status-open'    },
+  'in-review': { label: 'In Review',  cls: 'status-pending' },
+  resolved:    { label: 'Resolved',   cls: 'status-resolved'},
+  closed:      { label: 'Closed',     cls: ''               },
+};
+const urgencyCls = { critical:'urgency-critical', high:'urgency-high', medium:'urgency-medium', low:'urgency-low' };
+
+let dashState = { status: 'all', cat: 'all', search: '' };
+
+function initDashboard() { renderDashboard(); }
+
+function filterDashboard() {
+  dashState.search = (document.getElementById('dash-search')?.value || '').trim().toLowerCase();
+  renderDashboard();
+}
+
+function setCatFilter(cat, el) {
+  dashState.cat = cat;
+  document.querySelectorAll('.dash-cat-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  renderDashboard();
+}
+
+function setStatusFilter(status, el) {
+  dashState.status = status;
+  document.querySelectorAll('#screen-dashboard .nav-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  renderDashboard();
+}
+
+function renderDashboard() {
+  const applyFilters = (statusOverride) => dashReports.filter(r => {
+    const s = statusOverride || dashState.status;
+    if (s !== 'all' && r.status !== s) return false;
+    if (dashState.cat !== 'all' && r.cat !== dashState.cat) return false;
+    if (dashState.search && !r.title.toLowerCase().includes(dashState.search)) return false;
+    return true;
+  });
+
+  const filtered = applyFilters();
+
+  // Tab counts (honour cat + search, ignore status tab)
+  ['all','submitted','in-review','resolved','closed'].forEach(s => {
+    const el = document.getElementById('tc-' + s);
+    if (el) el.textContent = applyFilters(s).length;
+  });
+
+  // Stat cards: submitted/in-review counts from full dataset (no filters)
+  const fullSub = dashReports.filter(r => r.status === 'submitted').length;
+  const fullRev = dashReports.filter(r => r.status === 'in-review').length;
+  const subEl = document.getElementById('stat-submitted');
+  const revEl = document.getElementById('stat-in-review');
+  if (subEl) subEl.textContent = fullSub + 9;  // +9 simulates off-screen reports
+  if (revEl) revEl.textContent = fullRev + 5;
+
+  const listEl  = document.getElementById('dash-report-list');
+  const emptyEl = document.getElementById('dash-empty');
+  if (!listEl) return;
+
+  if (filtered.length === 0) {
+    listEl.innerHTML = '';
+    if (emptyEl) emptyEl.style.display = 'block';
+    return;
+  }
+  if (emptyEl) emptyEl.style.display = 'none';
+
+  listEl.innerHTML = filtered.map(r => {
+    const sm = statusMeta[r.status] || { label: r.status, cls: '' };
+    return `
+      <div class="report-row">
+        <div class="urgency-dot ${urgencyCls[r.urgency]}" title="${r.urgency} urgency"></div>
+        <div class="report-ref">${r.id}</div>
+        <div class="report-title-cell">
+          <div class="report-title-text">${r.title}</div>
+          <div class="report-cat-label">${r.cat}</div>
+        </div>
+        <span class="status-pill ${sm.cls}" style="flex-shrink:0">${sm.label}</span>
+        <div style="font-size:12px;color:#718096;flex-shrink:0;width:88px;text-align:right">${r.by}</div>
+        <div style="font-size:11px;color:#a0aec0;flex-shrink:0;width:52px;text-align:right">${r.ago}</div>
+        <button class="btn btn-secondary btn-sm" style="flex-shrink:0">View →</button>
+      </div>`;
+  }).join('');
 }
 
 // Init
