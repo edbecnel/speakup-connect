@@ -17,6 +17,10 @@ import 'package:speakup_connect/features/reports/presentation/screens/my_reports
 import 'package:speakup_connect/features/reports/presentation/screens/report_confirmation_screen.dart';
 import 'package:speakup_connect/features/reports/presentation/screens/report_details_screen.dart';
 import 'package:speakup_connect/features/reports/presentation/screens/submit_report_screen.dart';
+import 'package:speakup_connect/features/roles/presentation/screens/assign_role_screen.dart';
+import 'package:speakup_connect/features/roles/presentation/screens/capabilities_screen.dart';
+import 'package:speakup_connect/features/roles/presentation/screens/role_editor_screen.dart';
+import 'package:speakup_connect/features/roles/presentation/screens/roles_management_screen.dart';
 import 'package:speakup_connect/features/settings/presentation/screens/settings_screen.dart';
 
 part 'app_router.g.dart';
@@ -170,6 +174,37 @@ GoRouter appRouter(Ref ref) {
         path: Routes.adminSettings,
         name: 'adminSettings',
         builder: (context, state) => const AdminBrandingScreen(),
+      ),
+      GoRoute(
+        path: Routes.adminRoles,
+        name: 'adminRoles',
+        builder: (context, state) => const RolesManagementScreen(),
+      ),
+      GoRoute(
+        path: Routes.adminRoleNew,
+        name: 'adminRoleNew',
+        builder: (context, state) => const RoleEditorScreen(roleId: 'new'),
+      ),
+      GoRoute(
+        path: Routes.adminRoleEdit,
+        name: 'adminRoleEdit',
+        builder: (context, state) {
+          final roleId = state.pathParameters['roleId']!;
+          return RoleEditorScreen(roleId: roleId);
+        },
+      ),
+      GoRoute(
+        path: Routes.adminRoleAssign,
+        name: 'adminRoleAssign',
+        builder: (context, state) {
+          final roleId = state.pathParameters['roleId']!;
+          return AssignRoleScreen(roleId: roleId);
+        },
+      ),
+      GoRoute(
+        path: Routes.adminCapabilities,
+        name: 'adminCapabilities',
+        builder: (context, state) => const CapabilitiesScreen(),
       ),
     ],
   );

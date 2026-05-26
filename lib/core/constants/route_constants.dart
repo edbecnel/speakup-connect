@@ -30,6 +30,13 @@ abstract class Routes {
   static const String adminReportDetail = '/admin/reports/:reportId';
   static const String adminSettings = '/admin/settings';
 
+  // --- Admin: Roles & Permissions ---
+  static const String adminRoles = '/admin/roles';
+  static const String adminRoleNew = '/admin/roles/new';
+  static const String adminRoleEdit = '/admin/roles/:roleId/edit';
+  static const String adminRoleAssign = '/admin/roles/:roleId/assign';
+  static const String adminCapabilities = '/admin/capabilities';
+
   // --- Helpers ---
 
   /// Builds the report details path with a concrete [reportId].
@@ -38,4 +45,12 @@ abstract class Routes {
   /// Builds the admin report detail path with a concrete [reportId].
   static String adminReportDetailPath(String reportId) =>
       '/admin/reports/$reportId';
+
+  /// Builds the role editor path for an existing [roleId].
+  static String adminRoleEditPath(String roleId) =>
+      '/admin/roles/$roleId/edit';
+
+  /// Builds the role assignment path for a concrete [roleId].
+  static String adminRoleAssignPath(String roleId) =>
+      '/admin/roles/$roleId/assign';
 }

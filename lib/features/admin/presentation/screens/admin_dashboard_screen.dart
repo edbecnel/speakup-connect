@@ -26,6 +26,11 @@ class AdminDashboardScreen extends ConsumerWidget {
           title: const Text('Admin Dashboard'),
           actions: [
             IconButton(
+              icon: const Icon(Icons.manage_accounts_outlined),
+              tooltip: 'Roles & Permissions',
+              onPressed: () => context.push(Routes.adminRoles),
+            ),
+            IconButton(
               icon: const Icon(Icons.settings_outlined),
               tooltip: 'Branding Settings',
               onPressed: () => context.push(Routes.adminSettings),

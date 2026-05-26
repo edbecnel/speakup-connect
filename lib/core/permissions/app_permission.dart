@@ -93,4 +93,47 @@ enum AppPermission {
 
   static final Set<OrgType> _allOrgTypes =
       Set.unmodifiable(OrgType.values.toSet());
+
+  // ── Display Metadata (UI layer only) ──────────────────────────────────────
+
+  /// Human-readable label shown in the admin capabilities catalog.
+  String get displayName => switch (this) {
+        AppPermission.viewAllReports => 'View all org reports',
+        AppPermission.viewGroupReports => 'View reports in assigned groups',
+        AppPermission.approveReport => 'Approve / close reports',
+        AppPermission.manageReports => 'Update status, escalate & add notes',
+        AppPermission.postBulletinOrgWide => 'Post bulletins org-wide',
+        AppPermission.postBulletinToGroup => 'Post bulletins to own groups',
+        AppPermission.broadcastReminders => 'Broadcast reminders',
+        AppPermission.manageGroupRoster => 'Manage own group roster',
+        AppPermission.manageClassRoster => 'Manage class roster (school only)',
+        AppPermission.approveApplications => 'Approve join applications',
+        AppPermission.blockUsers => 'Suspend or block users',
+        AppPermission.manageOrganizationSettings =>
+          'Manage org settings & branding',
+        AppPermission.manageRoles => 'Manage roles & assign permissions',
+        AppPermission.viewAuditLogs => 'View audit logs',
+      };
+
+  /// Section label used to group capabilities in the admin UI.
+  String get groupLabel => switch (this) {
+        AppPermission.viewAllReports ||
+        AppPermission.viewGroupReports ||
+        AppPermission.approveReport ||
+        AppPermission.manageReports =>
+          'Reports',
+        AppPermission.postBulletinOrgWide ||
+        AppPermission.postBulletinToGroup =>
+          'Bulletins & News',
+        AppPermission.broadcastReminders => 'Reminders',
+        AppPermission.manageGroupRoster ||
+        AppPermission.manageClassRoster ||
+        AppPermission.approveApplications ||
+        AppPermission.blockUsers =>
+          'Roster & Users',
+        AppPermission.manageOrganizationSettings ||
+        AppPermission.manageRoles ||
+        AppPermission.viewAuditLogs =>
+          'Administration',
+      };
 }
