@@ -672,24 +672,23 @@
 
 ### Epic 2.12 — Role-Based Permissions
 
-> Architecture fully designed. See **[docs/RBAC_ARCHITECTURE.md](RBAC_ARCHITECTURE.md)** for the two-tier RBAC model, `AppPermission` enum design, custom capabilities, and enforcement strategy.  
-> **⚠ Do not begin until open questions in [ADMIN_APP_REQUIREMENTS.md](ADMIN_APP_REQUIREMENTS.md) are resolved with MONHS.**
+> Architecture fully designed. See **[docs/RBAC_ARCHITECTURE.md](RBAC_ARCHITECTURE.md)** for the two-tier RBAC model, `AppPermission` enum design, custom capabilities, and enforcement strategy.
 
-- [ ] Define `AppPermission` enum in `lib/core/permissions/app_permission.dart`
-- [ ] Create `roles` Firestore collection per org (schema in RBAC_ARCHITECTURE.md)
-- [ ] Create `customCapabilities` Firestore collection per org
-- [ ] Seed default system roles on org creation (`org-admin`, `member`)
-- [ ] Build `PermissionProvider` (Riverpod) — resolves effective capabilities from role assignments + custom cap registry
-- [ ] Implement Firebase Auth Custom Claims Cloud Function (writes permissions array on role change)
-- [ ] Build `RolesManagementScreen` (admin) — create, edit, delete roles and capability sets
-- [ ] Build `AssignRoleScreen` (admin) — assign custom roles to users with optional tag scope
-- [ ] Build `CapabilitiesScreen` (admin) — view built-ins, create custom capability aliases
-- [ ] Enforce permissions via Firestore Security Rules (using Custom Claims):
+- [x] Define `AppPermission` enum in `lib/core/permissions/app_permission.dart`
+- [ ] Create `roles` Firestore collection per org — seed default system roles (`org-admin`, `member`)
+- [ ] Create `customCapabilities` Firestore collection per org — seed with org-specific defaults
+- [x] Build `PermissionProvider` (Riverpod) — resolves effective capabilities from role assignments + custom cap registry
+- [x] Implement Firebase Auth Custom Claims Cloud Function (`syncCustomClaims`, `refreshMyPermissions`)
+- [x] Build `RolesManagementScreen` (admin) — list, edit, delete roles
+- [x] Build `RoleEditorScreen` (admin) — create/edit role with capability checklist
+- [x] Build `AssignRoleScreen` (admin) — assign custom roles to users with scope
+- [x] Build `CapabilitiesScreen` (admin) — view built-ins, create/delete custom capability aliases
+- [x] Enforce permissions via Firestore Security Rules (using Custom Claims) — `roleAssignments`, `roles`, `customCapabilities`, `classes`, `counselorContactRequests`
+- [ ] Enforce remaining permission gates in Security Rules:
   - `broadcastReminders` — reminders collection write
   - `postBulletinToGroup` / `postBulletinOrgWide` — bulletins / newsPosts write
   - `manageGroupRoster` — groups subcollection write
   - `blockUsers` — blockedUsers collection write
-  - `approveReport` / `manageReports` — report status update write
 
 ### Epic 2.13 — Abuse Blocking & Moderation
 
@@ -722,6 +721,22 @@
 - [ ] Admin: average resolution time
 - [ ] Admin: export reports to CSV
 - [ ] Admin: date range filtering
+
+### Epic 2.17 — Admin Activity Audit Log
+
+> Schema fully designed. See **[docs/DATABASE_DESIGN.md → audit_log](DATABASE_DESIGN.md)** for the event taxonomy, document schema, and implementation strategy.
+
+- [ ] Create `audit_log` Cloud Function write helper (shared utility for all triggers)
+- [ ] Trigger: `config/main` write → `config.branding_updated`
+- [ ] Trigger: `categories/{id}` write → `config.category_created/updated/deleted`
+- [ ] Trigger: `roles/{id}` write → `roles.role_created/updated/deleted`
+- [ ] Trigger: `customCapabilities/{id}` write → `roles.capability_created/deleted`
+- [ ] Extend `syncCustomClaims` trigger → also write `roles.assignment_added/removed` to `audit_log`
+- [ ] Trigger: `users/{id}` approval status change → `users.application_approved/rejected`
+- [ ] Trigger: `blockedUsers/{id}` write → `users.user_blocked/unblocked`
+- [ ] Build `AuditLogScreen` (admin, web-only) — paginated timeline view with `resourceType` + `actorId` filters
+- [ ] Firestore Security Rules: `audit_log` readable only by `viewAuditLogs` permission; **no client writes**
+- [ ] Add `audit_log` composite indexes to `firestore.indexes.json`
 
 ---
 

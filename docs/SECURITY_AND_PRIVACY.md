@@ -206,13 +206,17 @@ Every report status change creates an immutable entry in `statusHistory`:
 - Failed login attempts (managed by Firebase)
 - Admin report view events (future enhancement)
 
-### Future: Admin Activity Log
+### Admin Activity Log — `organizations/{orgId}/audit_log/`
 
-A separate `audit_log` subcollection will be added to track:
-- Admin logins
-- Configuration changes
-- User management actions
-- Report deletions (if deletion is ever enabled)
+Fully specced in [DATABASE_DESIGN.md → audit_log](DATABASE_DESIGN.md). Written exclusively by Cloud Function triggers (never from the Flutter client). Covers:
+
+- **Configuration changes** — branding, category schema, `anonymityMode` per category, org settings
+- **RBAC changes** — role create/edit/delete, custom capability create/delete, role assignment add/remove
+- **User management** — application approval/rejection, block/unblock
+- **Report management** — status changes (mirrors `statusHistory` for org-level querying), internal notes
+- **Content** — bulletin post/delete
+
+Each entry captures `before`/`after` field snapshots of the changed fields only. Readable only by users with the `viewAuditLogs` permission (see `AppPermission` enum). Implementation tracked in Epic 2.17.
 
 ---
 

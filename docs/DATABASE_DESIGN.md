@@ -53,7 +53,8 @@ Firestore Root
 │       ├── messages/        # Group chat messages (per group sub-collection)
 │       ├── directMessages/  # Peer-to-peer message threads
 │       ├── blockedUsers/    # Abuse block records
-│       └── communityRules/  # Customizable signup/community rules
+        ├── communityRules/  # Customizable signup/community rules
+        └── audit_log/       # Immutable admin activity log (append-only)
 │
 ├── languages/               # Global language string database
 │   └── {languageCode}/      # e.g. "en", "fil", "es"
@@ -565,6 +566,58 @@ Group messages are stored as subcollections under a thread document.
 
 ---
 
+### `organizations/{organizationId}/audit_log/{entryId}` — Admin Activity Log
+
+Immutable, append-only record of every privileged action performed by admins or Cloud Functions. Written exclusively by trusted Cloud Functions (never directly from the Flutter client) to prevent tampering. Readable only by users with the `viewAuditLogs` permission.
+
+```json
+{
+  "entryId": "string (auto-generated Firestore doc ID)",
+  "eventType": "string (dot-namespaced — see taxonomy below)",
+  "actorId": "string (Firebase Auth UID of the admin who performed the action)",
+  "actorDisplayName": "string (snapshot at time of action — denormalized)",
+  "timestamp": "Timestamp (server-set)",
+  "resourceType": "string ('role' | 'capability' | 'assignment' | 'category' | 'config' | 'user' | 'report' | 'bulletin')",
+  "resourceId": "string (Firestore document ID of the affected resource)",
+  "before": "Map? (snapshot of key changed fields before the action — omitted on creation)",
+  "after":  "Map? (snapshot of key changed fields after the action — omitted on deletion)",
+  "metadata": "Map? (additional context — e.g. scopeType + scopeId for role assignments)"
+}
+```
+
+> **`before`/`after` capture only the changed fields**, not the full document, to keep entries small and diffs legible.
+
+#### Event Type Taxonomy
+
+| Event Type | Trigger |
+|---|---|
+| `config.branding_updated` | Admin saves display name, primary/secondary color |
+| `config.category_created` | New report category added |
+| `config.category_updated` | Category name, `anonymityMode`, or `identifiedNotice` changed |
+| `config.category_deleted` | Category removed |
+| `config.org_settings_updated` | Any other org-level setting (communityRules, features flags) |
+| `roles.role_created` | New role definition saved |
+| `roles.role_updated` | Role capabilities or description changed |
+| `roles.role_deleted` | Role removed |
+| `roles.capability_created` | Custom capability alias created |
+| `roles.capability_deleted` | Custom capability alias removed |
+| `roles.assignment_added` | Role assigned to a user (with scope) |
+| `roles.assignment_removed` | Role assignment revoked |
+| `users.application_approved` | Admin approves a join application |
+| `users.application_rejected` | Admin rejects a join application |
+| `users.user_blocked` | User suspended or permanently blocked |
+| `users.user_unblocked` | Block lifted |
+| `reports.status_changed` | Report status updated (mirrors `statusHistory` for org-level querying) |
+| `reports.note_added` | Internal note appended to a report |
+| `bulletins.posted` | Bulletin published (especially `org_wide`) |
+| `bulletins.deleted` | Bulletin removed |
+
+#### Implementation Strategy
+
+All writes to `audit_log` are performed by **Firestore-triggered Cloud Functions** that react to document writes in the relevant collections. This ensures audit entries are created regardless of which client or admin tool performed the write, and that clients cannot skip or forge them. No direct Firestore writes to `audit_log` are permitted from Flutter code.
+
+---
+
 ### `organizations/{organizationId}/communityRules/{ruleId}` — Community Rules
 
 Displayed at signup and on the home page. Admin-customizable.
@@ -644,6 +697,12 @@ Indexes:
 Collection: organizations/{orgId}/blockedUsers
 Indexes:
   1. organizationId ASC + targetUserId ASC + expiresAt ASC
+
+Collection: organizations/{orgId}/audit_log
+Indexes:
+  1. resourceType ASC + timestamp DESC
+  2. actorId ASC + timestamp DESC
+  3. eventType ASC + timestamp DESC
 
 Collection: organizations/{orgId}/roster
 Indexes:
