@@ -79,9 +79,22 @@ service cloud.firestore {
     // Returns true when [orgId] member [uid] has [permission] in their
     // user profile document.  Used to check delegated permissions granted
     // by a super_admin (e.g. 'edit_theme' granted to an admin).
+    // True when the requesting user has [permission] in their Firebase Auth
+    // custom claims. JWT-first — no Firestore read required.
+    // Claims are synced by the syncCustomClaims Cloud Function on every role
+    // assignment write. May lag by up to 1 hour on role *definition* changes
+    // unless refreshMyPermissions is called and the app force-refreshes its token.
+    function hasClaimedPermission(permission) {
+      return isSignedIn()
+          && permission in request.auth.token.get('permissions', []);
+    }
+
+    // True when [orgId] member [uid] has [permission].
+    // Checks the Firebase Auth JWT claim first (no read cost), then falls back
+    // to the user profile document (for users whose claims have not yet synced).
     function hasPermission(orgId, permission) {
-      let profile = get(/databases/$(database)/documents/organizations/$(orgId)/users/$(request.auth.uid)).data;
-      return permission in profile.get('permissions', []);
+      return hasClaimedPermission(permission)
+          || permission in get(/databases/$(database)/documents/organizations/$(orgId)/users/$(request.auth.uid)).data.get('permissions', []);
     }
 
     // True when the update only touches branding fields (+ updatedAt).
@@ -195,6 +208,22 @@ service cloud.firestore {
                               .affectedKeys().hasAny(['permissions', 'role']));
 
         allow delete: if isAdminOrAbove(orgId);
+
+        // ── Role Assignments ──────────────────────────────────────────────────
+        // Subcollection tracking which roles this user holds, each with a
+        // scopeType and optional scopeId. Writes trigger the syncCustomClaims
+        // Cloud Function which refreshes the user's Firebase Auth custom claims.
+        match /roleAssignments/{assignmentId} {
+          // Users can read their own assignments; admins can read any.
+          allow read: if isAdminOrAbove(orgId)
+                      || (isSignedIn() && request.auth.uid == userId);
+          // Org admins may always write. Holders of manageRoles may write,
+          // but only within their own org (orgId claim check prevents
+          // cross-org privilege escalation).
+          allow write: if isAdminOrAbove(orgId)
+                       || (hasClaimedPermission('manageRoles')
+                           && request.auth.token.get('orgId', '') == orgId);
+        }
       }
 
       // ── Admin Records ───────────────────────────────────────────────────────
@@ -215,7 +244,19 @@ service cloud.firestore {
       // ── Custom Roles ────────────────────────────────────────────────────────
       match /roles/{roleId} {
         allow read:  if isSuperAdmin() || isOrgMember(orgId);
-        allow write: if isAdminOrAbove(orgId);
+        allow write: if isAdminOrAbove(orgId)
+                     || (hasClaimedPermission('manageRoles')
+                         && request.auth.token.get('orgId', '') == orgId);
+      }
+
+      // ── Custom Capabilities ─────────────────────────────────────────────────
+      // Org-defined aliases that map a display name to a built-in AppPermission.
+      // Only org admins and manageRoles holders may create or edit them.
+      match /customCapabilities/{capId} {
+        allow read:  if isSuperAdmin() || isOrgMember(orgId);
+        allow write: if isAdminOrAbove(orgId)
+                     || (hasClaimedPermission('manageRoles')
+                         && request.auth.token.get('orgId', '') == orgId);
       }
 
       // ── Groups ──────────────────────────────────────────────────────────────
@@ -230,6 +271,36 @@ service cloud.firestore {
           allow read:  if isSuperAdmin() || isOrgMember(orgId);
           allow write: if isAdminOrAbove(orgId);
         }
+      }
+
+      // ── Classes (school-only academic units) ────────────────────────────────
+      // Each class has a members subcollection for roster management.
+      // The manageClassRoster permission (school OrgType only) gates writes;
+      // org admins always have full access regardless of OrgType.
+      match /classes/{classId} {
+        allow read:   if isSuperAdmin() || isOrgMember(orgId);
+        allow create: if isAdminOrAbove(orgId)
+                      || hasClaimedPermission('manageClassRoster');
+        allow update: if isAdminOrAbove(orgId)
+                      || hasClaimedPermission('manageClassRoster');
+        allow delete: if isAdminOrAbove(orgId);
+
+        match /members/{memberId} {
+          allow read:  if isSuperAdmin() || isOrgMember(orgId);
+          allow write: if isAdminOrAbove(orgId)
+                       || hasClaimedPermission('manageClassRoster');
+        }
+      }
+
+      // ── Counselor Contact Requests (voluntary_contact anonymityMode) ──────────
+      // Stores the reporter's optional consent to be contacted by a counselor
+      // after an anonymous report. Intentionally NOT linked to the report
+      // document so the report remains genuinely anonymous.
+      match /counselorContactRequests/{requestId} {
+        allow read: if isModeratorOrAbove(orgId);
+        allow create: if isOrgMember(orgId)
+                      && request.resource.data.organizationId == orgId;
+        allow update, delete: if isAdminOrAbove(orgId);
       }
 
       // ── Bulletins ───────────────────────────────────────────────────────────

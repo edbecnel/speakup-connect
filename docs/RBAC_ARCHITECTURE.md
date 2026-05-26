@@ -358,14 +358,14 @@ See [DATABASE_DESIGN.md](DATABASE_DESIGN.md) for full Firestore schemas.
 | Classes vs Groups separation | ✅ Decided — separate `classes/` and `groups/` collections; `scopeType` includes `"class"` |
 | Teacher/Staff role definition | ✅ Decided — role names are admin-configurable; no code change needed for new role names |
 | Scoped `manageRoles` delegation | ✅ Decided — delegation scope set in the role assignment by org admin |
-| `AppPermission` enum (Dart) | ⬜ Not started — Epic 2.12 |
-| `PermissionProvider` (Riverpod) | ⬜ Not started — Epic 2.12 |
+| `AppPermission` enum (Dart) | ✅ Complete — `lib/core/permissions/app_permission.dart` |
+| `PermissionProvider` (Riverpod) | ✅ Complete — `lib/core/permissions/providers/permission_provider.dart` |
 | `roles` Firestore collection + seeding | ⬜ Not started — Epic 2.12 |
 | Custom capabilities Firestore collection | ⬜ Not started — Epic 2.12 |
 | `RolesManagementScreen` | ⬜ Not started — Epic 2.12 |
 | `AssignRoleScreen` | ⬜ Not started — Epic 2.12 |
-| Custom Claims Cloud Function | ⬜ Not started — Epic 2.12 |
-| Firestore Security Rules for capabilities | ⬜ Not started — Epic 2.12 |
+| Custom Claims Cloud Function | ✅ Complete — `functions/src/index.ts` (`syncCustomClaims`, `refreshMyPermissions`) |
+| Firestore Security Rules for capabilities | ✅ Complete — `roleAssignments`, `customCapabilities`, `classes`, `counselorContactRequests` added |
 
 > All architectural decisions are resolved. Epic 2.12 implementation can proceed. See [ADMIN_APP_REQUIREMENTS.md](ADMIN_APP_REQUIREMENTS.md) for the decision log.
 

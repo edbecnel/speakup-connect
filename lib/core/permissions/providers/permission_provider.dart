@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:speakup_connect/config/app_config.dart';
 import 'package:speakup_connect/core/permissions/app_permission.dart';
@@ -50,6 +51,10 @@ final permissionProvider = StreamProvider<EffectivePermissionSet>((ref) async* {
       orgId: orgId,
       assignments: assignments,
     );
+    // Force-refresh the Firebase Auth ID token so Firestore Security Rules
+    // immediately see the updated custom claims written by syncCustomClaims.
+    // Fire-and-forget — the UI update (yield) is not blocked by the refresh.
+    FirebaseAuth.instance.currentUser?.getIdToken(true).ignore();
     yield resolved;
   }
 });
