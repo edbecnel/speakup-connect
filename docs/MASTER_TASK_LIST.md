@@ -284,7 +284,9 @@
 - [ ] Create `PhotoPickerWidget` — 3-slot photo picker
 - [ ] Create `ReportReviewSummary` — step 3 summary card
 - [ ] Create `StepProgressIndicator` — 1→2→3 progress widget
-- [ ] Create `AnonymousToggle` — Anonymous | With Identity segmented control
+- [ ] Create `AnonymousToggle` — Anonymous | With Identity segmented control; hidden entirely when category `anonymityMode` is `identified`; unchanged when `open`; hidden when `voluntary_contact` (report is always anonymous, opt-in offered post-submit)
+- [ ] Show `identifiedNotice` banner on report form when `anonymityMode` is `identified`
+- [ ] Build post-submit `VoluntaryContactSheet` — shown after anonymous submit when `anonymityMode` is `voluntary_contact`; stores opt-in as a separate `counselorContactRequests/{requestId}` document not linked to the report
 
 **Firebase**
 - [ ] Configure Firebase Storage rules for photo uploads

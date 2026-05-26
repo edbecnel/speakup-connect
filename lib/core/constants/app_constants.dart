@@ -35,6 +35,9 @@ abstract class AppConstants {
   static const String adminsCollection = 'admins';
   static const String configCollection = 'config';
   static const String auditLogCollection = 'audit_log';
+  static const String rolesCollection = 'roles';
+  static const String customCapabilitiesCollection = 'customCapabilities';
+  static const String roleAssignmentsCollection = 'roleAssignments';
 
   // --- Firestore Document IDs ---
   static const String mainConfigDocId = 'main';

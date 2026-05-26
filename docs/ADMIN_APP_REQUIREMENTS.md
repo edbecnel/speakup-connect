@@ -37,6 +37,7 @@ The following features are **intentionally excluded from the mobile admin app** 
 - Full report analytics and trend dashboards
 - Roster import (CSV/PDF bulk upload)
 - Organization settings and branding configuration
+- **Report category configuration** — creating/editing categories, setting `anonymityMode` per category, customizing `identifiedNotice` text
 - Role and permission management
 - Audit log review
 - Billing and subscription management
@@ -297,24 +298,60 @@ Admins can override urgency during triage. Reporters set urgency at submission t
 
 ---
 
-## Open Questions — Awaiting MONHS Feedback
+## Architecture Constraints
 
-> These questions must be resolved before Epic 2.12 (Role-Based Permissions) can be sprint-planned. See [RBAC_ARCHITECTURE.md](RBAC_ARCHITECTURE.md) for the finalized architecture and [MASTER_TASK_LIST.md → Epic 2.12](MASTER_TASK_LIST.md) for the task breakdown.
+> These are fixed design principles. They are not configurable by org admins — they require a developer action to change.
 
-### Q1 — Teacher / Staff Role Granularity (May 23, 2026)
+### C1 — New Capabilities Always Require a Code Change
 
-The current role hierarchy lists a single **Teacher / Staff** role, but real-world use at MONHS may require more granular distinctions. A "Teacher Admin" sub-role has been identified that would be class-scoped rather than org-wide:
+The `AppPermission` enum in Dart is the authoritative list of actions the app can perform. Adding new behaviour (a new UI action, a new Firestore write path) requires:
+1. Adding the enum value in Dart
+2. Writing the UI widget/action it unlocks
+3. Adding the Firestore Security Rule that enforces it
+4. Deploying the app update
 
-- Post bulletins **only to their own class/group** (not org-wide)
-- Manage the student roster **for their own class only**
-- Cannot access other classes' data or org-level settings
+Org admins can create custom capability **names** (aliases) for existing actions, but they cannot conjure new behaviour from the admin panel. This is an intentional security boundary.
 
-**Questions for MONHS:**
-1. How many distinct elevated roles exist in practice? (e.g., Subject Teacher, Homeroom Teacher, Department Head, Guidance Counselor, School Admin)
-2. Should a Homeroom Teacher's class-scoped access differ from a Subject Teacher's?
-3. Can a teacher belong to multiple classes simultaneously (co-teacher / advisory split)?
-4. Who at MONHS has authority to assign/revoke teacher-level roles — Org Admin only, or also a Department Head?
-5. Are there any roles that should have read-only visibility into org-wide data without any write access?
-6. Should the concept of "groups" (clubs, etc.) and "classes" be unified or kept as separate constructs in the data model?
+---
 
-**Impact:** The answers will determine whether Teacher/Staff remains one role with scoped permissions, or splits into multiple distinct roles. This directly affects the Firestore data model, Security Rules, and Epic 2.12 task breakdown.
+## Decisions — Resolved May 26, 2026
+
+### D1 — Classes and Groups are Separate Constructs ✅
+
+**Decision:** `classes/` and `groups/` are distinct Firestore sub-collections under each organization.
+
+- **Classes** — academic units: Grade/Year level, section name, homeroom teacher reference, academic year. Scope type: `"class"`.
+- **Groups** — extracurricular/club units: Chess Club, Journalism Group, Drum & Lyre Corps, etc. Scope type: `"group"`.
+
+Role assignment `scopeType` expands to: `"org" | "class" | "group" | "tag"`.
+
+A role scoped to `class/7-A` grants no access to `group/chess-club` and vice versa. See [DATABASE_DESIGN.md](DATABASE_DESIGN.md) and [RBAC_ARCHITECTURE.md](RBAC_ARCHITECTURE.md) for updated schemas.
+
+### D2 — `manageRoles` Delegation Scope is Org-Admin-Configurable ✅
+
+**Decision:** When an org admin assigns `manageRoles` to a Department Head (or any elevated role), they explicitly set the delegation scope in the role assignment:
+
+- `scopeType: "group", scopeId: "science-dept"` — Department Head can only assign roles to users within that department
+- `scopeType: "org"` — Department Head can assign roles org-wide
+
+No new capability enum value is needed. The permission provider enforces: *"does this user have `manageRoles` AND is the target user within their `manageRoles` scope?"* Firestore Security Rules verify this server-side on all role assignment writes.
+
+### D3 — Teacher/Staff Role Names are Admin-Configurable ✅
+
+**Decision:** Role names (Homeroom Teacher, Subject Teacher, Department Head, Guidance Counselor, etc.) are created by the org admin in the admin panel using existing capabilities and scopes. No code change is required to add or rename roles as long as the required capabilities already exist in the `AppPermission` enum.
+
+### D4 — Per-Category Anonymous Reporting Mode (`anonymityMode`) ✅
+
+**Decision:** Each report category carries an `anonymityMode` field configurable by the org admin from the **web portal only**. Three valid modes:
+
+| Mode | Report form behaviour | Use case |
+|---|---|---|
+| `open` | Anonymous toggle shown normally. Reporter chooses. | Most categories (bullying, safety, suggestions). Default. |
+| `identified` | Anonymous toggle hidden. Reporter must identify. A notice is shown (customizable via `identifiedNotice`). | Categories where the assigned counselor must follow up in person. |
+| `voluntary_contact` | All submissions are anonymous (toggle hidden). After a successful submit, a **VoluntaryContactSheet** is offered — reporter may optionally leave their name for the counselor. The opt-in is stored as a separate `counselorContactRequests/{requestId}` document with **no link to the report document**. | Mental health / personal concerns where preserving trust is critical but counselor follow-up is beneficial. |
+
+**Explicitly rejected — Option 2 (fake anonymity):** A mode where the counselor can silently unmask an anonymous reporter was rejected. When a counselor contacts a student who submitted "anonymously", word spreads among students that the anonymous option is not genuine. This destroys trust in the entire reporting system permanently. Only the three modes above are permitted.
+
+**Mobile admin app impact:** None for triage — the admin sees the report the same way regardless of mode. The submission form change (hiding/showing the toggle, displaying the notice, triggering the contact sheet) is in the **user-facing app**, not the admin app. Category `anonymityMode` configuration lives in the web portal under category management.
+
+Multiple class-scoped assignments per user (co-teacher, split advisory) are supported by the existing union-of-assignments model.

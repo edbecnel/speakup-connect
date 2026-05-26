@@ -84,7 +84,7 @@ A **role assignment** can include an optional tag scope:
 ```
 userId: "abc123"
 roleId: "guidance-counselor"
-scopeType: "tag"          // "org" | "group" | "tag"
+scopeType: "tag"          // "org" | "class" | "group" | "tag"
 scopeId: "guidance"
 ```
 
@@ -131,7 +131,7 @@ Role assignments are stored at `organizations/{orgId}/users/{userId}/roleAssignm
 ```json
 {
   "roleId": "guidance-counselor",
-  "scopeType": "tag",
+  "scopeType": "tag",          // "org" | "class" | "group" | "tag"
   "scopeId": "guidance",
   "assignedBy": "userId-of-admin",
   "assignedAt": "timestamp"
@@ -139,6 +139,32 @@ Role assignments are stored at `organizations/{orgId}/users/{userId}/roleAssignm
 ```
 
 A user may hold multiple role assignments (e.g., Guidance Counselor scoped to `guidance` AND Group Leader scoped to a specific group). Effective permissions are the **union** of all assignments.
+
+### Scoped `manageRoles` Delegation
+
+The `manageRoles` capability supports scoped delegation — an org admin can grant a Department Head the ability to assign roles **only within their own department**, rather than org-wide. This is configured in the role assignment itself:
+
+```json
+// Department Head — can only assign roles within science-dept
+{
+  "roleId": "department-head",
+  "scopeType": "group",
+  "scopeId": "science-dept",
+  "assignedBy": "userId-of-admin",
+  "assignedAt": "timestamp"
+}
+
+// Department Head — org-wide delegation
+{
+  "roleId": "department-head",
+  "scopeType": "org",
+  "scopeId": null,
+  "assignedBy": "userId-of-admin",
+  "assignedAt": "timestamp"
+}
+```
+
+The permission provider enforces: *"does this user have `manageRoles` AND is the target user within the assigner's scope?"* Firestore Security Rules verify this on all role assignment writes — a scoped `manageRoles` holder cannot assign roles outside their declared scope.
 
 ---
 
@@ -329,7 +355,9 @@ See [DATABASE_DESIGN.md](DATABASE_DESIGN.md) for full Firestore schemas.
 |---|---|
 | RBAC architecture design | ✅ Finalized |
 | Interactive UI mockup | ✅ [`docs/mockups/roles-management-mockup.html`](mockups/roles-management-mockup.html) |
-| Teacher/Staff role definition | ⏳ Awaiting MONHS feedback — see [ADMIN_APP_REQUIREMENTS.md](ADMIN_APP_REQUIREMENTS.md) |
+| Classes vs Groups separation | ✅ Decided — separate `classes/` and `groups/` collections; `scopeType` includes `"class"` |
+| Teacher/Staff role definition | ✅ Decided — role names are admin-configurable; no code change needed for new role names |
+| Scoped `manageRoles` delegation | ✅ Decided — delegation scope set in the role assignment by org admin |
 | `AppPermission` enum (Dart) | ⬜ Not started — Epic 2.12 |
 | `PermissionProvider` (Riverpod) | ⬜ Not started — Epic 2.12 |
 | `roles` Firestore collection + seeding | ⬜ Not started — Epic 2.12 |
@@ -339,7 +367,7 @@ See [DATABASE_DESIGN.md](DATABASE_DESIGN.md) for full Firestore schemas.
 | Custom Claims Cloud Function | ⬜ Not started — Epic 2.12 |
 | Firestore Security Rules for capabilities | ⬜ Not started — Epic 2.12 |
 
-> **⚠ Do not begin implementation of Epic 2.12 until the open questions in [`ADMIN_APP_REQUIREMENTS.md`](ADMIN_APP_REQUIREMENTS.md) are resolved with MONHS.** Role definitions affect the Firestore schema, Security Rules, and task breakdown.
+> All architectural decisions are resolved. Epic 2.12 implementation can proceed. See [ADMIN_APP_REQUIREMENTS.md](ADMIN_APP_REQUIREMENTS.md) for the decision log.
 
 ---
 

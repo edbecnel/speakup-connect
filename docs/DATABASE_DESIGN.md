@@ -39,7 +39,11 @@ Firestore Root
 │       ├── admins/          # Admin records for this org
 │       ├── roster/          # Imported student/member ID registry
 │       ├── roles/           # Custom roles and permission sets
-│       ├── groups/          # Admin-defined groups/clubs/organizations
+│       ├── classes/         # Academic classes/sections (Grade 7-A, etc.)
+│       │   └── {classId}/
+│       │       ├── [class document]
+│       │       └── members/     # Class enrollment records
+│       ├── groups/          # Extracurricular groups/clubs/organizations
 │       │   └── {groupId}/
 │       │       ├── [group document]
 │       │       └── members/     # Group membership records
@@ -138,23 +142,39 @@ A single document per organization (use `configId = "main"`).
   "requiresPhoto": "boolean",
   "requiresLocation": "boolean",
   "sortOrder": "number",
+  "anonymityMode": "open | identified | voluntary_contact",
+  "identifiedNotice": "string | null",
   "createdAt": "Timestamp"
 }
 ```
 
+#### `anonymityMode` — Per-Category Anonymous Reporting Behaviour
+
+Configured by the org admin per category. Controls how the report submission form handles reporter identity.
+
+| Value | Behaviour | Use case |
+|---|---|---|
+| `open` | Reporter freely chooses Anonymous or Identified. Default for most categories. | Bullying, Harassment, Safety, Suggestions |
+| `identified` | Anonymous option is hidden. Reporter must submit with their identity. A notice is shown explaining why. | Guidance referrals where counselor needs to follow up in person |
+| `voluntary_contact` | Report is genuinely anonymous. After submission, reporter is offered an optional private opt-in to be contacted by the assigned counselor. The opt-in is stored separately and is not linked to the report document. | Mental health, personal concerns where trust is critical but counselor follow-up is beneficial |
+
+`identifiedNotice` — Optional custom message shown on the form when `anonymityMode` is `identified`. If null, the app displays a default message: *"Your name will be shared with the assigned counselor so they can support you directly."*
+
+**Design rationale:** Option 2 (fake anonymity — counselor can unmask) was explicitly rejected because it destroys reporter trust when the counselor initiates contact. Students will share that the anonymous option is not genuine, causing the entire reporting system to lose credibility. Only `open` and `identified` and `voluntary_contact` are valid modes.
+
 **Default Categories (created at organization setup):**
 
-| categoryId | label | icon |
-|---|---|---|
-| `safety` | Safety | `shield` |
-| `bullying` | Bullying | `person_off` |
-| `maintenance` | Maintenance | `build` |
-| `facilities` | Facilities | `business` |
-| `harassment` | Harassment | `report` |
-| `suggestions` | Suggestions | `lightbulb` |
-| `cleanliness` | Cleanliness | `cleaning_services` |
-| `security` | Security | `security` |
-| `other` | Other | `more_horiz` |
+| categoryId | label | icon | anonymityMode |
+|---|---|---|---|
+| `safety` | Safety | `shield` | `open` |
+| `bullying` | Bullying | `person_off` | `open` |
+| `maintenance` | Maintenance | `build` | `open` |
+| `facilities` | Facilities | `business` | `open` |
+| `harassment` | Harassment | `report` | `open` |
+| `suggestions` | Suggestions | `lightbulb` | `open` |
+| `cleanliness` | Cleanliness | `cleaning_services` | `open` |
+| `security` | Security | `security` | `open` |
+| `other` | Other | `more_horiz` | `open` |
 
 ---
 
@@ -336,7 +356,43 @@ Pre-loaded registry of valid student names and IDs used for apply-to-join signup
 
 ---
 
+### `organizations/{organizationId}/classes/{classId}` — Academic Classes
+
+Academic units (sections/homerooms). Separate from extracurricular groups. Role assignment `scopeType: "class"` targets these.
+
+```json
+{
+  "classId": "string",
+  "organizationId": "string (denormalized)",
+  "name": "string (e.g. 'Grade 7 — Section A', '10-Rizal')",
+  "gradeLevel": "number (e.g. 7, 8, 9, 10)",
+  "academicYear": "string (e.g. '2025-2026')",
+  "homeroomTeacherId": "string | null (userId of assigned homeroom teacher)",
+  "isActive": "boolean",
+  "studentCount": "number (denormalized for display)",
+  "createdBy": "string (admin UID)",
+  "createdAt": "Timestamp",
+  "updatedAt": "Timestamp"
+}
+```
+
+#### `organizations/{organizationId}/classes/{classId}/members/{userId}` — Class Enrollment
+
+```json
+{
+  "userId": "string (Firebase Auth UID)",
+  "displayName": "string (denormalized for display)",
+  "classRole": "student | teacher",
+  "enrolledAt": "Timestamp",
+  "addedBy": "string (admin UID)"
+}
+```
+
+---
+
 ### `organizations/{organizationId}/groups/{groupId}` — Groups & Clubs
+
+Extracurricular units (clubs, organizations, corps). Separate from academic classes. Role assignment `scopeType: "group"` targets these.
 
 ```json
 {
