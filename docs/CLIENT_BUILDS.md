@@ -499,7 +499,82 @@ Use this checklist when onboarding a new VIP client (e.g., Xavier Academy):
 
 ---
 
-## 13. Reference — MONHS Flavor Parameters
+## 13. Testing on a Physical Android Device via USB
+
+Use this when you want to run the app directly on your phone during development.
+
+### 13.1 Prepare the device (one-time)
+
+1. **Enable Developer Options** — Go to **Settings → About phone**, tap **Build
+   number** 7 times until you see "You are now a developer!".
+2. **Enable USB Debugging** — **Settings → Developer Options → USB Debugging**,
+   toggle on.
+3. Connect the phone to your PC with a USB cable and accept the
+   **"Allow USB debugging?"** prompt on the device.
+
+### 13.2 Verify ADB detects the device
+
+```powershell
+adb devices
+```
+
+Expected output (device must show `device`, not `unauthorized`):
+
+```
+List of devices attached
+R5CT41XXXXX    device
+```
+
+If it shows `unauthorized`, re-check the prompt on the phone screen and
+tap **Allow**.
+
+### 13.3 Run the app
+
+```powershell
+# Standard flavor
+flutter run
+
+# MONHS client flavor
+flutter run --flavor monhs -t lib/main_monhs.dart
+```
+
+Flutter will automatically target the connected USB device. If multiple devices
+are available (e.g., an emulator is also running), list them first:
+
+```powershell
+flutter devices
+```
+
+Then target your phone explicitly using its device ID:
+
+```powershell
+flutter run -d <device-id>
+flutter run -d <device-id> --flavor monhs -t lib/main_monhs.dart
+```
+
+### 13.4 Hot reload & hot restart
+
+While the app is running in the terminal:
+
+| Key | Action |
+|-----|--------|
+| `r` | Hot reload (preserves state) |
+| `R` | Hot restart (clears state) |
+| `q` | Quit |
+
+### 13.5 Troubleshooting
+
+| Problem | Fix |
+|---------|-----|
+| `adb devices` shows nothing | Try a different USB cable (data cable, not charge-only); try a different USB port |
+| Device shows `unauthorized` | Unlock the phone screen and accept the USB debugging prompt |
+| `flutter run` picks the wrong device | Use `flutter devices` to get the ID then pass `-d <id>` |
+| App installs but crashes immediately | Run `flutter logs` to see the device logcat in real time |
+| `INSTALL_FAILED_UPDATE_INCOMPATIBLE` | Uninstall the existing app from the phone first, then re-run |
+
+---
+
+## 14. Reference — MONHS Flavor Parameters
 
 | Parameter | Value |
 |---|---|
