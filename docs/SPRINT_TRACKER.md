@@ -13,6 +13,8 @@
 ### Sprint 7 — Admin Dashboard Enhancements
 - **Date/Time:** May 29, 2026
 - **Status:** ✅ Complete
+- **Commit:** `9ec4bcd`
+- **GitHub Issues:** #43, #44, #45, #46
 
 #### 📝 Done
 - [x] Quick stats header — total, submitted, in-progress, resolved counts above the filter bar
