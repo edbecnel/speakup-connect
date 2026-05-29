@@ -37,6 +37,7 @@ class RolesManagementScreen extends ConsumerWidget {
         onPressed: () => context.push(Routes.adminRoleNew),
         icon: const Icon(Icons.add),
         label: const Text('Create Role'),
+        shape: const StadiumBorder(),
       ),
       body: rolesAsync.when(
         loading: () => const AppLoadingIndicator(),
@@ -221,7 +222,7 @@ class _RoleCard extends StatelessWidget {
                     ),
                   ),
                   if (overflow > 0)
-                    Chip(
+                    ActionChip(
                       label: Text('+$overflow more'),
                       labelStyle: theme.textTheme.labelSmall?.copyWith(
                         color: theme.colorScheme.primary,
@@ -230,6 +231,39 @@ class _RoleCard extends StatelessWidget {
                       side: BorderSide(color: theme.colorScheme.primary),
                       backgroundColor: Colors.transparent,
                       padding: EdgeInsets.zero,
+                      onPressed: () => showDialog<void>(
+                        context: context,
+                        builder: (_) => AlertDialog(
+                          title: Text('${role.displayName} — All Capabilities'),
+                          content: SingleChildScrollView(
+                            child: Wrap(
+                              spacing: 6,
+                              runSpacing: 6,
+                              children: resolvedCaps
+                                  .map(
+                                    (p) => Chip(
+                                      label: Text(p.displayName),
+                                      labelStyle: theme.textTheme.labelSmall,
+                                      visualDensity: VisualDensity.compact,
+                                      backgroundColor: Colors.transparent,
+                                      side: BorderSide(
+                                        color: theme.colorScheme.outline
+                                            .withOpacity(0.4),
+                                      ),
+                                      padding: EdgeInsets.zero,
+                                    ),
+                                  )
+                                  .toList(),
+                            ),
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.of(context).pop(),
+                              child: const Text('Close'),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                 ],
               ),
@@ -259,6 +293,7 @@ class _RoleCard extends StatelessWidget {
                 const SizedBox(width: 8),
                 AppButton.secondary(
                   label: 'Edit',
+                  minimumWidth: 80,
                   onPressed: () => context.push(
                     Routes.adminRoleEditPath(role.id),
                   ),
@@ -274,14 +309,32 @@ class _RoleCard extends StatelessWidget {
 
 // ── Empty Placeholder ─────────────────────────────────────────────────────────
 
-class _EmptyRolesPlaceholder extends StatelessWidget {
+class _EmptyRolesPlaceholder extends ConsumerWidget {
   const _EmptyRolesPlaceholder({required this.onCreateTap});
 
   final VoidCallback onCreateTap;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final seedState = ref.watch(seedRolesProvider);
+
+    ref.listen(seedRolesProvider, (prev, next) {
+      if (!next.isLoading && prev?.isLoading == true) {
+        if (next.hasError) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text('Seed failed: ${next.error}'),
+            backgroundColor: theme.colorScheme.error,
+          ));
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text('Default roles added successfully'),
+            backgroundColor: Colors.green,
+          ));
+        }
+      }
+    });
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -307,9 +360,35 @@ class _EmptyRolesPlaceholder extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
-            AppButton.primary(
-              label: 'Create First Role',
-              onPressed: onCreateTap,
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                onPressed: seedState.isLoading
+                    ? null
+                    : () => ref.read(seedRolesProvider.notifier).seed(),
+                icon: seedState.isLoading
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const Icon(Icons.auto_fix_high_outlined),
+                label: Text(
+                  seedState.isLoading ? 'Seeding…' : 'Seed Default Roles',
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: seedState.isLoading ? null : onCreateTap,
+                icon: const Icon(Icons.add),
+                label: const Text('Create Role Manually'),
+              ),
             ),
           ],
         ),

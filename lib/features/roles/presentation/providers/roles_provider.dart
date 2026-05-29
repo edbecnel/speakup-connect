@@ -238,3 +238,150 @@ final roleAssignmentWriterProvider =
     NotifierProvider<RoleAssignmentWriter, AsyncValue<void>>(
   RoleAssignmentWriter.new,
 );
+
+// ── Seed Default Roles ────────────────────────────────────────────────────────
+
+/// Writes the system roles and MONHS starter roles to Firestore in a
+/// single batch. Safe to re-run — uses [SetOptions(merge: true)] so any
+/// admin edits made after the initial seed are preserved.
+///
+/// System roles (`org-admin`, `member`) cannot be deleted via the admin UI.
+/// Starter roles (guidance-counselor, etc.) are fully editable.
+class SeedRoles extends Notifier<AsyncValue<void>> {
+  static const _allPermissions = [
+    // Reports
+    'viewAllReports',
+    'viewGroupReports',
+    'approveReport',
+    'manageReports',
+    // Bulletins & News
+    'postBulletinOrgWide',
+    'postBulletinToGroup',
+    // Reminders
+    'broadcastReminders',
+    // Roster & Users
+    'manageGroupRoster',
+    'manageClassRoster',
+    'approveApplications',
+    'blockUsers',
+    // Org Administration
+    'manageOrganizationSettings',
+    'manageRoles',
+    'viewAuditLogs',
+  ];
+
+  static const _roles = [
+    // ── System roles ──────────────────────────────────────────────────────
+    (
+      id: 'org-admin',
+      displayName: 'Organization Admin',
+      description: 'Full administrative access to all organization features.',
+      isSystemRole: true,
+      capabilities: _allPermissions,
+    ),
+    (
+      id: 'member',
+      displayName: 'Member',
+      description:
+          'Standard member. Can submit reports and view their own submissions.',
+      isSystemRole: true,
+      capabilities: <String>[],
+    ),
+    // ── MONHS starter roles (editable) ────────────────────────────────────
+    (
+      id: 'guidance-counselor',
+      displayName: 'Guidance Counselor',
+      description:
+          'Reviews and closes guidance referral reports. Can post to group boards.',
+      isSystemRole: false,
+      capabilities: [
+        'viewGroupReports',
+        'approveReport',
+        'postBulletinToGroup',
+      ],
+    ),
+    (
+      id: 'discipline-officer',
+      displayName: 'Discipline Officer',
+      description:
+          'Manages discipline-related reports. Can update status and add notes.',
+      isSystemRole: false,
+      capabilities: [
+        'viewGroupReports',
+        'approveReport',
+        'manageReports',
+        'blockUsers',
+      ],
+    ),
+    (
+      id: 'homeroom-teacher',
+      displayName: 'Homeroom Teacher',
+      description:
+          'Views reports from their assigned class/section. Manages class roster.',
+      isSystemRole: false,
+      capabilities: [
+        'viewGroupReports',
+        'manageClassRoster',
+      ],
+    ),
+    (
+      id: 'club-adviser',
+      displayName: 'Club / Org Adviser',
+      description:
+          'Manages extracurricular group roster. Can post to group bulletin board.',
+      isSystemRole: false,
+      capabilities: [
+        'manageGroupRoster',
+        'postBulletinToGroup',
+        'broadcastReminders',
+      ],
+    ),
+  ];
+
+  @override
+  AsyncValue<void> build() => const AsyncData(null);
+
+  Future<void> seed() async {
+    state = const AsyncLoading();
+    try {
+      final batch = FirebaseFirestore.instance.batch();
+      final rolesRef = _rolesRef();
+      final now = FieldValue.serverTimestamp();
+
+      for (final role in _roles) {
+        final doc = rolesRef.doc(role.id);
+        batch.set(
+          doc,
+          {
+            'displayName': role.displayName,
+            'description': role.description,
+            'isSystemRole': role.isSystemRole,
+            'capabilities': role.capabilities,
+            'customCapabilities': <String>[],
+            'updatedAt': now,
+          },
+          SetOptions(merge: true),
+        );
+      }
+
+      await batch.commit();
+
+      // Set createdAt only on docs that don't have it yet.
+      for (final role in _roles) {
+        final snap = await rolesRef.doc(role.id).get();
+        if (snap.exists && snap.data()?['createdAt'] == null) {
+          await rolesRef.doc(role.id).update({'createdAt': now});
+        } else if (!snap.exists) {
+          await rolesRef.doc(role.id).set({'createdAt': now}, SetOptions(merge: true));
+        }
+      }
+
+      state = const AsyncData(null);
+    } catch (e, st) {
+      state = AsyncError(e, st);
+    }
+  }
+}
+
+final seedRolesProvider =
+    NotifierProvider<SeedRoles, AsyncValue<void>>(SeedRoles.new);

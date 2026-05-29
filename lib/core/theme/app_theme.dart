@@ -288,10 +288,11 @@ abstract class AppTheme {
       ),
 
       // --- FloatingActionButton ---
+      // Do NOT set shape here: regular FABs default to CircleBorder and
+      // extended FABs default to StadiumBorder — let each use its own default.
       floatingActionButtonTheme: FloatingActionButtonThemeData(
         backgroundColor: effectiveFg,
         foregroundColor: effectiveFgContent,
-        shape: const CircleBorder(),
         elevation: 4,
       ),
 

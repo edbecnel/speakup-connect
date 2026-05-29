@@ -1,7 +1,7 @@
 # Sprint Tracker — SpeakUp Connect
 
 > Last Updated: May 29, 2026  
-> Current Sprint: **Sprint 7** (Admin Dashboard Enhancements — complete)  
+> Current Sprint: **Sprint 8** (RBAC — Roles Management, Phase 1 — complete)  
 > Sprint Duration: 2 weeks
 
 > **Development Velocity Note:** Development has significantly outpaced the original planned schedule. As of May 23, 2026 (day 5 of the project), the codebase covers work originally scoped for Sprints 1–6. Sprint numbering below reflects original plan order but completion dates reflect actual delivery dates.
@@ -9,6 +9,33 @@
 ---
 
 ## Active Sprint
+
+### Sprint 8 — RBAC: Roles Management, Phase 1
+- **Date/Time:** May 29, 2026
+- **Status:** ✅ Complete
+- **Commit:** *(pending)*
+- **GitHub Issues:** *(pending)*
+
+#### 🚀 AI Context Prompt
+> "We are implementing Sprint 8 — RBAC (Role-Based Access Control) for SpeakUp Connect. Stack: Flutter 3.44, Riverpod 3.x (NotifierProvider pattern), go_router, Firebase Firestore. Seed 6 default system/starter roles into `organizations/monhs-ph-001/roles`, build the Roles & Permissions management screen, and fix any layout issues. DefaultOrganizationId is `monhs-ph-001`."
+
+#### 📝 Done
+- [x] Add `SeedRoles` notifier + `seedRolesProvider` to `roles_provider.dart` — batch-writes 6 roles via `SetOptions(merge: true)`
+- [x] Add in-app "Seed Default Roles" button to `_EmptyRolesPlaceholder` (follows `_SetupCategoriesCard` pattern)
+- [x] Seed 6 roles to Firestore: `org-admin` (all 14 permissions, isSystemRole), `member` (isSystemRole, no caps), `guidance-counselor`, `discipline-officer`, `homeroom-teacher`, `club-adviser`
+- [x] Fix `_RoleCard` layout crash — `AppButton.secondary` uses `minimumSize: Size(double.infinity, 52)` by default; added `minimumWidth: 80` to prevent infinite-width constraint inside `Row`
+- [x] Fix global FAB shape — removed `shape: const CircleBorder()` from `FloatingActionButtonThemeData`; Flutter's defaults already give regular FABs a circle and `.extended` FABs a stadium shape
+- [x] Add explicit `shape: const StadiumBorder()` to both `FloatingActionButton.extended` widgets (`roles_management_screen.dart`, `my_reports_screen.dart`)
+- [x] Make `+N more` capability chip interactive — converted from `Chip` to `ActionChip`; tapping opens `AlertDialog` listing all capabilities for that role
+
+#### 👁️ Stakeholder Demo Asset
+- **Asset Type:** *(To be added)*
+- **Location:** `./docs/demos/sprint-008-rbac-roles.mp4`
+- **Stakeholder Note:** Admins can now view all defined roles (system and custom) in the Roles & Permissions screen, see each role's capability chips, tap "+N more" to reveal the full capability list in a dialog, and use the in-app seed button to bootstrap default roles for a new organisation.
+
+---
+
+## Completed Sprints
 
 ### Sprint 7 — Admin Dashboard Enhancements
 - **Date/Time:** May 29, 2026
@@ -28,8 +55,6 @@
 - **Stakeholder Note:** Admin dashboard now shows live report counts, supports search, allows assigning reports to admin staff, and automatically notifies reporters when their report status changes.
 
 ---
-
-## Completed Sprints
 
 ### Sprint 6 — Admin Dashboard
 - **Date/Time:** May 23, 2026

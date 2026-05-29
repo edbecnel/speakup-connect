@@ -48,6 +48,7 @@ class MyReportsScreen extends ConsumerWidget {
           onPressed: () => context.push(Routes.submitReport),
           icon: const Icon(Icons.add_rounded),
           label: const Text('New Report'),
+          shape: const StadiumBorder(),
         ),
       ),
     );
