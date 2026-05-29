@@ -1,4 +1,4 @@
-import { onDocumentWritten } from 'firebase-functions/v2/firestore';
+import { onDocumentWritten, onDocumentUpdated } from 'firebase-functions/v2/firestore';
 import { onCall, HttpsError } from 'firebase-functions/v2/https';
 import { logger } from 'firebase-functions';
 import * as admin from 'firebase-admin';
@@ -221,3 +221,119 @@ export const refreshMyPermissions = onCall(async (request) => {
 
   return { ok: true, permissionCount: permissions.length };
 });
+
+// ── Trigger: notifyReporterOnStatusChange ─────────────────────────────────────
+
+/**
+ * Triggered on every update to a report document.
+ *
+ * When the `status` field changes, sends an FCM push notification to the
+ * original reporter (if non-anonymous and notifications are enabled).
+ *
+ * Stale FCM tokens (error: registration-token-not-registered) are
+ * automatically removed from the user document after each send.
+ */
+export const notifyReporterOnStatusChange = onDocumentUpdated(
+  'organizations/{orgId}/reports/{reportId}',
+  async (event) => {
+    const before = event.data?.before.data();
+    const after = event.data?.after.data();
+
+    // Only proceed if status actually changed.
+    if (!before || !after || before['status'] === after['status']) {
+      return;
+    }
+
+    const submittedBy = after['submittedBy'] as string | null | undefined;
+    if (!submittedBy) {
+      // Anonymous report — cannot send a notification.
+      return;
+    }
+
+    const { orgId, reportId } = event.params;
+    const newStatus = after['status'] as string;
+    const reportTitle = (after['title'] as string | undefined) ?? 'Your report';
+
+    // Load the reporter's profile for FCM tokens and notification preferences.
+    const userDoc = await db
+      .collection('organizations').doc(orgId)
+      .collection('users').doc(submittedBy)
+      .get();
+
+    if (!userDoc.exists) {
+      logger.warn('notifyReporterOnStatusChange: user not found', { submittedBy });
+      return;
+    }
+
+    const userData = userDoc.data()!;
+    const prefs = userData['notificationPreferences'] as
+      | Record<string, unknown>
+      | undefined;
+
+    if (prefs?.['statusUpdates'] === false) {
+      // Reporter has opted out of status update notifications.
+      return;
+    }
+
+    const fcmTokens = (userData['fcmTokens'] as string[] | undefined) ?? [];
+    if (fcmTokens.length === 0) {
+      return;
+    }
+
+    const statusLabels: Record<string, string> = {
+      submitted: 'Submitted',
+      under_review: 'Under Review',
+      in_progress: 'In Progress',
+      resolved: 'Resolved',
+      closed: 'Closed',
+    };
+    const statusLabel = statusLabels[newStatus] ?? newStatus;
+
+    const messaging = admin.messaging();
+    const result = await messaging.sendEachForMulticast({
+      tokens: fcmTokens,
+      notification: {
+        title: 'Report Status Updated',
+        body: `"${reportTitle}" is now ${statusLabel}.`,
+      },
+      data: {
+        reportId,
+        type: 'status_update',
+        newStatus,
+      },
+      android: {
+        priority: 'high',
+        notification: { channelId: 'status_updates' },
+      },
+    });
+
+    // Prune stale tokens to keep the user's token list clean.
+    const staleTokens: string[] = [];
+    result.responses.forEach((resp, i) => {
+      if (
+        !resp.success &&
+        resp.error?.code === 'messaging/registration-token-not-registered'
+      ) {
+        staleTokens.push(fcmTokens[i]);
+      }
+    });
+
+    if (staleTokens.length > 0) {
+      await userDoc.ref.update({
+        fcmTokens: admin.firestore.FieldValue.arrayRemove(...staleTokens),
+      });
+      logger.info('Removed stale FCM tokens', {
+        submittedBy,
+        count: staleTokens.length,
+      });
+    }
+
+    logger.info('notifyReporterOnStatusChange completed', {
+      orgId,
+      reportId,
+      newStatus,
+      successCount: result.successCount,
+      failureCount: result.failureCount,
+    });
+  },
+);

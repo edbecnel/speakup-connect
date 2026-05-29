@@ -49,6 +49,8 @@ class AdminDashboardScreen extends ConsumerWidget {
         ),
         body: const Column(
           children: [
+            _QuickStatsHeader(),
+            _SearchBar(),
             AdminFilterBar(),
             Divider(height: 1),
             Expanded(
@@ -63,6 +65,126 @@ class AdminDashboardScreen extends ConsumerWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _QuickStatsHeader extends ConsumerWidget {
+  const _QuickStatsHeader();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final allAsync = ref.watch(allReportsProvider(null));
+    final theme = Theme.of(context);
+
+    return allAsync.when(
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
+      data: (reports) {
+        final total = reports.length;
+        final submitted =
+            reports.where((r) => r.status == ReportStatus.submitted).length;
+        final inProgress =
+            reports.where((r) => r.status == ReportStatus.inProgress).length;
+        final resolved =
+            reports.where((r) => r.status == ReportStatus.resolved).length;
+
+        return Container(
+          color: theme.colorScheme.surfaceContainerLow,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Row(
+            children: [
+              _StatChip(label: 'Total', count: total, color: theme.colorScheme.primary),
+              const SizedBox(width: 8),
+              _StatChip(label: 'Submitted', count: submitted, color: const Color(0xFF1565C0)),
+              const SizedBox(width: 8),
+              _StatChip(label: 'In Progress', count: inProgress, color: const Color(0xFFF57F17)),
+              const SizedBox(width: 8),
+              _StatChip(label: 'Resolved', count: resolved, color: const Color(0xFF2E7D32)),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _StatChip extends StatelessWidget {
+  const _StatChip({
+    required this.label,
+    required this.count,
+    required this.color,
+  });
+
+  final String label;
+  final int count;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: color.withValues(alpha: 0.3)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              '$count',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+                color: color,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w500,
+                color: color,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SearchBar extends ConsumerWidget {
+  const _SearchBar();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final query = ref.watch(adminSearchQueryProvider);
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+      child: TextField(
+        decoration: InputDecoration(
+          hintText: 'Search by title or reference number...',
+          prefixIcon: const Icon(Icons.search, size: 20),
+          suffixIcon: query.isNotEmpty
+              ? IconButton(
+                  icon: const Icon(Icons.clear, size: 18),
+                  onPressed: () =>
+                      ref.read(adminSearchQueryProvider.notifier).set(''),
+                )
+              : null,
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          isDense: true,
+        ),
+        onChanged: (value) =>
+            ref.read(adminSearchQueryProvider.notifier).set(value),
       ),
     );
   }
@@ -85,17 +207,31 @@ class _AdminReportsList extends ConsumerWidget {
       ),
       data: (reports) {
         final categoryFilter = ref.watch(adminCategoryFilterProvider);
-        final filtered = categoryFilter.isEmpty
+        final searchQuery =
+            ref.watch(adminSearchQueryProvider).trim().toLowerCase();
+
+        var filtered = categoryFilter.isEmpty
             ? reports
             : reports.where((r) => categoryFilter.contains(r.categoryId)).toList();
+
+        if (searchQuery.isNotEmpty) {
+          filtered = filtered
+              .where((r) =>
+                  r.title.toLowerCase().contains(searchQuery) ||
+                  (r.referenceNumber?.toLowerCase().contains(searchQuery) ??
+                      false))
+              .toList();
+        }
 
         if (filtered.isEmpty) {
           return AppEmptyState(
             icon: Icons.assignment_outlined,
-            message: 'No reports',
-            subtitle: filterStatus == null
-                ? 'No reports submitted yet.'
-                : 'No "${filterStatus!.label}" reports.',
+            message: searchQuery.isNotEmpty ? 'No results' : 'No reports',
+            subtitle: searchQuery.isNotEmpty
+                ? 'No reports match "$searchQuery".'
+                : filterStatus == null
+                    ? 'No reports submitted yet.'
+                    : 'No "${filterStatus!.label}" reports.',
           );
         }
 

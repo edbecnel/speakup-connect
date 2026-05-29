@@ -1,8 +1,12 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:speakup_connect/config/app_config.dart';
+import 'package:speakup_connect/core/constants/app_constants.dart';
 import 'package:speakup_connect/features/auth/presentation/providers/auth_provider.dart';
+import 'package:speakup_connect/features/organization/data/models/user_profile_model.dart';
+import 'package:speakup_connect/features/organization/domain/entities/user_profile_entity.dart';
 import 'package:speakup_connect/features/organization/presentation/providers/user_profile_provider.dart';
 import 'package:speakup_connect/features/reports/domain/entities/report_entity.dart';
 import 'package:speakup_connect/features/reports/presentation/providers/report_provider.dart';
@@ -132,6 +136,8 @@ class _AdminDetailView extends ConsumerWidget {
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
                     ),
+                  const SizedBox(height: 4),
+                  _AssigneeRow(assignedToUid: report.assignedTo),
                 ],
               ),
             ),
@@ -197,6 +203,15 @@ class _AdminDetailView extends ConsumerWidget {
               ),
             ],
           ),
+          const SizedBox(height: 8),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              icon: const Icon(Icons.assignment_ind_outlined),
+              label: Text(report.assignedTo == null ? 'Assign to Admin' : 'Reassign'),
+              onPressed: () => _showAssignDialog(context, ref, report),
+            ),
+          ),
 
           // ── Admin notes ───────────────────────────────────────────────────
           if (report.adminNotes.isNotEmpty) ...[
@@ -252,12 +267,217 @@ class _AdminDetailView extends ConsumerWidget {
     }
   }
 
+  Future<void> _showAssignDialog(
+    BuildContext context,
+    WidgetRef ref,
+    ReportEntity report,
+  ) async {
+    final assigned = await showDialog<bool>(
+      context: context,
+      builder: (_) => _AssignDialog(report: report, ref: ref),
+    );
+    if (assigned == true) {
+      ref.invalidate(adminReportByIdProvider(reportId));
+    }
+  }
+
   String _formatDate(DateTime dt) {
     const months = [
       'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
       'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
     ];
     return '${months[dt.month - 1]} ${dt.day}, ${dt.year}';
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Assignee Row (inline header display)
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _AssigneeRow extends ConsumerWidget {
+  const _AssigneeRow({required this.assignedToUid});
+
+  final String? assignedToUid;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+
+    if (assignedToUid == null) {
+      return Text(
+        'Unassigned',
+        style: theme.textTheme.bodySmall?.copyWith(
+          color: theme.colorScheme.onSurfaceVariant,
+          fontStyle: FontStyle.italic,
+        ),
+      );
+    }
+
+    final adminsAsync = ref.watch(_adminUsersProvider);
+    final name = adminsAsync.maybeWhen(
+      data: (users) => users
+          .where((u) => u.userId == assignedToUid)
+          .map((u) => u.displayName)
+          .firstOrNull,
+      orElse: () => null,
+    );
+
+    return Row(
+      children: [
+        Icon(Icons.person_outlined, size: 14, color: theme.colorScheme.primary),
+        const SizedBox(width: 4),
+        Text(
+          'Assigned to: ${name ?? assignedToUid!}',
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.primary,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Assign Dialog
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _AssignDialog extends ConsumerStatefulWidget {
+  const _AssignDialog({required this.report, required this.ref});
+
+  final ReportEntity report;
+  final WidgetRef ref;
+
+  @override
+  ConsumerState<_AssignDialog> createState() => _AssignDialogState();
+}
+
+class _AssignDialogState extends ConsumerState<_AssignDialog> {
+  String _filter = '';
+  bool _isSaving = false;
+
+  Future<void> _assign(String adminUid) async {
+    setState(() => _isSaving = true);
+    try {
+      await widget.ref.read(reportRepositoryProvider).assignReport(
+            organizationId: AppConfig.defaultOrganizationId,
+            reportId: widget.report.reportId,
+            adminUid: adminUid,
+          );
+      if (mounted) Navigator.of(context).pop(true);
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isSaving = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to assign report: $e')),
+        );
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final adminsAsync = ref.watch(_adminUsersProvider);
+
+    return AlertDialog(
+      title: const Text('Assign to Admin'),
+      contentPadding: const EdgeInsets.fromLTRB(24, 12, 24, 0),
+      content: SizedBox(
+        width: 320,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              decoration: const InputDecoration(
+                hintText: 'Search admins...',
+                prefixIcon: Icon(Icons.search, size: 18),
+                contentPadding:
+                    EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                isDense: true,
+              ),
+              onChanged: (v) => setState(() => _filter = v.trim().toLowerCase()),
+            ),
+            const SizedBox(height: 8),
+            adminsAsync.when(
+              loading: () => const Padding(
+                padding: EdgeInsets.symmetric(vertical: 24),
+                child: AppLoadingIndicator(),
+              ),
+              error: (e, _) => Text('Failed to load admins: $e',
+                  style: TextStyle(color: theme.colorScheme.error)),
+              data: (admins) {
+                final filtered = _filter.isEmpty
+                    ? admins
+                    : admins
+                        .where((u) =>
+                            u.displayName
+                                .toLowerCase()
+                                .contains(_filter))
+                        .toList();
+
+                if (filtered.isEmpty) {
+                  return const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 24),
+                    child: Text('No admins found.',
+                        style: TextStyle(color: Colors.grey)),
+                  );
+                }
+
+                return ConstrainedBox(
+                  constraints: const BoxConstraints(maxHeight: 280),
+                  child: ListView.separated(
+                    shrinkWrap: true,
+                    itemCount: filtered.length,
+                    separatorBuilder: (_, __) => const Divider(height: 1),
+                    itemBuilder: (_, i) {
+                      final user = filtered[i];
+                      final isCurrentAssignee =
+                          widget.report.assignedTo == user.userId;
+                      return ListTile(
+                        dense: true,
+                        leading: CircleAvatar(
+                          radius: 16,
+                          backgroundColor:
+                              theme.colorScheme.primaryContainer,
+                          child: Text(
+                            user.displayName.isNotEmpty
+                                ? user.displayName[0].toUpperCase()
+                                : '?',
+                            style: TextStyle(
+                              color: theme.colorScheme.onPrimaryContainer,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                        title: Text(user.displayName,
+                            style: const TextStyle(fontSize: 13)),
+                        subtitle: Text(user.role,
+                            style: const TextStyle(fontSize: 11)),
+                        trailing: isCurrentAssignee
+                            ? Icon(Icons.check_circle,
+                                color: theme.colorScheme.primary, size: 18)
+                            : null,
+                        enabled: !_isSaving,
+                        onTap: isCurrentAssignee
+                            ? null
+                            : () => _assign(user.userId),
+                      );
+                    },
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: _isSaving ? null : () => Navigator.of(context).pop(false),
+          child: const Text('Cancel'),
+        ),
+      ],
+    );
   }
 }
 
@@ -702,5 +922,24 @@ final adminReportByIdProvider =
   return ref.watch(reportRepositoryProvider).getReportById(
         organizationId: AppConfig.defaultOrganizationId,
         reportId: reportId,
+      );
+});
+
+/// Streams all admin/super_admin users for the default org.
+/// Used by the assign dialog and assignee display.
+final _adminUsersProvider =
+    StreamProvider.autoDispose<List<UserProfileEntity>>((ref) {
+  return FirebaseFirestore.instance
+      .collection(AppConstants.organizationsCollection)
+      .doc(AppConfig.defaultOrganizationId)
+      .collection(AppConstants.usersCollection)
+      .where('role', whereIn: ['admin', 'super_admin'])
+      .where('approvalStatus', isEqualTo: 'approved')
+      .orderBy('displayName')
+      .snapshots()
+      .map(
+        (snap) => snap.docs
+            .map((d) => UserProfileModel.fromFirestore(d.data(), d.id))
+            .toList(),
       );
 });

@@ -1,7 +1,7 @@
 # Sprint Tracker — SpeakUp Connect
 
-> Last Updated: May 23, 2026  
-> Current Sprint: **Sprint 6** (Admin Dashboard — core features complete)  
+> Last Updated: May 29, 2026  
+> Current Sprint: **Sprint 7** (Admin Dashboard Enhancements — complete)  
 > Sprint Duration: 2 weeks
 
 > **Development Velocity Note:** Development has significantly outpaced the original planned schedule. As of May 23, 2026 (day 5 of the project), the codebase covers work originally scoped for Sprints 1–6. Sprint numbering below reflects original plan order but completion dates reflect actual delivery dates.
@@ -9,6 +9,25 @@
 ---
 
 ## Active Sprint
+
+### Sprint 7 — Admin Dashboard Enhancements
+- **Date/Time:** May 29, 2026
+- **Status:** ✅ Complete
+
+#### 📝 Done
+- [x] Quick stats header — total, submitted, in-progress, resolved counts above the filter bar
+- [x] Search bar — title/reference number filter with clear button (`adminSearchQueryProvider`)
+- [x] Assign report to admin — "Assign / Reassign" button on detail screen, `_AssignDialog` with admin user picker and search, assignee display in header card
+- [x] Push notification on status change — `notifyReporterOnStatusChange` Cloud Function (v2 `onDocumentUpdated`), sends FCM to reporter when `status` changes, respects `notificationPreferences.statusUpdates`, prunes stale tokens
+
+#### 👁️ Stakeholder Demo Asset
+- **Asset Type:** *(To be added)*
+- **Location:** `./docs/demos/sprint-007-admin-enhancements.mp4`
+- **Stakeholder Note:** Admin dashboard now shows live report counts, supports search, allows assigning reports to admin staff, and automatically notifies reporters when their report status changes.
+
+---
+
+## Completed Sprints
 
 ### Sprint 6 — Admin Dashboard
 - **Date/Time:** May 23, 2026

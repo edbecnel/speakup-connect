@@ -10,6 +10,19 @@ final adminCategoryFilterProvider =
   _AdminCategoryFilterNotifier.new,
 );
 
+/// State provider for the admin dashboard search query.
+/// An empty string means no active search filter.
+final adminSearchQueryProvider = NotifierProvider<_AdminSearchQueryNotifier, String>(
+  _AdminSearchQueryNotifier.new,
+);
+
+class _AdminSearchQueryNotifier extends Notifier<String> {
+  @override
+  String build() => '';
+
+  void set(String query) => state = query;
+}
+
 class _AdminCategoryFilterNotifier extends Notifier<Set<String>> {
   @override
   Set<String> build() => const {};

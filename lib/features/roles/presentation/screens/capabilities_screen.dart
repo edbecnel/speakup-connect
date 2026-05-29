@@ -99,8 +99,8 @@ class _CustomCapsList extends ConsumerWidget {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      builder: (_) => ProviderScope(
-        parent: ProviderScope.containerOf(context),
+      builder: (_) => UncontrolledProviderScope(
+        container: ProviderScope.containerOf(context),
         child: const _CreateCapabilitySheet(),
       ),
     );
