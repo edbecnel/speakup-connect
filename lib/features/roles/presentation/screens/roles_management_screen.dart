@@ -215,7 +215,7 @@ class _RoleCard extends StatelessWidget {
                       labelStyle: theme.textTheme.labelSmall,
                       visualDensity: VisualDensity.compact,
                       side: BorderSide(
-                        color: theme.colorScheme.outline.withOpacity(0.4),
+                        color: theme.colorScheme.outline.withValues(alpha: 0.4),
                       ),
                       backgroundColor: Colors.transparent,
                       padding: EdgeInsets.zero,
@@ -231,39 +231,45 @@ class _RoleCard extends StatelessWidget {
                       side: BorderSide(color: theme.colorScheme.primary),
                       backgroundColor: Colors.transparent,
                       padding: EdgeInsets.zero,
-                      onPressed: () => showDialog<void>(
-                        context: context,
-                        builder: (_) => AlertDialog(
-                          title: Text('${role.displayName} — All Capabilities'),
-                          content: SingleChildScrollView(
-                            child: Wrap(
-                              spacing: 6,
-                              runSpacing: 6,
-                              children: resolvedCaps
-                                  .map(
-                                    (p) => Chip(
-                                      label: Text(p.displayName),
-                                      labelStyle: theme.textTheme.labelSmall,
-                                      visualDensity: VisualDensity.compact,
-                                      backgroundColor: Colors.transparent,
-                                      side: BorderSide(
-                                        color: theme.colorScheme.outline
-                                            .withOpacity(0.4),
+                      onPressed: () {
+                        if (!context.mounted) return;
+                        showDialog<void>(
+                          context: context,
+                          builder: (dialogCtx) => AlertDialog(
+                            title:
+                                Text('${role.displayName} — All Capabilities'),
+                            content: SingleChildScrollView(
+                              child: Wrap(
+                                spacing: 6,
+                                runSpacing: 6,
+                                children: resolvedCaps
+                                    .map(
+                                      (p) => Chip(
+                                        label: Text(p.displayName),
+                                        labelStyle:
+                                            theme.textTheme.labelSmall,
+                                        visualDensity: VisualDensity.compact,
+                                        backgroundColor: Colors.transparent,
+                                        side: BorderSide(
+                                          color: theme.colorScheme.outline
+                                              .withValues(alpha: 0.4),
+                                        ),
+                                        padding: EdgeInsets.zero,
                                       ),
-                                      padding: EdgeInsets.zero,
-                                    ),
-                                  )
-                                  .toList(),
+                                    )
+                                    .toList(),
+                              ),
                             ),
+                            actions: [
+                              TextButton(
+                                onPressed: () =>
+                                    Navigator.of(dialogCtx).pop(),
+                                child: const Text('Close'),
+                              ),
+                            ],
                           ),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.of(context).pop(),
-                              child: const Text('Close'),
-                            ),
-                          ],
-                        ),
-                      ),
+                        );
+                      },
                     ),
                 ],
               ),
