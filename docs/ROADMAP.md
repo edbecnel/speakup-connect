@@ -91,11 +91,13 @@ This roadmap tracks the evolution from MVP pilot to a full multi-tenant SaaS pla
 - [ ] Boards displayed on home dashboard
 - [ ] Push notifications for new bulletin and news posts
 
-**Communications: Reminders**
+**Communications: Reminders** *(Sprint 10)*
 - [ ] Reminder broadcasts by admin, teachers, or role-authorized users (e.g., club leader)
 - [ ] Broadcast audience: all members, specific group, or custom role
 - [ ] Reminders appear as push notification + in-app notification feed
-- [ ] Role-based permission: grant "can broadcast reminders" to specific roles
+- [ ] Role-based permission: `broadcastReminders` (compose & send) + `approveReminders` (approve pending)
+- [ ] Org-level toggle: `requireReminderApproval` — when enabled, reminders from non-approvers go into a pending queue before publishing
+- [ ] Admin approval queue screen for pending reminders
 
 **Messaging**
 - [ ] Peer-to-peer direct messaging between members

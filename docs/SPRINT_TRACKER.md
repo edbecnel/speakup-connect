@@ -1,7 +1,7 @@
 # Sprint Tracker — SpeakUp Connect
 
-> Last Updated: May 29, 2026  
-> Current Sprint: **Sprint 8** (RBAC — Roles Management, Phase 1 — complete)  
+> Last Updated: June 1, 2026  
+> Current Sprint: **Sprint 10** (Reminders Feature)  
 > Sprint Duration: 2 weeks
 
 > **Development Velocity Note:** Development has significantly outpaced the original planned schedule. As of May 23, 2026 (day 5 of the project), the codebase covers work originally scoped for Sprints 1–6. Sprint numbering below reflects original plan order but completion dates reflect actual delivery dates.
@@ -9,6 +9,50 @@
 ---
 
 ## Active Sprint
+
+### Sprint 10 — Reminders Feature
+- **Status:** 🔄 Planned
+- **Goal:** Build the full reminders feature — compose screen, broadcast delivery (push + in-app feed), optional approval workflow, and the `approveReminders` permission.
+
+#### 📋 Scope
+- [ ] Add `approveReminders` to `AppPermission` enum + update `org-admin` seed role
+- [ ] Add `requireReminderApproval` boolean field to `organizations/{orgId}` document
+- [ ] Design Firestore data model: `organizations/{orgId}/reminders/{id}` with `status: draft|pending|published|rejected`
+- [ ] Build `ReminderEntity` + `ReminderModel` (domain + data layers)
+- [ ] Build `remindersProvider` (StreamProvider — live list)
+- [ ] Build Compose Reminder screen — title, body, audience (all / group / role), schedule or send now
+- [ ] Submit flow: if `requireReminderApproval == true` AND user lacks `approveReminders` → save as `pending`; otherwise publish directly
+- [ ] Build Admin Approval Queue screen — list of `pending` reminders with approve/reject actions
+- [ ] Push notification on publish (Cloud Function `onReminderPublished`)
+- [ ] In-app notification feed entry on publish
+- [ ] Gate Compose button on `broadcastReminders` permission
+- [ ] Gate Approval Queue on `approveReminders` permission
+- [ ] Firestore security rules for `reminders` collection
+- [ ] Add `approveReminders` composite index if needed
+
+---
+
+## Completed Sprints
+
+### Sprint 9 — RBAC Phase 2: Permission Enforcement + UX
+- **Date/Time:** June 1, 2026
+- **Status:** ✅ Complete
+- **Commit:** `5f1c4f7` (Sprint 9) + `8997ccc` (bugfixes)
+
+#### 📝 Done
+- [x] Router guard: non-admin profiles redirected away from `/admin/*` routes
+- [x] `manageRoles` permission gate on RolesManagementScreen FAB, `_RoleCard` edit/assign buttons, `_EmptyRolesPlaceholder` buttons
+- [x] `manageReports` permission gate on AdminReportDetailScreen admin actions section
+- [x] Fix Riverpod 3.x breaking change: `valueOrNull` → `asData?.value` in `permission_provider.dart`
+- [x] Photo lightbox viewer (`showPhotoViewer`) added to both report detail screens (admin + user)
+- [x] Category chip displayed in both report detail screen headers
+- [x] `customCapabilitiesProvider` switched to `FutureProvider` + `get()` to surface Firestore errors
+- [x] Deploy Firestore rules for `customCapabilities` collection (fixed permission-denied)
+- [x] Fix capabilities screen: `ref.invalidate(customCapabilitiesProvider)` after create and delete
+- [x] Add composite index `users(approvalStatus ASC, displayName ASC)` — fixes assign-role user list query
+- [x] Add `scripts/assign_admin.js` bootstrap script for org-admin role assignment
+
+---
 
 ### Sprint 8 — RBAC: Roles Management, Phase 1
 - **Date/Time:** May 29, 2026

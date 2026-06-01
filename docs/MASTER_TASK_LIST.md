@@ -593,29 +593,48 @@
 - [ ] Unit test: `PostNewsUseCase`
 - [ ] Widget test: `NewsBoardScreen`
 
-### Epic 2.9 — Reminders
+### Epic 2.9 — Reminders *(Sprint 10)*
+
+**Permissions**
+- [ ] Add `approveReminders` to `AppPermission` enum (group: Reminders)
+- [ ] Update `org-admin` seed role in `SeedRoles` notifier to include `approveReminders`
+- [ ] Update `seed_roles.js` script to include `approveReminders` in org-admin
+
+**Org Settings**
+- [ ] Add `requireReminderApproval` boolean field to `organizations/{orgId}` document (default: `false`)
+- [ ] Admin toggle UI for this setting (org settings screen or inline on reminders screen)
 
 **Domain**
-- [ ] Create `ReminderEntity`
+- [ ] Create `ReminderEntity` — id, title, body, audience, status (draft/pending/published/rejected), authorId, createdAt, publishedAt
 - [ ] Create `ReminderRepository` abstract interface
-- [ ] Create `BroadcastReminderUseCase` (requires `canBroadcastReminders` permission)
+- [ ] Create `BroadcastReminderUseCase` — publishes directly if approved, else saves as `pending`
+- [ ] Create `ApproveReminderUseCase` (requires `approveReminders` permission)
+- [ ] Create `RejectReminderUseCase` (requires `approveReminders` permission)
 - [ ] Create `GetRemindersUseCase`
+- [ ] Create `WatchPendingRemindersUseCase` (for approval queue)
 
 **Data**
-- [ ] Create `ReminderModel`
+- [ ] Create `ReminderModel` with `fromFirestore` / `toFirestore`
 - [ ] Create `ReminderRemoteDataSource`
 - [ ] Create `ReminderRepositoryImpl`
+- [ ] Firestore path: `organizations/{orgId}/reminders/{reminderId}`
+- [ ] Firestore security rules: `broadcastReminders` to create, `approveReminders` to approve/reject, members to read published only
 
 **Presentation**
-- [ ] Build `SendReminderScreen` — title, body, audience selector (all / group / role)
-- [ ] Audience picker: all org, specific group, or role
-- [ ] Build `RemindersHistoryScreen` — list of sent reminders (sender view)
-- [ ] Reminders appear in user notification feed
-- [ ] Push notification delivered to audience on broadcast
-- [ ] Enforce `canBroadcastReminders` permission via Firestore Security Rules
+- [ ] Build `ComposeReminderScreen` — title, body, audience selector (all org / specific group / specific role)
+- [ ] Submit logic: if `requireReminderApproval && !can(approveReminders)` → save as `pending`; else publish directly
+- [ ] Build `RemindersHistoryScreen` — list of sent/published reminders
+- [ ] Build `PendingRemindersScreen` (admin) — approval queue, approve/reject actions; gated on `approveReminders`
+- [ ] Gate Compose button on `broadcastReminders` permission
+- [ ] Reminders appear in user in-app notification feed on publish
+- [ ] Push notification delivered to audience on publish (Cloud Function `onReminderPublished`)
+
+**Indexes**
+- [ ] Add composite index: `reminders(status ASC, createdAt DESC)` to `firestore.indexes.json`
 
 **Testing**
 - [ ] Unit test: `BroadcastReminderUseCase`
+- [ ] Unit test: `ApproveReminderUseCase`
 
 ### Epic 2.10 — Peer-to-Peer Messaging
 
