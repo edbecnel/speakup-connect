@@ -21,6 +21,7 @@ import 'package:speakup_connect/features/roles/presentation/screens/assign_role_
 import 'package:speakup_connect/features/roles/presentation/screens/capabilities_screen.dart';
 import 'package:speakup_connect/features/roles/presentation/screens/role_editor_screen.dart';
 import 'package:speakup_connect/features/roles/presentation/screens/roles_management_screen.dart';
+import 'package:speakup_connect/features/roles/presentation/screens/user_assignments_screen.dart';
 import 'package:speakup_connect/features/settings/presentation/screens/settings_screen.dart';
 
 part 'app_router.g.dart';
@@ -207,6 +208,11 @@ GoRouter appRouter(Ref ref) {
         path: Routes.adminCapabilities,
         name: 'adminCapabilities',
         builder: (context, state) => const CapabilitiesScreen(),
+      ),
+      GoRoute(
+        path: Routes.adminUserAssignments,
+        name: 'adminUserAssignments',
+        builder: (context, state) => const UserAssignmentsScreen(),
       ),
     ],
   );

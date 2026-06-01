@@ -36,6 +36,7 @@ abstract class Routes {
   static const String adminRoleEdit = '/admin/roles/:roleId/edit';
   static const String adminRoleAssign = '/admin/roles/:roleId/assign';
   static const String adminCapabilities = '/admin/capabilities';
+  static const String adminUserAssignments = '/admin/roles/assignments';
 
   // --- Helpers ---
 

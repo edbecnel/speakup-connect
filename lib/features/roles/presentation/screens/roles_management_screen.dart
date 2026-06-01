@@ -30,6 +30,11 @@ class RolesManagementScreen extends ConsumerWidget {
         title: const Text('Roles & Permissions'),
         actions: [
           TextButton.icon(
+            onPressed: () => context.push(Routes.adminUserAssignments),
+            icon: const Icon(Icons.people_outlined),
+            label: const Text('Assignments'),
+          ),
+          TextButton.icon(
             onPressed: () => context.push(Routes.adminCapabilities),
             icon: const Icon(Icons.tune_outlined),
             label: const Text('Capabilities'),

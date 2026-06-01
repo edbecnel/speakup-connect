@@ -421,6 +421,23 @@ service cloud.firestore {
       allow read, write: if isSuperAdmin();
     }
 
+    // ── Role Assignments (collection group) ─────────────────────────────────
+    // Required so org admins can query roleAssignments across all users via
+    // collectionGroup(). A plain nested match rule is insufficient for
+    // collection group queries — Firestore requires a wildcard-path rule.
+    // Allows legacy role-claim admins OR RBAC manageRoles permission holders.
+    // Note: isSuperAdmin() and isOrgAdmin() cannot be used here because
+    // collection group queries have no orgId in scope.
+    match /{path=**}/roleAssignments/{assignmentId} {
+      allow read: if isSignedIn()
+                  && (
+                    isSuperAdmin()
+                    || request.auth.token.get('role', '') in
+                       ['admin', 'super_admin', 'owner']
+                    || hasClaimedPermission('manageRoles')
+                  );
+    }
+
     // ── Default deny — reject all unmatched paths ─────────────────────────────
     match /{document=**} {
       allow read, write: if false;

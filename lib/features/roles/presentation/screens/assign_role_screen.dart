@@ -6,6 +6,8 @@ import 'package:speakup_connect/core/constants/app_constants.dart';
 import 'package:speakup_connect/core/permissions/org_scope_type.dart';
 import 'package:speakup_connect/features/organization/data/models/user_profile_model.dart';
 import 'package:speakup_connect/features/organization/domain/entities/user_profile_entity.dart';
+import 'package:speakup_connect/features/roles/data/models/role_assignment_model.dart';
+import 'package:speakup_connect/features/roles/domain/entities/role_assignment_entity.dart';
 import 'package:speakup_connect/features/roles/domain/entities/role_entity.dart';
 import 'package:speakup_connect/features/roles/presentation/providers/roles_provider.dart';
 import 'package:speakup_connect/shared/widgets/app_button.dart';
@@ -13,26 +15,41 @@ import 'package:speakup_connect/shared/widgets/app_error_widget.dart';
 import 'package:speakup_connect/shared/widgets/app_loading_indicator.dart';
 import 'package:speakup_connect/shared/widgets/app_text_field.dart';
 
-// ── Org users stream (admin view) ─────────────────────────────────────────────
+// ── Providers ─────────────────────────────────────────────────────────────────
 
-/// Streams all approved users in the default org. Used only on the
-/// AssignRoleScreen so it is defined here and kept autoDispose.
+/// Fetches all approved users in the default org once (no stream).
+/// A one-shot get() avoids the cache→server double-emit that causes
+/// the list to flash on every rebuild.
 final _orgUsersProvider =
-    StreamProvider.autoDispose<List<UserProfileEntity>>((ref) {
-  return FirebaseFirestore.instance
+    FutureProvider.autoDispose<List<UserProfileEntity>>((ref) async {
+  final snap = await FirebaseFirestore.instance
       .collection(AppConstants.organizationsCollection)
       .doc(AppConfig.defaultOrganizationId)
       .collection(AppConstants.usersCollection)
       .where('approvalStatus', isEqualTo: 'approved')
       .orderBy('displayName')
+      .get();
+  return snap.docs
+      .map((d) => UserProfileModel.fromFirestore(d.data(), d.id))
+      .where((u) => u.isApproved)
+      .toList();
+});
+
+/// Streams the role assignments for [userId] that match [roleId].
+final _userRoleAssignmentsProvider = StreamProvider.autoDispose
+    .family<List<RoleAssignmentEntity>, ({String userId, String roleId})>(
+        (ref, args) {
+  return FirebaseFirestore.instance
+      .collection(AppConstants.organizationsCollection)
+      .doc(AppConfig.defaultOrganizationId)
+      .collection(AppConstants.usersCollection)
+      .doc(args.userId)
+      .collection(AppConstants.roleAssignmentsCollection)
+      .where('roleId', isEqualTo: args.roleId)
       .snapshots()
-      .map(
-        (snap) => snap.docs
-            .map(
-              (d) => UserProfileModel.fromFirestore(d.data(), d.id),
-            )
-            .toList(),
-      );
+      .map((snap) => snap.docs
+          .map((d) => RoleAssignmentModel.fromFirestore(d.data(), d.id))
+          .toList());
 });
 
 // ── AssignRoleScreen ──────────────────────────────────────────────────────────
@@ -146,6 +163,15 @@ class _AssignRoleScreenState extends ConsumerState<AssignRoleScreen> {
             selectedUserId: _selectedUser?.userId,
             onSelect: (u) => setState(() => _selectedUser = u),
           ),
+
+          // ── Current assignments for selected user ──────────────────
+          if (_selectedUser != null) ...[
+            const SizedBox(height: 20),
+            _CurrentAssignmentsSection(
+              userId: _selectedUser!.userId,
+              roleId: widget.roleId,
+            ),
+          ],
 
           const SizedBox(height: 20),
 
@@ -440,4 +466,150 @@ class _AssignmentForm extends StatelessWidget {
         OrgScopeType.barangay => 'Firestore barangay document ID',
         OrgScopeType.org => '',
       };
+}
+
+// ── Current Assignments Section ───────────────────────────────────────────────
+
+/// Shows the existing assignments of [roleId] for [userId] with a
+/// remove button for each. Uses a live stream so it updates instantly
+/// after an assignment is added or removed.
+class _CurrentAssignmentsSection extends ConsumerWidget {
+  const _CurrentAssignmentsSection({
+    required this.userId,
+    required this.roleId,
+  });
+
+  final String userId;
+  final String roleId;
+
+  String _scopeDescription(RoleAssignmentEntity a) {
+    if (a.scopeType == OrgScopeType.org) return 'Org-wide';
+    final label = switch (a.scopeType) {
+      OrgScopeType.tag => 'Tag',
+      OrgScopeType.classUnit => 'Class',
+      OrgScopeType.group => 'Group',
+      OrgScopeType.department => 'Department',
+      OrgScopeType.barangay => 'Barangay',
+      OrgScopeType.org => '',
+    };
+    return '$label: ${a.scopeId ?? ''}';
+  }
+
+  Future<void> _confirmRemove(
+    BuildContext context,
+    WidgetRef ref,
+    RoleAssignmentEntity assignment,
+  ) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Remove Assignment?'),
+        content: Text(
+          'Remove this role assignment (${_scopeDescription(assignment)})? '
+          'The user will immediately lose the permissions granted by this role.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(
+              'Remove',
+              style: TextStyle(
+                  color: Theme.of(context).colorScheme.error),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) {
+      await ref.read(roleAssignmentWriterProvider.notifier).removeAssignment(
+            targetUserId: userId,
+            assignmentId: assignment.assignmentId,
+          );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final assignmentsAsync = ref.watch(
+      _userRoleAssignmentsProvider((userId: userId, roleId: roleId)),
+    );
+
+    return assignmentsAsync.when(
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
+      data: (assignments) {
+        if (assignments.isEmpty) return const SizedBox.shrink();
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Current Assignments',
+              style: theme.textTheme.titleSmall
+                  ?.copyWith(fontWeight: FontWeight.w700),
+            ),
+            const SizedBox(height: 8),
+            Container(
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: theme.colorScheme.outlineVariant,
+                ),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Column(
+                children: [
+                  for (int i = 0; i < assignments.length; i++) ...[
+                    if (i > 0)
+                      Divider(
+                        height: 1,
+                        color: theme.colorScheme.outlineVariant,
+                      ),
+                    ListTile(
+                      dense: true,
+                      leading: const Icon(Icons.shield_outlined, size: 18),
+                      title: Text(_scopeDescription(assignments[i])),
+                      subtitle: Text(
+                        'Assigned ${_formatDate(assignments[i].assignedAt)}',
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                      trailing: IconButton(
+                        icon: Icon(
+                          Icons.remove_circle_outline,
+                          color: theme.colorScheme.error,
+                        ),
+                        tooltip: 'Remove assignment',
+                        onPressed: () => _confirmRemove(
+                          context,
+                          ref,
+                          assignments[i],
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Tap \u2212 to revoke an existing assignment.',
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  String _formatDate(DateTime dt) {
+    return '${dt.year}-${dt.month.toString().padLeft(2, '0')}-${dt.day.toString().padLeft(2, '0')}';
+  }
 }
