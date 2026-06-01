@@ -183,6 +183,7 @@ class _CustomCapTile extends ConsumerWidget {
       await ref
           .read(customCapabilityWriterProvider.notifier)
           .deleteCapability(cap.id);
+      ref.invalidate(customCapabilitiesProvider);
     }
   }
 }
@@ -231,6 +232,7 @@ class _CreateCapabilitySheetState
         SnackBar(content: Text('Error: ${state.error}')),
       );
     } else if (!state.hasError && mounted) {
+      ref.invalidate(customCapabilitiesProvider);
       Navigator.of(context).pop();
     }
   }
