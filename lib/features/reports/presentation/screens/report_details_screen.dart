@@ -6,6 +6,7 @@ import 'package:speakup_connect/features/reports/domain/entities/report_entity.d
 import 'package:speakup_connect/features/reports/presentation/providers/report_provider.dart';
 import 'package:speakup_connect/shared/widgets/app_error_widget.dart';
 import 'package:speakup_connect/shared/widgets/app_loading_indicator.dart';
+import 'package:speakup_connect/shared/widgets/photo_viewer.dart';
 
 /// Report Details screen — deep view of a single report.
 class ReportDetailsScreen extends ConsumerWidget {
@@ -34,14 +35,21 @@ class ReportDetailsScreen extends ConsumerWidget {
   }
 }
 
-class _ReportDetailView extends StatelessWidget {
+class _ReportDetailView extends ConsumerWidget {
   const _ReportDetailView({required this.report});
 
   final ReportEntity report;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final categoryLabel = ref.watch(reportCategoriesProvider).maybeWhen(
+      data: (cats) => cats
+          .where((c) => c.categoryId == report.categoryId)
+          .map((c) => c.label)
+          .firstOrNull,
+      orElse: () => null,
+    );
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -68,8 +76,20 @@ class _ReportDetailView extends StatelessWidget {
                       _StatusBadge(status: report.status),
                     ],
                   ),
-                  if (report.referenceNumber != null) ...[
+                  if (categoryLabel != null) ...[
                     const SizedBox(height: 8),
+                    Chip(
+                      label: Text(categoryLabel),
+                      labelStyle: theme.textTheme.labelSmall,
+                      visualDensity: VisualDensity.compact,
+                      side: BorderSide(color: theme.colorScheme.outline.withValues(alpha: 0.4)),
+                      backgroundColor: theme.colorScheme.surfaceContainerHighest,
+                      padding: EdgeInsets.zero,
+                      avatar: const Icon(Icons.label_outline, size: 14),
+                    ),
+                  ],
+                  if (report.referenceNumber != null) ...[
+                    const SizedBox(height: 4),
                     Text(
                       report.referenceNumber!,
                       style: theme.textTheme.bodySmall?.copyWith(
@@ -128,18 +148,25 @@ class _ReportDetailView extends StatelessWidget {
                 scrollDirection: Axis.horizontal,
                 itemCount: report.photoUrls.length,
                 separatorBuilder: (_, __) => const SizedBox(width: 8),
-                itemBuilder: (_, i) => ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: Image.network(
-                    report.photoUrls[i],
-                    width: 120,
-                    height: 120,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => Container(
+                itemBuilder: (_, i) => GestureDetector(
+                  onTap: () => showPhotoViewer(
+                    context,
+                    urls: report.photoUrls,
+                    initialIndex: i,
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.network(
+                      report.photoUrls[i],
                       width: 120,
                       height: 120,
-                      color: theme.colorScheme.surfaceContainerHighest,
-                      child: const Icon(Icons.broken_image_outlined),
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => Container(
+                        width: 120,
+                        height: 120,
+                        color: theme.colorScheme.surfaceContainerHighest,
+                        child: const Icon(Icons.broken_image_outlined),
+                      ),
                     ),
                   ),
                 ),

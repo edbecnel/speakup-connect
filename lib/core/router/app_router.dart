@@ -80,6 +80,8 @@ GoRouter appRouter(Ref ref) {
         // Profile approved → redirect away from auth/join pages.
         if (profile != null && profile.isApproved) {
           if (isOnAuthPage || isOnJoinFlow) return Routes.home;
+          // Admin routes: non-admin profiles are redirected to home.
+          if (loc.startsWith('/admin') && !profile.isAdmin) return Routes.home;
         }
       }
 

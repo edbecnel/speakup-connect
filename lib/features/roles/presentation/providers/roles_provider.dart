@@ -43,14 +43,17 @@ final roleByIdProvider =
   });
 });
 
-/// Streams all custom capability definitions for the default organisation.
+/// Fetches all custom capability definitions for the default organisation.
+/// Uses a one-shot get() instead of snapshots() — Firestore streams on
+/// empty collections can hang indefinitely. Use ref.invalidate() to refresh.
 final customCapabilitiesProvider =
-    StreamProvider.autoDispose<List<CustomCapabilityEntity>>((ref) {
-  return _capsRef().orderBy('displayName').snapshots().map(
-        (snap) => snap.docs
-            .map((d) => CustomCapabilityModel.fromFirestore(d.data(), d.id))
-            .toList(),
-      );
+    FutureProvider<List<CustomCapabilityEntity>>((ref) async {
+  final snap = await _capsRef().get();
+  final items = snap.docs
+      .map((d) => CustomCapabilityModel.fromFirestore(d.data(), d.id))
+      .toList()
+    ..sort((a, b) => a.displayName.compareTo(b.displayName));
+  return items;
 });
 
 // ── Role Writer ───────────────────────────────────────────────────────────────

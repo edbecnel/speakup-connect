@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:speakup_connect/config/app_config.dart';
 import 'package:speakup_connect/core/constants/app_constants.dart';
+import 'package:speakup_connect/core/permissions/app_permission.dart';
+import 'package:speakup_connect/core/permissions/providers/permission_provider.dart';
 import 'package:speakup_connect/features/auth/presentation/providers/auth_provider.dart';
 import 'package:speakup_connect/features/organization/data/models/user_profile_model.dart';
 import 'package:speakup_connect/features/organization/domain/entities/user_profile_entity.dart';
@@ -12,6 +14,7 @@ import 'package:speakup_connect/features/reports/domain/entities/report_entity.d
 import 'package:speakup_connect/features/reports/presentation/providers/report_provider.dart';
 import 'package:speakup_connect/shared/widgets/app_error_widget.dart';
 import 'package:speakup_connect/shared/widgets/app_loading_indicator.dart';
+import 'package:speakup_connect/shared/widgets/photo_viewer.dart';
 
 /// Admin-only detail view for a single report.
 ///
@@ -63,6 +66,15 @@ class _AdminDetailView extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final canManageReports =
+        ref.watch(hasPermissionProvider(AppPermission.manageReports));
+    final categoryLabel = ref.watch(reportCategoriesProvider).maybeWhen(
+      data: (cats) => cats
+          .where((c) => c.categoryId == report.categoryId)
+          .map((c) => c.label)
+          .firstOrNull,
+      orElse: () => null,
+    );
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -93,6 +105,18 @@ class _AdminDetailView extends ConsumerWidget {
                   ),
                   const SizedBox(height: 6),
                   _PriorityBadge(priority: report.priority),
+                  if (categoryLabel != null) ...[
+                    const SizedBox(height: 6),
+                    Chip(
+                      label: Text(categoryLabel),
+                      labelStyle: theme.textTheme.labelSmall,
+                      visualDensity: VisualDensity.compact,
+                      side: BorderSide(color: theme.colorScheme.outline.withValues(alpha: 0.4)),
+                      backgroundColor: theme.colorScheme.surfaceContainerHighest,
+                      padding: EdgeInsets.zero,
+                      avatar: const Icon(Icons.label_outline, size: 14),
+                    ),
+                  ],
                   if (report.referenceNumber != null) ...[
                     const SizedBox(height: 8),
                     Text(
@@ -161,18 +185,25 @@ class _AdminDetailView extends ConsumerWidget {
                 scrollDirection: Axis.horizontal,
                 itemCount: report.photoUrls.length,
                 separatorBuilder: (_, __) => const SizedBox(width: 8),
-                itemBuilder: (_, i) => ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: Image.network(
-                    report.photoUrls[i],
-                    width: 120,
-                    height: 120,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => Container(
+                itemBuilder: (_, i) => GestureDetector(
+                  onTap: () => showPhotoViewer(
+                    context,
+                    urls: report.photoUrls,
+                    initialIndex: i,
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.network(
+                      report.photoUrls[i],
                       width: 120,
                       height: 120,
-                      color: theme.colorScheme.surfaceContainerHighest,
-                      child: const Icon(Icons.broken_image_outlined),
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => Container(
+                        width: 120,
+                        height: 120,
+                        color: theme.colorScheme.surfaceContainerHighest,
+                        child: const Icon(Icons.broken_image_outlined),
+                      ),
                     ),
                   ),
                 ),
@@ -181,37 +212,39 @@ class _AdminDetailView extends ConsumerWidget {
           ],
 
           // ── Admin actions ─────────────────────────────────────────────────
-          const SizedBox(height: 24),
-          _SectionHeader(title: 'Admin Actions'),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  icon: const Icon(Icons.swap_horiz_outlined),
-                  label: const Text('Update Status'),
-                  onPressed: () => _showStatusUpdateDialog(context, ref, report),
+          if (canManageReports) ...[
+            const SizedBox(height: 24),
+            _SectionHeader(title: 'Admin Actions'),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    icon: const Icon(Icons.swap_horiz_outlined),
+                    label: const Text('Update Status'),
+                    onPressed: () => _showStatusUpdateDialog(context, ref, report),
+                  ),
                 ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: OutlinedButton.icon(
-                  icon: const Icon(Icons.note_add_outlined),
-                  label: const Text('Add Note'),
-                  onPressed: () => _showAddNoteDialog(context, ref, report),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    icon: const Icon(Icons.note_add_outlined),
+                    label: const Text('Add Note'),
+                    onPressed: () => _showAddNoteDialog(context, ref, report),
+                  ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton.icon(
-              icon: const Icon(Icons.assignment_ind_outlined),
-              label: Text(report.assignedTo == null ? 'Assign to Admin' : 'Reassign'),
-              onPressed: () => _showAssignDialog(context, ref, report),
+              ],
             ),
-          ),
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                icon: const Icon(Icons.assignment_ind_outlined),
+                label: Text(report.assignedTo == null ? 'Assign to Admin' : 'Reassign'),
+                onPressed: () => _showAssignDialog(context, ref, report),
+              ),
+            ),
+          ],
 
           // ── Admin notes ───────────────────────────────────────────────────
           if (report.adminNotes.isNotEmpty) ...[

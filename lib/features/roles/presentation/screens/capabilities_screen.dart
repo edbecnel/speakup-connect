@@ -53,8 +53,12 @@ class _CustomCapabilitiesTab extends ConsumerWidget {
     final capsAsync = ref.watch(customCapabilitiesProvider);
 
     return capsAsync.when(
+      skipLoadingOnRefresh: false,
       loading: () => const AppLoadingIndicator(),
-      error: (e, _) => AppErrorWidget(message: e.toString()),
+      error: (e, _) => AppErrorWidget(
+        message: 'Could not load custom capabilities:\n$e',
+        onRetry: () => ref.invalidate(customCapabilitiesProvider),
+      ),
       data: (caps) => _CustomCapsList(caps: caps),
     );
   }

@@ -77,5 +77,5 @@ final permissionProvider = StreamProvider<EffectivePermissionSet>((ref) async* {
 /// ```
 final hasPermissionProvider =
     Provider.family<bool, AppPermission>((ref, permission) {
-  return ref.watch(permissionProvider).valueOrNull?.has(permission) ?? false;
+  return ref.watch(permissionProvider).asData?.value.has(permission) ?? false;
 });

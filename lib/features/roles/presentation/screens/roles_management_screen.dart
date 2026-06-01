@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:speakup_connect/core/constants/route_constants.dart';
 import 'package:speakup_connect/core/permissions/app_permission.dart';
+import 'package:speakup_connect/core/permissions/providers/permission_provider.dart';
 import 'package:speakup_connect/features/roles/domain/entities/role_entity.dart';
 import 'package:speakup_connect/features/roles/presentation/providers/roles_provider.dart';
 import 'package:speakup_connect/shared/widgets/app_button.dart';
@@ -20,6 +21,8 @@ class RolesManagementScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final rolesAsync = ref.watch(rolesProvider);
+    final canManageRoles =
+        ref.watch(hasPermissionProvider(AppPermission.manageRoles));
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -33,12 +36,14 @@ class RolesManagementScreen extends ConsumerWidget {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.push(Routes.adminRoleNew),
-        icon: const Icon(Icons.add),
-        label: const Text('Create Role'),
-        shape: const StadiumBorder(),
-      ),
+      floatingActionButton: canManageRoles
+          ? FloatingActionButton.extended(
+              onPressed: () => context.push(Routes.adminRoleNew),
+              icon: const Icon(Icons.add),
+              label: const Text('Create Role'),
+              shape: const StadiumBorder(),
+            )
+          : null,
       body: rolesAsync.when(
         loading: () => const AppLoadingIndicator(),
         error: (e, _) => AppErrorWidget(message: e.toString()),
@@ -132,13 +137,15 @@ class _SectionHeader extends StatelessWidget {
 
 // ── Role Card ─────────────────────────────────────────────────────────────────
 
-class _RoleCard extends StatelessWidget {
+class _RoleCard extends ConsumerWidget {
   const _RoleCard({required this.role});
 
   final RoleEntity role;
 
   @override
-  Widget build(BuildContext context, ) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final canManageRoles =
+        ref.watch(hasPermissionProvider(AppPermission.manageRoles));
     final theme = Theme.of(context);
     final resolvedCaps = role.capabilities
         .map(AppPermission.fromKey)
@@ -285,27 +292,29 @@ class _RoleCard extends StatelessWidget {
             ],
 
             // ── Action buttons ─────────────────────────────────────────────
-            const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                TextButton.icon(
-                  onPressed: () => context.push(
-                    Routes.adminRoleAssignPath(role.id),
+            if (canManageRoles) ...[
+              const SizedBox(height: 12),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton.icon(
+                    onPressed: () => context.push(
+                      Routes.adminRoleAssignPath(role.id),
+                    ),
+                    icon: const Icon(Icons.person_add_outlined, size: 18),
+                    label: const Text('Assign Users'),
                   ),
-                  icon: const Icon(Icons.person_add_outlined, size: 18),
-                  label: const Text('Assign Users'),
-                ),
-                const SizedBox(width: 8),
-                AppButton.secondary(
-                  label: 'Edit',
-                  minimumWidth: 80,
-                  onPressed: () => context.push(
-                    Routes.adminRoleEditPath(role.id),
+                  const SizedBox(width: 8),
+                  AppButton.secondary(
+                    label: 'Edit',
+                    minimumWidth: 80,
+                    onPressed: () => context.push(
+                      Routes.adminRoleEditPath(role.id),
+                    ),
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
+            ],
           ],
         ),
       ),
@@ -324,6 +333,8 @@ class _EmptyRolesPlaceholder extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final seedState = ref.watch(seedRolesProvider);
+    final canManageRoles =
+        ref.watch(hasPermissionProvider(AppPermission.manageRoles));
 
     ref.listen(seedRolesProvider, (prev, next) {
       if (!next.isLoading && prev?.isLoading == true) {
@@ -365,37 +376,39 @@ class _EmptyRolesPlaceholder extends ConsumerWidget {
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton.icon(
-                onPressed: seedState.isLoading
-                    ? null
-                    : () => ref.read(seedRolesProvider.notifier).seed(),
-                icon: seedState.isLoading
-                    ? const SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
-                      )
-                    : const Icon(Icons.auto_fix_high_outlined),
-                label: Text(
-                  seedState.isLoading ? 'Seeding…' : 'Seed Default Roles',
+            if (canManageRoles) ...[
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  onPressed: seedState.isLoading
+                      ? null
+                      : () => ref.read(seedRolesProvider.notifier).seed(),
+                  icon: seedState.isLoading
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Icon(Icons.auto_fix_high_outlined),
+                  label: Text(
+                    seedState.isLoading ? 'Seeding…' : 'Seed Default Roles',
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton.icon(
-                onPressed: seedState.isLoading ? null : onCreateTap,
-                icon: const Icon(Icons.add),
-                label: const Text('Create Role Manually'),
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: seedState.isLoading ? null : onCreateTap,
+                  icon: const Icon(Icons.add),
+                  label: const Text('Create Role Manually'),
+                ),
               ),
-            ),
+            ],
           ],
         ),
       ),
