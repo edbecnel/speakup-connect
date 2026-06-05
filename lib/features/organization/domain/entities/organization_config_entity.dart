@@ -1,5 +1,8 @@
 import 'package:speakup_connect/core/theme/app_colors.dart';
 
+/// Default grade levels for Philippine high schools when none are configured.
+const kDefaultSchoolGradeLevels = [7, 8, 9, 10, 11, 12];
+
 /// Domain entity representing an organization's configuration.
 ///
 /// This is the runtime representation of what's stored in:
@@ -21,6 +24,7 @@ class OrganizationConfigEntity {
     this.country = 'PH',
     this.isActive = true,
     this.requireReminderApproval = false,
+    this.gradeLevels,
   });
 
   /// Unique identifier for this organization (e.g., 'monhs-ph-001').
@@ -65,6 +69,26 @@ class OrganizationConfigEntity {
   /// being published directly. Approvers act on them in the Approval Queue.
   final bool requireReminderApproval;
 
+  /// Grade levels offered by this school (e.g. [7, 8, 9, 10, 11, 12]).
+  ///
+  /// Only meaningful for [supportsStudentGrades] org types. Municipalities,
+  /// NGOs, and other non-school clients do not use this field.
+  final List<int>? gradeLevels;
+
+  /// Whether this org uses student grade levels (schools and universities).
+  bool get supportsStudentGrades =>
+      type == OrganizationType.school || type == OrganizationType.university;
+
+  /// Configured grade levels for school orgs, or an empty list otherwise.
+  List<int> get effectiveGradeLevels {
+    if (!supportsStudentGrades) return const [];
+    final configured = gradeLevels;
+    if (configured == null || configured.isEmpty) {
+      return List<int>.from(kDefaultSchoolGradeLevels);
+    }
+    return List<int>.from(configured)..sort();
+  }
+
   /// The effective tagline, with a sensible default.
   String get effectiveTagline =>
       tagline ?? 'Your voice. Our action. A better community for all.';
@@ -91,6 +115,31 @@ enum OrganizationType {
 
   final String value;
   final String label;
+
+  /// Admin-facing label for organization settings UI.
+  String get adminDisplayName => switch (this) {
+        OrganizationType.school => 'School',
+        OrganizationType.university => 'University',
+        OrganizationType.lgu => 'Municipality / LGU',
+        OrganizationType.ngo => 'NGO',
+        OrganizationType.church => 'Church',
+        OrganizationType.corporation => 'Corporation',
+        OrganizationType.other => 'Other',
+      };
+
+  /// Short note shown when selecting this type in admin settings.
+  String get adminDescription => switch (this) {
+        OrganizationType.school ||
+        OrganizationType.university =>
+          'Enables student grades, roster, and class-based features.',
+        OrganizationType.lgu =>
+          'For municipalities, barangays, and local government units.',
+        OrganizationType.ngo => 'For non-profit and community organizations.',
+        OrganizationType.church => 'For churches and faith-based communities.',
+        OrganizationType.corporation =>
+          'For companies and workplace communities.',
+        OrganizationType.other => 'Generic organization without type-specific features.',
+      };
 
   static OrganizationType fromValue(String value) {
     return OrganizationType.values.firstWhere(

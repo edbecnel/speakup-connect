@@ -84,3 +84,38 @@ class OrganizationConfig extends _$OrganizationConfig {
     }
   }
 }
+
+/// Whether the active organization uses student grade levels.
+final orgSupportsStudentGradesProvider = Provider<bool>((ref) {
+  final config = ref.watch(organizationConfigProvider).value;
+  return config?.supportsStudentGrades ?? false;
+});
+
+/// Grade levels configured for the active school org.
+final orgGradeLevelsProvider = Provider<List<int>>((ref) {
+  final config = ref.watch(organizationConfigProvider).value;
+  if (config == null) {
+    return List<int>.from(kDefaultSchoolGradeLevels);
+  }
+  return config.effectiveGradeLevels;
+});
+
+class SchoolGradesActionNotifier extends Notifier<AsyncValue<void>> {
+  @override
+  AsyncValue<void> build() => const AsyncValue.data(null);
+
+  Future<void> save(List<int> gradeLevels) async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(
+      () => ref.read(organizationRepositoryProvider).updateGradeLevels(
+            organizationId: AppConfig.defaultOrganizationId,
+            gradeLevels: gradeLevels,
+          ),
+    );
+  }
+}
+
+final schoolGradesActionProvider =
+    NotifierProvider<SchoolGradesActionNotifier, AsyncValue<void>>(
+  SchoolGradesActionNotifier.new,
+);

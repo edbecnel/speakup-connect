@@ -11,11 +11,18 @@ class UserProfileModel extends UserProfileEntity {
     required super.displayName,
     required super.fullName,
     super.studentId,
+    super.gradeLevel,
     super.email,
     super.role,
     super.approvalStatus,
     super.applicationSubmitted,
     super.isActive,
+    super.blockReason,
+    super.blockedAt,
+    super.blockedBy,
+    super.unenrollReason,
+    super.unenrolledAt,
+    super.unenrolledBy,
     super.permissions,
     required super.createdAt,
     required super.updatedAt,
@@ -33,6 +40,7 @@ class UserProfileModel extends UserProfileEntity {
           data['displayName'] as String? ??
           '',
       studentId: data['studentId'] as String?,
+      gradeLevel: (data['gradeLevel'] as num?)?.toInt(),
       email: data['email'] as String?,
       role: data['role'] as String? ?? 'user',
       approvalStatus: _parseApprovalStatus(
@@ -42,6 +50,12 @@ class UserProfileModel extends UserProfileEntity {
           data.containsKey('approvalStatus') ||
               ((data['fullName'] as String?)?.isNotEmpty ?? false),
       isActive: data['isActive'] as bool? ?? true,
+      blockReason: data['blockReason'] as String?,
+      blockedAt: (data['blockedAt'] as Timestamp?)?.toDate(),
+      blockedBy: data['blockedBy'] as String?,
+      unenrollReason: data['unenrollReason'] as String?,
+      unenrolledAt: (data['unenrolledAt'] as Timestamp?)?.toDate(),
+      unenrolledBy: data['unenrolledBy'] as String?,
       permissions: Set<String>.from(
         (data['permissions'] as List<dynamic>?) ?? [],
       ),
@@ -76,6 +90,8 @@ class UserProfileModel extends UserProfileEntity {
         return ApprovalStatus.approved;
       case 'rejected':
         return ApprovalStatus.rejected;
+      case 'unenrolled':
+        return ApprovalStatus.unenrolled;
       default:
         return ApprovalStatus.pending;
     }

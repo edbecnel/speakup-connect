@@ -5,9 +5,14 @@ import 'package:speakup_connect/core/constants/route_constants.dart';
 import 'package:speakup_connect/features/admin/presentation/screens/admin_branding_screen.dart';
 import 'package:speakup_connect/features/admin/presentation/screens/admin_dashboard_screen.dart';
 import 'package:speakup_connect/features/admin/presentation/screens/admin_report_detail_screen.dart';
+import 'package:speakup_connect/features/admin/presentation/screens/enrolled_users_screen.dart';
 import 'package:speakup_connect/features/admin/presentation/screens/member_approval_queue_screen.dart';
+import 'package:speakup_connect/features/admin/presentation/screens/roster_management_screen.dart';
+import 'package:speakup_connect/features/admin/presentation/screens/school_grades_settings_screen.dart';
 import 'package:speakup_connect/features/auth/presentation/providers/auth_provider.dart';
 import 'package:speakup_connect/features/auth/presentation/screens/apply_to_join_screen.dart';
+import 'package:speakup_connect/features/auth/presentation/screens/blocked_account_screen.dart';
+import 'package:speakup_connect/features/auth/presentation/screens/unenrolled_account_screen.dart';
 import 'package:speakup_connect/features/auth/presentation/screens/login_screen.dart';
 import 'package:speakup_connect/features/auth/presentation/screens/pending_approval_screen.dart';
 import 'package:speakup_connect/features/auth/presentation/screens/register_screen.dart';
@@ -64,6 +69,9 @@ GoRouter appRouter(Ref ref) {
       final isOnJoinFlow = loc == Routes.applyToJoin ||
           loc == Routes.pendingApproval;
 
+      final isOnBlockedScreen = loc == Routes.accountBlocked;
+      final isOnUnenrolledScreen = loc == Routes.accountUnenrolled;
+
       // Unauthenticated → login.
       if (!isAuthenticated && !isOnAuthPage) {
         return Routes.login;
@@ -84,6 +92,20 @@ GoRouter appRouter(Ref ref) {
             !profile.isApproved &&
             !isOnJoinFlow) {
           return Routes.pendingApproval;
+        }
+
+        // Unenrolled former members.
+        if (profile != null && profile.isUnenrolled) {
+          if (!isOnUnenrolledScreen) return Routes.accountUnenrolled;
+        } else if (isOnUnenrolledScreen) {
+          return Routes.home;
+        }
+
+        // Blocked enrolled members → restriction screen only.
+        if (profile != null && profile.isApproved && profile.isBlocked) {
+          if (!isOnBlockedScreen) return Routes.accountBlocked;
+        } else if (isOnBlockedScreen) {
+          return Routes.home;
         }
 
         // Profile approved → redirect away from auth/join pages.
@@ -192,6 +214,31 @@ GoRouter appRouter(Ref ref) {
         path: Routes.memberApprovals,
         name: 'memberApprovals',
         builder: (context, state) => const MemberApprovalQueueScreen(),
+      ),
+      GoRoute(
+        path: Routes.enrolledUsers,
+        name: 'enrolledUsers',
+        builder: (context, state) => const EnrolledUsersScreen(),
+      ),
+      GoRoute(
+        path: Routes.rosterManagement,
+        name: 'rosterManagement',
+        builder: (context, state) => const RosterManagementScreen(),
+      ),
+      GoRoute(
+        path: Routes.schoolGradesSettings,
+        name: 'schoolGradesSettings',
+        builder: (context, state) => const SchoolGradesSettingsScreen(),
+      ),
+      GoRoute(
+        path: Routes.accountBlocked,
+        name: 'accountBlocked',
+        builder: (context, state) => const BlockedAccountScreen(),
+      ),
+      GoRoute(
+        path: Routes.accountUnenrolled,
+        name: 'accountUnenrolled',
+        builder: (context, state) => const UnenrolledAccountScreen(),
       ),
 
       // --- Admin ---

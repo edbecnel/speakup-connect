@@ -61,4 +61,45 @@ abstract class UserProfileRepository {
     String? reviewedBy,
     String? rejectionReason,
   });
+
+  /// Streams all approved (enrolled) members in the org.
+  Stream<List<UserProfileEntity>> watchEnrolledUsers({
+    required String orgId,
+  });
+
+  /// Streams approved and unenrolled members for admin management screens.
+  Stream<List<UserProfileEntity>> watchManagedMembers({
+    required String orgId,
+  });
+
+  /// Blocks or unblocks an enrolled member.
+  Future<void> setUserBlockStatus({
+    required String orgId,
+    required String targetUserId,
+    required bool isActive,
+    required String actorId,
+    String? reason,
+  });
+
+  /// Removes one or more enrolled members from the organization.
+  Future<int> unenrollUsers({
+    required String orgId,
+    required List<String> targetUserIds,
+    required String actorId,
+    required String reason,
+  });
+
+  /// Sets grade level on an enrolled member's profile.
+  Future<void> setMemberGradeLevel({
+    required String orgId,
+    required String targetUserId,
+    required int gradeLevel,
+  });
+
+  /// Restores one or more unenrolled members to active enrollment.
+  Future<int> reEnrollUsers({
+    required String orgId,
+    required List<String> targetUserIds,
+    required String actorId,
+  });
 }

@@ -22,6 +22,7 @@ class SettingsScreen extends ConsumerWidget {
     final profileAsync = ref.watch(userProfileProvider);
     final profile = profileAsync.value;
     final pendingJoinCount = ref.watch(pendingMemberApplicationCountProvider);
+    final supportsGrades = ref.watch(orgSupportsStudentGradesProvider);
 
     final orgName = orgConfigAsync.value?.displayName ?? '—';
     final theme = Theme.of(context);
@@ -165,6 +166,31 @@ class SettingsScreen extends ConsumerWidget {
               trailing: const Icon(Icons.chevron_right_rounded),
               onTap: () => context.push(Routes.memberApprovals),
             ),
+            ListTile(
+              leading: const Icon(Icons.people_outline),
+              title: const Text('Member Management'),
+              subtitle: const Text(
+                'View, block, unenroll, unblock, or re-enroll members',
+              ),
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () => context.push(Routes.enrolledUsers),
+            ),
+            if (supportsGrades) ...[
+              ListTile(
+                leading: const Icon(Icons.school_outlined),
+                title: const Text('Student Roster'),
+                subtitle: const Text('Assign grades individually or in bulk'),
+                trailing: const Icon(Icons.chevron_right_rounded),
+                onTap: () => context.push(Routes.rosterManagement),
+              ),
+              ListTile(
+                leading: const Icon(Icons.format_list_numbered_outlined),
+                title: const Text('School Grades'),
+                subtitle: const Text('Define which grade levels your school uses'),
+                trailing: const Icon(Icons.chevron_right_rounded),
+                onTap: () => context.push(Routes.schoolGradesSettings),
+              ),
+            ],
             const Divider(),
           ],
 

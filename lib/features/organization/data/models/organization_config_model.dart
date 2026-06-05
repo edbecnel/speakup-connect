@@ -22,6 +22,7 @@ class OrganizationConfigModel extends OrganizationConfigEntity {
     super.country,
     super.isActive,
     super.requireReminderApproval,
+    super.gradeLevels,
   });
 
   factory OrganizationConfigModel.fromJson(
@@ -54,7 +55,20 @@ class OrganizationConfigModel extends OrganizationConfigEntity {
       isActive: json['isActive'] as bool? ?? true,
       requireReminderApproval:
           json['requireReminderApproval'] as bool? ?? false,
+      gradeLevels: _parseGradeLevels(json['gradeLevels']),
     );
+  }
+
+  static List<int>? _parseGradeLevels(dynamic raw) {
+    if (raw is! List) return null;
+    final levels = raw
+        .map((v) => v is num ? v.toInt() : int.tryParse('$v'))
+        .whereType<int>()
+        .where((g) => g > 0)
+        .toSet()
+        .toList()
+      ..sort();
+    return levels.isEmpty ? null : levels;
   }
 
   Map<String, dynamic> toJson() {
@@ -72,6 +86,7 @@ class OrganizationConfigModel extends OrganizationConfigEntity {
       'country': country,
       'isActive': isActive,
       'requireReminderApproval': requireReminderApproval,
+      if (gradeLevels != null) 'gradeLevels': gradeLevels,
     };
   }
 

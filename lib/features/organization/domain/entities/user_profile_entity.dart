@@ -7,7 +7,7 @@
 ///   - [ApprovalStatus.pending]  → pending-approval screen
 ///   - [ApprovalStatus.approved] → home dashboard
 ///   - [ApprovalStatus.rejected] → pending-approval screen (with rejection note)
-enum ApprovalStatus { pending, approved, rejected }
+enum ApprovalStatus { pending, approved, rejected, unenrolled }
 
 /// Typed constants for delegated permissions.
 ///
@@ -29,11 +29,18 @@ class UserProfileEntity {
     required this.displayName,
     required this.fullName,
     this.studentId,
+    this.gradeLevel,
     this.email,
     this.role = 'user',
     this.approvalStatus = ApprovalStatus.pending,
     this.applicationSubmitted = false,
     this.isActive = true,
+    this.blockReason,
+    this.blockedAt,
+    this.blockedBy,
+    this.unenrollReason,
+    this.unenrolledAt,
+    this.unenrolledBy,
     this.permissions = const {},
     required this.createdAt,
     required this.updatedAt,
@@ -54,6 +61,9 @@ class UserProfileEntity {
   /// School/org-issued student ID for roster verification.
   final String? studentId;
 
+  /// Grade level (e.g. 7–12). May come from profile or org roster.
+  final int? gradeLevel;
+
   /// Email address (may be null for anonymous accounts).
   final String? email;
 
@@ -69,6 +79,24 @@ class UserProfileEntity {
   /// Whether this account is currently active.
   final bool isActive;
 
+  /// Why the account was blocked, when [isActive] is false.
+  final String? blockReason;
+
+  /// When the account was last blocked.
+  final DateTime? blockedAt;
+
+  /// UID of the admin who last blocked this account.
+  final String? blockedBy;
+
+  /// Why the member was unenrolled (e.g. graduation).
+  final String? unenrollReason;
+
+  /// When the member was unenrolled.
+  final DateTime? unenrolledAt;
+
+  /// UID of the admin who unenrolled this account.
+  final String? unenrolledBy;
+
   /// Delegated permissions granted by a [super_admin].
   ///
   /// Use [UserPermission] constants as values, e.g. [UserPermission.editTheme].
@@ -82,6 +110,7 @@ class UserProfileEntity {
   bool get isPending => approvalStatus == ApprovalStatus.pending;
   bool get isApproved => approvalStatus == ApprovalStatus.approved;
   bool get isRejected => approvalStatus == ApprovalStatus.rejected;
+  bool get isUnenrolled => approvalStatus == ApprovalStatus.unenrolled;
 
   /// Whether this user is waiting for admin review in the join queue.
   ///
@@ -93,6 +122,8 @@ class UserProfileEntity {
       !isAdmin &&
       (applicationSubmitted || fullName.isNotEmpty);
   bool get isAdmin => role == 'admin' || role == 'super_admin' || role == 'owner';
+  bool get isBlocked => !isActive;
+  bool get isEnrolled => isApproved;
 
   /// Whether this user may edit the organisation's visual theme.
   ///

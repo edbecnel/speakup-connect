@@ -5,6 +5,7 @@ import 'package:speakup_connect/config/app_config.dart';
 import 'package:speakup_connect/core/constants/route_constants.dart';
 import 'package:speakup_connect/features/admin/presentation/widgets/admin_filter_bar.dart';
 import 'package:speakup_connect/features/auth/presentation/providers/auth_provider.dart';
+import 'package:speakup_connect/features/organization/presentation/providers/organization_provider.dart';
 import 'package:speakup_connect/features/organization/presentation/providers/user_profile_provider.dart';
 import 'package:speakup_connect/features/reports/domain/entities/report_entity.dart';
 import 'package:speakup_connect/features/reports/presentation/providers/report_provider.dart';
@@ -21,6 +22,7 @@ class AdminDashboardScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final pendingCount = ref.watch(pendingMemberApplicationCountProvider);
+    final supportsGrades = ref.watch(orgSupportsStudentGradesProvider);
 
     return DefaultTabController(
       length: 4,
@@ -38,13 +40,30 @@ class AdminDashboardScreen extends ConsumerWidget {
               ),
             ),
             IconButton(
+              tooltip: 'Member Management',
+              onPressed: () => context.push(Routes.enrolledUsers),
+              icon: const Icon(Icons.people_outline),
+            ),
+            if (supportsGrades) ...[
+              IconButton(
+                tooltip: 'Student Roster',
+                onPressed: () => context.push(Routes.rosterManagement),
+                icon: const Icon(Icons.school_outlined),
+              ),
+              IconButton(
+                tooltip: 'School Grades',
+                onPressed: () => context.push(Routes.schoolGradesSettings),
+                icon: const Icon(Icons.format_list_numbered_outlined),
+              ),
+            ],
+            IconButton(
               icon: const Icon(Icons.manage_accounts_outlined),
               tooltip: 'Roles & Permissions',
               onPressed: () => context.push(Routes.adminRoles),
             ),
             IconButton(
               icon: const Icon(Icons.settings_outlined),
-              tooltip: 'Branding Settings',
+              tooltip: 'Organization Settings',
               onPressed: () => context.push(Routes.adminSettings),
             ),
           ],

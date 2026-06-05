@@ -159,9 +159,195 @@ class UserProfileRepositoryImpl implements UserProfileRepository {
 
     try {
       await _usersRef(orgId).doc(targetUserId).update(update);
+
+      if (status == ApprovalStatus.approved) {
+        final doc = await _usersRef(orgId).doc(targetUserId).get();
+        final data = doc.data();
+        if (data != null) {
+          final profile = UserProfileModel.fromFirestore(data, targetUserId);
+          final studentId = profile.studentId;
+          if (studentId != null && studentId.isNotEmpty) {
+            await _rosterRef(orgId).doc(studentId).set(
+              {
+                'fullName': profile.fullName,
+                if (profile.email != null) 'email': profile.email,
+                'isRegistered': true,
+                'registeredUserId': targetUserId,
+                'importedAt': FieldValue.serverTimestamp(),
+                'importSource': 'approval',
+                'updatedAt': FieldValue.serverTimestamp(),
+              },
+              SetOptions(merge: true),
+            );
+          }
+        }
+      }
     } on FirebaseException catch (e) {
       throw DatabaseException(
         message: e.message ?? 'Failed to update approval status',
+        code: e.code,
+      );
+    }
+  }
+
+  CollectionReference<Map<String, dynamic>> _rosterRef(String orgId) =>
+      _firestore
+          .collection(AppConstants.organizationsCollection)
+          .doc(orgId)
+          .collection(AppConstants.rosterCollection);
+
+  @override
+  Stream<List<UserProfileEntity>> watchEnrolledUsers({
+    required String orgId,
+  }) {
+    return _usersRef(orgId)
+        .where('approvalStatus', isEqualTo: ApprovalStatus.approved.name)
+        .orderBy('displayName')
+        .snapshots()
+        .map((snap) => snap.docs
+            .map((d) => UserProfileModel.fromFirestore(d.data(), d.id))
+            .where((p) => p.isEnrolled)
+            .toList());
+  }
+
+  @override
+  Stream<List<UserProfileEntity>> watchManagedMembers({
+    required String orgId,
+  }) {
+    return _usersRef(orgId)
+        .where(
+          'approvalStatus',
+          whereIn: [
+            ApprovalStatus.approved.name,
+            ApprovalStatus.unenrolled.name,
+          ],
+        )
+        .snapshots()
+        .map((snap) {
+      final members = snap.docs
+          .map((d) => UserProfileModel.fromFirestore(d.data(), d.id))
+          .where((p) => p.isApproved || p.isUnenrolled)
+          .toList();
+      members.sort(
+        (a, b) => a.fullName.toLowerCase().compareTo(b.fullName.toLowerCase()),
+      );
+      return members;
+    });
+  }
+
+  @override
+  Future<void> setUserBlockStatus({
+    required String orgId,
+    required String targetUserId,
+    required bool isActive,
+    required String actorId,
+    String? reason,
+  }) async {
+    final update = <String, dynamic>{
+      'isActive': isActive,
+      'updatedAt': FieldValue.serverTimestamp(),
+    };
+
+    if (isActive) {
+      update['blockReason'] = FieldValue.delete();
+      update['blockedAt'] = FieldValue.delete();
+      update['blockedBy'] = FieldValue.delete();
+    } else {
+      update['blockReason'] = reason ?? 'No reason provided';
+      update['blockedAt'] = FieldValue.serverTimestamp();
+      update['blockedBy'] = actorId;
+    }
+
+    try {
+      await _usersRef(orgId).doc(targetUserId).update(update);
+    } on FirebaseException catch (e) {
+      throw DatabaseException(
+        message: e.message ?? 'Failed to update user block status',
+        code: e.code,
+      );
+    }
+  }
+
+  @override
+  Future<int> unenrollUsers({
+    required String orgId,
+    required List<String> targetUserIds,
+    required String actorId,
+    required String reason,
+  }) async {
+    if (targetUserIds.isEmpty) return 0;
+
+    try {
+      final batch = _firestore.batch();
+      final now = FieldValue.serverTimestamp();
+
+      for (final userId in targetUserIds) {
+        batch.update(_usersRef(orgId).doc(userId), {
+          'approvalStatus': ApprovalStatus.unenrolled.name,
+          'unenrollReason': reason,
+          'unenrolledAt': now,
+          'unenrolledBy': actorId,
+          'updatedAt': now,
+        });
+      }
+
+      await batch.commit();
+      return targetUserIds.length;
+    } on FirebaseException catch (e) {
+      throw DatabaseException(
+        message: e.message ?? 'Failed to unenroll users',
+        code: e.code,
+      );
+    }
+  }
+
+  @override
+  Future<int> reEnrollUsers({
+    required String orgId,
+    required List<String> targetUserIds,
+    required String actorId,
+  }) async {
+    if (targetUserIds.isEmpty) return 0;
+
+    try {
+      final batch = _firestore.batch();
+      final now = FieldValue.serverTimestamp();
+
+      for (final userId in targetUserIds) {
+        batch.update(_usersRef(orgId).doc(userId), {
+          'approvalStatus': ApprovalStatus.approved.name,
+          'isActive': true,
+          'unenrollReason': FieldValue.delete(),
+          'unenrolledAt': FieldValue.delete(),
+          'unenrolledBy': FieldValue.delete(),
+          'updatedAt': now,
+        });
+      }
+
+      await batch.commit();
+      return targetUserIds.length;
+    } on FirebaseException catch (e) {
+      throw DatabaseException(
+        message: e.message ?? 'Failed to re-enroll users',
+        code: e.code,
+      );
+    }
+  }
+
+  @override
+  Future<void> setMemberGradeLevel({
+    required String orgId,
+    required String targetUserId,
+    required int gradeLevel,
+  }) async {
+    try {
+      await _usersRef(orgId).doc(targetUserId).update({
+        'gradeLevel': gradeLevel,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+    } on FirebaseException catch (e) {
+      throw DatabaseException(
+        message: e.message ?? 'Failed to update member grade',
         code: e.code,
       );
     }

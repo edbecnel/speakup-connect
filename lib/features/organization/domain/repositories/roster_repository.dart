@@ -1,0 +1,25 @@
+import 'package:speakup_connect/features/organization/domain/entities/roster_entry_entity.dart';
+
+/// Repository for org student/member roster operations.
+abstract class RosterRepository {
+  /// Streams all roster entries for the organization.
+  Stream<List<RosterEntryEntity>> watchRoster({required String orgId});
+
+  /// Sets the grade for one roster student and syncs enrolled profile if linked.
+  Future<void> setStudentGrade({
+    required String orgId,
+    required String studentId,
+    required int gradeLevel,
+    RosterEntryEntity? entry,
+  });
+
+  /// Sets the grade for multiple roster students in one batch.
+  ///
+  /// [entryDetails] supplies name/registration metadata when upserting roster
+  /// rows that only exist as user profiles today.
+  Future<int> setStudentGrades({
+    required String orgId,
+    required Map<String, int> gradesByStudentId,
+    Map<String, RosterEntryEntity> entryDetails = const {},
+  });
+}

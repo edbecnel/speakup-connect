@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:speakup_connect/config/app_config.dart';
 import 'package:speakup_connect/core/theme/app_theme.dart';
 import 'package:speakup_connect/features/admin/presentation/providers/admin_branding_provider.dart';
+import 'package:speakup_connect/features/organization/domain/entities/organization_config_entity.dart';
 import 'package:speakup_connect/features/organization/presentation/providers/organization_provider.dart';
 import 'package:speakup_connect/features/reports/presentation/providers/report_provider.dart';
 
@@ -81,7 +82,7 @@ class _AdminBrandingScreenState extends ConsumerState<AdminBrandingScreen> {
     return Scaffold(
       appBar: AppBar(
         leading: BackButton(onPressed: () => context.pop()),
-        title: const Text('Branding Settings'),
+        title: const Text('Organization Settings'),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
@@ -90,6 +91,8 @@ class _AdminBrandingScreenState extends ConsumerState<AdminBrandingScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              const _OrganizationTypeCard(),
+              const SizedBox(height: 32),
               _SectionHeader(
                 icon: Icons.business_outlined,
                 title: 'Organization Name',
@@ -597,6 +600,148 @@ class _SetupCategoriesCard extends ConsumerWidget {
               ),
             );
           },
+        ),
+      ],
+    );
+  }
+}
+
+// ── Organization type ───────────────────────────────────────────────────────
+
+class _OrganizationTypeCard extends ConsumerStatefulWidget {
+  const _OrganizationTypeCard();
+
+  @override
+  ConsumerState<_OrganizationTypeCard> createState() =>
+      _OrganizationTypeCardState();
+}
+
+class _OrganizationTypeCardState extends ConsumerState<_OrganizationTypeCard> {
+  OrganizationType? _selectedType;
+  bool _saving = false;
+
+  Future<void> _saveType(OrganizationType currentType) async {
+    final nextType = _selectedType;
+    if (nextType == null || nextType == currentType) return;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Change organization type?'),
+        content: Text(
+          'Change from ${currentType.adminDisplayName} to '
+          '${nextType.adminDisplayName}?\n\n'
+          '${nextType.adminDescription}\n\n'
+          'This affects which admin features are available (such as student '
+          'grades and roster for schools).',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Confirm'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+
+    setState(() => _saving = true);
+    try {
+      await ref.read(organizationRepositoryProvider).updateOrganizationType(
+            organizationId: AppConfig.defaultOrganizationId,
+            type: nextType,
+          );
+      if (mounted) {
+        setState(() => _selectedType = null);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Organization type set to ${nextType.adminDisplayName}'),
+            backgroundColor: Colors.green.shade700,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Update failed: $e'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final orgAsync = ref.watch(organizationConfigProvider);
+    final currentType =
+        orgAsync.asData?.value.type ?? OrganizationType.other;
+    final selectedType = _selectedType ?? currentType;
+    final hasChanges = selectedType != currentType;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _SectionHeader(
+          icon: Icons.apartment_outlined,
+          title: 'Organization Type',
+          subtitle:
+              'Determines which features are available. Schools can use '
+              'student grades and roster; municipalities and NGOs use '
+              'member management without grades.',
+        ),
+        const SizedBox(height: 12),
+        DropdownButtonFormField<OrganizationType>(
+          initialValue: selectedType,
+          decoration: const InputDecoration(
+            labelText: 'Type',
+            border: OutlineInputBorder(),
+          ),
+          items: OrganizationType.values
+              .map(
+                (type) => DropdownMenuItem(
+                  value: type,
+                  child: Text(type.adminDisplayName),
+                ),
+              )
+              .toList(),
+          onChanged: _saving
+              ? null
+              : (value) => setState(() => _selectedType = value),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          selectedType.adminDescription,
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Align(
+          alignment: Alignment.centerRight,
+          child: FilledButton(
+            onPressed: _saving || !hasChanges
+                ? null
+                : () => _saveType(currentType),
+            child: _saving
+                ? const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                : const Text('Save type'),
+          ),
         ),
       ],
     );

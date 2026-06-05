@@ -50,4 +50,16 @@ abstract class OrganizationRepository {
     required String organizationId,
     required bool requireApproval,
   });
+
+  /// Updates the grade levels offered by a school-type organization.
+  Future<void> updateGradeLevels({
+    required String organizationId,
+    required List<int> gradeLevels,
+  });
+
+  /// Updates the organization type (school, NGO, municipality, etc.).
+  Future<void> updateOrganizationType({
+    required String organizationId,
+    required OrganizationType type,
+  });
 }

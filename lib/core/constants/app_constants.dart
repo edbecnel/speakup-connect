@@ -40,6 +40,7 @@ abstract class AppConstants {
   static const String roleAssignmentsCollection = 'roleAssignments';
   static const String remindersCollection = 'reminders';
   static const String groupsCollection = 'groups';
+  static const String rosterCollection = 'roster';
 
   /// Per-user in-app notification feed:
   /// `organizations/{orgId}/users/{userId}/notifications/{notificationId}`.

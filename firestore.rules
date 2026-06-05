@@ -135,6 +135,67 @@ service cloud.firestore {
           ]);
     }
 
+    // Block / unblock enrolled members — isActive and block audit fields only.
+    function onlyBlockUserFields() {
+      return request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly([
+            'isActive',
+            'blockReason',
+            'blockedAt',
+            'blockedBy',
+            'updatedAt',
+          ]);
+    }
+
+    // Roster grade updates — grade field only.
+    function onlyRosterGradeFields() {
+      return request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['grade', 'updatedAt']);
+    }
+
+    // Member grade on enrolled profile.
+    function onlyGradeLevelFields() {
+      return request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['gradeLevel', 'updatedAt']);
+    }
+
+    // Unenroll members — approval status and audit fields only.
+    function onlyUnenrollFields() {
+      return request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly([
+            'approvalStatus',
+            'unenrollReason',
+            'unenrolledAt',
+            'unenrolledBy',
+            'updatedAt',
+          ]);
+    }
+
+    // School grade levels on the org document (school-type clients only).
+    function onlyGradeLevelsFields() {
+      return request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['gradeLevels', 'updatedAt']);
+    }
+
+    // Organization type (school, NGO, municipality, etc.).
+    function onlyOrganizationTypeFields() {
+      return request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['type', 'updatedAt']);
+    }
+
+    // Re-enroll former members — restore approved status and clear unenroll audit.
+    function onlyReEnrollFields() {
+      return request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly([
+            'approvalStatus',
+            'isActive',
+            'unenrollReason',
+            'unenrolledAt',
+            'unenrolledBy',
+            'updatedAt',
+          ]);
+    }
+
     // ── Organizations ─────────────────────────────────────────────────────────
 
     match /organizations/{orgId} {
@@ -156,7 +217,13 @@ service cloud.firestore {
                         && onlyThemeFields())
                     || ((isAdminOrAbove(orgId)
                          || hasClaimedPermission('manageOrganizationSettings'))
-                        && onlyReminderApprovalFields());
+                        && onlyReminderApprovalFields())
+                    || ((isAdminOrAbove(orgId)
+                         || hasClaimedPermission('manageOrganizationSettings'))
+                        && onlyGradeLevelsFields())
+                    || ((isAdminOrAbove(orgId)
+                         || hasClaimedPermission('manageOrganizationSettings'))
+                        && onlyOrganizationTypeFields());
 
       // ── Config ─────────────────────────────────────────────────────────────
       match /config/{configId} {
@@ -220,6 +287,7 @@ service cloud.firestore {
         // own profile during the pending-approval flow.
         allow read: if isAdminOrAbove(orgId)
                     || hasPermission(orgId, 'approveApplications')
+                    || hasPermission(orgId, 'blockUsers')
                     || (isSignedIn() && request.auth.uid == userId);
 
         // Users may create their own profile; admins may create any
@@ -238,6 +306,14 @@ service cloud.firestore {
                               .affectedKeys().hasAny(['permissions']))
                       || (hasPermission(orgId, 'approveApplications')
                           && onlyJoinApprovalFields())
+                      || (hasPermission(orgId, 'blockUsers')
+                          && onlyBlockUserFields())
+                      || (hasPermission(orgId, 'blockUsers')
+                          && onlyUnenrollFields())
+                      || (hasPermission(orgId, 'blockUsers')
+                          && onlyReEnrollFields())
+                      || (hasPermission(orgId, 'manageClassRoster')
+                          && onlyGradeLevelFields())
                       || (isOrgMember(orgId)
                           && request.auth.uid == userId
                           && !request.resource.data.diff(resource.data)
@@ -290,8 +366,13 @@ service cloud.firestore {
       // Roster is sensitive (student IDs + names). Admin-only reads.
       // Roster verification at signup is done server-side via Admin SDK.
       match /roster/{studentId} {
-        allow read:  if isAdminOrAbove(orgId);
-        allow write: if isAdminOrAbove(orgId);
+        allow read:  if isAdminOrAbove(orgId)
+                     || hasPermission(orgId, 'blockUsers')
+                     || hasPermission(orgId, 'manageClassRoster');
+        allow create, delete: if isAdminOrAbove(orgId);
+        allow update: if isAdminOrAbove(orgId)
+                      || (hasPermission(orgId, 'manageClassRoster')
+                          && onlyRosterGradeFields());
       }
 
       // ── Custom Roles ────────────────────────────────────────────────────────

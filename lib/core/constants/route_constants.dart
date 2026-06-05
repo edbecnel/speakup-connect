@@ -33,6 +33,11 @@ abstract class Routes {
   static const String adminReportDetail = '/admin/reports/:reportId';
   static const String adminSettings = '/admin/settings';
   static const String memberApprovals = '/join-applications';
+  static const String enrolledUsers = '/enrolled-users';
+  static const String rosterManagement = '/roster';
+  static const String schoolGradesSettings = '/school-grades';
+  static const String accountBlocked = '/account-blocked';
+  static const String accountUnenrolled = '/account-unenrolled';
 
   // --- Admin: Roles & Permissions ---
   static const String adminRoles = '/admin/roles';

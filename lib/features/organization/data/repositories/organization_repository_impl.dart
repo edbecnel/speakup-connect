@@ -135,4 +135,57 @@ class OrganizationRepositoryImpl implements OrganizationRepository {
       );
     }
   }
+
+  @override
+  Future<void> updateGradeLevels({
+    required String organizationId,
+    required List<int> gradeLevels,
+  }) async {
+    final normalized = gradeLevels.where((g) => g > 0).toSet().toList()..sort();
+    if (normalized.isEmpty) {
+      throw const AppException(message: 'At least one grade level is required.');
+    }
+
+    try {
+      await _firestore
+          .collection(AppConstants.organizationsCollection)
+          .doc(organizationId)
+          .update({
+        'gradeLevels': normalized,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+    } on FirebaseException catch (e) {
+      if (e.code == 'permission-denied') {
+        throw const PermissionException();
+      }
+      throw DatabaseException(
+        message: e.message ?? 'Failed to update grade levels',
+        code: e.code,
+      );
+    }
+  }
+
+  @override
+  Future<void> updateOrganizationType({
+    required String organizationId,
+    required OrganizationType type,
+  }) async {
+    try {
+      await _firestore
+          .collection(AppConstants.organizationsCollection)
+          .doc(organizationId)
+          .update({
+        'type': type.value,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+    } on FirebaseException catch (e) {
+      if (e.code == 'permission-denied') {
+        throw const PermissionException();
+      }
+      throw DatabaseException(
+        message: e.message ?? 'Failed to update organization type',
+        code: e.code,
+      );
+    }
+  }
 }
