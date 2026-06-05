@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:speakup_connect/config/app_config.dart';
 import 'package:speakup_connect/core/constants/route_constants.dart';
+import 'package:speakup_connect/core/permissions/providers/permission_provider.dart';
 import 'package:speakup_connect/features/auth/presentation/providers/auth_provider.dart';
 import 'package:speakup_connect/features/organization/presentation/providers/organization_provider.dart';
 import 'package:speakup_connect/features/organization/presentation/providers/user_profile_provider.dart';
@@ -23,6 +24,7 @@ class SettingsScreen extends ConsumerWidget {
     final profile = profileAsync.value;
     final pendingJoinCount = ref.watch(pendingMemberApplicationCountProvider);
     final supportsGrades = ref.watch(orgSupportsStudentGradesProvider);
+    final canTriageReports = ref.watch(canAccessAdminReportsProvider);
 
     final orgName = orgConfigAsync.value?.displayName ?? '—';
     final theme = Theme.of(context);
@@ -141,55 +143,58 @@ class SettingsScreen extends ConsumerWidget {
           const Divider(),
 
           // --- Admin ---
-          if (profile?.isAdmin == true) ...[  
+          if (profile?.isAdmin == true || canTriageReports) ...[
             const _SectionHeader(title: 'Administration'),
-            ListTile(
-              leading: const Icon(Icons.admin_panel_settings_outlined),
-              title: const Text('Admin Dashboard'),
-              subtitle: const Text('Manage reports and settings'),
-              trailing: const Icon(Icons.chevron_right_rounded),
-              onTap: () => context.push(Routes.adminDashboard),
-            ),
-            ListTile(
-              leading: SizedBox(
-                width: 40,
-                height: 40,
-                child: Center(
-                  child: NotificationBadgeIcon(
-                    icon: Icons.person_add_alt_1_outlined,
-                    unreadCount: pendingJoinCount,
+            if (canTriageReports)
+              ListTile(
+                leading: const Icon(Icons.admin_panel_settings_outlined),
+                title: const Text('Admin Dashboard'),
+                subtitle: const Text('Review and manage submitted reports'),
+                trailing: const Icon(Icons.chevron_right_rounded),
+                onTap: () => context.push(Routes.adminDashboard),
+              ),
+            if (profile?.isAdmin == true) ...[
+              ListTile(
+                leading: SizedBox(
+                  width: 40,
+                  height: 40,
+                  child: Center(
+                    child: NotificationBadgeIcon(
+                      icon: Icons.person_add_alt_1_outlined,
+                      unreadCount: pendingJoinCount,
+                    ),
                   ),
                 ),
-              ),
-              title: const Text('Join Applications'),
-              subtitle: const Text('Approve new member sign-ups'),
-              trailing: const Icon(Icons.chevron_right_rounded),
-              onTap: () => context.push(Routes.memberApprovals),
-            ),
-            ListTile(
-              leading: const Icon(Icons.people_outline),
-              title: const Text('Member Management'),
-              subtitle: const Text(
-                'View, block, unenroll, unblock, or re-enroll members',
-              ),
-              trailing: const Icon(Icons.chevron_right_rounded),
-              onTap: () => context.push(Routes.enrolledUsers),
-            ),
-            if (supportsGrades) ...[
-              ListTile(
-                leading: const Icon(Icons.school_outlined),
-                title: const Text('Student Roster'),
-                subtitle: const Text('Assign grades individually or in bulk'),
+                title: const Text('Join Applications'),
+                subtitle: const Text('Approve new member sign-ups'),
                 trailing: const Icon(Icons.chevron_right_rounded),
-                onTap: () => context.push(Routes.rosterManagement),
+                onTap: () => context.push(Routes.memberApprovals),
               ),
               ListTile(
-                leading: const Icon(Icons.format_list_numbered_outlined),
-                title: const Text('School Grades'),
-                subtitle: const Text('Define which grade levels your school uses'),
+                leading: const Icon(Icons.people_outline),
+                title: const Text('Member Management'),
+                subtitle: const Text(
+                  'View, block, unenroll, unblock, or re-enroll members',
+                ),
                 trailing: const Icon(Icons.chevron_right_rounded),
-                onTap: () => context.push(Routes.schoolGradesSettings),
+                onTap: () => context.push(Routes.enrolledUsers),
               ),
+              if (supportsGrades) ...[
+                ListTile(
+                  leading: const Icon(Icons.school_outlined),
+                  title: const Text('Student Roster'),
+                  subtitle: const Text('Assign grades individually or in bulk'),
+                  trailing: const Icon(Icons.chevron_right_rounded),
+                  onTap: () => context.push(Routes.rosterManagement),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.format_list_numbered_outlined),
+                  title: const Text('School Grades'),
+                  subtitle: const Text('Define which grade levels your school uses'),
+                  trailing: const Icon(Icons.chevron_right_rounded),
+                  onTap: () => context.push(Routes.schoolGradesSettings),
+                ),
+              ],
             ],
             const Divider(),
           ],

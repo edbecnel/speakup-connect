@@ -31,11 +31,14 @@ Future<List<ReportCategoryEntity>> reportCategories(Ref ref) async {
 // --- My Reports Stream ---
 
 @riverpod
-Stream<List<ReportEntity>> myReports(Ref ref) {
-  final user = ref.watch(currentUserProvider);
-  if (user == null || user.isAnonymous) return const Stream.empty();
+Stream<List<ReportEntity>> myReports(Ref ref) async* {
+  final user = await ref.watch(authStateChangesProvider.future);
+  if (user == null || user.isAnonymous) {
+    yield const <ReportEntity>[];
+    return;
+  }
 
-  return ref.watch(reportRepositoryProvider).watchMyReports(
+  yield* ref.watch(reportRepositoryProvider).watchMyReports(
         organizationId: AppConfig.defaultOrganizationId,
         userId: user.uid,
       );

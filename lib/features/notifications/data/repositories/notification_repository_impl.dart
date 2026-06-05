@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:speakup_connect/core/constants/app_constants.dart';
 import 'package:speakup_connect/core/errors/app_exception.dart';
@@ -33,6 +35,114 @@ class NotificationRepositoryImpl implements NotificationRepository {
         .map((snap) => snap.docs
             .map((d) => AppNotificationModel.fromFirestore(d.data(), d.id))
             .toList());
+  }
+
+  @override
+  Stream<List<AppNotificationEntity>> watchAlertFeed({
+    required String organizationId,
+    required String userId,
+  }) {
+    final controller = StreamController<List<AppNotificationEntity>>();
+    List<AppNotificationEntity> notifications = const [];
+    List<AppNotificationEntity> broadcasts = const [];
+
+    void emit() {
+      if (controller.isClosed) return;
+      controller.add(_mergeAlertFeed(notifications, broadcasts));
+    }
+
+    final notifSub = watchNotifications(
+      organizationId: organizationId,
+      userId: userId,
+    ).listen(
+      (items) {
+        notifications = items;
+        emit();
+      },
+      onError: controller.addError,
+    );
+
+    final broadcastSub = _watchOrgBroadcasts(organizationId).listen(
+      (items) {
+        broadcasts = items;
+        emit();
+      },
+      onError: controller.addError,
+    );
+
+    controller.onCancel = () async {
+      await notifSub.cancel();
+      await broadcastSub.cancel();
+    };
+
+    return controller.stream;
+  }
+
+  Stream<List<AppNotificationEntity>> _watchOrgBroadcasts(String organizationId) {
+    return _firestore
+        .collection(AppConstants.organizationsCollection)
+        .doc(organizationId)
+        .collection(AppConstants.remindersCollection)
+        .where('status', isEqualTo: 'published')
+        .orderBy('createdAt', descending: true)
+        .limit(50)
+        .snapshots()
+        .map((snap) {
+          return snap.docs
+              .where((doc) {
+                final data = doc.data();
+                final audience = data['audienceType'] as String? ?? 'all';
+                // Include all org-wide published broadcasts — covers missed
+                // server-side delivery as well as late-approved members.
+                return audience == 'all';
+              })
+              .map(_reminderDocToNotification)
+              .toList();
+        });
+  }
+
+  AppNotificationEntity _reminderDocToNotification(
+    QueryDocumentSnapshot<Map<String, dynamic>> doc,
+  ) {
+    final data = doc.data();
+    DateTime? toDate(dynamic v) => v is Timestamp ? v.toDate() : null;
+
+    return AppNotificationModel(
+      id: 'broadcast-${doc.id}',
+      type: 'reminder',
+      title: data['title'] as String? ?? 'New reminder',
+      body: data['body'] as String? ?? '',
+      read: false,
+      data: {
+        'reminderId': doc.id,
+        'audienceType': data['audienceType'] as String? ?? 'all',
+        'synthetic': true,
+      },
+      createdAt: toDate(data['publishedAt']) ??
+          toDate(data['deliveredAt']) ??
+          toDate(data['createdAt']) ??
+          DateTime.now(),
+    );
+  }
+
+  List<AppNotificationEntity> _mergeAlertFeed(
+    List<AppNotificationEntity> notifications,
+    List<AppNotificationEntity> broadcasts,
+  ) {
+    final deliveredReminderIds = notifications
+        .where((n) => n.type == 'reminder')
+        .map((n) => n.data['reminderId'] as String?)
+        .whereType<String>()
+        .toSet();
+
+    final merged = [
+      ...notifications,
+      ...broadcasts.where(
+        (b) => !deliveredReminderIds.contains(b.data['reminderId']),
+      ),
+    ];
+    merged.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    return merged;
   }
 
   @override

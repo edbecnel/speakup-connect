@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:speakup_connect/core/constants/route_constants.dart';
+import 'package:speakup_connect/core/permissions/providers/permission_provider.dart';
 import 'package:speakup_connect/features/admin/presentation/screens/admin_branding_screen.dart';
 import 'package:speakup_connect/features/admin/presentation/screens/admin_dashboard_screen.dart';
 import 'package:speakup_connect/features/admin/presentation/screens/admin_report_detail_screen.dart';
@@ -111,8 +112,18 @@ GoRouter appRouter(Ref ref) {
         // Profile approved → redirect away from auth/join pages.
         if (profile != null && profile.isApproved) {
           if (isOnAuthPage || isOnJoinFlow) return Routes.home;
-          // Admin routes: non-admin profiles are redirected to home.
-          if (loc.startsWith('/admin') && !profile.isAdmin) return Routes.home;
+          // Admin routes — report triage vs full admin settings.
+          if (loc.startsWith('/admin')) {
+            final canTriageReports = ref.read(canAccessAdminReportsProvider);
+            final isReportTriageRoute = loc == Routes.adminDashboard ||
+                loc.startsWith('/admin/reports/');
+            if (isReportTriageRoute && !canTriageReports) {
+              return Routes.home;
+            }
+            if (!isReportTriageRoute && !profile.isAdmin) {
+              return Routes.home;
+            }
+          }
         }
       }
 

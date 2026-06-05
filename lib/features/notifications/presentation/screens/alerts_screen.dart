@@ -99,9 +99,11 @@ class AlertsScreen extends ConsumerWidget {
             separatorBuilder: (_, __) => const Divider(height: 1),
             itemBuilder: (_, i) {
               final n = items[i];
+              final isSynthetic = n.id.startsWith('broadcast-');
               return Dismissible(
                 key: ValueKey(n.id),
-                direction: DismissDirection.endToStart,
+                direction:
+                    isSynthetic ? DismissDirection.none : DismissDirection.endToStart,
                 background: Container(
                   alignment: Alignment.centerRight,
                   color: Theme.of(context).colorScheme.errorContainer,

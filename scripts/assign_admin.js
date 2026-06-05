@@ -61,6 +61,19 @@ async function main() {
     assignedAt: admin.firestore.FieldValue.serverTimestamp(),
   });
 
+  // Keep the profile role in sync so router/admin UI gates match Firestore rules.
+  const profileRef = db
+    .collection('organizations').doc(ORG_ID)
+    .collection('users').doc(uid);
+  await profileRef.set(
+    {
+      role: 'admin',
+      organizationId: ORG_ID,
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    },
+    { merge: true },
+  );
+
   console.log(`\nDone! "${email}" is now an org-admin for ${ORG_ID}.`);
   console.log('Hot-restart the app and the Create Role button will appear.');
 }

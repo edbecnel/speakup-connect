@@ -279,6 +279,7 @@ class _AdminDetailView extends ConsumerWidget {
   ) async {
     final updated = await showDialog<bool>(
       context: context,
+      barrierDismissible: false,
       builder: (_) => _StatusUpdateDialog(report: report, ref: ref),
     );
     if (updated == true) {
@@ -293,6 +294,7 @@ class _AdminDetailView extends ConsumerWidget {
   ) async {
     final added = await showDialog<bool>(
       context: context,
+      barrierDismissible: false,
       builder: (_) => _AddNoteDialog(report: report, ref: ref),
     );
     if (added == true) {
@@ -514,6 +516,30 @@ class _AssignDialogState extends ConsumerState<_AssignDialog> {
   }
 }
 
+/// Wraps [AlertDialog] so the keyboard shifts the dialog up instead of
+/// collapsing/dismissing it when a [TextField] is focused.
+Widget _keyboardSafeAdminDialog({
+  required BuildContext context,
+  required Widget title,
+  required Widget content,
+  required List<Widget> actions,
+}) {
+  return AnimatedPadding(
+    padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
+    duration: const Duration(milliseconds: 100),
+    curve: Curves.easeOut,
+    child: MediaQuery(
+      data: MediaQuery.of(context).copyWith(viewInsets: EdgeInsets.zero),
+      child: AlertDialog(
+        scrollable: true,
+        title: title,
+        content: content,
+        actions: actions,
+      ),
+    ),
+  );
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Status Update Dialog
 // ─────────────────────────────────────────────────────────────────────────────
@@ -578,11 +604,12 @@ class _StatusUpdateDialogState extends ConsumerState<_StatusUpdateDialog> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return AlertDialog(
+    return _keyboardSafeAdminDialog(
+      context: context,
       title: const Text('Update Status'),
       content: Column(
         mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
             'Current: ${widget.report.status.label}',
@@ -613,6 +640,8 @@ class _StatusUpdateDialogState extends ConsumerState<_StatusUpdateDialog> {
             controller: _noteController,
             enabled: !_isSaving,
             maxLines: 3,
+            keyboardType: TextInputType.multiline,
+            textInputAction: TextInputAction.newline,
             decoration: const InputDecoration(
               labelText: 'Note (optional)',
               border: OutlineInputBorder(),
@@ -624,19 +653,25 @@ class _StatusUpdateDialogState extends ConsumerState<_StatusUpdateDialog> {
         ],
       ),
       actions: [
-        TextButton(
-          onPressed: _isSaving ? null : () => Navigator.of(context).pop(false),
-          child: const Text('Cancel'),
-        ),
-        FilledButton(
-          onPressed: _isSaving ? null : _save,
-          child: _isSaving
-              ? const SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : const Text('Save'),
+        OverflowBar(
+          spacing: 8,
+          children: [
+            TextButton(
+              onPressed:
+                  _isSaving ? null : () => Navigator.of(context).pop(false),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: _isSaving ? null : _save,
+              child: _isSaving
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Text('Save'),
+            ),
+          ],
         ),
       ],
     );
@@ -695,13 +730,16 @@ class _AddNoteDialogState extends ConsumerState<_AddNoteDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
+    return _keyboardSafeAdminDialog(
+      context: context,
       title: const Text('Add Admin Note'),
       content: TextField(
         controller: _noteController,
         enabled: !_isSaving,
         maxLines: 5,
         autofocus: true,
+        keyboardType: TextInputType.multiline,
+        textInputAction: TextInputAction.newline,
         decoration: const InputDecoration(
           labelText: 'Note',
           border: OutlineInputBorder(),
@@ -710,19 +748,25 @@ class _AddNoteDialogState extends ConsumerState<_AddNoteDialog> {
         ),
       ),
       actions: [
-        TextButton(
-          onPressed: _isSaving ? null : () => Navigator.of(context).pop(false),
-          child: const Text('Cancel'),
-        ),
-        FilledButton(
-          onPressed: _isSaving ? null : _save,
-          child: _isSaving
-              ? const SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : const Text('Save'),
+        OverflowBar(
+          spacing: 8,
+          children: [
+            TextButton(
+              onPressed:
+                  _isSaving ? null : () => Navigator.of(context).pop(false),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: _isSaving ? null : _save,
+              child: _isSaving
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Text('Save'),
+            ),
+          ],
         ),
       ],
     );

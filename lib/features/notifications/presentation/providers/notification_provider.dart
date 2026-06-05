@@ -14,12 +14,15 @@ final notificationRepositoryProvider = Provider<NotificationRepository>((ref) {
 
 // ── Streams ──────────────────────────────────────────────────────────────────
 
-/// Streams the current user's notification feed.
+/// Streams the current user's alert feed (notifications + org broadcasts).
 final notificationsProvider =
-    StreamProvider.autoDispose<List<AppNotificationEntity>>((ref) {
-  final user = ref.watch(currentUserProvider);
-  if (user == null) return const Stream.empty();
-  return ref.watch(notificationRepositoryProvider).watchNotifications(
+    StreamProvider.autoDispose<List<AppNotificationEntity>>((ref) async* {
+  final user = await ref.watch(authStateChangesProvider.future);
+  if (user == null) {
+    yield const <AppNotificationEntity>[];
+    return;
+  }
+  yield* ref.watch(notificationRepositoryProvider).watchAlertFeed(
         organizationId: AppConfig.defaultOrganizationId,
         userId: user.uid,
       );
@@ -38,6 +41,7 @@ class NotificationActions extends Notifier<AsyncValue<void>> {
   AsyncValue<void> build() => const AsyncData(null);
 
   Future<void> markRead(String notificationId) async {
+    if (notificationId.startsWith('broadcast-')) return;
     final user = ref.read(currentUserProvider);
     if (user == null) return;
     try {
@@ -67,6 +71,7 @@ class NotificationActions extends Notifier<AsyncValue<void>> {
   }
 
   Future<void> delete(String notificationId) async {
+    if (notificationId.startsWith('broadcast-')) return;
     final user = ref.read(currentUserProvider);
     if (user == null) return;
     try {

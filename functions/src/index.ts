@@ -139,6 +139,17 @@ export const syncCustomClaims = onDocumentWritten(
 
     const { permissions, tagScopes } = await resolveUserPermissions(orgId, userId);
 
+    // Mirror profile role + org onto JWT so legacy Security Rule helpers
+    // (isOrgModerator, isOrgMember) work without an extra Firestore get().
+    const profileSnap = await db
+      .collection('organizations').doc(orgId)
+      .collection('users').doc(userId)
+      .get();
+    const profile = profileSnap.data() ?? {};
+    const profileRole = (profile['role'] as string | undefined) ?? 'user';
+    const profileOrgId =
+      (profile['organizationId'] as string | undefined) ?? orgId;
+
     // Preserve any existing claims this function does not own.
     let existingClaims: Record<string, unknown> = {};
     try {
@@ -157,6 +168,8 @@ export const syncCustomClaims = onDocumentWritten(
       permissions,
       tagScopes,
       orgId,
+      organizationId: profileOrgId,
+      role: profileRole,
     });
 
     logger.info('Custom claims synced', {
@@ -205,6 +218,15 @@ export const refreshMyPermissions = onCall(async (request) => {
 
   const { permissions, tagScopes } = await resolveUserPermissions(orgId, userId);
 
+  const profileSnap = await db
+    .collection('organizations').doc(orgId)
+    .collection('users').doc(userId)
+    .get();
+  const profile = profileSnap.data() ?? {};
+  const profileRole = (profile['role'] as string | undefined) ?? 'user';
+  const profileOrgId =
+    (profile['organizationId'] as string | undefined) ?? orgId;
+
   let existingClaims: Record<string, unknown> = {};
   try {
     const userRecord = await admin.auth().getUser(userId);
@@ -218,6 +240,8 @@ export const refreshMyPermissions = onCall(async (request) => {
     permissions,
     tagScopes,
     orgId,
+    organizationId: profileOrgId,
+    role: profileRole,
   });
 
   return { ok: true, permissionCount: permissions.length };
@@ -706,3 +730,71 @@ export const publishDueReminders = onSchedule('every 5 minutes', async () => {
     delivered,
   });
 });
+
+// ── Trigger: onMemberApproved ─────────────────────────────────────────────────
+
+/**
+ * When a member is approved (or re-enrolled), backfill any org-wide broadcasts
+ * they missed while not in the approved recipient set.
+ */
+async function backfillMissedBroadcasts(
+  orgId: string,
+  userId: string,
+): Promise<number> {
+  const publishedSnap = await db
+    .collection('organizations').doc(orgId)
+    .collection('reminders')
+    .where('status', '==', 'published')
+    .get();
+
+  let written = 0;
+  for (const doc of publishedSnap.docs) {
+    const data = doc.data() as ReminderData;
+    if ((data.audienceType ?? 'all') !== 'all') continue;
+
+    const existing = await db
+      .collection('organizations').doc(orgId)
+      .collection('users').doc(userId)
+      .collection('notifications')
+      .where('data.reminderId', '==', doc.id)
+      .limit(1)
+      .get();
+    if (!existing.empty) continue;
+
+    await db
+      .collection('organizations').doc(orgId)
+      .collection('users').doc(userId)
+      .collection('notifications')
+      .add({
+        type: 'reminder',
+        title: data.title ?? 'New reminder',
+        body: data.body ?? '',
+        read: false,
+        data: { reminderId: doc.id, audienceType: 'all' },
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
+    written++;
+  }
+  return written;
+}
+
+export const onMemberApproved = onDocumentUpdated(
+  'organizations/{orgId}/users/{userId}',
+  async (event) => {
+    const before = event.data?.before.data();
+    const after = event.data?.after.data();
+    if (!before || !after) return;
+    if (before['approvalStatus'] === after['approvalStatus']) return;
+    if (after['approvalStatus'] !== 'approved') return;
+
+    const { orgId, userId } = event.params;
+    const count = await backfillMissedBroadcasts(orgId, userId);
+    if (count > 0) {
+      logger.info('onMemberApproved: backfilled broadcasts', {
+        orgId,
+        userId,
+        count,
+      });
+    }
+  },
+);

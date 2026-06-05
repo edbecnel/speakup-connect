@@ -8,6 +8,13 @@ abstract class NotificationRepository {
     required String userId,
   });
 
+  /// Merges the per-user notification feed with org-wide published broadcasts
+  /// the user may have missed (e.g. approved after delivery).
+  Stream<List<AppNotificationEntity>> watchAlertFeed({
+    required String organizationId,
+    required String userId,
+  });
+
   /// Marks a single notification as read.
   Future<void> markAsRead({
     required String organizationId,

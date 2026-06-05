@@ -25,10 +25,18 @@ class AdminDashboardScreen extends ConsumerWidget {
     final supportsGrades = ref.watch(orgSupportsStudentGradesProvider);
 
     return DefaultTabController(
-      length: 4,
+      length: 6,
       child: Scaffold(
         appBar: AppBar(
-          leading: BackButton(onPressed: () => context.go(Routes.home)),
+          leading: BackButton(
+            onPressed: () {
+              if (context.canPop()) {
+                context.pop();
+              } else {
+                context.go(Routes.home);
+              }
+            },
+          ),
           title: const Text('Admin Dashboard'),
           actions: [
             IconButton(
@@ -73,8 +81,10 @@ class AdminDashboardScreen extends ConsumerWidget {
             tabs: [
               Tab(text: 'All'),
               Tab(text: 'Submitted'),
+              Tab(text: 'Under Review'),
               Tab(text: 'In Progress'),
               Tab(text: 'Resolved'),
+              Tab(text: 'Closed'),
             ],
           ),
         ),
@@ -87,10 +97,12 @@ class AdminDashboardScreen extends ConsumerWidget {
             Expanded(
               child: TabBarView(
                 children: [
-                  _AdminReportsList(),
-                  _AdminReportsList(filterStatus: ReportStatus.submitted),
-                  _AdminReportsList(filterStatus: ReportStatus.inProgress),
-                  _AdminReportsList(filterStatus: ReportStatus.resolved),
+                  _AdminReportsList(tab: AdminReportsTab.allActive),
+                  _AdminReportsList(tab: AdminReportsTab.submitted),
+                  _AdminReportsList(tab: AdminReportsTab.underReview),
+                  _AdminReportsList(tab: AdminReportsTab.inProgress),
+                  _AdminReportsList(tab: AdminReportsTab.resolved),
+                  _AdminReportsList(tab: AdminReportsTab.closed),
                 ],
               ),
             ),
@@ -106,34 +118,100 @@ class _QuickStatsHeader extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final allAsync = ref.watch(allReportsProvider(null));
+    final allAsync = ref.watch(allReportsProvider(AdminReportsTab.allActive));
     final theme = Theme.of(context);
 
     return allAsync.when(
       loading: () => const SizedBox.shrink(),
       error: (_, __) => const SizedBox.shrink(),
       data: (reports) {
-        final total = reports.length;
+        final active = _activeReports(reports);
+        final total = active.length;
         final submitted =
-            reports.where((r) => r.status == ReportStatus.submitted).length;
+            active.where((r) => r.status == ReportStatus.submitted).length;
+        final underReview =
+            active.where((r) => r.status == ReportStatus.underReview).length;
         final inProgress =
-            reports.where((r) => r.status == ReportStatus.inProgress).length;
+            active.where((r) => r.status == ReportStatus.inProgress).length;
         final resolved =
-            reports.where((r) => r.status == ReportStatus.resolved).length;
+            active.where((r) => r.status == ReportStatus.resolved).length;
+        final closed =
+            reports.where((r) => r.status == ReportStatus.closed).length;
+
+        final tabController = DefaultTabController.of(context);
 
         return Container(
           color: theme.colorScheme.surfaceContainerLow,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Row(
-            children: [
-              _StatChip(label: 'Total', count: total, color: theme.colorScheme.primary),
-              const SizedBox(width: 8),
-              _StatChip(label: 'Submitted', count: submitted, color: const Color(0xFF1565C0)),
-              const SizedBox(width: 8),
-              _StatChip(label: 'In Progress', count: inProgress, color: const Color(0xFFF57F17)),
-              const SizedBox(width: 8),
-              _StatChip(label: 'Resolved', count: resolved, color: const Color(0xFF2E7D32)),
-            ],
+          child: AnimatedBuilder(
+            animation: tabController,
+            builder: (context, _) {
+              final selectedTab = tabController.index;
+
+              void selectTab(AdminReportsTab tab) {
+                tabController.animateTo(tab.tabIndex);
+              }
+
+              return SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                child: Row(
+                  children: [
+                    _StatChip(
+                      label: 'Total',
+                      count: total,
+                      color: theme.colorScheme.primary,
+                      selected: selectedTab == AdminReportsTab.allActive.tabIndex,
+                      onTap: () => selectTab(AdminReportsTab.allActive),
+                    ),
+                    const SizedBox(width: 8),
+                    _StatChip(
+                      label: 'Submitted',
+                      count: submitted,
+                      color: const Color(0xFF1565C0),
+                      selected:
+                          selectedTab == AdminReportsTab.submitted.tabIndex,
+                      onTap: () => selectTab(AdminReportsTab.submitted),
+                    ),
+                    const SizedBox(width: 8),
+                    _StatChip(
+                      label: 'Under Review',
+                      count: underReview,
+                      color: const Color(0xFFF9A825),
+                      selected:
+                          selectedTab == AdminReportsTab.underReview.tabIndex,
+                      onTap: () => selectTab(AdminReportsTab.underReview),
+                    ),
+                    const SizedBox(width: 8),
+                    _StatChip(
+                      label: 'In Progress',
+                      count: inProgress,
+                      color: const Color(0xFFF57F17),
+                      selected:
+                          selectedTab == AdminReportsTab.inProgress.tabIndex,
+                      onTap: () => selectTab(AdminReportsTab.inProgress),
+                    ),
+                    const SizedBox(width: 8),
+                    _StatChip(
+                      label: 'Resolved',
+                      count: resolved,
+                      color: const Color(0xFF2E7D32),
+                      selected:
+                          selectedTab == AdminReportsTab.resolved.tabIndex,
+                      onTap: () => selectTab(AdminReportsTab.resolved),
+                    ),
+                    const SizedBox(width: 8),
+                    _StatChip(
+                      label: 'Closed',
+                      count: closed,
+                      color: theme.colorScheme.onSurfaceVariant,
+                      selected: selectedTab == AdminReportsTab.closed.tabIndex,
+                      onTap: () => selectTab(AdminReportsTab.closed),
+                    ),
+                  ],
+                ),
+              );
+            },
           ),
         );
       },
@@ -146,44 +224,63 @@ class _StatChip extends StatelessWidget {
     required this.label,
     required this.count,
     required this.color,
+    required this.onTap,
+    this.selected = false,
   });
 
   final String label;
   final int count;
   final Color color;
+  final VoidCallback onTap;
+  final bool selected;
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.1),
+    return Semantics(
+      button: true,
+      label: '$label: $count reports',
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: color.withValues(alpha: 0.3)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              '$count',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
-                color: color,
+          child: Ink(
+            width: 88,
+            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: selected ? 0.22 : 0.1),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: color.withValues(alpha: selected ? 0.85 : 0.3),
+                width: selected ? 2 : 1,
               ),
             ),
-            const SizedBox(height: 2),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w500,
-                color: color,
-              ),
-              textAlign: TextAlign.center,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  '$count',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                    color: color,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                    color: color,
+                  ),
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -222,28 +319,30 @@ class _SearchBar extends ConsumerWidget {
 }
 
 class _AdminReportsList extends ConsumerWidget {
-  const _AdminReportsList({this.filterStatus});
+  const _AdminReportsList({required this.tab});
 
-  final ReportStatus? filterStatus;
+  final AdminReportsTab tab;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final allReportsAsync = ref.watch(allReportsProvider(filterStatus));
+    final allReportsAsync = ref.watch(allReportsProvider(tab));
 
     return allReportsAsync.when(
       loading: () => const AppLoadingIndicator(message: 'Loading reports...'),
       error: (e, _) => AppErrorWidget(
         message: 'Failed to load reports',
-        onRetry: () => ref.invalidate(allReportsProvider(filterStatus)),
+        onRetry: () => ref.invalidate(allReportsProvider(tab)),
       ),
       data: (reports) {
         final categoryFilter = ref.watch(adminCategoryFilterProvider);
         final searchQuery =
             ref.watch(adminSearchQueryProvider).trim().toLowerCase();
 
-        var filtered = categoryFilter.isEmpty
-            ? reports
-            : reports.where((r) => categoryFilter.contains(r.categoryId)).toList();
+        var filtered = _reportsForTab(reports, tab);
+
+        filtered = categoryFilter.isEmpty
+            ? filtered
+            : filtered.where((r) => categoryFilter.contains(r.categoryId)).toList();
 
         if (searchQuery.isNotEmpty) {
           filtered = filtered
@@ -260,9 +359,12 @@ class _AdminReportsList extends ConsumerWidget {
             message: searchQuery.isNotEmpty ? 'No results' : 'No reports',
             subtitle: searchQuery.isNotEmpty
                 ? 'No reports match "$searchQuery".'
-                : filterStatus == null
-                    ? 'No reports submitted yet.'
-                    : 'No "${filterStatus!.label}" reports.',
+                : switch (tab) {
+                    AdminReportsTab.allActive =>
+                      'No active reports submitted yet.',
+                    AdminReportsTab.closed => 'No closed reports.',
+                    _ => 'No "${tab.label}" reports.',
+                  },
           );
         }
 
@@ -422,11 +524,49 @@ class _PriorityBadge extends StatelessWidget {
   }
 }
 
+// --- Tab filter ---
+
+/// Admin dashboard report tabs. [allActive] excludes closed reports.
+enum AdminReportsTab {
+  allActive('All'),
+  submitted('Submitted'),
+  underReview('Under Review'),
+  inProgress('In Progress'),
+  resolved('Resolved'),
+  closed('Closed');
+
+  const AdminReportsTab(this.label);
+
+  final String label;
+
+  ReportStatus? get statusFilter => switch (this) {
+        AdminReportsTab.allActive => null,
+        AdminReportsTab.submitted => ReportStatus.submitted,
+        AdminReportsTab.underReview => ReportStatus.underReview,
+        AdminReportsTab.inProgress => ReportStatus.inProgress,
+        AdminReportsTab.resolved => ReportStatus.resolved,
+        AdminReportsTab.closed => ReportStatus.closed,
+      };
+
+  /// Index in the dashboard [TabBar] / [TabBarView].
+  int get tabIndex => AdminReportsTab.values.indexOf(this);
+}
+
+List<ReportEntity> _activeReports(List<ReportEntity> reports) =>
+    reports.where((r) => r.status != ReportStatus.closed).toList();
+
+List<ReportEntity> _reportsForTab(List<ReportEntity> reports, AdminReportsTab tab) {
+  if (tab == AdminReportsTab.allActive) return _activeReports(reports);
+  final status = tab.statusFilter;
+  if (status == null) return reports;
+  return reports.where((r) => r.status == status).toList();
+}
+
 // --- Providers ---
 
-final allReportsProvider = StreamProvider.family<List<ReportEntity>, ReportStatus?>(
-  (ref, filterStatus) => ref.watch(reportRepositoryProvider).watchAllReports(
+final allReportsProvider = StreamProvider.family<List<ReportEntity>, AdminReportsTab>(
+  (ref, tab) => ref.watch(reportRepositoryProvider).watchAllReports(
         organizationId: AppConfig.defaultOrganizationId,
-        filterStatus: filterStatus,
+        filterStatus: tab.statusFilter,
       ),
 );

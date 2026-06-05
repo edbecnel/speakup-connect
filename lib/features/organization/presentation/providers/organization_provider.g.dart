@@ -112,7 +112,7 @@ final class OrganizationConfigProvider extends $AsyncNotifierProvider<
 }
 
 String _$organizationConfigHash() =>
-    r'708bf0faa9b8a4382baa4ea5d9eba95568f43563';
+    r'94171dd26dea4b58da131568a2dbe4afa91b6e60';
 
 /// Loads and caches the active organization's configuration.
 ///

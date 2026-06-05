@@ -136,11 +136,19 @@ class ReportRepositoryImpl implements ReportRepository {
     required String organizationId,
     required String userId,
   }) {
+    // Security rules require isAnonymous == false for non-moderator reads;
+    // the query must include the same constraint or Firestore denies the listen.
+    // Sort client-side so we don't need a composite index (avoids spinner while
+    // indexes build).
     return _reportsRef(organizationId)
         .where('submittedBy', isEqualTo: userId)
-        .orderBy(AppConstants.fieldCreatedAt, descending: true)
+        .where(AppConstants.fieldIsAnonymous, isEqualTo: false)
         .snapshots()
-        .map((snap) => snap.docs.map(_documentToEntity).toList());
+        .map((snap) {
+          final reports = snap.docs.map(_documentToEntity).toList();
+          reports.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+          return reports;
+        });
   }
 
   @override

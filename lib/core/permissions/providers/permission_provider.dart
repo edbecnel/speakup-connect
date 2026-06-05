@@ -5,6 +5,7 @@ import 'package:speakup_connect/config/app_config.dart';
 import 'package:speakup_connect/core/permissions/app_permission.dart';
 import 'package:speakup_connect/core/permissions/entities/effective_permission_set.dart';
 import 'package:speakup_connect/features/auth/presentation/providers/auth_provider.dart';
+import 'package:speakup_connect/features/organization/presentation/providers/user_profile_provider.dart';
 import 'package:speakup_connect/features/roles/data/repositories/permissions_repository_impl.dart';
 import 'package:speakup_connect/features/roles/domain/repositories/permissions_repository.dart';
 
@@ -78,4 +79,12 @@ final permissionProvider = StreamProvider<EffectivePermissionSet>((ref) async* {
 final hasPermissionProvider =
     Provider.family<bool, AppPermission>((ref, permission) {
   return ref.watch(permissionProvider).asData?.value.has(permission) ?? false;
+});
+
+/// True when the user may open the Admin Dashboard and triage org reports.
+final canAccessAdminReportsProvider = Provider<bool>((ref) {
+  final profile = ref.watch(userProfileProvider).value;
+  if (profile?.isAdmin == true) return true;
+  return ref.watch(hasPermissionProvider(AppPermission.viewAllReports)) ||
+      ref.watch(hasPermissionProvider(AppPermission.manageReports));
 });

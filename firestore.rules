@@ -76,6 +76,22 @@ service cloud.firestore {
       return isSuperAdmin() || isOrgModerator(orgId);
     }
 
+    // RBAC report triage — holders of viewAllReports / manageReports via JWT
+    // or delegated profile permissions (org-admin role, discipline officer, etc.).
+    function canViewOrgReports(orgId) {
+      return isModeratorOrAbove(orgId)
+          || hasClaimedPermission('viewAllReports')
+          || hasClaimedPermission('manageReports')
+          || hasPermission(orgId, 'viewAllReports')
+          || hasPermission(orgId, 'manageReports');
+    }
+
+    function canManageOrgReports(orgId) {
+      return isModeratorOrAbove(orgId)
+          || hasClaimedPermission('manageReports')
+          || hasPermission(orgId, 'manageReports');
+    }
+
     // Returns true when [orgId] member [uid] has [permission] in their
     // user profile document.  Used to check delegated permissions granted
     // by a super_admin (e.g. 'edit_theme' granted to an admin).
@@ -262,7 +278,7 @@ service cloud.firestore {
       //     (field-level filtering is enforced in app code + Cloud Functions;
       //      Firestore Security Rules do not support field-level redaction natively)
       match /reports/{reportId} {
-        allow read: if isModeratorOrAbove(orgId)
+        allow read: if canViewOrgReports(orgId)
                     || (isOrgMember(orgId)
                         && resource.data.isAnonymous == false
                         && resource.data.submittedBy == request.auth.uid);
@@ -272,8 +288,8 @@ service cloud.firestore {
                       && (request.resource.data.isAnonymous == true
                           || request.resource.data.submittedBy == request.auth.uid);
 
-        // Only moderators+ may update (status changes, triage, notes)
-        allow update: if isModeratorOrAbove(orgId);
+        // Status changes, triage, and admin notes.
+        allow update: if canManageOrgReports(orgId);
 
         // Only org admin+ may delete
         allow delete: if isAdminOrAbove(orgId);
