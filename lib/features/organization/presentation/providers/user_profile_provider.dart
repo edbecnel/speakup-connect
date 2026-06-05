@@ -123,8 +123,11 @@ final permissionDelegationProvider = NotifierProvider.autoDispose<
 // --- Member Application Review ---
 
 /// Join applications awaiting admin approval.
+///
+/// Kept alive (non-autoDispose) so the dashboard badge and queue screen
+/// always share the same Firestore snapshot.
 final pendingMemberApplicationsProvider =
-    StreamProvider.autoDispose<List<UserProfileEntity>>((ref) {
+    StreamProvider<List<UserProfileEntity>>((ref) {
   final orgId = AppConfig.defaultOrganizationId;
   return ref
       .read(userProfileRepositoryProvider)
@@ -133,7 +136,8 @@ final pendingMemberApplicationsProvider =
 
 /// Count of pending join applications — for admin dashboard badges.
 final pendingMemberApplicationCountProvider = Provider<int>((ref) {
-  return ref.watch(pendingMemberApplicationsProvider).asData?.value.length ?? 0;
+  final async = ref.watch(pendingMemberApplicationsProvider);
+  return async.value?.length ?? 0;
 });
 
 class MemberApplicationReviewNotifier extends Notifier<AsyncValue<void>> {

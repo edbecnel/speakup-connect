@@ -8,6 +8,7 @@ import 'package:speakup_connect/features/organization/presentation/providers/org
 import 'package:speakup_connect/features/organization/presentation/providers/user_profile_provider.dart';
 import 'package:speakup_connect/features/settings/presentation/providers/settings_provider.dart';
 import 'package:speakup_connect/shared/widgets/app_button.dart';
+import 'package:speakup_connect/shared/widgets/notification_badge_icon.dart';
 
 /// Settings / Profile screen.
 class SettingsScreen extends ConsumerWidget {
@@ -20,6 +21,7 @@ class SettingsScreen extends ConsumerWidget {
     final themeMode = ref.watch(themeModeProvider);
     final profileAsync = ref.watch(userProfileProvider);
     final profile = profileAsync.value;
+    final pendingJoinCount = ref.watch(pendingMemberApplicationCountProvider);
 
     final orgName = orgConfigAsync.value?.displayName ?? '—';
     final theme = Theme.of(context);
@@ -146,6 +148,22 @@ class SettingsScreen extends ConsumerWidget {
               subtitle: const Text('Manage reports and settings'),
               trailing: const Icon(Icons.chevron_right_rounded),
               onTap: () => context.push(Routes.adminDashboard),
+            ),
+            ListTile(
+              leading: SizedBox(
+                width: 40,
+                height: 40,
+                child: Center(
+                  child: NotificationBadgeIcon(
+                    icon: Icons.person_add_alt_1_outlined,
+                    unreadCount: pendingJoinCount,
+                  ),
+                ),
+              ),
+              title: const Text('Join Applications'),
+              subtitle: const Text('Approve new member sign-ups'),
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () => context.push(Routes.memberApprovals),
             ),
             const Divider(),
           ],

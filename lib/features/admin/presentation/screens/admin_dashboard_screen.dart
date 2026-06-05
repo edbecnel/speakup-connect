@@ -4,8 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:speakup_connect/config/app_config.dart';
 import 'package:speakup_connect/core/constants/route_constants.dart';
 import 'package:speakup_connect/features/admin/presentation/widgets/admin_filter_bar.dart';
-import 'package:speakup_connect/core/permissions/app_permission.dart';
-import 'package:speakup_connect/core/permissions/providers/permission_provider.dart';
 import 'package:speakup_connect/features/auth/presentation/providers/auth_provider.dart';
 import 'package:speakup_connect/features/organization/presentation/providers/user_profile_provider.dart';
 import 'package:speakup_connect/features/reports/domain/entities/report_entity.dart';
@@ -22,8 +20,6 @@ class AdminDashboardScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final canApproveApplications =
-        ref.watch(hasPermissionProvider(AppPermission.approveApplications));
     final pendingCount = ref.watch(pendingMemberApplicationCountProvider);
 
     return DefaultTabController(
@@ -33,15 +29,14 @@ class AdminDashboardScreen extends ConsumerWidget {
           leading: BackButton(onPressed: () => context.go(Routes.home)),
           title: const Text('Admin Dashboard'),
           actions: [
-            if (canApproveApplications)
-              IconButton(
-                tooltip: 'Join Applications',
-                onPressed: () => context.push(Routes.memberApprovals),
-                icon: NotificationBadgeIcon(
-                  icon: Icons.person_add_alt_1_outlined,
-                  unreadCount: pendingCount,
-                ),
+            IconButton(
+              tooltip: 'Join Applications',
+              onPressed: () => context.push(Routes.memberApprovals),
+              icon: NotificationBadgeIcon(
+                icon: Icons.person_add_alt_1_outlined,
+                unreadCount: pendingCount,
               ),
+            ),
             IconButton(
               icon: const Icon(Icons.manage_accounts_outlined),
               tooltip: 'Roles & Permissions',

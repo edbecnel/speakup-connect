@@ -122,6 +122,19 @@ service cloud.firestore {
           .hasOnly(['requireReminderApproval', 'updatedAt']);
     }
 
+    // Join-application review — approvalStatus and related audit fields only.
+    function onlyJoinApprovalFields() {
+      return request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly([
+            'approvalStatus',
+            'applicationSubmitted',
+            'reviewedBy',
+            'reviewedAt',
+            'rejectionReason',
+            'updatedAt',
+          ]);
+    }
+
     // ── Organizations ─────────────────────────────────────────────────────────
 
     match /organizations/{orgId} {
@@ -206,6 +219,7 @@ service cloud.firestore {
         // users without an organizationId custom claim can still watch their
         // own profile during the pending-approval flow.
         allow read: if isAdminOrAbove(orgId)
+                    || hasPermission(orgId, 'approveApplications')
                     || (isSignedIn() && request.auth.uid == userId);
 
         // Users may create their own profile; admins may create any
@@ -222,6 +236,8 @@ service cloud.firestore {
                       || (isAdminOrAbove(orgId)
                           && !request.resource.data.diff(resource.data)
                               .affectedKeys().hasAny(['permissions']))
+                      || (hasPermission(orgId, 'approveApplications')
+                          && onlyJoinApprovalFields())
                       || (isOrgMember(orgId)
                           && request.auth.uid == userId
                           && !request.resource.data.diff(resource.data)

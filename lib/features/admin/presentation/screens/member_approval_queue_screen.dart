@@ -8,17 +8,18 @@ import 'package:speakup_connect/features/organization/domain/entities/user_profi
 import 'package:speakup_connect/features/organization/presentation/providers/user_profile_provider.dart';
 
 /// Admin queue for reviewing join applications submitted after sign-up.
-///
-/// Gated on [AppPermission.approveApplications].
 class MemberApprovalQueueScreen extends ConsumerWidget {
   const MemberApprovalQueueScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final profile = ref.watch(userProfileProvider).value;
     final canApprove =
         ref.watch(hasPermissionProvider(AppPermission.approveApplications));
+    final canAct = canApprove || (profile?.isAdmin ?? false);
     final pendingAsync = ref.watch(pendingMemberApplicationsProvider);
+    final applications = pendingAsync.value ?? const <UserProfileEntity>[];
 
     ref.listen(memberApplicationReviewProvider, (prev, next) {
       if (prev?.isLoading == true && !next.isLoading && next.hasError) {
@@ -29,111 +30,110 @@ class MemberApprovalQueueScreen extends ConsumerWidget {
       }
     });
 
+    Widget body;
+    if (pendingAsync.isLoading && !pendingAsync.hasValue) {
+      body = const Center(child: CircularProgressIndicator());
+    } else if (pendingAsync.hasError && !pendingAsync.hasValue) {
+      body = Center(child: Text('Failed to load: ${pendingAsync.error}'));
+    } else if (applications.isEmpty) {
+      body = const _EmptyQueue();
+    } else {
+      body = ListView.separated(
+        padding: const EdgeInsets.all(16),
+        itemCount: applications.length,
+        separatorBuilder: (_, __) => const SizedBox(height: 12),
+        itemBuilder: (_, i) => _PendingApplicationCard(
+          profile: applications[i],
+          canAct: canAct,
+        ),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         leading: BackButton(onPressed: () => context.pop()),
         title: const Text('Join Applications'),
       ),
-      body: !canApprove
-          ? const _NoAccessPlaceholder()
-          : pendingAsync.when(
-              loading: () =>
-                  const Center(child: CircularProgressIndicator()),
-              error: (e, _) => Center(child: Text('Failed to load: $e')),
-              data: (applications) {
-                if (applications.isEmpty) {
-                  return const _EmptyQueue();
-                }
-                return ListView.separated(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: applications.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 12),
-                  itemBuilder: (_, i) =>
-                      _PendingApplicationCard(profile: applications[i]),
-                );
-              },
-            ),
+      body: body,
     );
   }
 }
 
 class _PendingApplicationCard extends ConsumerWidget {
-  const _PendingApplicationCard({required this.profile});
+  const _PendingApplicationCard({
+    required this.profile,
+    required this.canAct,
+  });
 
   final UserProfileEntity profile;
+  final bool canAct;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final reviewState = ref.watch(memberApplicationReviewProvider);
     final busy = reviewState.isLoading;
+    final appliedAt = DateFormat.yMMMd().add_jm().format(profile.createdAt);
 
     return Card(
       margin: EdgeInsets.zero,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              profile.fullName,
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          ListTile(
+            title: Text(
+              profile.fullName.isNotEmpty ? profile.fullName : 'Unknown',
               style: theme.textTheme.titleMedium
                   ?.copyWith(fontWeight: FontWeight.w700),
             ),
-            if (profile.displayName != profile.fullName) ...[
-              const SizedBox(height: 4),
-              Text(
-                profile.displayName,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ],
-            const SizedBox(height: 12),
-            if (profile.studentId != null)
-              _DetailRow(
-                icon: Icons.badge_outlined,
-                label: 'Student ID',
-                value: profile.studentId!,
-              ),
-            if (profile.email != null)
-              _DetailRow(
-                icon: Icons.email_outlined,
-                label: 'Email',
-                value: profile.email!,
-              ),
-            _DetailRow(
-              icon: Icons.schedule,
-              label: 'Applied',
-              value: DateFormat.yMMMd().add_jm().format(profile.createdAt),
-            ),
-            const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                TextButton.icon(
-                  onPressed:
-                      busy ? null : () => _confirmReject(context, ref),
-                  icon: const Icon(Icons.close, size: 18),
-                  label: const Text('Reject'),
+                if (profile.displayName.isNotEmpty &&
+                    profile.displayName != profile.fullName)
+                  Text(profile.displayName),
+                if (profile.email != null) Text(profile.email!),
+                if (profile.studentId != null)
+                  Text('Student ID: ${profile.studentId}'),
+                Text('Applied $appliedAt'),
+              ],
+            ),
+          ),
+          if (canAct)
+            OverflowBar(
+              alignment: MainAxisAlignment.end,
+              spacing: 8,
+              children: [
+                TextButton(
+                  onPressed: busy ? null : () => _confirmReject(context, ref),
                   style: TextButton.styleFrom(
                     foregroundColor: theme.colorScheme.error,
                   ),
+                  child: const Text('Reject'),
                 ),
-                const SizedBox(width: 8),
-                FilledButton.icon(
+                FilledButton(
                   onPressed: busy
                       ? null
                       : () => ref
                           .read(memberApplicationReviewProvider.notifier)
                           .approve(profile.userId),
-                  icon: const Icon(Icons.check, size: 18),
-                  label: const Text('Approve'),
+                  child: const Text('Approve'),
                 ),
               ],
+            )
+          else
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+              child: Text(
+                'View only — you do not have permission to approve applications.',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
             ),
-          ],
-        ),
+        ],
       ),
     );
   }
@@ -174,45 +174,6 @@ class _PendingApplicationCard extends ConsumerWidget {
   }
 }
 
-class _DetailRow extends StatelessWidget {
-  const _DetailRow({
-    required this.icon,
-    required this.label,
-    required this.value,
-  });
-
-  final IconData icon;
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 4),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, size: 16, color: theme.colorScheme.onSurfaceVariant),
-          const SizedBox(width: 8),
-          SizedBox(
-            width: 88,
-            child: Text(
-              label,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ),
-          Expanded(
-            child: Text(value, style: theme.textTheme.bodyMedium),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _EmptyQueue extends StatelessWidget {
   const _EmptyQueue();
 
@@ -238,31 +199,13 @@ class _EmptyQueue extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'When someone signs up and completes the Join form, their request will appear here.\n\n'
-              'If you created an account before this screen existed, ask them to sign in and submit the Join form — sign-up alone does not create a request.',
+              'When someone signs up and completes the Join form, their request will appear here.',
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
               textAlign: TextAlign.center,
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class _NoAccessPlaceholder extends StatelessWidget {
-  const _NoAccessPlaceholder();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: Padding(
-        padding: EdgeInsets.all(32),
-        child: Text(
-          'You do not have permission to approve join applications.',
-          textAlign: TextAlign.center,
         ),
       ),
     );

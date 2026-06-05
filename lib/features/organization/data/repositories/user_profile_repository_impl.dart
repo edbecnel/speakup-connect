@@ -123,8 +123,8 @@ class UserProfileRepositoryImpl implements UserProfileRepository {
   Stream<List<UserProfileEntity>> watchPendingApplications({
     required String orgId,
   }) {
-    // Stream the whole collection and filter client-side so we still pick up
-    // legacy profiles that are pending but may be missing indexed fields.
+    // Stream the whole collection and filter client-side so legacy profiles
+    // missing indexed fields still appear in the admin queue.
     return _usersRef(orgId).snapshots().map((snap) {
       final profiles = snap.docs
           .map((d) => UserProfileModel.fromFirestore(d.data(), d.id))

@@ -84,8 +84,14 @@ class UserProfileEntity {
   bool get isRejected => approvalStatus == ApprovalStatus.rejected;
 
   /// Whether this user is waiting for admin review in the join queue.
+  ///
+  /// Excludes approved admins and accounts that have not submitted the join
+  /// form (sign-up alone is not enough).
   bool get isAwaitingJoinApproval =>
-      isPending && (applicationSubmitted || fullName.isNotEmpty);
+      !isApproved &&
+      !isRejected &&
+      !isAdmin &&
+      (applicationSubmitted || fullName.isNotEmpty);
   bool get isAdmin => role == 'admin' || role == 'super_admin' || role == 'owner';
 
   /// Whether this user may edit the organisation's visual theme.
