@@ -4,7 +4,9 @@ import 'package:go_router/go_router.dart';
 import 'package:speakup_connect/core/constants/route_constants.dart';
 import 'package:speakup_connect/core/theme/app_theme.dart';
 import 'package:speakup_connect/features/auth/presentation/providers/auth_provider.dart';
+import 'package:speakup_connect/features/notifications/presentation/providers/notification_provider.dart';
 import 'package:speakup_connect/features/organization/presentation/providers/organization_provider.dart';
+import 'package:speakup_connect/shared/widgets/notification_badge_icon.dart';
 
 /// Home Dashboard — the main screen for authenticated users.
 ///
@@ -24,6 +26,7 @@ class HomeDashboardScreen extends ConsumerWidget {
 
     final orgConfig = orgConfigAsync.value;
     final firstName = user?.displayName?.split(' ').first ?? 'there';
+    final unreadAlerts = ref.watch(unreadNotificationCountProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -36,7 +39,10 @@ class HomeDashboardScreen extends ConsumerWidget {
         title: const Text('Home'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.notifications_outlined),
+            icon: NotificationBadgeIcon(
+              icon: Icons.notifications_outlined,
+              unreadCount: unreadAlerts,
+            ),
             onPressed: () => context.push(Routes.alerts),
           ),
         ],
@@ -112,7 +118,10 @@ class HomeDashboardScreen extends ConsumerWidget {
           ),
         ),
       ),
-      bottomNavigationBar: const _AppBottomNavBar(currentIndex: 0),
+      bottomNavigationBar: _AppBottomNavBar(
+        currentIndex: 0,
+        unreadAlerts: unreadAlerts,
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => context.push(Routes.submitReport),
         child: const Icon(Icons.add_rounded),
@@ -238,9 +247,13 @@ class _DashboardTile extends StatelessWidget {
 
 /// Bottom navigation bar used across main app screens.
 class _AppBottomNavBar extends StatelessWidget {
-  const _AppBottomNavBar({required this.currentIndex});
+  const _AppBottomNavBar({
+    required this.currentIndex,
+    required this.unreadAlerts,
+  });
 
   final int currentIndex;
+  final int unreadAlerts;
 
   @override
   Widget build(BuildContext context) {
@@ -258,28 +271,34 @@ class _AppBottomNavBar extends StatelessWidget {
             context.go(Routes.settings);
         }
       },
-      items: const [
-        BottomNavigationBarItem(
+      items: [
+        const BottomNavigationBarItem(
           icon: Icon(Icons.home_outlined),
           activeIcon: Icon(Icons.home_rounded),
           label: 'Home',
         ),
-        BottomNavigationBarItem(
+        const BottomNavigationBarItem(
           icon: Icon(Icons.list_alt_outlined),
           activeIcon: Icon(Icons.list_alt_rounded),
           label: 'My Reports',
         ),
         // Index 2 is the FAB — represented as a spacer
-        BottomNavigationBarItem(
+        const BottomNavigationBarItem(
           icon: SizedBox.shrink(),
           label: '',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.notifications_outlined),
-          activeIcon: Icon(Icons.notifications_rounded),
+          icon: NotificationBadgeIcon(
+            icon: Icons.notifications_outlined,
+            unreadCount: unreadAlerts,
+          ),
+          activeIcon: NotificationBadgeIcon(
+            icon: Icons.notifications_rounded,
+            unreadCount: unreadAlerts,
+          ),
           label: 'Alerts',
         ),
-        BottomNavigationBarItem(
+        const BottomNavigationBarItem(
           icon: Icon(Icons.person_outline_rounded),
           activeIcon: Icon(Icons.person_rounded),
           label: 'Profile',

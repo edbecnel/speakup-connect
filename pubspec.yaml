@@ -55,6 +55,7 @@ dependencies:
 
   # --- Icons ---
   cupertino_icons: ^1.0.8
+  cloud_functions: ^5.6.2
 
 dev_dependencies:
   flutter_test:

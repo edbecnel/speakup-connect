@@ -26,7 +26,7 @@ final userProfileProvider = StreamProvider<UserProfileEntity?>((ref) {
   final user = ref.watch(currentUserProvider);
   if (user == null) return Stream.value(null);
 
-  const orgId = AppConfig.defaultOrganizationId;
+  final orgId = AppConfig.defaultOrganizationId;
   return ref
       .read(userProfileRepositoryProvider)
       .watchUserProfile(orgId: orgId, userId: user.uid);
@@ -118,4 +118,59 @@ class PermissionDelegationNotifier
 final permissionDelegationProvider = NotifierProvider.autoDispose<
     PermissionDelegationNotifier, AsyncValue<void>>(
   PermissionDelegationNotifier.new,
+);
+
+// --- Member Application Review ---
+
+/// Join applications awaiting admin approval.
+final pendingMemberApplicationsProvider =
+    StreamProvider.autoDispose<List<UserProfileEntity>>((ref) {
+  final orgId = AppConfig.defaultOrganizationId;
+  return ref
+      .read(userProfileRepositoryProvider)
+      .watchPendingApplications(orgId: orgId);
+});
+
+/// Count of pending join applications — for admin dashboard badges.
+final pendingMemberApplicationCountProvider = Provider<int>((ref) {
+  return ref.watch(pendingMemberApplicationsProvider).asData?.value.length ?? 0;
+});
+
+class MemberApplicationReviewNotifier extends Notifier<AsyncValue<void>> {
+  @override
+  AsyncValue<void> build() => const AsyncValue.data(null);
+
+  Future<void> approve(String targetUserId) async {
+    final reviewer = ref.read(currentUserProvider);
+    if (reviewer == null) return;
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(
+      () => ref.read(userProfileRepositoryProvider).updateApprovalStatus(
+            orgId: AppConfig.defaultOrganizationId,
+            targetUserId: targetUserId,
+            status: ApprovalStatus.approved,
+            reviewedBy: reviewer.uid,
+          ),
+    );
+  }
+
+  Future<void> reject(String targetUserId, {String? reason}) async {
+    final reviewer = ref.read(currentUserProvider);
+    if (reviewer == null) return;
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(
+      () => ref.read(userProfileRepositoryProvider).updateApprovalStatus(
+            orgId: AppConfig.defaultOrganizationId,
+            targetUserId: targetUserId,
+            status: ApprovalStatus.rejected,
+            reviewedBy: reviewer.uid,
+            rejectionReason: reason,
+          ),
+    );
+  }
+}
+
+final memberApplicationReviewProvider =
+    NotifierProvider<MemberApplicationReviewNotifier, AsyncValue<void>>(
+  MemberApplicationReviewNotifier.new,
 );

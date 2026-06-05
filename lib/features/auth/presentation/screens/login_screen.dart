@@ -43,6 +43,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
   final _registerPasswordController = TextEditingController();
   final _registerConfirmPasswordController = TextEditingController();
   bool _registerPasswordVisible = false;
+  bool _registerConfirmPasswordVisible = false;
   bool _termsAccepted = false;
 
   @override
@@ -165,6 +166,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                       passwordVisible: _registerPasswordVisible,
                       onTogglePassword: () => setState(
                           () => _registerPasswordVisible = !_registerPasswordVisible),
+                      confirmPasswordVisible: _registerConfirmPasswordVisible,
+                      onToggleConfirmPassword: () => setState(() =>
+                          _registerConfirmPasswordVisible =
+                              !_registerConfirmPasswordVisible),
                       termsAccepted: _termsAccepted,
                       onTermsChanged: (v) =>
                           setState(() => _termsAccepted = v ?? false),
@@ -305,6 +310,8 @@ class _RegisterForm extends StatelessWidget {
     required this.confirmPasswordController,
     required this.passwordVisible,
     required this.onTogglePassword,
+    required this.confirmPasswordVisible,
+    required this.onToggleConfirmPassword,
     required this.termsAccepted,
     required this.onTermsChanged,
     required this.onRegister,
@@ -318,6 +325,8 @@ class _RegisterForm extends StatelessWidget {
   final TextEditingController confirmPasswordController;
   final bool passwordVisible;
   final VoidCallback onTogglePassword;
+  final bool confirmPasswordVisible;
+  final VoidCallback onToggleConfirmPassword;
   final bool termsAccepted;
   final void Function(bool?) onTermsChanged;
   final VoidCallback onRegister;
@@ -370,9 +379,17 @@ class _RegisterForm extends StatelessWidget {
             label: 'Confirm Password',
             hint: 'Re-enter your password',
             prefixIcon: Icons.lock_outline_rounded,
-            obscureText: true,
+            obscureText: !confirmPasswordVisible,
             textInputAction: TextInputAction.done,
             validator: (v) => Validators.confirmPassword(v, passwordController.text),
+            suffixIcon: IconButton(
+              icon: Icon(
+                confirmPasswordVisible
+                    ? Icons.visibility_off_outlined
+                    : Icons.visibility_outlined,
+              ),
+              onPressed: onToggleConfirmPassword,
+            ),
           ),
           const SizedBox(height: 8),
           Row(

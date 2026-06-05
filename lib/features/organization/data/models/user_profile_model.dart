@@ -14,6 +14,7 @@ class UserProfileModel extends UserProfileEntity {
     super.email,
     super.role,
     super.approvalStatus,
+    super.applicationSubmitted,
     super.isActive,
     super.permissions,
     required super.createdAt,
@@ -37,6 +38,9 @@ class UserProfileModel extends UserProfileEntity {
       approvalStatus: _parseApprovalStatus(
         data['approvalStatus'] as String?,
       ),
+      applicationSubmitted: data['applicationSubmitted'] as bool? ??
+          data.containsKey('approvalStatus') ||
+              ((data['fullName'] as String?)?.isNotEmpty ?? false),
       isActive: data['isActive'] as bool? ?? true,
       permissions: Set<String>.from(
         (data['permissions'] as List<dynamic>?) ?? [],
@@ -58,6 +62,7 @@ class UserProfileModel extends UserProfileEntity {
       'email': email,
       'role': role,
       'approvalStatus': approvalStatus.name,
+      'applicationSubmitted': applicationSubmitted,
       'isActive': isActive,
       'permissions': permissions.toList(),
       'createdAt': FieldValue.serverTimestamp(),

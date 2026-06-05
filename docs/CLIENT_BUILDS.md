@@ -5,7 +5,8 @@
 > store listing with a custom app name, custom icon color theme, and pre-configured
 > org settings, while sharing 100% of the core codebase.
 >
-> **Worked example throughout:** MONHS (red/black, "Speakup Connect MONHS").
+> **Quick start for a new school:** [ONBOARDING_NEW_SCHOOL.md](ONBOARDING_NEW_SCHOOL.md)  
+> **Worked example throughout:** MONHS (red/black, launcher name **"Speakup MONHS"**).
 
 ---
 
@@ -16,7 +17,7 @@ the same source tree. It differs from the standard app in:
 
 | Property | Standard App | Client Build (MONHS) |
 |---|---|---|
-| App store name | Speakup Connect | Speakup Connect MONHS |
+| Launcher / app drawer name | Speakup Connect | Speakup MONHS |
 | Android `applicationId` | `com.speakupconnect.speakup_connect` | `com.speakupconnect.speakup_connect.monhs` |
 | iOS Bundle ID | `com.speakupconnect.speakupConnect` | `com.speakupconnect.speakupConnect.monhs` |
 | Launcher icon | Blue/green | Red/black |
@@ -67,11 +68,19 @@ Examples:
 
 ### File diff between `main` and `client/monhs`
 
+**Already on `main` (MONHS pilot):**
+
+```
+lib/flavor_config.dart
+lib/main_common.dart
+lib/main.dart                           ← MONHS entry point (FlavorConfig.monhs())
+lib/main_standard.dart                  ← standard app entry point
+```
+
 Files that exist only on `client/monhs` (never on `main`):
 
 ```
-lib/main_monhs.dart
-lib/flavor_config.dart                  ← shared stub added to main when first client added
+lib/main_monhs.dart                     ← optional alias; main.dart currently serves MONHS on pilot branch
 assets/icons/flavors/monhs/icon.png     ← 1024×1024 source icon (red/black)
 android/app/src/monhs/
     res/values/strings.xml              ← app_name override
@@ -94,81 +103,39 @@ pubspec.yaml                           ← flutter_launcher_icons dev dependency
 
 ## 4. FlavorConfig — Shared Dart Layer
 
-Add this file to `main` when the first client build is set up. All entry points
-reference it at startup.
+Implemented in `lib/flavor_config.dart`. All entry points set `FlavorConfig.instance`
+before calling `mainCommon()`. `AppConfig.appName` and `AppConfig.defaultOrganizationId`
+read from this singleton.
 
-### `lib/flavor_config.dart`
+### Entry points (current)
 
-```dart
-/// Compile-time flavor identity injected at app startup.
-///
-/// Each client entry point (main_monhs.dart, etc.) sets [FlavorConfig.instance]
-/// before calling [mainCommon]. The rest of the app reads from this singleton.
-enum AppFlavor { standard, monhs }
-
-class FlavorConfig {
-  FlavorConfig._({
-    required this.flavor,
-    required this.orgId,
-    required this.appDisplayName,
-  });
-
-  static FlavorConfig _instance = FlavorConfig._(
-    flavor: AppFlavor.standard,
-    orgId: null,
-    appDisplayName: 'Speakup Connect',
-  );
-
-  static FlavorConfig get instance => _instance;
-  static set instance(FlavorConfig config) => _instance = config;
-
-  /// Which flavor this binary is.
-  final AppFlavor flavor;
-
-  /// If non-null, skip org selection and pre-load this org on first launch.
-  final String? orgId;
-
-  /// Displayed on the splash screen and used as the window title.
-  final String appDisplayName;
-
-  bool get isStandard => flavor == AppFlavor.standard;
-}
-```
-
-### `lib/main.dart` (standard — already exists, update slightly)
+| File | Flavor | Launcher name | Default org |
+|---|---|---|---|
+| `lib/main.dart` | MONHS (pilot) | Speakup MONHS | `monhs-ph-001` |
+| `lib/main_standard.dart` | Standard | Speakup Connect | none (runtime selection) |
 
 ```dart
+// lib/main.dart — MONHS pilot
 void main() async {
-  // FlavorConfig.instance stays at its default (AppFlavor.standard).
+  FlavorConfig.instance = FlavorConfig.monhs();
+  await mainCommon();
+}
+
+// lib/main_standard.dart — generic store listing
+void main() async {
+  FlavorConfig.instance = FlavorConfig.standard();
   await mainCommon();
 }
 ```
 
-### `lib/main_monhs.dart` (new file on client/monhs branch)
+### Adding a new school
 
-```dart
-import 'package:speakup_connect/flavor_config.dart';
-import 'package:speakup_connect/main_common.dart';
+1. Add `AppFlavor.{orgId}` and `FlavorConfig.{orgId}()` factory to `lib/flavor_config.dart`
+2. Create `lib/main_{orgId}.dart` that sets the new factory
+3. Set `appDisplayName` to `Speakup {ShortName}` (e.g. `Speakup Xavier`)
+4. Set `orgId` to the Firestore document ID
 
-void main() async {
-  FlavorConfig.instance = FlavorConfig._(
-    flavor: AppFlavor.monhs,
-    orgId: 'monhs-ph-001',
-    appDisplayName: 'Speakup Connect MONHS',
-  );
-  await mainCommon();
-}
-```
-
-### `lib/main_common.dart` (extract shared init — refactor of main.dart)
-
-```dart
-Future<void> mainCommon() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  // ... existing Firebase init, etc.
-  runApp(const ProviderScope(child: App()));
-}
-```
+See the full checklist in [ONBOARDING_NEW_SCHOOL.md](ONBOARDING_NEW_SCHOOL.md).
 
 ---
 
@@ -191,7 +158,7 @@ android {
         create("monhs") {
             dimension = "client"
             applicationId = "com.speakupconnect.speakup_connect.monhs"
-            resValue("string", "app_name", "Speakup Connect MONHS")
+            resValue("string", "app_name", "Speakup MONHS")
         }
     }
 }
@@ -304,6 +271,8 @@ flutter build ipa --flavor monhs -t lib/main_monhs.dart
 
 ## 7. App Icon Generation
 
+> **Full workflow:** [ONBOARDING_NEW_SCHOOL.md §4.A](ONBOARDING_NEW_SCHOOL.md#4a-customize-the-app-icon-colors-manual--gimp-or-similar)
+
 ### 7.1 Source icon requirements
 
 Each client flavor needs a **1024×1024 PNG** source icon that follows the
@@ -313,6 +282,12 @@ branding rules in [SPEAKUP CONNECT BRANDING.md](SPEAKUP%20CONNECT%20BRANDING.md)
 - Only the color scheme differs
 - No transparency (required by Play Store / App Store)
 - File path: `assets/icons/flavors/{flavor}/icon.png`
+
+**There is no automated recolor tool in the repo.** Create the PNG by manually
+editing the master icon (`assets/icons/app_icon.png`) in **GIMP** (or Photoshop,
+Affinity Photo, etc.) — adjust hue/colorize to the school's primary and secondary
+brand colors, then export. See the GIMP step-by-step in
+[ONBOARDING_NEW_SCHOOL.md §4.A](ONBOARDING_NEW_SCHOOL.md#4a-customize-the-app-icon-colors-manual--gimp-or-similar).
 
 Example: `assets/icons/flavors/monhs/icon.png` — red/black color scheme.
 
@@ -464,12 +439,15 @@ The splash screen and home dashboard should display
 
 ## 11. Checklist — Adding a New Client Build
 
+> **Canonical checklist:** [ONBOARDING_NEW_SCHOOL.md §5](ONBOARDING_NEW_SCHOOL.md#5-checklist--onboarding-a-new-school-client-build)
+
 Use this checklist when onboarding a new VIP client (e.g., Xavier Academy):
 
 ```
 [ ] 1. Confirm client is eligible (pilot or VIP paying contract)
-[ ] 2. Confirm branding with client: primary + secondary colors, org name suffix
-[ ] 3. Create source icon 1024×1024 PNG (red/black, gold/navy, etc.)
+[ ] 2. Confirm branding with client: primary + secondary hex codes, org name suffix
+[ ] 3. Recolor master icon in GIMP → 1024×1024 PNG at assets/icons/flavors/{orgId}/icon.png
+[ ] 3b. Set primary/secondary in Admin → Branding Settings before publish (defaults on first launch)
 [ ] 4. Create Git branch: client/{org-id}
 [ ] 5. Add AppFlavor.{orgId} variant to lib/flavor_config.dart (commit to main first)
 [ ] 6. Create lib/main_{orgId}.dart entry point
@@ -531,11 +509,14 @@ tap **Allow**.
 ### 13.3 Run the app
 
 ```powershell
-# Standard flavor
-flutter run
+# MONHS pilot (current main entry point)
+flutter run -d <device-id>
 
-# MONHS client flavor
-flutter run --flavor monhs -t lib/main_monhs.dart
+# Standard app (future generic listing)
+flutter run -t lib/main_standard.dart -d <device-id>
+
+# MONHS with Gradle flavors (after productFlavors are added)
+flutter run --flavor monhs -t lib/main_monhs.dart -d <device-id>
 ```
 
 Flutter will automatically target the connected USB device. If multiple devices
@@ -582,8 +563,9 @@ While the app is running in the terminal:
 | Git branch | `client/monhs` |
 | Android applicationId | `com.speakupconnect.speakup_connect.monhs` |
 | iOS Bundle ID | `com.speakupconnect.speakupConnect.monhs` |
-| App store name | `Speakup Connect MONHS` |
-| Entry point | `lib/main_monhs.dart` |
+| Launcher name | `Speakup MONHS` |
+| Entry point | `lib/main.dart` (pilot); `lib/main_monhs.dart` on `client/monhs` branch |
+| Standard entry point | `lib/main_standard.dart` |
 | Org ID (Firestore) | `monhs-ph-001` |
 | Icon primary color | `#CC0000` (red) |
 | Icon secondary color | `#1A1A1A` (near-black) |

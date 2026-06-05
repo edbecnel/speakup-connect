@@ -40,7 +40,7 @@ final permissionProvider = StreamProvider<EffectivePermissionSet>((ref) async* {
     return;
   }
 
-  const orgId = AppConfig.defaultOrganizationId;
+  final orgId = AppConfig.defaultOrganizationId;
   final repo = ref.read(permissionsRepositoryProvider);
 
   await for (final assignments in repo.watchRoleAssignments(

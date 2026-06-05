@@ -20,7 +20,10 @@ This structure is chosen because:
 speakup_connect/                          # Project root
 │
 ├── lib/                                  # All Dart source code
-│   ├── main.dart                         # App entry point
+│   ├── main.dart                         # MONHS client entry point (pilot)
+│   ├── main_standard.dart                # Standard Speakup Connect entry point
+│   ├── main_common.dart                  # Shared startup (Firebase, runApp)
+│   ├── flavor_config.dart                # Per-school compile-time identity
 │   ├── app.dart                          # Root app widget (MaterialApp.router)
 │   │
 │   ├── core/                             # App-wide infrastructure
@@ -190,6 +193,8 @@ speakup_connect/                          # Project root
 ├── android/                              # Android native project
 ├── ios/                                  # iOS native project (future)
 ├── docs/                                 # Project documentation
+│   ├── ONBOARDING_NEW_SCHOOL.md          # New school client build checklist
+│   ├── CLIENT_BUILDS.md                  # Gradle flavors, CI/CD
 ├── assets/                               # Static assets
 │   ├── images/
 │   ├── icons/

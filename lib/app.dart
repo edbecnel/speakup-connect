@@ -30,7 +30,7 @@ class SpeakUpConnectApp extends ConsumerWidget {
         orgConfigAsync.value?.themeColors ?? AppConfig.defaultThemeColors;
 
     return MaterialApp.router(
-      title: 'SpeakUp Connect',
+      title: AppConfig.appName,
       debugShowCheckedModeBanner: false,
       routerConfig: router,
       theme: AppTheme.light(orgColors: orgColors),

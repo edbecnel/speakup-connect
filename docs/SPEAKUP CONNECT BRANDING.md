@@ -42,9 +42,12 @@ For important schools, organizations, or enterprise customers:
 - Separate app builds may be released
 
 Examples:
-- Speakup Connect MONHS
+- Speakup MONHS (launcher name under the icon — MONHS pilot)
+- Speakup Connect MONHS (app store listing title)
 - Speakup Connect Xavier Academy
 - Speakup Connect City Government
+
+> **Onboarding guide:** [ONBOARDING_NEW_SCHOOL.md](ONBOARDING_NEW_SCHOOL.md)
 
 These builds:
 - Still retain Speakup Connect branding
@@ -71,6 +74,9 @@ These restrictions are REQUIRED to preserve the Speakup Connect brand identity.
 ### REQUIRED:
 - All icons MUST use the official Speakup Connect graphic/logo
 - Only color schemes may be customized
+- Recoloring is done **manually** in image-editing software (GIMP, Photoshop, etc.)
+  — there is no in-app or build-script recolor tool. See
+  [ONBOARDING_NEW_SCHOOL.md §4.A](ONBOARDING_NEW_SCHOOL.md#4a-customize-the-app-icon-colors-manual--gimp-or-similar)
 
 ### NOT ALLOWED:
 - Replacing the logo graphic entirely
@@ -105,8 +111,9 @@ Organizations may append their identifying name.
 ### Examples
 
 Allowed:
-- Speakup Connect
-- Speakup Connect MONHS
+- Speakup Connect (standard listing)
+- Speakup MONHS (client build launcher — short form when icon label space is limited)
+- Speakup Connect MONHS (app store / marketing title)
 - Speakup Connect Xavier Academy
 - Speakup Connect LGU Oroquieta
 
@@ -820,8 +827,8 @@ and can be updated by a super_admin without any app release:
 
 | Property | Reason | How to Change |
 |---|---|---|
-| App launcher icon | Platform OS caches icons at install time | Requires a new client build (§CLIENT_BUILDS.md) |
-| App name in OS / app drawer | iOS: set at build time only; Android: inconsistent | Requires a new client build |
+| App launcher icon | Platform OS caches icons at install time | Requires a new client build — see [ONBOARDING_NEW_SCHOOL.md](ONBOARDING_NEW_SCHOOL.md) |
+| App name in OS / app drawer | iOS: set at build time only; Android: set in manifest / Gradle | Requires a new client build — e.g. `Speakup MONHS` vs `Speakup Connect` |
 | App Store / Play Store listing name | Controlled by store accounts | Requires a new app listing |
 | `organizationId` | Primary key — changing it would orphan all data | Contact platform super-admin |
 | Font family | Bundled in the app binary | Requires an app release |

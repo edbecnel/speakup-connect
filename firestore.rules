@@ -97,12 +97,29 @@ service cloud.firestore {
           || permission in get(/databases/$(database)/documents/organizations/$(orgId)/users/$(request.auth.uid)).data.get('permissions', []);
     }
 
+    // True when the requester may publish a reminder immediately (status
+    // 'published') rather than submitting it for approval. Either they are an
+    // admin / approver, or the org does not require reminder approval.
+    function canPublishRemindersDirectly(orgId) {
+      return isAdminOrAbove(orgId)
+          || hasClaimedPermission('approveReminders')
+          || get(/databases/$(database)/documents/organizations/$(orgId)).data.get('requireReminderApproval', false) == false;
+    }
+
     // True when the update only touches branding fields (+ updatedAt).
     // Used to allow delegated admins to update the visual branding without
     // being able to change any other org settings.
     function onlyThemeFields() {
       return request.resource.data.diff(resource.data).affectedKeys()
           .hasOnly(['displayName', 'primaryColor', 'secondaryColor', 'logoUrl', 'tagline', 'welcomeMessage', 'updatedAt']);
+    }
+
+    // True when the update only touches the reminder-approval toggle
+    // (+ updatedAt). Lets org admins / manageOrganizationSettings holders flip
+    // requireReminderApproval without granting broad org-document write access.
+    function onlyReminderApprovalFields() {
+      return request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['requireReminderApproval', 'updatedAt']);
     }
 
     // ── Organizations ─────────────────────────────────────────────────────────
@@ -123,7 +140,10 @@ service cloud.firestore {
                     || (isAdminOrAbove(orgId) && onlyThemeFields())
                     || (isOrgModerator(orgId)
                         && hasPermission(orgId, 'edit_theme')
-                        && onlyThemeFields());
+                        && onlyThemeFields())
+                    || ((isAdminOrAbove(orgId)
+                         || hasClaimedPermission('manageOrganizationSettings'))
+                        && onlyReminderApprovalFields());
 
       // ── Config ─────────────────────────────────────────────────────────────
       match /config/{configId} {
@@ -223,6 +243,23 @@ service cloud.firestore {
           allow write: if isAdminOrAbove(orgId)
                        || (hasClaimedPermission('manageRoles')
                            && request.auth.token.get('orgId', '') == orgId);
+        }
+
+        // ── In-App Notification Feed ─────────────────────────────────────────
+        // Per-user feed written server-side by Cloud Functions (Admin SDK,
+        // which bypasses these rules). Clients may only read their own feed and
+        // flip the read/readAt fields when opening a notification.
+        match /notifications/{notificationId} {
+          allow read: if isAdminOrAbove(orgId)
+                      || (isSignedIn() && request.auth.uid == userId);
+          // Owner may mark as read — restricted to the read/readAt fields only.
+          allow update: if isSignedIn()
+                        && request.auth.uid == userId
+                        && request.resource.data.diff(resource.data)
+                            .affectedKeys().hasOnly(['read', 'readAt']);
+          allow delete: if isSignedIn() && request.auth.uid == userId;
+          // Client creates are not allowed — only Cloud Functions write feed entries.
+          allow create: if false;
         }
       }
 
@@ -330,11 +367,34 @@ service cloud.firestore {
       }
 
       // ── Reminders / Broadcasts ──────────────────────────────────────────────
+      // Security model:
+      //   - Any org member may read published reminders / their own.
+      //   - Holders of broadcastReminders (or admins) may create reminders.
+      //       · They may always create a `pending` reminder (submit for review).
+      //       · They may create a `published` reminder only if they can publish
+      //         directly — i.e. they hold approveReminders, are an admin, OR the
+      //         org does not require reminder approval.
+      //   - Holders of approveReminders (or admins) may update reminders
+      //     (approve / reject). Delivery writes (deliveredAt/publishedAt) are
+      //     performed by Cloud Functions via the Admin SDK, which bypass rules.
       match /reminders/{reminderId} {
         allow read:   if isSuperAdmin() || isOrgMember(orgId);
-        allow create: if isAdminOrAbove(orgId);
-        allow update: if isAdminOrAbove(orgId);
-        allow delete: if isAdminOrAbove(orgId);
+
+        allow create: if (isAdminOrAbove(orgId)
+                          || hasClaimedPermission('broadcastReminders'))
+                      && request.resource.data.createdBy == request.auth.uid
+                      && (
+                        request.resource.data.status == 'pending'
+                        || (request.resource.data.status == 'published'
+                            && canPublishRemindersDirectly(orgId))
+                      );
+
+        allow update: if isAdminOrAbove(orgId)
+                      || hasClaimedPermission('approveReminders');
+
+        allow delete: if isAdminOrAbove(orgId)
+                      || (hasClaimedPermission('broadcastReminders')
+                          && resource.data.createdBy == request.auth.uid);
       }
 
       // ── Group Chat Messages ─────────────────────────────────────────────────

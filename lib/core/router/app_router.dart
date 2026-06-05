@@ -5,13 +5,18 @@ import 'package:speakup_connect/core/constants/route_constants.dart';
 import 'package:speakup_connect/features/admin/presentation/screens/admin_branding_screen.dart';
 import 'package:speakup_connect/features/admin/presentation/screens/admin_dashboard_screen.dart';
 import 'package:speakup_connect/features/admin/presentation/screens/admin_report_detail_screen.dart';
+import 'package:speakup_connect/features/admin/presentation/screens/member_approval_queue_screen.dart';
 import 'package:speakup_connect/features/auth/presentation/providers/auth_provider.dart';
 import 'package:speakup_connect/features/auth/presentation/screens/apply_to_join_screen.dart';
 import 'package:speakup_connect/features/auth/presentation/screens/login_screen.dart';
 import 'package:speakup_connect/features/auth/presentation/screens/pending_approval_screen.dart';
 import 'package:speakup_connect/features/auth/presentation/screens/register_screen.dart';
 import 'package:speakup_connect/features/auth/presentation/screens/splash_screen.dart';
+import 'package:speakup_connect/features/notifications/presentation/screens/alerts_screen.dart';
 import 'package:speakup_connect/features/organization/presentation/providers/user_profile_provider.dart';
+import 'package:speakup_connect/features/reminders/presentation/screens/compose_reminder_screen.dart';
+import 'package:speakup_connect/features/reminders/presentation/screens/my_broadcasts_screen.dart';
+import 'package:speakup_connect/features/reminders/presentation/screens/reminder_approval_queue_screen.dart';
 import 'package:speakup_connect/features/reports/presentation/screens/home_dashboard_screen.dart';
 import 'package:speakup_connect/features/reports/presentation/screens/my_reports_screen.dart';
 import 'package:speakup_connect/features/reports/presentation/screens/report_confirmation_screen.dart';
@@ -67,14 +72,17 @@ GoRouter appRouter(Ref ref) {
       if (isAuthenticated) {
         final profile = profileAsync.asData?.value;
 
-        // No profile yet → prompt to apply (regardless of which page they
-        // are on, including login — this handles the post-signup redirect).
-        if (profile == null && !isOnJoinFlow) {
+        // No profile yet, or profile exists but join form not submitted.
+        if (!isOnJoinFlow &&
+            (profile == null || !profile.applicationSubmitted)) {
           return Routes.applyToJoin;
         }
 
-        // Profile pending or rejected → pending screen.
-        if (profile != null && !profile.isApproved && !isOnJoinFlow) {
+        // Join form submitted — pending or rejected → waiting screen.
+        if (profile != null &&
+            profile.applicationSubmitted &&
+            !profile.isApproved &&
+            !isOnJoinFlow) {
           return Routes.pendingApproval;
         }
 
@@ -157,6 +165,33 @@ GoRouter appRouter(Ref ref) {
         path: Routes.settings,
         name: 'settings',
         builder: (context, state) => const SettingsScreen(),
+      ),
+
+      // --- Alerts & Reminders ---
+      GoRoute(
+        path: Routes.alerts,
+        name: 'alerts',
+        builder: (context, state) => const AlertsScreen(),
+      ),
+      GoRoute(
+        path: Routes.composeReminder,
+        name: 'composeReminder',
+        builder: (context, state) => const ComposeReminderScreen(),
+      ),
+      GoRoute(
+        path: Routes.reminderApprovals,
+        name: 'reminderApprovals',
+        builder: (context, state) => const ReminderApprovalQueueScreen(),
+      ),
+      GoRoute(
+        path: Routes.myBroadcasts,
+        name: 'myBroadcasts',
+        builder: (context, state) => const MyBroadcastsScreen(),
+      ),
+      GoRoute(
+        path: Routes.memberApprovals,
+        name: 'memberApprovals',
+        builder: (context, state) => const MemberApprovalQueueScreen(),
       ),
 
       // --- Admin ---

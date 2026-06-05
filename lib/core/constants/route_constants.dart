@@ -20,6 +20,9 @@ abstract class Routes {
   static const String myReports = '/reports/mine';
   static const String reportDetails = '/reports/:reportId';
   static const String alerts = '/alerts';
+  static const String composeReminder = '/reminders/compose';
+  static const String reminderApprovals = '/reminders/approvals';
+  static const String myBroadcasts = '/reminders/mine';
   static const String profile = '/profile';
   static const String settings = '/settings';
   static const String organizationInfo = '/org/info';
@@ -29,6 +32,7 @@ abstract class Routes {
   static const String adminDashboard = '/admin';
   static const String adminReportDetail = '/admin/reports/:reportId';
   static const String adminSettings = '/admin/settings';
+  static const String memberApprovals = '/join-applications';
 
   // --- Admin: Roles & Permissions ---
   static const String adminRoles = '/admin/roles';

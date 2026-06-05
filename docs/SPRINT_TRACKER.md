@@ -11,24 +11,38 @@
 ## Active Sprint
 
 ### Sprint 10 — Reminders Feature
-- **Status:** 🔄 Planned
+- **Status:** ✅ Implemented & deployed — backend (rules, indexes, functions) live on `speakup-connect-891dd`; pending on-device smoke test
 - **Goal:** Build the full reminders feature — compose screen, broadcast delivery (push + in-app feed), optional approval workflow, and the `approveReminders` permission.
+- **Scope decisions:** full scheduling (scheduled Cloud Function), robust per-user notification feed (read/unread), and full audience targeting (all / group / role).
+- **Verification:** `flutter analyze` clean (no new errors/warnings); `functions` `npm run build` (tsc, strict) passes; deployed `firestore:rules`, `firestore:indexes`, and all functions (`onReminderPublished` asia-southeast1, `publishDueReminders` us-central1, plus existing functions).
 
 #### 📋 Scope
-- [ ] Add `approveReminders` to `AppPermission` enum + update `org-admin` seed role
-- [ ] Add `requireReminderApproval` boolean field to `organizations/{orgId}` document
-- [ ] Design Firestore data model: `organizations/{orgId}/reminders/{id}` with `status: draft|pending|published|rejected`
-- [ ] Build `ReminderEntity` + `ReminderModel` (domain + data layers)
-- [ ] Build `remindersProvider` (StreamProvider — live list)
-- [ ] Build Compose Reminder screen — title, body, audience (all / group / role), schedule or send now
-- [ ] Submit flow: if `requireReminderApproval == true` AND user lacks `approveReminders` → save as `pending`; otherwise publish directly
-- [ ] Build Admin Approval Queue screen — list of `pending` reminders with approve/reject actions
-- [ ] Push notification on publish (Cloud Function `onReminderPublished`)
-- [ ] In-app notification feed entry on publish
-- [ ] Gate Compose button on `broadcastReminders` permission
-- [ ] Gate Approval Queue on `approveReminders` permission
-- [ ] Firestore security rules for `reminders` collection
-- [ ] Add `approveReminders` composite index if needed
+- [x] Add `approveReminders` to `AppPermission` enum (+ `displayName`/`groupLabel`) + update `org-admin` seed role (`roles_provider.dart`)
+- [x] Add `requireReminderApproval` boolean field to `organizations/{orgId}` document (entity + model + repository + admin Branding Settings toggle)
+- [x] Firestore data model: `organizations/{orgId}/reminders/{id}` with `status: draft|pending|published|rejected`, `audienceType/audienceId/audienceLabel`, `scheduledAt`, `deliveredAt`, review fields
+- [x] Build `ReminderEntity` + `ReminderModel` (domain + data layers)
+- [x] Build reminder providers — `pendingRemindersProvider`, `myRemindersProvider`, compose-form notifier, submit notifier, review notifier
+- [x] Build Compose Reminder screen — title, body, audience (all / group / role), schedule or send now
+- [x] Submit flow: if `requireReminderApproval == true` AND user lacks `approveReminders` → save as `pending`; otherwise publish directly
+- [x] Build Admin Approval Queue screen — list of `pending` reminders with approve/reject actions
+- [x] Push notification on publish — Cloud Function `onReminderPublished` (FCM fan-out by audience + stale-token pruning)
+- [x] Scheduled publisher — Cloud Function `publishDueReminders` (`every 5 minutes`) for future-scheduled reminders
+- [x] In-app notification feed — per-user `notifications` subcollection written by the publish function; `AlertsScreen` with read/unread; registered `Routes.alerts`
+- [x] Gate Compose button on `broadcastReminders` permission
+- [x] Gate Approval Queue on `approveReminders` permission
+- [x] Firestore security rules for `reminders` (broadcast/approve/pending flow) + per-user `notifications`
+- [x] Composite indexes — `reminders` (status+createdAt, createdBy+createdAt) and collection-group (status+scheduledAt)
+
+#### Done in this session
+- [x] `flutter analyze` — clean (no new errors/warnings; only pre-existing info lints remain)
+- [x] `functions` `npm run build` — passes under strict tsc
+- [x] Deployed `firestore:rules` + `firestore:indexes`
+- [x] Deployed all Cloud Functions (first 2nd-gen deploy on this project; required Eventarc/Pub-Sub/Cloud Run APIs auto-enabled, artifact cleanup policy set)
+
+#### Follow-ups / known gaps
+- [ ] On-device smoke test of the full flow (compose → approve → feed entry; scheduled publish)
+- [ ] **Client FCM not wired up project-wide:** the app does not yet register `fcmTokens` or handle incoming messages, so push delivery is a no-op until that's built. The in-app notification feed works regardless. (Pre-existing gap — also affects the Sprint 7 status-change push.)
+- [ ] Once client FCM is added, create the Android notification channels (`reminders`, `status_updates`) referenced by the push payloads.
 
 ---
 

@@ -58,6 +58,8 @@ The platform is designed as a **multi-tenant SaaS solution**, meaning a single c
 | [docs/MASTER_TASK_LIST.md](docs/MASTER_TASK_LIST.md) | Full project task breakdown |
 | [docs/CODING_STANDARDS.md](docs/CODING_STANDARDS.md) | Coding conventions & standards |
 | [docs/AI_DEVELOPMENT_WORKFLOW.md](docs/AI_DEVELOPMENT_WORKFLOW.md) | AI-assisted development process |
+| [docs/ONBOARDING_NEW_SCHOOL.md](docs/ONBOARDING_NEW_SCHOOL.md) | **Onboarding a new school** — client app name, flavors, checklist |
+| [docs/CLIENT_BUILDS.md](docs/CLIENT_BUILDS.md) | Gradle/iOS flavors, CI/CD, git branching for client builds |
 
 ---
 

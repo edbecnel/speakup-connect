@@ -37,6 +37,9 @@ enum AppPermission {
   /// Compose and send broadcast reminders to members.
   broadcastReminders,
 
+  /// Approve or reject reminders submitted for review.
+  approveReminders,
+
   // ── Roster & Users ─────────────────────────────────────────────────────────
   /// Add or remove members from an extracurricular group/club.
   manageGroupRoster,
@@ -105,6 +108,7 @@ enum AppPermission {
         AppPermission.postBulletinOrgWide => 'Post bulletins org-wide',
         AppPermission.postBulletinToGroup => 'Post bulletins to own groups',
         AppPermission.broadcastReminders => 'Broadcast reminders',
+        AppPermission.approveReminders => 'Approve / reject reminders',
         AppPermission.manageGroupRoster => 'Manage own group roster',
         AppPermission.manageClassRoster => 'Manage class roster (school only)',
         AppPermission.approveApplications => 'Approve join applications',
@@ -125,7 +129,9 @@ enum AppPermission {
         AppPermission.postBulletinOrgWide ||
         AppPermission.postBulletinToGroup =>
           'Bulletins & News',
-        AppPermission.broadcastReminders => 'Reminders',
+        AppPermission.broadcastReminders ||
+        AppPermission.approveReminders =>
+          'Reminders',
         AppPermission.manageGroupRoster ||
         AppPermission.manageClassRoster ||
         AppPermission.approveApplications ||

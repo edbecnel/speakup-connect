@@ -32,6 +32,7 @@ class UserProfileEntity {
     this.email,
     this.role = 'user',
     this.approvalStatus = ApprovalStatus.pending,
+    this.applicationSubmitted = false,
     this.isActive = true,
     this.permissions = const {},
     required this.createdAt,
@@ -62,6 +63,9 @@ class UserProfileEntity {
   /// Current approval state for apply-to-join organisations.
   final ApprovalStatus approvalStatus;
 
+  /// True once the user has submitted the apply-to-join form.
+  final bool applicationSubmitted;
+
   /// Whether this account is currently active.
   final bool isActive;
 
@@ -78,6 +82,10 @@ class UserProfileEntity {
   bool get isPending => approvalStatus == ApprovalStatus.pending;
   bool get isApproved => approvalStatus == ApprovalStatus.approved;
   bool get isRejected => approvalStatus == ApprovalStatus.rejected;
+
+  /// Whether this user is waiting for admin review in the join queue.
+  bool get isAwaitingJoinApproval =>
+      isPending && (applicationSubmitted || fullName.isNotEmpty);
   bool get isAdmin => role == 'admin' || role == 'super_admin' || role == 'owner';
 
   /// Whether this user may edit the organisation's visual theme.

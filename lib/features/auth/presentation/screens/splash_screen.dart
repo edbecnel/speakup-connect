@@ -51,11 +51,11 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
     return Scaffold(
       body: SafeArea(
         child: orgConfigAsync.when(
-          loading: () => const _SplashContent(
+          loading: () => _SplashContent(
             orgName: AppConfig.clientDisplayName,
             tagline: 'Your voice. Our action.',
           ),
-          error: (_, __) => const _SplashContent(
+          error: (_, __) => _SplashContent(
             orgName: AppConfig.clientDisplayName,
             tagline: 'Your voice. Our action.',
           ),

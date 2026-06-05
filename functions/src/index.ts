@@ -1,5 +1,6 @@
 import { onDocumentWritten, onDocumentUpdated } from 'firebase-functions/v2/firestore';
 import { onCall, HttpsError } from 'firebase-functions/v2/https';
+import { onSchedule } from 'firebase-functions/v2/scheduler';
 import { logger } from 'firebase-functions';
 import * as admin from 'firebase-admin';
 
@@ -337,3 +338,371 @@ export const notifyReporterOnStatusChange = onDocumentUpdated(
     });
   },
 );
+
+// ── Callable: recallReminder ──────────────────────────────────────────────────
+
+/**
+ * Recalls a broadcast: deletes the reminder document AND removes every copy
+ * already delivered to recipients' in-app notification feeds.
+ *
+ * Authorized for the reminder's author, org admins, or holders of
+ * `approveReminders`. Per-user feed entries can only be removed server-side
+ * (the Admin SDK bypasses the owner-only delete rule), which is why this runs
+ * as a callable rather than a client-side delete.
+ *
+ * Returns: { ok: true, deletedNotifications: number }
+ */
+export const recallReminder = onCall(async (request) => {
+  if (!request.auth) {
+    throw new HttpsError('unauthenticated', 'Sign in required.');
+  }
+
+  const { orgId, reminderId } = (request.data ?? {}) as {
+    orgId?: string;
+    reminderId?: string;
+  };
+  if (!orgId || !reminderId) {
+    throw new HttpsError(
+      'invalid-argument',
+      'orgId and reminderId are required.',
+    );
+  }
+
+  const uid = request.auth.uid;
+  const token = request.auth.token as Record<string, unknown>;
+  const permissions = (token['permissions'] as string[] | undefined) ?? [];
+  const role = token['role'] as string | undefined;
+  const isAdmin =
+    role === 'admin' || role === 'super_admin' || role === 'owner';
+  const canApprove = permissions.includes('approveReminders');
+
+  const reminderRef = db
+    .collection('organizations').doc(orgId)
+    .collection('reminders').doc(reminderId);
+  const snap = await reminderRef.get();
+  if (!snap.exists) {
+    throw new HttpsError('not-found', 'Reminder not found.');
+  }
+
+  const data = snap.data() as ReminderData & { createdBy?: string };
+  const isOwner = data.createdBy === uid;
+  if (!isOwner && !isAdmin && !canApprove) {
+    throw new HttpsError(
+      'permission-denied',
+      'You do not have permission to recall this reminder.',
+    );
+  }
+
+  // Remove delivered feed copies (matched by data.reminderId), scoped to this org.
+  const notifSnap = await db
+    .collectionGroup('notifications')
+    .where('data.reminderId', '==', reminderId)
+    .get();
+  const toDelete = notifSnap.docs.filter((d) => {
+    // Path: organizations/{orgId}/users/{uid}/notifications/{id}
+    const orgDoc = d.ref.parent.parent?.parent.parent;
+    return orgDoc?.id === orgId;
+  });
+
+  let deletedNotifications = 0;
+  for (let i = 0; i < toDelete.length; i += 450) {
+    const batch = db.batch();
+    const slice = toDelete.slice(i, i + 450);
+    for (const d of slice) batch.delete(d.ref);
+    await batch.commit();
+    deletedNotifications += slice.length;
+  }
+
+  await reminderRef.delete();
+
+  logger.info('recallReminder completed', {
+    orgId,
+    reminderId,
+    deletedNotifications,
+    by: uid,
+  });
+
+  return { ok: true, deletedNotifications };
+});
+
+// ── Reminders: delivery helpers ───────────────────────────────────────────────
+
+interface ReminderData {
+  title?: string;
+  body?: string;
+  status?: string;
+  audienceType?: string;
+  audienceId?: string | null;
+  audienceLabel?: string | null;
+  scheduledAt?: admin.firestore.Timestamp | null;
+  deliveredAt?: admin.firestore.Timestamp | null;
+  publishedAt?: admin.firestore.Timestamp | null;
+}
+
+/**
+ * Resolves the set of recipient user IDs for a reminder based on its audience.
+ *
+ *   - `all`   → every approved member of the org
+ *   - `group` → members of `groups/{audienceId}/members`
+ *   - `role`  → every user holding a roleAssignment with roleId == audienceId
+ */
+async function resolveReminderRecipients(
+  orgId: string,
+  audienceType: string,
+  audienceId: string | null | undefined,
+): Promise<string[]> {
+  const usersRef = db.collection('organizations').doc(orgId).collection('users');
+
+  if (audienceType === 'all') {
+    const snap = await usersRef
+      .where('approvalStatus', '==', 'approved')
+      .get();
+    return snap.docs.map((d) => d.id);
+  }
+
+  if (audienceType === 'group' && audienceId) {
+    const membersSnap = await db
+      .collection('organizations').doc(orgId)
+      .collection('groups').doc(audienceId)
+      .collection('members')
+      .get();
+    return membersSnap.docs.map(
+      (d) => (d.data()['userId'] as string | undefined) ?? d.id,
+    );
+  }
+
+  if (audienceType === 'role' && audienceId) {
+    const assignmentsSnap = await db
+      .collectionGroup('roleAssignments')
+      .where('roleId', '==', audienceId)
+      .get();
+    const ids = new Set<string>();
+    for (const doc of assignmentsSnap.docs) {
+      // Path: organizations/{orgId}/users/{userId}/roleAssignments/{id}
+      const userDoc = doc.ref.parent.parent;
+      const orgDoc = userDoc?.parent.parent;
+      if (userDoc && orgDoc?.id === orgId) ids.add(userDoc.id);
+    }
+    return Array.from(ids);
+  }
+
+  return [];
+}
+
+/**
+ * Performs delivery for a published, due reminder:
+ *   1. Atomically "claims" the reminder (sets deliveredAt) so the publish
+ *      trigger and the scheduled publisher never deliver the same reminder
+ *      twice.
+ *   2. Writes a notification document into each recipient's feed.
+ *   3. Sends an FCM push to each recipient's registered tokens.
+ *
+ * No-ops (returns false) if the reminder is not published, not yet due, or has
+ * already been delivered.
+ */
+async function deliverReminder(
+  orgId: string,
+  reminderId: string,
+): Promise<boolean> {
+  const reminderRef = db
+    .collection('organizations').doc(orgId)
+    .collection('reminders').doc(reminderId);
+
+  // 1. Claim delivery transactionally.
+  const claimed = await db.runTransaction<ReminderData | null>(async (tx) => {
+    const snap = await tx.get(reminderRef);
+    if (!snap.exists) return null;
+    const data = snap.data() as ReminderData;
+
+    if (data.status !== 'published') return null;
+    if (data.deliveredAt) return null; // already delivered
+    if (data.scheduledAt && data.scheduledAt.toMillis() > Date.now()) {
+      return null; // scheduled for the future — not due yet
+    }
+
+    tx.update(reminderRef, {
+      deliveredAt: admin.firestore.FieldValue.serverTimestamp(),
+      publishedAt:
+        data.publishedAt ?? admin.firestore.FieldValue.serverTimestamp(),
+    });
+    return data;
+  });
+
+  if (!claimed) return false;
+
+  const title = claimed.title ?? 'New reminder';
+  const body = claimed.body ?? '';
+  const audienceType = claimed.audienceType ?? 'all';
+  const audienceId = claimed.audienceId ?? null;
+
+  const recipientIds = await resolveReminderRecipients(
+    orgId,
+    audienceType,
+    audienceId,
+  );
+
+  if (recipientIds.length === 0) {
+    logger.info('deliverReminder: no recipients', { orgId, reminderId });
+    return true;
+  }
+
+  // 2. Write in-app feed entries (batched, ≤450 writes per batch).
+  const notification = {
+    type: 'reminder',
+    title,
+    body,
+    read: false,
+    data: { reminderId, audienceType },
+    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+  };
+
+  for (let i = 0; i < recipientIds.length; i += 450) {
+    const batch = db.batch();
+    for (const uid of recipientIds.slice(i, i + 450)) {
+      const ref = db
+        .collection('organizations').doc(orgId)
+        .collection('users').doc(uid)
+        .collection('notifications').doc();
+      batch.set(ref, notification);
+    }
+    await batch.commit();
+  }
+
+  // 3. Send push notifications to recipients' FCM tokens.
+  const userDocs = await fetchByIds(
+    db.collection('organizations').doc(orgId).collection('users'),
+    recipientIds,
+  );
+
+  const tokenOwner = new Map<string, string>(); // token → uid (for pruning)
+  const tokens: string[] = [];
+  for (const u of userDocs) {
+    const prefs = u['notificationPreferences'] as
+      | Record<string, unknown>
+      | undefined;
+    if (prefs?.['reminders'] === false) continue; // opted out of reminder push
+    const userTokens = (u['fcmTokens'] as string[] | undefined) ?? [];
+    for (const t of userTokens) {
+      tokens.push(t);
+      tokenOwner.set(t, u.id);
+    }
+  }
+
+  if (tokens.length === 0) {
+    logger.info('deliverReminder: no FCM tokens', { orgId, reminderId });
+    return true;
+  }
+
+  const messaging = admin.messaging();
+  const staleByUser = new Map<string, string[]>();
+  let successCount = 0;
+
+  // Multicast supports up to 500 tokens per call.
+  for (let i = 0; i < tokens.length; i += 500) {
+    const chunk = tokens.slice(i, i + 500);
+    const result = await messaging.sendEachForMulticast({
+      tokens: chunk,
+      notification: { title, body },
+      data: { reminderId, type: 'reminder' },
+      android: {
+        priority: 'high',
+        notification: { channelId: 'reminders' },
+      },
+    });
+    successCount += result.successCount;
+    result.responses.forEach((resp, idx) => {
+      if (
+        !resp.success &&
+        resp.error?.code === 'messaging/registration-token-not-registered'
+      ) {
+        const token = chunk[idx];
+        const uid = tokenOwner.get(token);
+        if (uid) {
+          const list = staleByUser.get(uid) ?? [];
+          list.push(token);
+          staleByUser.set(uid, list);
+        }
+      }
+    });
+  }
+
+  // Prune stale tokens.
+  for (const [uid, stale] of staleByUser) {
+    await db
+      .collection('organizations').doc(orgId)
+      .collection('users').doc(uid)
+      .update({
+        fcmTokens: admin.firestore.FieldValue.arrayRemove(...stale),
+      });
+  }
+
+  logger.info('deliverReminder completed', {
+    orgId,
+    reminderId,
+    recipientCount: recipientIds.length,
+    pushSuccess: successCount,
+  });
+  return true;
+}
+
+// ── Trigger: onReminderPublished ──────────────────────────────────────────────
+
+/**
+ * Triggered on any write to a reminder document.
+ *
+ * Delivers the reminder (push + in-app feed) the moment it becomes `published`
+ * and is due (no future `scheduledAt`). Reminders scheduled for a future time
+ * are left for [publishDueReminders] to deliver when they come due. Delivery is
+ * idempotent — [deliverReminder] claims each reminder atomically.
+ */
+export const onReminderPublished = onDocumentWritten(
+  'organizations/{orgId}/reminders/{reminderId}',
+  async (event) => {
+    const after = event.data?.after.data() as ReminderData | undefined;
+    if (!after) return; // deleted
+
+    if (after.status !== 'published') return;
+    if (after.deliveredAt) return; // already delivered
+    if (after.scheduledAt && after.scheduledAt.toMillis() > Date.now()) {
+      return; // future schedule — handled by publishDueReminders
+    }
+
+    const { orgId, reminderId } = event.params;
+    await deliverReminder(orgId, reminderId);
+  },
+);
+
+// ── Scheduled: publishDueReminders ────────────────────────────────────────────
+
+/**
+ * Runs every 5 minutes and delivers any `published` reminders whose
+ * `scheduledAt` time has arrived but which have not yet been delivered.
+ *
+ * Uses a collection-group query so a single scheduled function serves every
+ * organization. Delivery is idempotent via [deliverReminder].
+ */
+export const publishDueReminders = onSchedule('every 5 minutes', async () => {
+  const now = admin.firestore.Timestamp.now();
+  const dueSnap = await db
+    .collectionGroup('reminders')
+    .where('status', '==', 'published')
+    .where('scheduledAt', '<=', now)
+    .get();
+
+  let delivered = 0;
+  for (const doc of dueSnap.docs) {
+    const data = doc.data() as ReminderData;
+    if (data.deliveredAt) continue; // already delivered
+
+    // Path: organizations/{orgId}/reminders/{reminderId}
+    const orgDoc = doc.ref.parent.parent;
+    if (!orgDoc) continue;
+    const ok = await deliverReminder(orgDoc.id, doc.id);
+    if (ok) delivered++;
+  }
+
+  logger.info('publishDueReminders completed', {
+    candidates: dueSnap.size,
+    delivered,
+  });
+});

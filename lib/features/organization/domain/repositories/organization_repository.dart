@@ -41,4 +41,13 @@ abstract class OrganizationRepository {
     required String primaryHex,
     required String secondaryHex,
   });
+
+  /// Toggles whether reminders require approval before publishing.
+  ///
+  /// When enabled, members holding `broadcastReminders` but not
+  /// `approveReminders` have their reminders saved as `pending` for review.
+  Future<void> updateReminderApproval({
+    required String organizationId,
+    required bool requireApproval,
+  });
 }

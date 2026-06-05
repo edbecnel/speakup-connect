@@ -47,4 +47,18 @@ abstract class UserProfileRepository {
     required String targetUserId,
     required String permission,
   });
+
+  /// Streams join applications awaiting admin review.
+  Stream<List<UserProfileEntity>> watchPendingApplications({
+    required String orgId,
+  });
+
+  /// Approves or rejects a join application.
+  Future<void> updateApprovalStatus({
+    required String orgId,
+    required String targetUserId,
+    required ApprovalStatus status,
+    String? reviewedBy,
+    String? rejectionReason,
+  });
 }

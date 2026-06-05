@@ -262,6 +262,7 @@ class SeedRoles extends Notifier<AsyncValue<void>> {
     'postBulletinToGroup',
     // Reminders
     'broadcastReminders',
+    'approveReminders',
     // Roster & Users
     'manageGroupRoster',
     'manageClassRoster',

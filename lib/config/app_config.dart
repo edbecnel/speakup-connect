@@ -1,29 +1,36 @@
 import 'package:speakup_connect/core/theme/app_colors.dart';
+import 'package:speakup_connect/flavor_config.dart';
 
 /// Compile-time application configuration.
 ///
 /// Values here are environment-independent. Environment-specific
 /// values (Firebase project IDs, API keys) live in [EnvConfig].
+///
+/// Client-specific display name and default org come from [FlavorConfig],
+/// set in each entry point (`main.dart`, `main_standard.dart`, etc.).
 abstract class AppConfig {
-  static const String appName = 'SpeakUp Connect';
+  /// Launcher / window title for this binary (e.g. "Speakup MONHS").
+  static String get appName => FlavorConfig.instance.appDisplayName;
+
   static const String appVersion = '1.0.0';
   static const int appBuildNumber = 1;
 
   /// The organization ID to load when no deep-link org is specified.
-  /// Set this to the client's Firestore document ID before building
-  /// for a specific deployment.
-  ///
-  /// In a full multi-tenant deployment, this is determined by:
-  /// 1. A deep link / dynamic link containing the org ID
-  /// 2. A stored preference from last session
-  /// 3. An organization selection screen
-  static const String defaultOrganizationId = 'monhs-ph-001';
+  /// Client builds set this via [FlavorConfig]; the standard app leaves it
+  /// null until the user picks or joins an org.
+  static String get defaultOrganizationId =>
+      FlavorConfig.instance.orgId ?? '';
 
   /// Short human-readable name for the client organisation.
   /// Shown on the splash screen and used as the offline display-name
   /// fallback before Firestore config loads.
-  /// Change this for each client deployment.
-  static const String clientDisplayName = 'MONHS';
+  static String get clientDisplayName {
+    final name = FlavorConfig.instance.appDisplayName;
+    if (name.startsWith('Speakup ')) {
+      return name.substring('Speakup '.length);
+    }
+    return 'MONHS';
+  }
 
   /// Default fallback theme colors used before org config loads.
   static const OrgThemeColors defaultThemeColors = OrgThemeColors(

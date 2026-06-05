@@ -38,7 +38,7 @@ class OrganizationConfig extends _$OrganizationConfig {
 
   @override
   Future<OrganizationConfigEntity> build() async {
-    const orgId = AppConfig.defaultOrganizationId;
+    final orgId = AppConfig.defaultOrganizationId;
     final repository = ref.read(organizationRepositoryProvider);
 
     ref.onDispose(() => _configSub?.cancel());

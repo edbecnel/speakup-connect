@@ -4,11 +4,15 @@ import 'package:go_router/go_router.dart';
 import 'package:speakup_connect/config/app_config.dart';
 import 'package:speakup_connect/core/constants/route_constants.dart';
 import 'package:speakup_connect/features/admin/presentation/widgets/admin_filter_bar.dart';
+import 'package:speakup_connect/core/permissions/app_permission.dart';
+import 'package:speakup_connect/core/permissions/providers/permission_provider.dart';
 import 'package:speakup_connect/features/auth/presentation/providers/auth_provider.dart';
+import 'package:speakup_connect/features/organization/presentation/providers/user_profile_provider.dart';
 import 'package:speakup_connect/features/reports/domain/entities/report_entity.dart';
 import 'package:speakup_connect/features/reports/presentation/providers/report_provider.dart';
 import 'package:speakup_connect/shared/widgets/app_error_widget.dart';
 import 'package:speakup_connect/shared/widgets/app_loading_indicator.dart';
+import 'package:speakup_connect/shared/widgets/notification_badge_icon.dart';
 
 /// Admin Dashboard — visible only to users with the 'admin' role.
 ///
@@ -18,6 +22,10 @@ class AdminDashboardScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final canApproveApplications =
+        ref.watch(hasPermissionProvider(AppPermission.approveApplications));
+    final pendingCount = ref.watch(pendingMemberApplicationCountProvider);
+
     return DefaultTabController(
       length: 4,
       child: Scaffold(
@@ -25,6 +33,15 @@ class AdminDashboardScreen extends ConsumerWidget {
           leading: BackButton(onPressed: () => context.go(Routes.home)),
           title: const Text('Admin Dashboard'),
           actions: [
+            if (canApproveApplications)
+              IconButton(
+                tooltip: 'Join Applications',
+                onPressed: () => context.push(Routes.memberApprovals),
+                icon: NotificationBadgeIcon(
+                  icon: Icons.person_add_alt_1_outlined,
+                  unreadCount: pendingCount,
+                ),
+              ),
             IconButton(
               icon: const Icon(Icons.manage_accounts_outlined),
               tooltip: 'Roles & Permissions',

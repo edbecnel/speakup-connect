@@ -20,6 +20,7 @@ class OrganizationConfigEntity {
     this.welcomeMessage,
     this.country = 'PH',
     this.isActive = true,
+    this.requireReminderApproval = false,
   });
 
   /// Unique identifier for this organization (e.g., 'monhs-ph-001').
@@ -58,6 +59,11 @@ class OrganizationConfigEntity {
 
   /// Whether the organization's account is active.
   final bool isActive;
+
+  /// When true, members with `broadcastReminders` (but not `approveReminders`)
+  /// must submit reminders for review — they are saved as `pending` instead of
+  /// being published directly. Approvers act on them in the Approval Queue.
+  final bool requireReminderApproval;
 
   /// The effective tagline, with a sensible default.
   String get effectiveTagline =>

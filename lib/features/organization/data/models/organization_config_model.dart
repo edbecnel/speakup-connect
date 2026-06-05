@@ -21,6 +21,7 @@ class OrganizationConfigModel extends OrganizationConfigEntity {
     super.welcomeMessage,
     super.country,
     super.isActive,
+    super.requireReminderApproval,
   });
 
   factory OrganizationConfigModel.fromJson(
@@ -51,6 +52,8 @@ class OrganizationConfigModel extends OrganizationConfigEntity {
       welcomeMessage: json['welcomeMessage'] as String?,
       country: json['country'] as String? ?? 'PH',
       isActive: json['isActive'] as bool? ?? true,
+      requireReminderApproval:
+          json['requireReminderApproval'] as bool? ?? false,
     );
   }
 
@@ -68,6 +71,7 @@ class OrganizationConfigModel extends OrganizationConfigEntity {
       'welcomeMessage': welcomeMessage,
       'country': country,
       'isActive': isActive,
+      'requireReminderApproval': requireReminderApproval,
     };
   }
 

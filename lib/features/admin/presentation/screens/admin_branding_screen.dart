@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:speakup_connect/config/app_config.dart';
 import 'package:speakup_connect/core/theme/app_theme.dart';
 import 'package:speakup_connect/features/admin/presentation/providers/admin_branding_provider.dart';
 import 'package:speakup_connect/features/organization/presentation/providers/organization_provider.dart';
@@ -162,6 +163,8 @@ class _AdminBrandingScreenState extends ConsumerState<AdminBrandingScreen> {
               ),
               const SizedBox(height: 32),
               _SetupCategoriesCard(),
+              const SizedBox(height: 32),
+              const _ReminderApprovalCard(),
             ],
           ),
         ),
@@ -594,6 +597,88 @@ class _SetupCategoriesCard extends ConsumerWidget {
               ),
             );
           },
+        ),
+      ],
+    );
+  }
+}
+
+// ── Setup: reminder approval workflow toggle ────────────────────────────────
+
+class _ReminderApprovalCard extends ConsumerStatefulWidget {
+  const _ReminderApprovalCard();
+
+  @override
+  ConsumerState<_ReminderApprovalCard> createState() =>
+      _ReminderApprovalCardState();
+}
+
+class _ReminderApprovalCardState extends ConsumerState<_ReminderApprovalCard> {
+  bool _saving = false;
+
+  Future<void> _toggle(bool value) async {
+    setState(() => _saving = true);
+    try {
+      await ref.read(organizationRepositoryProvider).updateReminderApproval(
+            organizationId: AppConfig.defaultOrganizationId,
+            requireApproval: value,
+          );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              value
+                  ? 'Reminders now require approval before publishing'
+                  : 'Reminders now publish directly',
+            ),
+            backgroundColor: Colors.green.shade700,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Update failed: $e'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final orgAsync = ref.watch(organizationConfigProvider);
+    final requireApproval =
+        orgAsync.asData?.value.requireReminderApproval ?? false;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _SectionHeader(
+          icon: Icons.fact_check_outlined,
+          title: 'Reminder Approval',
+          subtitle:
+              'When enabled, members who can broadcast reminders but cannot '
+              'approve them must submit reminders for review before they are '
+              'published.',
+        ),
+        const SizedBox(height: 4),
+        SwitchListTile(
+          contentPadding: EdgeInsets.zero,
+          title: const Text('Require approval before publishing'),
+          value: requireApproval,
+          onChanged: _saving ? null : _toggle,
+          secondary: _saving
+              ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : null,
         ),
       ],
     );

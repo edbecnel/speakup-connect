@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:speakup_connect/config/app_config.dart';
 import 'package:speakup_connect/core/constants/route_constants.dart';
 import 'package:speakup_connect/features/auth/presentation/providers/auth_provider.dart';
 import 'package:speakup_connect/features/organization/presentation/providers/organization_provider.dart';
@@ -122,7 +123,7 @@ class SettingsScreen extends ConsumerWidget {
           const _SectionHeader(title: 'About'),
           ListTile(
             leading: const Icon(Icons.info_outline_rounded),
-            title: const Text('About SpeakUp Connect'),
+            title: Text('About ${AppConfig.appName}'),
             trailing: const Icon(Icons.chevron_right_rounded),
             onTap: () {
               showAboutDialog(

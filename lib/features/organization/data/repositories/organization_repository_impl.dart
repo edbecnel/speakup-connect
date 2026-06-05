@@ -111,4 +111,28 @@ class OrganizationRepositoryImpl implements OrganizationRepository {
       );
     }
   }
+
+  @override
+  Future<void> updateReminderApproval({
+    required String organizationId,
+    required bool requireApproval,
+  }) async {
+    try {
+      await _firestore
+          .collection(AppConstants.organizationsCollection)
+          .doc(organizationId)
+          .update({
+        'requireReminderApproval': requireApproval,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+    } on FirebaseException catch (e) {
+      if (e.code == 'permission-denied') {
+        throw const PermissionException();
+      }
+      throw DatabaseException(
+        message: e.message ?? 'Failed to update reminder approval setting',
+        code: e.code,
+      );
+    }
+  }
 }
