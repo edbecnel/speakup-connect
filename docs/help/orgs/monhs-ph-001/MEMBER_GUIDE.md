@@ -123,13 +123,120 @@ Each entry shows the group name, whether you are a **Leader** or **Member**, and
 
 If you expect to be in a group but see **No groups yet**, contact your adviser or the school office. Open **My Groups & Clubs** once after being added — the list syncs from the school roster.
 
-### Group leaders
+### Group leaders — managing your club
 
-If you are a **Leader** on a group roster, **My Groups & Clubs** also offers:
+This section is for students and staff who are **Leaders** on a group roster (e.g. SSLG officers, club presidents). You do **not** need to be a school administrator.
 
-- **View Members** / **Manage Members**
-- **Send Alert** to your group
-- **Sent Group Alerts** — see alerts you sent and view member responses
+#### Leader vs club position
+
+| Label | Meaning |
+|-------|---------|
+| **Leader** | You can manage the roster and send **group alerts** for that club |
+| **Member** | You belong to the group but cannot manage it |
+| **Club position** | Display title only (President, Secretary, etc.) — set by a leader or admin |
+
+You can be a **Leader** with any club position, or a **Member** without leadership permissions.
+
+#### Open your group
+
+1. Go to **Home → My Groups & Clubs** (or **Settings → My Groups & Clubs**)
+2. Find your club — the subtitle shows **Leader** or **Member**, your position, and member count
+3. Use the buttons on the card:
+   - **View Members** — see the full roster (everyone can do this)
+   - **Manage Members** — add people to the club *(leaders only)*
+   - **Send Alert** — message everyone in the club *(leaders only)*
+
+If a group is missing after your adviser adds you, open **My Groups & Clubs** once — the list syncs from the school roster.
+
+#### View the member list
+
+1. Tap **View Members** (or open a group from the list)
+2. Members are sorted by club position, then name
+3. Each row shows **Leader** or **Member** and their **club position** when assigned
+
+From this screen, leaders also see an **Add Members** button at the bottom.
+
+#### Add members to your club
+
+**Requires:** **Leader** on this group
+
+1. Tap **Manage Members** on the group card, or **Add Members** on the roster screen
+2. **Search** by name, email, or student ID
+3. Tap a person in the list to select them (or use checkboxes for several at once)
+4. Choose **Group role**:
+   - **Member** — regular member
+   - **Leader** — can also manage the roster and send alerts
+5. If your club uses **club positions**, pick one from the dropdown (optional)
+6. Tap **Assign**
+
+Only **approved** school members who are **not already** on the roster appear in search. You cannot add someone who has not finished joining the app — ask your adviser to approve their application first.
+
+#### Change roles, positions, or remove someone
+
+**Requires:** **Leader** on this group
+
+1. Open **View Members**
+2. Tap the **⋮** menu on a member’s row
+3. Choose an action:
+   - **Make leader** / **Make member** — change who can manage the club
+   - **Assign position** — set or clear club office (President, Secretary, etc.)
+   - **Remove from group** — take them off this club’s roster (they stay in the school; they only leave this group)
+
+You **cannot** create new position titles (e.g. add “Auditor”) — only a school administrator can edit the club’s position list. Ask your adviser if a new office is needed.
+
+#### Send a group alert
+
+**Requires:** **Leader** on at least one group
+
+1. From **My Groups & Clubs**, tap **Send Alert** on the group card  
+   **or** open **Alerts** and tap the **Group Alert** button
+2. Enter a **title** and **message**
+3. Confirm the **group** — leaders only send to groups they lead
+4. Optional settings:
+   - **Schedule** — send later instead of immediately
+   - **Expiration** — alert auto-removes after a date/time
+   - **Request a response** — ask members to answer (see below)
+5. Tap **Send Reminder** or **Submit for Approval**
+
+**If your school requires admin approval:** the button says **Submit for Approval**. An administrator must approve before members receive the alert. You can check status under **Sent Group Alerts** (see below).
+
+**Response options** (when you turn on **Request a response**):
+
+| Setting | Use when |
+|---------|----------|
+| **Response required** | Members must answer before they can dismiss the alert |
+| **Allow changing responses** | Turn **OFF** for votes/polls so answers lock after submit |
+| **Checkboxes** | Good for “I will attend” — one option is enough; members may leave it unchecked |
+| **Multiple choice** | Pick one option only |
+| **Free text** | Open-ended answer |
+
+#### See alerts you sent and member answers
+
+1. Open **Alerts** → **Sent Group Alerts** (outbox icon in the app bar)  
+   **or** **Settings → Sent Group Alerts**
+2. Each row shows status (**Published**, **Pending Approval**, etc.)
+3. Tap an alert, then **View responses** to see who answered and what they chose
+
+You can also start a new alert from **Alerts → Group Alert**.
+
+#### Receive alerts as a member
+
+Even as a leader, you still get alerts sent **to** your groups like any other member. Open **Alerts**, read the message, and respond if asked. See [Responding to an alert](#responding-to-an-alert) above.
+
+#### What group leaders cannot do
+
+- Create new clubs or delete a club — school administrator only
+- Edit the list of club position names — administrator only
+- Send alerts to the **whole school** or to groups you do not lead
+- Approve other people’s alerts — administrator only (unless you are also an admin)
+
+#### Quick checklist for new SSLG/club officers
+
+1. Confirm you show as **Leader** under **My Groups & Clubs**
+2. **View Members** — verify the roster looks correct
+3. **Manage Members** — add missing members or fix roles/positions
+4. **Send Alert** — test a message to your group (or submit for approval if required)
+5. **Sent Group Alerts** — confirm delivery and open **View responses** if you asked for replies
 
 ---
 

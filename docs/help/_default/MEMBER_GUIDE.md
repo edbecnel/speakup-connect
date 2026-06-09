@@ -59,6 +59,29 @@ Open **Settings** from the bottom navigation for:
 
 If your organization uses groups, an administrator adds you to the roster. You can view memberships on **Home** or **Settings → My Groups & Clubs**. Group membership may determine which **Alerts** you receive.
 
+### Group leaders (not administrators)
+
+If your roster role is **Leader**, you can manage that group without org-admin access.
+
+**Where to go:** **Home** or **Settings → My Groups & Clubs**
+
+| Task | How |
+|------|-----|
+| See who is in the group | **View Members** |
+| Add people | **Manage Members** — search, set Leader/Member role, optional club position, **Assign** |
+| Change role or remove someone | **View Members** → **⋮** on a row |
+| Message the group | **Send Alert** on the group card, or **Alerts → Group Alert** |
+| See what you sent | **Alerts → Sent Group Alerts** or **Settings → Sent Group Alerts** |
+| Read poll answers | Open a sent alert → **View responses** |
+
+**Leader vs club position:** **Leader** controls roster and alerts; **club position** (President, Secretary, etc.) is a display label only.
+
+**Approval:** Some organizations require an administrator to approve group alerts before they are delivered. Use **Submit for Approval** when shown; track status in **Sent Group Alerts**.
+
+**Limits:** Leaders cannot create groups, edit position-title lists, or broadcast outside groups they lead. Contact your administrator for those tasks.
+
+Your organization’s custom member guide may include local step-by-step instructions (e.g. school-specific examples).
+
 ---
 
 ## Need local details?
