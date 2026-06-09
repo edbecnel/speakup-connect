@@ -84,6 +84,7 @@ This roadmap tracks the evolution from MVP pilot to a full multi-tenant SaaS pla
 - [x] Group member list management (admin/leader adds/removes members, club positions)
 - [~] Group roles: leader, member — leaders send **group alerts**, manage roster; news/chat not yet built
 - [x] Groups visible on home dashboard and Settings (**My Groups & Clubs**)
+- [ ] **Group membership requests** — join: per-group opt-in (`allowJoinRequests`, default closed); leave: `voluntary` or `request_required` (default); removal and denied-leave alerts ([GROUP_JOIN_REQUESTS.md](GROUP_JOIN_REQUESTS.md))
 
 **Communications: Boards**
 - [ ] Bulletin board — admin-only org-wide announcements

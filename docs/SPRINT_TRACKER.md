@@ -1,7 +1,7 @@
 # Sprint Tracker — SpeakUp Connect
 
 > Last Updated: June 5, 2026  
-> Current Sprint: **Sprint 11** (Groups & Clubs) — shipped with student roster, club positions, and in-app help  
+> Current Sprint: **Sprint 13** (Group Membership Requests) — design complete; implementation not started  
 > Sprint Duration: 2 weeks
 
 > **Development Velocity Note:** Development has significantly outpaced the original planned schedule. As of May 23, 2026 (day 5 of the project), the codebase covers work originally scoped for Sprints 1–6. Sprint numbering below reflects original plan order but completion dates reflect actual delivery dates.
@@ -9,6 +9,37 @@
 ---
 
 ## Active Sprint
+
+### Sprint 13 — Group Membership Requests (Join & Leave) *(Epic 2.6.1)*
+- **Status:** 📋 Design complete — implementation not started
+- **Goal:** Join: members **request to join** when `allowJoinRequests` is on (default off). Leave: `voluntary` (leave anytime) or `request_required` (reason form + approval, default). Alerts when **removed** or **leave denied** (with reason).
+- **Design:** [GROUP_JOIN_REQUESTS.md](GROUP_JOIN_REQUESTS.md)
+- **Source epic:** [MASTER_TASK_LIST.md → Epic 2.6.1](MASTER_TASK_LIST.md)
+
+#### 🚀 AI Context Prompt
+> "Implement Sprint 13 per `docs/GROUP_JOIN_REQUESTS.md`. Join: `allowJoinRequests`, `joinRequests/{userId}`, browse + review. Leave: `memberLeavePolicy` (`voluntary` | `request_required`), `leaveRequests/{userId}`, Leave group vs Request to leave UI. Callables for submit/review/voluntary leave; enhance removal to notify member. Denied leave alerts must include rejection reason."
+
+#### 📋 Scope (ship order)
+- [ ] Schema + join/leave entities + repository
+- [ ] Cloud Functions + Firestore rules + indexes
+- [ ] Admin/leader policy toggles (join + leave) on create/edit group
+- [ ] `BrowseGroupsScreen` + join request sheet
+- [ ] `MyGroupsScreen` leave / request-to-leave + reason form
+- [ ] `GroupMembershipRequestsScreen` (Join | Leave tabs) + badges
+- [ ] Membership notifications (removed, leave denied with reason) + help guides
+
+#### 🚫 Out of scope
+- Instant self-join without approval
+- Class/homeroom enrollment
+- Replacing SSLG election workflow
+
+#### MONHS validation
+- [ ] SSLG: join closed; leave `request_required`; officer cannot leave without approval
+- [ ] Drum and Lyre: open join requests; `voluntary` leave
+- [ ] Admin removes member → student receives alert
+- [ ] Denied leave request → student alert shows reason
+
+---
 
 ### Sprint 11 — Groups & Clubs *(client demo priority)*
 - **Status:** ✅ Complete — commit `828738e` and follow-ups
@@ -52,7 +83,7 @@
 - **Stakeholder Note:** Admin creates SPJ / Drum and Lyre / SSLG groups, adds student members; admin broadcasts a reminder to SPJ and recipients see it in Alerts.
 
 #### Next up
-- **Sprint 13 — Client FCM (Epic 1.12):** standard Android push notifications (lock screen / background) without opening the app. Server-side send paths already exist (`onReminderPublished`, `notifyReporterOnStatusChange`); client must register `fcmTokens` and handle taps.
+- **Sprint 13 — Group Membership Requests (Epic 2.6.1):** join + leave policies — see [GROUP_JOIN_REQUESTS.md](GROUP_JOIN_REQUESTS.md).
 
 ---
 

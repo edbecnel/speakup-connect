@@ -413,8 +413,57 @@ Extracurricular units (clubs, organizations, corps). Separate from academic clas
     }
   ],
   "isActive": "boolean",
+  "allowJoinRequests": "boolean (default false — when true, approved members may request to join; see GROUP_JOIN_REQUESTS.md)",
+  "joinRequestHint": "string | null (optional text shown when join requests are enabled)",
+  "memberLeavePolicy": "voluntary | request_required (default request_required — member-initiated exit; see GROUP_JOIN_REQUESTS.md)",
   "memberCount": "number (denormalized for display)",
+  "pendingJoinRequestCount": "number | null (denormalized badge count for leaders/admins)",
+  "pendingLeaveRequestCount": "number | null (denormalized badge count for leaders/admins)",
   "createdBy": "string (admin UID)",
+  "createdAt": "Timestamp",
+  "updatedAt": "Timestamp"
+}
+```
+
+#### `organizations/{organizationId}/groups/{groupId}/joinRequests/{userId}` — Group Join Requests
+
+> One document per requester per group (document ID = `userId`). Mutations via Cloud Functions. See [GROUP_JOIN_REQUESTS.md](GROUP_JOIN_REQUESTS.md).
+
+```json
+{
+  "userId": "string",
+  "organizationId": "string (denormalized)",
+  "groupId": "string (denormalized)",
+  "groupName": "string (denormalized)",
+  "displayName": "string",
+  "studentId": "string | null",
+  "message": "string | null (requester note, max 200 chars)",
+  "status": "pending | approved | rejected | withdrawn",
+  "reviewedBy": "string | null (admin or leader UID)",
+  "reviewedAt": "Timestamp | null",
+  "rejectionReason": "string | null",
+  "createdAt": "Timestamp",
+  "updatedAt": "Timestamp"
+}
+```
+
+#### `organizations/{organizationId}/groups/{groupId}/leaveRequests/{userId}` — Group Leave Requests
+
+> One document per requester per group (document ID = `userId`). Mutations via Cloud Functions. See [GROUP_JOIN_REQUESTS.md](GROUP_JOIN_REQUESTS.md).
+
+```json
+{
+  "userId": "string",
+  "organizationId": "string (denormalized)",
+  "groupId": "string (denormalized)",
+  "groupName": "string (denormalized)",
+  "displayName": "string",
+  "studentId": "string | null",
+  "reason": "string (required, 20–500 chars)",
+  "status": "pending | approved | rejected | withdrawn",
+  "reviewedBy": "string | null (admin or leader UID)",
+  "reviewedAt": "Timestamp | null",
+  "rejectionReason": "string | null (required when status is rejected)",
   "createdAt": "Timestamp",
   "updatedAt": "Timestamp"
 }

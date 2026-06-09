@@ -553,6 +553,85 @@
 - [ ] Unit test: `GroupRepositoryImpl`
 - [ ] Widget test: `GroupsListScreen`
 
+### Epic 2.6.1 — Group Membership Requests (Join & Leave) *(planned)*
+
+> Design: [GROUP_JOIN_REQUESTS.md](GROUP_JOIN_REQUESTS.md). Join: default **closed** (`allowJoinRequests`). Leave: default **request required** (`memberLeavePolicy`). Admins and group leaders configure both per group.
+
+**Domain**
+- [ ] Add `allowJoinRequests`, `joinRequestHint`, `memberLeavePolicy` to `GroupEntity` / `GroupModel`
+- [ ] Create `GroupJoinRequestEntity`, `GroupLeaveRequestEntity` (`status`: pending | approved | rejected | withdrawn)
+- [ ] Extend `GroupRepository`: join + leave submit, withdraw, list pending, review
+- [ ] Use cases: submit/review/withdraw join; voluntary leave; submit/review/withdraw leave
+
+**Data**
+- [ ] `GroupJoinRequestModel`, `GroupLeaveRequestModel` + Firestore codecs
+- [ ] Datasource methods for `joinRequests` and `leaveRequests` subcollections
+- [ ] Denormalize `organizationId`, `groupId`, `groupName` on request docs for admin queue queries
+
+**Cloud Functions — join**
+- [ ] `submitGroupJoinRequest` — approved member; `allowJoinRequests`; not on roster; idempotent pending check
+- [ ] `reviewGroupJoinRequest` — admin / `manageGroupRoster` / leader; approve adds member + sync index
+- [ ] `withdrawGroupJoinRequest` — requester cancels pending join request
+
+**Cloud Functions — leave**
+- [ ] `voluntaryLeaveGroup` — member; `memberLeavePolicy == voluntary`; block sole leader
+- [ ] `submitGroupLeaveRequest` — member; `request_required`; required reason (20–500 chars)
+- [ ] `reviewGroupLeaveRequest` — approve removes member; deny **requires** `rejectionReason`
+- [ ] `withdrawGroupLeaveRequest` — requester cancels pending leave request
+- [ ] Enhance `removeGroupMember` (or server wrapper) — notify removed member; cancel pending leave request
+
+**Cloud Functions — counts**
+- [ ] Optional: maintain `pendingJoinRequestCount`, `pendingLeaveRequestCount` on group doc
+
+**Security**
+- [ ] Firestore rules: `joinRequests` / `leaveRequests` read for requester, leader, admin; writes via callables only
+- [ ] Extend `onlyGroupLeaderGroupUpdate()` for `allowJoinRequests`, `joinRequestHint`, `memberLeavePolicy`
+- [ ] Route roster deletes through callables so removal notifications always fire
+- [ ] Composite / collection-group indexes for pending join and leave queues
+
+**Presentation — settings & admin**
+- [ ] **Allow join requests** toggle on `CreateGroupScreen` (default OFF)
+- [ ] **Member leave policy** selector: Leave anytime | Must request to leave (default request)
+- [ ] Group settings sheet — join toggle, leave policy, hint (admin + `manageGroupRoster` + leader on led groups)
+- [ ] Badge on admin `GroupsListScreen` for pending join + leave counts
+
+**Presentation — members (join)**
+- [ ] `BrowseGroupsScreen` — status: Member | Pending | Request to join | Invitation only
+- [ ] `GroupJoinRequestSheet` — optional message
+- [ ] Entry points: Home, Settings (near My Groups)
+
+**Presentation — members (leave)**
+- [ ] `MyGroupsScreen`: **Leave group** when `voluntary`; **Request to leave** when `request_required`
+- [ ] `GroupLeaveRequestSheet` — required reason form (20–500 chars); show **Leave pending** state
+- [ ] Confirmation dialog for voluntary leave
+
+**Presentation — review queue**
+- [ ] `GroupMembershipRequestsScreen` — **Join** and **Leave** tabs; approve / reject (deny leave requires reason)
+- [ ] Leader badges on `MyGroupsScreen` / `GroupMembersScreen`
+- [ ] Optional: cross-group aggregate screen for admins
+
+**Notifications (in-app alert + push)**
+- [ ] New join / leave request → leaders + roster admins
+- [ ] Join approved / rejected → requester
+- [ ] Leave approved → requester
+- [ ] Leave **denied** → requester with **rejection reason in alert body**
+- [ ] **Removed** by admin/leader → removed member (automated alert)
+- [ ] Optional: voluntary leave → notify leaders
+
+**Routes & providers**
+- [ ] `Routes.browseGroups`, `Routes.groupMembershipRequestsPath(groupId)`
+- [ ] `canReviewGroupMembershipRequestsProvider`, pending join/leave providers, `groupMembershipPolicyProvider`
+
+**Documentation & help**
+- [ ] Update `MEMBER_GUIDE` / `ADMIN_GUIDE` — join policies, leave policies, removal/denial alerts
+- [ ] Sync `assets/help/`
+
+**Testing**
+- [ ] Unit tests: join/leave use cases, policy guards, sole-leader block
+- [ ] Rules / emulator: closed join, voluntary leave, leave request deny with reason
+- [ ] Widget tests: browse status chips; leave vs request-to-leave buttons
+- [ ] On-device: SSLG (`request_required` leave); Drum and Lyre (`voluntary`); removal alert; denied leave shows reason
+
 ### Epic 2.7 — Bulletin Board
 
 **Domain**
