@@ -7,6 +7,7 @@ import 'package:speakup_connect/features/organization/presentation/providers/org
 import 'package:speakup_connect/features/reminders/domain/entities/reminder_entity.dart';
 import 'package:speakup_connect/features/reminders/presentation/providers/reminder_provider.dart';
 import 'package:speakup_connect/features/reminders/presentation/widgets/expiration_picker_section.dart';
+import 'package:speakup_connect/features/reminders/presentation/widgets/response_config_section.dart';
 import 'package:speakup_connect/features/roles/presentation/providers/roles_provider.dart';
 import 'package:speakup_connect/shared/widgets/app_button.dart';
 
@@ -144,6 +145,11 @@ class _ComposeReminderScreenState extends ConsumerState<ComposeReminderScreen> {
               value: form.expiration,
               scheduledAt: form.scheduledAt,
               onChanged: notifier.setExpiration,
+            ),
+            const SizedBox(height: 8),
+            ResponseConfigSection(
+              value: form.responseConfig,
+              onChanged: notifier.setResponseConfig,
             ),
             const SizedBox(height: 28),
             AppButton.primary(

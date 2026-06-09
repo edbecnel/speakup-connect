@@ -9,6 +9,7 @@ import 'package:speakup_connect/features/auth/presentation/providers/auth_provid
 import 'package:speakup_connect/features/reminders/presentation/providers/reminder_provider.dart';
 import 'package:speakup_connect/features/notifications/presentation/providers/notification_history_provider.dart';
 import 'package:speakup_connect/features/reminders/presentation/screens/broadcast_detail_screen.dart';
+import 'package:speakup_connect/features/reminders/presentation/screens/reminder_responses_screen.dart';
 import 'package:speakup_connect/features/reminders/presentation/widgets/edit_reminder_dialog.dart';
 import 'package:speakup_connect/features/organization/presentation/providers/user_profile_provider.dart';
 
@@ -194,6 +195,23 @@ class _BroadcastCard extends ConsumerWidget {
               ],
             ),
             const SizedBox(height: 8),
+            if (reminder.acceptsResponses)
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton.icon(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => ReminderResponsesScreen(
+                          reminderId: reminder.reminderId,
+                        ),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.poll_outlined, size: 18),
+                  label: const Text('View responses'),
+                ),
+              ),
             if (canManage)
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,

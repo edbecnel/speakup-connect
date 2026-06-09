@@ -10,6 +10,7 @@ import 'package:speakup_connect/features/organization/presentation/providers/use
 import 'package:speakup_connect/features/reminders/data/repositories/reminder_repository_impl.dart';
 import 'package:speakup_connect/features/reminders/domain/entities/reminder_entity.dart';
 import 'package:speakup_connect/features/reminders/domain/repositories/reminder_repository.dart';
+import 'package:speakup_connect/features/reminders/domain/entities/reminder_response_config.dart';
 import 'package:speakup_connect/features/reminders/presentation/widgets/expiration_picker_section.dart';
 
 /// Extracts the source reminder ID from a feed notification, if any.
@@ -79,6 +80,7 @@ class ComposeReminderState {
     this.targetLabel,
     this.scheduledAt,
     this.expiration = const ExpirationPickerValue(),
+    this.responseConfig = const ReminderResponseConfig(),
   });
 
   final String title;
@@ -91,6 +93,7 @@ class ComposeReminderState {
   final DateTime? scheduledAt;
 
   final ExpirationPickerValue expiration;
+  final ReminderResponseConfig responseConfig;
 
   DateTime? get resolvedExpiresAt =>
       expiration.resolve(scheduledAt: scheduledAt);
@@ -104,8 +107,16 @@ class ComposeReminderState {
     if (expiration.isEnabled && !expiration.isValid(scheduledAt: scheduledAt)) {
       return false;
     }
+    if (responseConfig.enabled && !responseConfig.isValid) {
+      return false;
+    }
     return true;
   }
+
+  ReminderResponseConfig? get resolvedResponseConfig =>
+      responseConfig.enabled && responseConfig.isValid
+          ? responseConfig.copyWith(options: responseConfig.validOptions)
+          : null;
 
   ReminderAudience get audience => ReminderAudience(
         type: audienceType,
@@ -122,6 +133,7 @@ class ComposeReminderState {
     String? targetLabel,
     DateTime? scheduledAt,
     ExpirationPickerValue? expiration,
+    ReminderResponseConfig? responseConfig,
     bool clearTarget = false,
     bool clearSchedule = false,
   }) {
@@ -133,6 +145,7 @@ class ComposeReminderState {
       targetLabel: clearTarget ? null : (targetLabel ?? this.targetLabel),
       scheduledAt: clearSchedule ? null : (scheduledAt ?? this.scheduledAt),
       expiration: expiration ?? this.expiration,
+      responseConfig: responseConfig ?? this.responseConfig,
     );
   }
 }
@@ -158,6 +171,9 @@ class ComposeReminderNotifier extends Notifier<ComposeReminderState> {
 
   void setExpiration(ExpirationPickerValue value) =>
       state = state.copyWith(expiration: value);
+
+  void setResponseConfig(ReminderResponseConfig value) =>
+      state = state.copyWith(responseConfig: value);
 
   void reset() => state = const ComposeReminderState();
 }
@@ -224,6 +240,7 @@ class SubmitReminderNotifier extends Notifier<AsyncValue<SubmitReminderResult?>>
                 createdByName: authorName,
                 scheduledAt: form.scheduledAt,
                 expiresAt: form.resolvedExpiresAt,
+                responseConfig: form.resolvedResponseConfig,
               );
 
       final result = SubmitReminderResult(status: status, reminder: reminder);

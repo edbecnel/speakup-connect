@@ -523,6 +523,15 @@ service cloud.firestore {
         allow delete: if isAdminOrAbove(orgId)
                       || (hasClaimedPermission('broadcastReminders')
                           && resource.data.createdBy == request.auth.uid);
+
+        // Recipient responses — written via submitReminderResponse callable.
+        match /responses/{userId} {
+          allow read: if isAdminOrAbove(orgId)
+                      || (isSignedIn() && request.auth.uid == userId)
+                      || (isSignedIn()
+                          && get(/databases/$(database)/documents/organizations/$(orgId)/reminders/$(reminderId)).data.createdBy == request.auth.uid);
+          allow write: if false;
+        }
       }
 
       // ── Group Chat Messages ─────────────────────────────────────────────────

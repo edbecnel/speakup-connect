@@ -636,6 +636,49 @@
 - [ ] Unit test: `BroadcastReminderUseCase`
 - [ ] Unit test: `ApproveReminderUseCase`
 
+### Epic 2.9.1 — Reminder Enhancements *(Sprint 12)*
+
+Optional expiration, notification history, broadcast management, full-screen detail, and recipient responses.
+
+**Expiration & auto-cleanup**
+- [x] Add `expiresAt` field to reminder documents and delivered feed copies
+- [x] Compose UI: optional expiration via **date & time** or **hours + minutes** duration (`ExpirationPickerSection`)
+- [x] Edit broadcast: update or clear `expiresAt` via `updateReminder` Cloud Function
+- [x] Scheduled Cloud Function `expireReminders` — archives expired broadcasts and removes feed copies
+- [x] Client filters expired items from Alerts feed (synthetic broadcasts + feed entries)
+
+**Notification history**
+- [x] Collection `organizations/{orgId}/notification_history/{historyId}` — server-written archive
+- [x] Archive on recall (`recalled`), expiration (`expired`), personal dismiss (`user_dismissed`), clear-all (`cleared_all`)
+- [x] Callables `dismissNotification`, `clearNotificationFeed` — archive before delete
+- [x] `NotificationHistoryScreen` — author/admin read access via Firestore rules
+- [x] Firestore composite index: `notification_history(createdBy ASC, removedAt DESC)`
+
+**Broadcast management UX**
+- [x] Callable `updateReminder` — author/admin edit title, body, expiration; propagates to feed copies
+- [x] Callable `recallReminder` — author/admin/approver global delete with history archive
+- [x] `EditReminderDialog`, edit/delete from Alerts and My Broadcasts (owner + org admin)
+- [x] `BroadcastDetailScreen` — full-screen reminder view with back button, expiration display
+
+**Recipient responses** *(optional per broadcast)*
+- [x] `responseConfig` on reminder document — `enabled`, `type`, `maxTextLength`, `options[]`
+- [x] Response types: `free_text` (character limit), `checkbox` (multi-select), `multiple_choice` (single-select)
+- [x] Compose UI: `ResponseConfigSection` — admin optionally configures response type and options
+- [x] Subcollection `organizations/{orgId}/reminders/{reminderId}/responses/{userId}` — one response per recipient
+- [x] Callable `submitReminderResponse` — validates response against config; upserts per-user doc
+- [x] `ReminderResponseForm` on `BroadcastDetailScreen` — submit/update response until expiration
+- [x] `ReminderResponsesScreen` — author/admin view all responses (poll icon + My Broadcasts link)
+- [x] Firestore rules: author/admin read all responses; recipient read own; writes server-only
+
+**Indexes**
+- [x] Collection-group index: `reminders(status ASC, expiresAt ASC)` for expiration job
+
+**Testing**
+- [ ] On-device: compose with each response type → recipient submits → author views responses
+- [ ] On-device: expiration via duration and date/time; verify auto-removal and history entry
+- [ ] Unit test: `ReminderResponseConfig` validation
+- [ ] Widget test: `ResponseConfigSection`, `ReminderResponseForm`
+
 ### Epic 2.10 — Peer-to-Peer Messaging
 
 **Domain**

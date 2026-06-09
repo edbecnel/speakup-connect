@@ -3,7 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:speakup_connect/features/notifications/domain/entities/app_notification_entity.dart';
 import 'package:speakup_connect/features/notifications/presentation/providers/notification_provider.dart';
 import 'package:speakup_connect/features/reminders/domain/entities/reminder_entity.dart';
+import 'package:speakup_connect/config/app_config.dart';
 import 'package:speakup_connect/features/reminders/presentation/providers/reminder_provider.dart';
+import 'package:speakup_connect/features/reminders/presentation/providers/reminder_response_provider.dart';
+import 'package:speakup_connect/features/reminders/presentation/screens/reminder_responses_screen.dart';
+import 'package:speakup_connect/features/reminders/presentation/widgets/reminder_response_form.dart';
 import 'package:speakup_connect/features/reminders/presentation/widgets/expiration_picker_section.dart'
     show formatDateTime;
 
@@ -97,6 +101,17 @@ class _BroadcastDetailScreenState extends ConsumerState<BroadcastDetailScreen> {
     ReminderEntity reminder,
     AppNotificationEntity? notification,
   ) {
+    final canRespond = reminder.isPublished &&
+        !reminder.isExpired &&
+        reminder.acceptsResponses;
+    final myResponseAsync = canRespond
+        ? ref.watch(myReminderResponseProvider(reminder.reminderId))
+        : null;
+    final canViewResponsesAsync = ref.watch(
+      canViewReminderResponsesProvider(reminder.reminderId),
+    );
+    final canViewResponses = canViewResponsesAsync.asData?.value ?? false;
+
     final theme = Theme.of(context);
     final receivedAt = notification?.createdAt ??
         reminder.publishedAt ??
@@ -108,6 +123,22 @@ class _BroadcastDetailScreenState extends ConsumerState<BroadcastDetailScreen> {
       appBar: AppBar(
         leading: BackButton(onPressed: () => Navigator.of(context).pop()),
         title: const Text('Reminder'),
+        actions: [
+          if (canViewResponses)
+            IconButton(
+              tooltip: 'View responses',
+              icon: const Icon(Icons.poll_outlined),
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => ReminderResponsesScreen(
+                      reminderId: reminder.reminderId,
+                    ),
+                  ),
+                );
+              },
+            ),
+        ],
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -183,6 +214,22 @@ class _BroadcastDetailScreenState extends ConsumerState<BroadcastDetailScreen> {
                 reminder.body,
                 style: theme.textTheme.bodyLarge?.copyWith(height: 1.5),
               ),
+              if (canRespond && reminder.responseConfig != null) ...[
+                const SizedBox(height: 28),
+                myResponseAsync == null
+                    ? const SizedBox.shrink()
+                    : myResponseAsync.when(
+                        loading: () =>
+                            const Center(child: CircularProgressIndicator()),
+                        error: (e, _) => Text('Failed to load response: $e'),
+                        data: (existing) => ReminderResponseForm(
+                          organizationId: AppConfig.defaultOrganizationId,
+                          reminderId: reminder.reminderId,
+                          config: reminder.responseConfig!,
+                          existing: existing,
+                        ),
+                      ),
+              ],
             ],
           ),
         ),

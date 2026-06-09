@@ -4,6 +4,7 @@ import 'package:speakup_connect/core/constants/app_constants.dart';
 import 'package:speakup_connect/core/errors/app_exception.dart';
 import 'package:speakup_connect/features/reminders/data/models/reminder_model.dart';
 import 'package:speakup_connect/features/reminders/domain/entities/reminder_entity.dart';
+import 'package:speakup_connect/features/reminders/domain/entities/reminder_response_config.dart';
 import 'package:speakup_connect/features/reminders/domain/repositories/reminder_repository.dart';
 import 'package:uuid/uuid.dart';
 
@@ -29,6 +30,7 @@ class ReminderRepositoryImpl implements ReminderRepository {
     String? createdByName,
     DateTime? scheduledAt,
     DateTime? expiresAt,
+    ReminderResponseConfig? responseConfig,
   }) async {
     try {
       final reminderId = const Uuid().v4();
@@ -43,6 +45,7 @@ class ReminderRepositoryImpl implements ReminderRepository {
         createdByName: createdByName,
         scheduledAt: scheduledAt,
         expiresAt: expiresAt,
+        responseConfig: responseConfig,
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
       );

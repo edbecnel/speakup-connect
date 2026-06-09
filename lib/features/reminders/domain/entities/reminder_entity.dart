@@ -1,3 +1,5 @@
+import 'package:speakup_connect/features/reminders/domain/entities/reminder_response_config.dart';
+
 /// Domain entity representing a broadcast reminder.
 ///
 /// Stored in Firestore at:
@@ -26,6 +28,7 @@ class ReminderEntity {
     this.reviewedByName,
     this.reviewedAt,
     this.rejectionReason,
+    this.responseConfig,
   });
 
   final String reminderId;
@@ -66,6 +69,9 @@ class ReminderEntity {
   /// Reason supplied by the approver when [status] is [ReminderStatus.rejected].
   final String? rejectionReason;
 
+  /// Optional recipient response collection (free text, checkboxes, or choices).
+  final ReminderResponseConfig? responseConfig;
+
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -79,6 +85,8 @@ class ReminderEntity {
 
   bool get isPending => status == ReminderStatus.pending;
   bool get isPublished => status == ReminderStatus.published;
+
+  bool get acceptsResponses => responseConfig?.enabled ?? false;
 }
 
 /// Lifecycle states of a reminder.

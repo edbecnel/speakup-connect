@@ -50,6 +50,9 @@ Firestore Root
 │       ├── bulletins/       # Admin-posted org-wide bulletin board posts
 │       ├── newsPosts/       # Group/org news board posts
 │       ├── reminders/       # Broadcast reminders sent to members
+│       │   └── {reminderId}/
+│       │       └── responses/   # Per-recipient optional responses
+│       ├── notification_history/  # Archived expired/recalled/dismissed notifications
 │       ├── messages/        # Group chat messages (per group sub-collection)
 │       ├── directMessages/  # Peer-to-peer message threads
 │       ├── blockedUsers/    # Abuse block records
@@ -473,21 +476,93 @@ Posts by groups/clubs. Visible to all org members or group members depending on 
 
 ```json
 {
-  "reminderId": "string",
   "organizationId": "string (denormalized)",
   "title": "string",
   "body": "string",
-  "authorId": "string (user UID)",
-  "authorName": "string",
-  "audience": "all | group | role",
-  "audienceGroupId": "string | null",
-  "audienceRoleId": "string | null",
-  "sentAt": "Timestamp",
-  "scheduledFor": "Timestamp | null (for future scheduled reminders)"
+  "status": "draft | pending | published | rejected",
+  "createdBy": "string (user UID)",
+  "createdByName": "string | null",
+  "audienceType": "all | group | role",
+  "audienceId": "string | null",
+  "audienceLabel": "string | null",
+  "scheduledAt": "Timestamp | null",
+  "expiresAt": "Timestamp | null (auto-remove when reached)",
+  "publishedAt": "Timestamp | null",
+  "deliveredAt": "Timestamp | null",
+  "reviewedBy": "string | null",
+  "reviewedByName": "string | null",
+  "reviewedAt": "Timestamp | null",
+  "rejectionReason": "string | null",
+  "responseConfig": {
+    "enabled": "boolean",
+    "type": "free_text | checkbox | multiple_choice",
+    "maxTextLength": "number (free_text only, default 500)",
+    "options": [
+      { "id": "string (UUID)", "label": "string" }
+    ]
+  },
+  "createdAt": "Timestamp",
+  "updatedAt": "Timestamp"
 }
 ```
 
-**Permission Note:** A user can create a reminder only if their role includes `canBroadcastReminders: true`.
+**Permission Note:** Holders of `broadcastReminders` may create reminders; `approveReminders` or admins approve/reject pending items. Delivery and expiration are server-side (Cloud Functions).
+
+**Response config:** Optional. When `responseConfig.enabled` is true, recipients submit one response per user via the `submitReminderResponse` callable until `expiresAt` (if set).
+
+---
+
+### `organizations/{organizationId}/reminders/{reminderId}/responses/{userId}` — Reminder Responses
+
+One document per recipient per reminder (document ID = recipient UID).
+
+```json
+{
+  "organizationId": "string",
+  "reminderId": "string",
+  "userId": "string (same as document ID)",
+  "userDisplayName": "string | null",
+  "responseType": "free_text | checkbox | multiple_choice",
+  "text": "string | null (free_text)",
+  "selectedOptionIds": ["string"] ,
+  "selectedOptionId": "string | null (multiple_choice)",
+  "submittedAt": "Timestamp",
+  "updatedAt": "Timestamp"
+}
+```
+
+**Permission Note:** Recipients write via `submitReminderResponse` (Admin SDK). Author and org admins may read all responses; recipients may read their own.
+
+---
+
+### `organizations/{organizationId}/notification_history/{historyId}` — Notification Archive
+
+Server-written when a notification or broadcast is removed (expired, recalled, dismissed, or cleared).
+
+```json
+{
+  "organizationId": "string",
+  "sourceType": "reminder | notification",
+  "sourceId": "string",
+  "reminderId": "string | null",
+  "userId": "string | null (per-user dismissals)",
+  "title": "string",
+  "body": "string",
+  "type": "reminder | status_update | general",
+  "audienceType": "string | null",
+  "audienceLabel": "string | null",
+  "createdBy": "string | null",
+  "createdByName": "string | null",
+  "publishedAt": "Timestamp | null",
+  "expiresAt": "Timestamp | null",
+  "removedAt": "Timestamp",
+  "removalReason": "expired | recalled | user_dismissed | cleared_all",
+  "removedBy": "string | null",
+  "feedCopiesAffected": "number | null"
+}
+```
+
+**Permission Note:** Client writes disabled. Admins read all; broadcast authors read by `createdBy`; users read entries where `userId` matches.
 
 ---
 
@@ -687,8 +762,19 @@ Indexes:
 
 Collection: organizations/{orgId}/reminders
 Indexes:
-  1. organizationId ASC + audience ASC + sentAt DESC
-  2. organizationId ASC + audienceGroupId ASC + sentAt DESC
+  1. status ASC + createdAt DESC
+  2. createdBy ASC + createdAt DESC
+  3. Collection group: status ASC + scheduledAt ASC (scheduled publisher)
+  4. Collection group: status ASC + expiresAt ASC (expiration job)
+
+Collection: organizations/{orgId}/reminders/{reminderId}/responses
+Indexes:
+  1. submittedAt DESC (list responses for a reminder)
+
+Collection: organizations/{orgId}/notification_history
+Indexes:
+  1. createdBy ASC + removedAt DESC (author history view)
+  2. removedAt DESC (admin org-wide view)
 
 Collection: organizations/{orgId}/directMessages
 Indexes:

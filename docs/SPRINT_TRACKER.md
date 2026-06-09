@@ -1,7 +1,7 @@
 # Sprint Tracker — SpeakUp Connect
 
 > Last Updated: June 8, 2026  
-> Current Sprint: **Sprint 11** (Groups & Clubs)  
+> Current Sprint: **Sprint 11** (Groups & Clubs) — reminder enhancements (Epic 2.9.1) shipped in parallel  
 > Sprint Duration: 2 weeks
 
 > **Development Velocity Note:** Development has significantly outpaced the original planned schedule. As of May 23, 2026 (day 5 of the project), the codebase covers work originally scoped for Sprints 1–6. Sprint numbering below reflects original plan order but completion dates reflect actual delivery dates.
@@ -48,7 +48,32 @@
 - **Stakeholder Note:** Admin creates a club, adds student members, assigns a leader; member sees the group on profile; admin broadcasts a reminder to that group and recipients see it in Alerts.
 
 #### Next up
-- **Sprint 12 — Client FCM (Epic 1.12):** standard Android push notifications (lock screen / background) without opening the app. Server-side send paths already exist (`onReminderPublished`, `notifyReporterOnStatusChange`); client must register `fcmTokens` and handle taps.
+- **Sprint 13 — Client FCM (Epic 1.12):** standard Android push notifications (lock screen / background) without opening the app. Server-side send paths already exist (`onReminderPublished`, `notifyReporterOnStatusChange`); client must register `fcmTokens` and handle taps.
+
+---
+
+### Sprint 12 — Reminder Enhancements *(Epic 2.9.1)*
+- **Status:** ✅ Complete — deployed to `speakup-connect-891dd`
+- **Goal:** Expiration, notification history, broadcast edit/recall, full-screen detail, and optional recipient responses on reminders.
+- **Source epic:** [MASTER_TASK_LIST.md → Epic 2.9.1](MASTER_TASK_LIST.md)
+
+#### 📝 Done
+- [x] Optional `expiresAt` — date/time picker or hours+minutes duration on compose; `expireReminders` scheduled job
+- [x] `notification_history` archive — expired, recalled, dismissed, cleared; history screen for author/admin
+- [x] Edit/recall broadcasts — `updateReminder`, `recallReminder` callables; owner + org admin UI
+- [x] `BroadcastDetailScreen` — tap reminder for full-screen view with expiration and back navigation
+- [x] Optional recipient responses — free text (char limit), checkboxes, multiple choice; `submitReminderResponse` callable
+- [x] `ReminderResponsesScreen` — author/admin views aggregated responses per broadcast
+- [x] Deployed: `firestore:rules`, `expireReminders`, `dismissNotification`, `clearNotificationFeed`, `submitReminderResponse`
+
+#### Deferred follow-ups
+- [ ] On-device smoke test: each response type end-to-end; expiration + history verification
+- [ ] Unit/widget tests for response config and forms
+
+#### 👁️ Stakeholder Demo Asset
+- **Asset Type:** Screen recording
+- **Location:** `./docs/demos/sprint-012-reminder-responses.mp4`
+- **Stakeholder Note:** Admin composes a reminder requesting checkbox responses; members open the alert full-screen and submit; admin reviews responses from My Broadcasts.
 
 ---
 
@@ -68,7 +93,7 @@
 #### Deferred follow-ups
 - [ ] On-device smoke test: compose → approve → feed entry; scheduled publish *(can run anytime)*
 - [ ] **Group audience demo** — in progress via Sprint 11
-- [ ] **Client FCM (Epic 1.12)** — scheduled as **Sprint 12** (after Groups)
+- [ ] **Client FCM (Epic 1.12)** — next after Groups *(was Sprint 12; reminder enhancements took Sprint 12 slot — FCM becomes Sprint 13)*
 
 ---
 
@@ -201,7 +226,7 @@ Each sprint entry follows this format:
 - **Stakeholder Note:** What this delivers from the roadmap perspective
 ```
 
-### Sprint 12 — Client FCM & Push Notifications *(planned — after Sprint 11)*
+### Sprint 13 — Client FCM & Push Notifications *(planned — after Sprint 11)*
 - **Status:** 📋 Planned
 - **Goal:** Wire `firebase_messaging` on Android so users receive system notifications when the app is backgrounded or closed. Unblocks push delivery for reminders, report status updates, and future broadcasts.
 - **Source epic:** [MASTER_TASK_LIST.md → Epic 1.12](MASTER_TASK_LIST.md)

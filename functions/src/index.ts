@@ -367,6 +367,18 @@ export const notifyReporterOnStatusChange = onDocumentUpdated(
 
 type RemovalReason = 'expired' | 'recalled' | 'user_dismissed' | 'cleared_all';
 
+interface ResponseOption {
+  id?: string;
+  label?: string;
+}
+
+interface ResponseConfig {
+  enabled?: boolean;
+  type?: string;
+  maxTextLength?: number;
+  options?: ResponseOption[];
+}
+
 interface ReminderData {
   title?: string;
   body?: string;
@@ -380,6 +392,7 @@ interface ReminderData {
   expiresAt?: admin.firestore.Timestamp | null;
   createdBy?: string;
   createdByName?: string;
+  responseConfig?: ResponseConfig;
 }
 
 async function getFeedCopiesForReminder(
@@ -761,6 +774,122 @@ export const clearNotificationFeed = onCall(async (request) => {
   }
 
   return { ok: true, cleared };
+});
+
+// ── Callable: submitReminderResponse ──────────────────────────────────────────
+
+/**
+ * Validates and stores a recipient's response to a published reminder.
+ */
+export const submitReminderResponse = onCall(async (request) => {
+  if (!request.auth) {
+    throw new HttpsError('unauthenticated', 'Sign in required.');
+  }
+
+  const { orgId, reminderId, text, selectedOptionIds, selectedOptionId } =
+    (request.data ?? {}) as {
+      orgId?: string;
+      reminderId?: string;
+      text?: string;
+      selectedOptionIds?: string[];
+      selectedOptionId?: string;
+    };
+  if (!orgId || !reminderId) {
+    throw new HttpsError(
+      'invalid-argument',
+      'orgId and reminderId are required.',
+    );
+  }
+
+  const uid = request.auth.uid;
+  const reminderRef = db
+    .collection('organizations').doc(orgId)
+    .collection('reminders').doc(reminderId);
+  const reminderSnap = await reminderRef.get();
+  if (!reminderSnap.exists) {
+    throw new HttpsError('not-found', 'Reminder not found.');
+  }
+
+  const reminder = reminderSnap.data() as ReminderData;
+  if (reminder.status !== 'published') {
+    throw new HttpsError(
+      'failed-precondition',
+      'This reminder is not accepting responses.',
+    );
+  }
+  if (reminder.expiresAt && reminder.expiresAt.toMillis() <= Date.now()) {
+    throw new HttpsError(
+      'failed-precondition',
+      'This reminder has expired.',
+    );
+  }
+
+  const config = reminder.responseConfig;
+  if (!config?.enabled) {
+    throw new HttpsError(
+      'failed-precondition',
+      'This reminder does not accept responses.',
+    );
+  }
+
+  const responseType = config.type ?? 'free_text';
+  const optionIds = new Set(
+    (config.options ?? [])
+      .map((o) => o.id)
+      .filter((id): id is string => Boolean(id)),
+  );
+
+  const payload: Record<string, unknown> = {
+    organizationId: orgId,
+    reminderId,
+    responseType,
+    submittedAt: admin.firestore.FieldValue.serverTimestamp(),
+    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+  };
+
+  if (responseType === 'free_text') {
+    const trimmed = (text ?? '').trim();
+    const maxLen = config.maxTextLength ?? 500;
+    if (!trimmed) {
+      throw new HttpsError('invalid-argument', 'Response text is required.');
+    }
+    if (trimmed.length > maxLen) {
+      throw new HttpsError(
+        'invalid-argument',
+        `Response must be at most ${maxLen} characters.`,
+      );
+    }
+    payload.text = trimmed;
+  } else if (responseType === 'checkbox') {
+    const ids = (selectedOptionIds ?? []).filter((id) => optionIds.has(id));
+    if (ids.length === 0) {
+      throw new HttpsError(
+        'invalid-argument',
+        'Select at least one option.',
+      );
+    }
+    payload.selectedOptionIds = ids;
+  } else if (responseType === 'multiple_choice') {
+    const id = selectedOptionId ?? '';
+    if (!optionIds.has(id)) {
+      throw new HttpsError('invalid-argument', 'Select a valid option.');
+    }
+    payload.selectedOptionId = id;
+  } else {
+    throw new HttpsError('invalid-argument', 'Unknown response type.');
+  }
+
+  const userSnap = await db
+    .collection('organizations').doc(orgId)
+    .collection('users').doc(uid)
+    .get();
+  const displayName = userSnap.data()?.['displayName'] as string | undefined;
+  if (displayName) payload.userDisplayName = displayName;
+
+  await reminderRef.collection('responses').doc(uid).set(payload, { merge: true });
+
+  logger.info('submitReminderResponse completed', { orgId, reminderId, uid });
+  return { ok: true };
 });
 
 // ── Reminders: delivery helpers ───────────────────────────────────────────────

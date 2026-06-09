@@ -1,4 +1,5 @@
 import 'package:speakup_connect/features/reminders/domain/entities/reminder_entity.dart';
+import 'package:speakup_connect/features/reminders/domain/entities/reminder_response_config.dart';
 
 /// Abstract repository for reminder CRUD and the approval workflow.
 ///
@@ -22,6 +23,7 @@ abstract class ReminderRepository {
     String? createdByName,
     DateTime? scheduledAt,
     DateTime? expiresAt,
+    ReminderResponseConfig? responseConfig,
   });
 
   /// Streams reminders awaiting approval, newest first.

@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:speakup_connect/features/reminders/data/models/reminder_response_config_codec.dart';
 import 'package:speakup_connect/features/reminders/domain/entities/reminder_entity.dart';
 
 /// Firestore data model for a reminder document.
@@ -23,6 +24,7 @@ class ReminderModel extends ReminderEntity {
     super.reviewedByName,
     super.reviewedAt,
     super.rejectionReason,
+    super.responseConfig,
   });
 
   factory ReminderModel.fromFirestore(
@@ -53,6 +55,8 @@ class ReminderModel extends ReminderEntity {
       reviewedByName: data['reviewedByName'] as String?,
       reviewedAt: toDate(data['reviewedAt']),
       rejectionReason: data['rejectionReason'] as String?,
+      responseConfig:
+          ReminderResponseConfigCodec.fromMap(data['responseConfig']),
       createdAt: toDate(data['createdAt']) ?? DateTime.now(),
       updatedAt: toDate(data['updatedAt']) ?? DateTime.now(),
     );
@@ -77,6 +81,8 @@ class ReminderModel extends ReminderEntity {
       if (scheduledAt != null) 'scheduledAt': Timestamp.fromDate(scheduledAt!),
       if (expiresAt != null) 'expiresAt': Timestamp.fromDate(expiresAt!),
       if (publishedAt != null) 'publishedAt': Timestamp.fromDate(publishedAt!),
+      if (ReminderResponseConfigCodec.toMap(responseConfig) != null)
+        'responseConfig': ReminderResponseConfigCodec.toMap(responseConfig),
       'createdAt': FieldValue.serverTimestamp(),
       'updatedAt': FieldValue.serverTimestamp(),
     };

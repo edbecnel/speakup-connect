@@ -39,6 +39,10 @@ abstract class AppConstants {
   static const String customCapabilitiesCollection = 'customCapabilities';
   static const String roleAssignmentsCollection = 'roleAssignments';
   static const String remindersCollection = 'reminders';
+
+  /// Per-user responses to a broadcast reminder:
+  /// `organizations/{orgId}/reminders/{reminderId}/responses/{userId}`.
+  static const String reminderResponsesCollection = 'responses';
   static const String groupsCollection = 'groups';
   static const String groupMembersCollection = 'members';
   static const String rosterCollection = 'roster';
