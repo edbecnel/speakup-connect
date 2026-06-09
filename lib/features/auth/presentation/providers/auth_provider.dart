@@ -43,8 +43,8 @@ class AuthNotifier extends _$AuthNotifier {
   }) async {
     state = const AsyncLoading();
     try {
-      await ref.read(authRepositoryProvider).signInWithEmail(
-            email: email,
+      await ref.read(authRepositoryProvider).signInWithIdentifier(
+            identifier: email,
             password: password,
           );
       state = const AsyncData(null);

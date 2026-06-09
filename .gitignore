@@ -52,6 +52,8 @@ android/.kotlin/
 google-services.json
 GoogleService-Info.plist
 lib/config/firebase_options.dart
+scripts/service-account.json
+**/service-account*.json
 
 # Environment files
 .env

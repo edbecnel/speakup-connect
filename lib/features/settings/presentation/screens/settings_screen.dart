@@ -196,7 +196,9 @@ class SettingsScreen extends ConsumerWidget {
                 ListTile(
                   leading: const Icon(Icons.school_outlined),
                   title: const Text('Student Roster'),
-                  subtitle: const Text('Assign grades individually or in bulk'),
+                  subtitle: const Text(
+                    'Add students, assign grades individually or in bulk',
+                  ),
                   trailing: const Icon(Icons.chevron_right_rounded),
                   onTap: () => context.push(Routes.rosterManagement),
                 ),

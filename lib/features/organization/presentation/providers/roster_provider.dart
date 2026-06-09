@@ -55,3 +55,36 @@ final rosterGradeActionProvider =
     NotifierProvider<RosterGradeActionNotifier, AsyncValue<int?>>(
   RosterGradeActionNotifier.new,
 );
+
+class ProvisionStudentNotifier extends Notifier<AsyncValue<void>> {
+  @override
+  AsyncValue<void> build() => const AsyncValue.data(null);
+
+  Future<bool> provision({
+    required String studentId,
+    required String fullName,
+    required int gradeLevel,
+    String? email,
+  }) async {
+    state = const AsyncValue.loading();
+    try {
+      await ref.read(rosterRepositoryProvider).provisionStudent(
+            orgId: AppConfig.defaultOrganizationId,
+            studentId: studentId,
+            fullName: fullName,
+            gradeLevel: gradeLevel,
+            email: email,
+          );
+      state = const AsyncValue.data(null);
+      return true;
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+      return false;
+    }
+  }
+}
+
+final provisionStudentProvider =
+    NotifierProvider<ProvisionStudentNotifier, AsyncValue<void>>(
+  ProvisionStudentNotifier.new,
+);

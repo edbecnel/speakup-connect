@@ -3,6 +3,10 @@ import { onCall, HttpsError } from 'firebase-functions/v2/https';
 import { onSchedule } from 'firebase-functions/v2/scheduler';
 import { logger } from 'firebase-functions';
 import * as admin from 'firebase-admin';
+import {
+  assertStudentPasswordLength,
+  studentAuthEmail,
+} from './student_auth';
 
 admin.initializeApp();
 
@@ -374,6 +378,7 @@ interface ResponseOption {
 
 interface ResponseConfig {
   enabled?: boolean;
+  responseRequired?: boolean;
   type?: string;
   maxTextLength?: number;
   options?: ResponseOption[];
@@ -662,6 +667,55 @@ export const updateReminder = onCall(async (request) => {
   return { ok: true, updatedNotifications };
 });
 
+async function isResponseRequiredForReminder(
+  orgId: string,
+  reminderId: string,
+): Promise<boolean> {
+  const snap = await db
+    .collection('organizations').doc(orgId)
+    .collection('reminders').doc(reminderId)
+    .get();
+  if (!snap.exists) return false;
+  const config = (snap.data() as ReminderData).responseConfig;
+  return config?.enabled === true && config?.responseRequired === true;
+}
+
+async function userHasReminderResponse(
+  orgId: string,
+  reminderId: string,
+  uid: string,
+): Promise<boolean> {
+  const snap = await db
+    .collection('organizations').doc(orgId)
+    .collection('reminders').doc(reminderId)
+    .collection('responses').doc(uid)
+    .get();
+  return snap.exists;
+}
+
+async function markUserReminderNotificationsRead(
+  orgId: string,
+  uid: string,
+  reminderId: string,
+): Promise<void> {
+  const snap = await db
+    .collection('organizations').doc(orgId)
+    .collection('users').doc(uid)
+    .collection('notifications')
+    .where('data.reminderId', '==', reminderId)
+    .get();
+  if (snap.empty) return;
+
+  const batch = db.batch();
+  for (const doc of snap.docs) {
+    batch.update(doc.ref, {
+      read: true,
+      readAt: admin.firestore.FieldValue.serverTimestamp(),
+    });
+  }
+  await batch.commit();
+}
+
 // ── Callable: dismissNotification ─────────────────────────────────────────────
 
 /**
@@ -695,6 +749,22 @@ export const dismissNotification = onCall(async (request) => {
 
   const data = snap.data() as Record<string, unknown>;
   const payload = (data['data'] as Record<string, unknown> | undefined) ?? {};
+  const reminderId = payload['reminderId'] as string | undefined;
+  const responseRequired =
+    payload['responseRequired'] === true ||
+    (reminderId
+      ? await isResponseRequiredForReminder(orgId, reminderId)
+      : false);
+
+  if (responseRequired && reminderId) {
+    const responded = await userHasReminderResponse(orgId, reminderId, uid);
+    if (!responded) {
+      throw new HttpsError(
+        'failed-precondition',
+        'Submit your response before dismissing this alert.',
+      );
+    }
+  }
 
   await db
     .collection('organizations').doc(orgId)
@@ -749,6 +819,20 @@ export const clearNotificationFeed = onCall(async (request) => {
       const data = doc.data() as Record<string, unknown>;
       const payload =
         (data['data'] as Record<string, unknown> | undefined) ?? {};
+      const reminderId = payload['reminderId'] as string | undefined;
+      const responseRequired =
+        payload['responseRequired'] === true ||
+        (reminderId
+          ? await isResponseRequiredForReminder(orgId, reminderId)
+          : false);
+      if (responseRequired && reminderId) {
+        const responded = await userHasReminderResponse(
+          orgId,
+          reminderId,
+          uid,
+        );
+        if (!responded) continue;
+      }
       const historyRef = db
         .collection('organizations').doc(orgId)
         .collection('notification_history')
@@ -887,6 +971,7 @@ export const submitReminderResponse = onCall(async (request) => {
   if (displayName) payload.userDisplayName = displayName;
 
   await reminderRef.collection('responses').doc(uid).set(payload, { merge: true });
+  await markUserReminderNotificationsRead(orgId, uid, reminderId);
 
   logger.info('submitReminderResponse completed', { orgId, reminderId, uid });
   return { ok: true };
@@ -1002,12 +1087,24 @@ async function deliverReminder(
   }
 
   // 2. Write in-app feed entries (batched, ≤450 writes per batch).
+  const responseConfig = claimed.responseConfig;
+  const responseRequired =
+    responseConfig?.enabled === true &&
+    responseConfig?.responseRequired === true;
+  const notificationData: Record<string, unknown> = {
+    reminderId,
+    audienceType,
+  };
+  if (responseRequired) {
+    notificationData.responseRequired = true;
+  }
+
   const notification: Record<string, unknown> = {
     type: 'reminder',
     title,
     body,
     read: false,
-    data: { reminderId, audienceType },
+    data: notificationData,
     createdAt: admin.firestore.FieldValue.serverTimestamp(),
   };
   if (claimed.expiresAt) {
@@ -1270,3 +1367,222 @@ export const onMemberApproved = onDocumentUpdated(
     }
   },
 );
+
+// ── Callable: provisionStudent ────────────────────────────────────────────────
+
+/**
+ * Creates a pre-approved student account: roster row, Firebase Auth user
+ * (synthetic email), profile, and default member role assignment.
+ *
+ * Students sign in with their school ID as both username and password until
+ * email-based auth is enabled.
+ */
+async function assertOrgAdminCaller(
+  uid: string,
+  orgId: string,
+  token: Record<string, unknown>,
+): Promise<void> {
+  const role = token['role'] as string | undefined;
+  const tokenOrg =
+    (token['orgId'] as string | undefined) ??
+    (token['organizationId'] as string | undefined);
+  if (
+    tokenOrg === orgId &&
+    (role === 'admin' || role === 'super_admin' || role === 'owner')
+  ) {
+    return;
+  }
+
+  const profileSnap = await db
+    .collection('organizations').doc(orgId)
+    .collection('users').doc(uid)
+    .get();
+  const profile = profileSnap.data() ?? {};
+  const profileRole = profile['role'] as string | undefined;
+  if (
+    profile['organizationId'] === orgId &&
+    profile['approvalStatus'] === 'approved' &&
+    (profileRole === 'admin' ||
+      profileRole === 'super_admin' ||
+      profileRole === 'owner')
+  ) {
+    return;
+  }
+
+  throw new HttpsError(
+    'permission-denied',
+    'Only organization admins can provision students.',
+  );
+}
+
+export const provisionStudent = onCall(async (request) => {
+  if (!request.auth) {
+    throw new HttpsError('unauthenticated', 'Sign in required.');
+  }
+
+  const { orgId, studentId, fullName, gradeLevel, email } = (request.data ?? {}) as {
+    orgId?: string;
+    studentId?: string;
+    fullName?: string;
+    gradeLevel?: number;
+    email?: string;
+  };
+
+  if (!orgId || !studentId || !fullName) {
+    throw new HttpsError(
+      'invalid-argument',
+      'orgId, studentId, and fullName are required.',
+    );
+  }
+
+  const trimmedId = studentId.trim();
+  const trimmedName = fullName.trim();
+  const trimmedContactEmail = email?.trim() ?? '';
+  if (!trimmedId || !trimmedName) {
+    throw new HttpsError(
+      'invalid-argument',
+      'studentId and fullName cannot be empty.',
+    );
+  }
+
+  if (gradeLevel == null || gradeLevel <= 0) {
+    throw new HttpsError('invalid-argument', 'gradeLevel is required.');
+  }
+
+  if (
+    trimmedContactEmail &&
+    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedContactEmail)
+  ) {
+    throw new HttpsError('invalid-argument', 'Invalid email address.');
+  }
+
+  try {
+    assertStudentPasswordLength(trimmedId);
+  } catch (err) {
+    throw new HttpsError(
+      'invalid-argument',
+      err instanceof Error ? err.message : 'Invalid student ID.',
+    );
+  }
+
+  const adminUid = request.auth.uid;
+  const token = request.auth.token as Record<string, unknown>;
+  await assertOrgAdminCaller(adminUid, orgId, token);
+
+  const rosterRef = db
+    .collection('organizations').doc(orgId)
+    .collection('roster').doc(trimmedId);
+  const existingRoster = await rosterRef.get();
+  if (existingRoster.exists && existingRoster.data()?.['isRegistered'] === true) {
+    throw new HttpsError(
+      'already-exists',
+      'A student with this ID is already registered.',
+    );
+  }
+
+  const authEmail = studentAuthEmail(orgId, trimmedId);
+  let uid: string;
+
+  try {
+    const userRecord = await admin.auth().createUser({
+      email: authEmail,
+      password: trimmedId,
+      displayName: trimmedName,
+    });
+    uid = userRecord.uid;
+  } catch (err) {
+    const code = (err as { code?: string }).code;
+    if (code === 'auth/email-already-exists') {
+      throw new HttpsError(
+        'already-exists',
+        'An account already exists for this student ID.',
+      );
+    }
+    logger.error('provisionStudent: createUser failed', { err, authEmail });
+    throw new HttpsError('internal', 'Failed to create student login.');
+  }
+
+  const now = admin.firestore.FieldValue.serverTimestamp();
+  const userRef = db
+    .collection('organizations').doc(orgId)
+    .collection('users').doc(uid);
+
+  const profileData: Record<string, unknown> = {
+    userId: uid,
+    organizationId: orgId,
+    displayName: trimmedName,
+    fullName: trimmedName,
+    studentId: trimmedId,
+    gradeLevel,
+    role: 'user',
+    approvalStatus: 'approved',
+    applicationSubmitted: true,
+    isActive: true,
+    permissions: [],
+    provisionedBy: adminUid,
+    provisionSource: 'admin',
+    createdAt: now,
+    updatedAt: now,
+  };
+  if (trimmedContactEmail) {
+    profileData['email'] = trimmedContactEmail;
+  }
+
+  const rosterData: Record<string, unknown> = {
+    studentId: trimmedId,
+    fullName: trimmedName,
+    grade: `Grade ${gradeLevel}`,
+    isRegistered: true,
+    registeredUserId: uid,
+    importedAt: now,
+    importSource: 'admin',
+    updatedAt: now,
+  };
+  if (trimmedContactEmail) {
+    rosterData['email'] = trimmedContactEmail;
+  }
+
+  const batch = db.batch();
+  batch.set(userRef, profileData, { merge: false });
+  batch.set(rosterRef, rosterData, { merge: true });
+
+  const assignmentRef = userRef
+    .collection('roleAssignments')
+    .doc();
+  batch.set(assignmentRef, {
+    roleId: 'member',
+    scopeType: 'org',
+    assignedBy: adminUid,
+    assignedAt: now,
+  });
+
+  try {
+    await batch.commit();
+  } catch (err) {
+    await admin.auth().deleteUser(uid);
+    logger.error('provisionStudent: Firestore write failed', { err, uid });
+    throw new HttpsError('internal', 'Failed to save student profile.');
+  }
+
+  await admin.auth().setCustomUserClaims(uid, {
+    orgId,
+    organizationId: orgId,
+    role: 'user',
+    permissions: [],
+    tagScopes: [],
+  });
+
+  logger.info('provisionStudent completed', {
+    orgId,
+    studentId: trimmedId,
+    uid,
+    by: adminUid,
+  });
+
+  return {
+    ok: true,
+    studentId: trimmedId,
+    userId: uid,
+    authEmail,
+  };
+});

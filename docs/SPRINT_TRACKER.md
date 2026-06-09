@@ -27,7 +27,7 @@
 - [x] Admin `CreateGroupScreen` — name, description
 - [x] Admin `GroupMembersScreen` — view roster, add member (user search), remove member, assign `leader` vs `member`
 - [x] Firestore rules: gate `groups` / `members` writes on `manageGroupRoster` (keep `isAdminOrAbove` as fallback), matching `classes` pattern
-- [ ] Seed 2–3 demo groups for MONHS client walkthrough (e.g. Journalism Club, Chess Club)
+- [ ] Seed MONHS demo groups via `scripts/seed_groups.js`: **SPJ** (program cohort, not a club), **Drum and Lyre Corps**, **SSLG**
 - [ ] Verify Compose Reminder **group audience** picker populates and publishes → members appear in Alerts feed
 
 #### 📋 Scope (stretch — if time remains)
@@ -45,7 +45,7 @@
 #### 👁️ Stakeholder Demo Asset
 - **Asset Type:** Screen recording
 - **Location:** `./docs/demos/sprint-011-groups.mp4`
-- **Stakeholder Note:** Admin creates a club, adds student members, assigns a leader; member sees the group on profile; admin broadcasts a reminder to that group and recipients see it in Alerts.
+- **Stakeholder Note:** Admin creates SPJ / Drum and Lyre / SSLG groups, adds student members; admin broadcasts a reminder to SPJ and recipients see it in Alerts.
 
 #### Next up
 - **Sprint 13 — Client FCM (Epic 1.12):** standard Android push notifications (lock screen / background) without opening the app. Server-side send paths already exist (`onReminderPublished`, `notifyReporterOnStatusChange`); client must register `fcmTokens` and handle taps.

@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:speakup_connect/core/constants/app_constants.dart';
 import 'package:speakup_connect/core/errors/app_exception.dart';
 import 'package:speakup_connect/features/organization/data/models/roster_entry_model.dart';
@@ -118,6 +119,39 @@ class RosterRepositoryImpl implements RosterRepository {
     } on FirebaseException catch (e) {
       throw DatabaseException(
         message: e.message ?? 'Failed to update roster grades',
+        code: e.code,
+      );
+    }
+  }
+
+  @override
+  Future<ProvisionedStudentResult> provisionStudent({
+    required String orgId,
+    required String studentId,
+    required String fullName,
+    required int gradeLevel,
+    String? email,
+  }) async {
+    try {
+      final trimmedEmail = email?.trim();
+      final callable =
+          FirebaseFunctions.instance.httpsCallable('provisionStudent');
+      final result = await callable.call<Map<String, dynamic>>({
+        'orgId': orgId,
+        'studentId': studentId.trim(),
+        'fullName': fullName.trim(),
+        'gradeLevel': gradeLevel,
+        if (trimmedEmail != null && trimmedEmail.isNotEmpty)
+          'email': trimmedEmail,
+      });
+      final data = result.data;
+      return ProvisionedStudentResult(
+        studentId: data['studentId'] as String? ?? studentId.trim(),
+        userId: data['userId'] as String? ?? '',
+      );
+    } on FirebaseFunctionsException catch (e) {
+      throw DatabaseException(
+        message: e.message ?? 'Failed to add student',
         code: e.code,
       );
     }

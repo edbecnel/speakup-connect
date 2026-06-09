@@ -1,5 +1,6 @@
 import 'package:speakup_connect/features/groups/domain/entities/group_entity.dart';
 import 'package:speakup_connect/features/groups/domain/entities/group_member_entity.dart';
+import 'package:speakup_connect/features/groups/domain/entities/group_position_role.dart';
 
 /// Abstract repository for org groups and their member rosters.
 abstract class GroupRepository {
@@ -10,6 +11,14 @@ abstract class GroupRepository {
     required String createdBy,
     String? description,
     String? avatarUrl,
+    List<GroupPositionRole> positionRoles = const [],
+  });
+
+  /// Replaces the group's customizable position roles (club offices).
+  Future<void> updateGroupPositionRoles({
+    required String organizationId,
+    required String groupId,
+    required List<GroupPositionRole> positionRoles,
   });
 
   /// Streams all active groups in the organization, sorted by name.
@@ -41,6 +50,7 @@ abstract class GroupRepository {
     required String displayName,
     required String addedBy,
     GroupRole groupRole = GroupRole.member,
+    String? positionRoleId,
   });
 
   /// Removes [userId] from the roster and decrements [memberCount].
@@ -56,5 +66,12 @@ abstract class GroupRepository {
     required String groupId,
     required String userId,
     required GroupRole groupRole,
+  });
+
+  Future<void> updateMemberPosition({
+    required String organizationId,
+    required String groupId,
+    required String userId,
+    String? positionRoleId,
   });
 }

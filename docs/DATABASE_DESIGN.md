@@ -402,9 +402,16 @@ Extracurricular units (clubs, organizations, corps). Separate from academic clas
 {
   "groupId": "string",
   "organizationId": "string (denormalized)",
-  "name": "string (e.g. 'Journalism Club', 'Chess Club', 'Drum and Lyre Corps')",
+  "name": "string (e.g. 'Special Program in Journalism (SPJ)', 'Drum and Lyre Corps', 'SSLG')",
   "description": "string | null",
   "avatarUrl": "string | null",
+  "positionRoles": [
+    {
+      "id": "string (stable slug, e.g. president)",
+      "label": "string (e.g. President)",
+      "sortOrder": "number"
+    }
+  ],
   "isActive": "boolean",
   "memberCount": "number (denormalized for display)",
   "createdBy": "string (admin UID)",
@@ -420,6 +427,7 @@ Extracurricular units (clubs, organizations, corps). Separate from academic clas
   "userId": "string (Firebase Auth UID)",
   "displayName": "string (denormalized for display)",
   "groupRole": "leader | member",
+  "positionRoleId": "string | null (references positionRoles[].id when defined)",
   "joinedAt": "Timestamp",
   "addedBy": "string (admin or leader UID)"
 }

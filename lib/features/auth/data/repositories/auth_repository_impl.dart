@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:speakup_connect/core/auth/student_auth_credentials.dart';
 import 'package:speakup_connect/core/errors/app_exception.dart';
 import 'package:speakup_connect/features/auth/domain/entities/user_entity.dart';
 import 'package:speakup_connect/features/auth/domain/repositories/auth_repository.dart';
@@ -27,10 +28,27 @@ class AuthRepositoryImpl implements AuthRepository {
     required String email,
     required String password,
   }) async {
+    return signInWithIdentifier(
+      identifier: email,
+      password: password,
+    );
+  }
+
+  @override
+  Future<UserEntity> signInWithIdentifier({
+    required String identifier,
+    required String password,
+    String? organizationId,
+  }) async {
+    final resolved = resolveLoginCredentials(
+      identifier: identifier,
+      password: password,
+      organizationId: organizationId,
+    );
     try {
       final credential = await _firebaseAuth.signInWithEmailAndPassword(
-        email: email.trim(),
-        password: password,
+        email: resolved.email,
+        password: resolved.password,
       );
       return _mapUser(credential.user!);
     } on FirebaseAuthException catch (e) {

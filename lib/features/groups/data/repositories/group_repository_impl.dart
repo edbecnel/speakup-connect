@@ -1,6 +1,7 @@
 import 'package:speakup_connect/features/groups/data/datasources/group_remote_datasource.dart';
 import 'package:speakup_connect/features/groups/domain/entities/group_entity.dart';
 import 'package:speakup_connect/features/groups/domain/entities/group_member_entity.dart';
+import 'package:speakup_connect/features/groups/domain/entities/group_position_role.dart';
 import 'package:speakup_connect/features/groups/domain/repositories/group_repository.dart';
 
 class GroupRepositoryImpl implements GroupRepository {
@@ -15,6 +16,7 @@ class GroupRepositoryImpl implements GroupRepository {
     required String createdBy,
     String? description,
     String? avatarUrl,
+    List<GroupPositionRole> positionRoles = const [],
   }) {
     return _remoteDataSource.createGroup(
       organizationId: organizationId,
@@ -22,6 +24,20 @@ class GroupRepositoryImpl implements GroupRepository {
       createdBy: createdBy,
       description: description,
       avatarUrl: avatarUrl,
+      positionRoles: positionRoles,
+    );
+  }
+
+  @override
+  Future<void> updateGroupPositionRoles({
+    required String organizationId,
+    required String groupId,
+    required List<GroupPositionRole> positionRoles,
+  }) {
+    return _remoteDataSource.updateGroupPositionRoles(
+      organizationId: organizationId,
+      groupId: groupId,
+      positionRoles: positionRoles,
     );
   }
 
@@ -80,6 +96,7 @@ class GroupRepositoryImpl implements GroupRepository {
     required String displayName,
     required String addedBy,
     GroupRole groupRole = GroupRole.member,
+    String? positionRoleId,
   }) {
     return _remoteDataSource.addGroupMember(
       organizationId: organizationId,
@@ -88,6 +105,7 @@ class GroupRepositoryImpl implements GroupRepository {
       displayName: displayName,
       addedBy: addedBy,
       groupRole: groupRole,
+      positionRoleId: positionRoleId,
     );
   }
 
@@ -116,6 +134,21 @@ class GroupRepositoryImpl implements GroupRepository {
       groupId: groupId,
       userId: userId,
       groupRole: groupRole,
+    );
+  }
+
+  @override
+  Future<void> updateMemberPosition({
+    required String organizationId,
+    required String groupId,
+    required String userId,
+    String? positionRoleId,
+  }) {
+    return _remoteDataSource.updateMemberPosition(
+      organizationId: organizationId,
+      groupId: groupId,
+      userId: userId,
+      positionRoleId: positionRoleId,
     );
   }
 }

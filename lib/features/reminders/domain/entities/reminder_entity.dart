@@ -87,6 +87,9 @@ class ReminderEntity {
   bool get isPublished => status == ReminderStatus.published;
 
   bool get acceptsResponses => responseConfig?.enabled ?? false;
+
+  bool get responseRequired =>
+      acceptsResponses && (responseConfig?.responseRequired ?? false);
 }
 
 /// Lifecycle states of a reminder.

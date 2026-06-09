@@ -19,6 +19,13 @@ abstract class AuthRepository {
     required String password,
   });
 
+  /// Signs in with an email address or a school-issued student ID.
+  Future<UserEntity> signInWithIdentifier({
+    required String identifier,
+    required String password,
+    String? organizationId,
+  });
+
   /// Creates a new account with [email] and [password].
   /// Throws [AuthFailure] if the email is already in use.
   Future<UserEntity> signUpWithEmail({

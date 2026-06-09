@@ -22,4 +22,24 @@ abstract class RosterRepository {
     required Map<String, int> gradesByStudentId,
     Map<String, RosterEntryEntity> entryDetails = const {},
   });
+
+  /// Admin-provisions a student account (roster + Auth + approved profile).
+  Future<ProvisionedStudentResult> provisionStudent({
+    required String orgId,
+    required String studentId,
+    required String fullName,
+    required int gradeLevel,
+    String? email,
+  });
+}
+
+/// Result of [RosterRepository.provisionStudent].
+class ProvisionedStudentResult {
+  const ProvisionedStudentResult({
+    required this.studentId,
+    required this.userId,
+  });
+
+  final String studentId;
+  final String userId;
 }

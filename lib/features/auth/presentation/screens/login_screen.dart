@@ -257,21 +257,21 @@ class _LoginForm extends StatelessWidget {
           AppTextField(
             controller: emailController,
             label: 'Email / School ID',
-            hint: 'Enter your email or school ID',
+            hint: 'Email or student ID',
             prefixIcon: Icons.email_outlined,
             keyboardType: TextInputType.emailAddress,
             textInputAction: TextInputAction.next,
-            validator: (v) => Validators.required(v, fieldName: 'Email'),
+            validator: Validators.loginIdentifier,
           ),
           const SizedBox(height: 16),
           AppTextField(
             controller: passwordController,
             label: 'Password',
-            hint: 'Enter your password',
+            hint: 'Your password or student ID',
             prefixIcon: Icons.lock_outline_rounded,
             obscureText: !passwordVisible,
             textInputAction: TextInputAction.done,
-            validator: Validators.password,
+            validator: Validators.loginPassword,
             suffixIcon: IconButton(
               icon: Icon(
                 passwordVisible ? Icons.visibility_off_outlined : Icons.visibility_outlined,
@@ -351,7 +351,7 @@ class _RegisterForm extends StatelessWidget {
           AppTextField(
             controller: emailController,
             label: 'Email / School ID',
-            hint: 'Enter your email or school ID',
+            hint: 'Email or student ID',
             prefixIcon: Icons.email_outlined,
             keyboardType: TextInputType.emailAddress,
             textInputAction: TextInputAction.next,

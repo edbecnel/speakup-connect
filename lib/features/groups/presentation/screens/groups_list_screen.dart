@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:speakup_connect/core/constants/route_constants.dart';
+import 'package:speakup_connect/core/permissions/app_permission.dart';
+import 'package:speakup_connect/core/permissions/providers/permission_provider.dart';
 import 'package:speakup_connect/features/groups/domain/entities/group_entity.dart';
 import 'package:speakup_connect/features/groups/presentation/providers/group_provider.dart';
+import 'package:speakup_connect/features/organization/presentation/providers/user_profile_provider.dart';
 import 'package:speakup_connect/shared/widgets/app_error_widget.dart';
 import 'package:speakup_connect/shared/widgets/app_loading_indicator.dart';
 
@@ -16,11 +19,64 @@ class GroupsListScreen extends ConsumerWidget {
     final groupsAsync = ref.watch(orgGroupsProvider);
     final query = ref.watch(groupsSearchQueryProvider).trim().toLowerCase();
     final canManage = ref.watch(canManageGroupsProvider);
+    final canSeedDemoGroups =
+        ref.watch(userProfileProvider).value?.isAdmin == true ||
+            ref.watch(
+              hasPermissionProvider(AppPermission.manageOrganizationSettings),
+            );
+    final seedState = ref.watch(seedDemoGroupsProvider);
     final theme = Theme.of(context);
+
+    ref.listen(seedDemoGroupsProvider, (prev, next) {
+      if (!next.isLoading && prev?.isLoading == true) {
+        if (next.hasError) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text('Seed failed: ${next.error}'),
+            backgroundColor: theme.colorScheme.error,
+          ));
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text('Demo groups added successfully'),
+            backgroundColor: Colors.green,
+          ));
+        }
+      }
+    });
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Groups & Clubs'),
+        actions: [
+          if (canSeedDemoGroups)
+            PopupMenuButton<String>(
+              tooltip: 'More actions',
+              onSelected: (value) {
+                if (value == 'seed' && !seedState.isLoading) {
+                  ref.read(seedDemoGroupsProvider.notifier).seed();
+                }
+              },
+              itemBuilder: (context) => [
+                PopupMenuItem(
+                  value: 'seed',
+                  enabled: !seedState.isLoading,
+                  child: ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: seedState.isLoading
+                        ? const SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.auto_fix_high_outlined),
+                    title: Text(
+                      seedState.isLoading ? 'Seeding…' : 'Seed Demo Groups',
+                    ),
+                    subtitle: const Text('SPJ, Drum & Lyre, SSLG'),
+                  ),
+                ),
+              ],
+            ),
+        ],
       ),
       floatingActionButton: canManage
           ? FloatingActionButton.extended(
@@ -89,19 +145,51 @@ class GroupsListScreen extends ConsumerWidget {
                           const SizedBox(height: 8),
                           Text(
                             groups.isEmpty && canManage
-                                ? 'Create a club or organization to get started.'
+                                ? 'Seed the MONHS demo groups or create your own.'
                                 : 'Try a different search term.',
                             textAlign: TextAlign.center,
                             style: theme.textTheme.bodySmall?.copyWith(
                               color: theme.colorScheme.onSurfaceVariant,
                             ),
                           ),
-                          if (groups.isEmpty && canManage) ...[
+                          if (groups.isEmpty && canSeedDemoGroups) ...[
                             const SizedBox(height: 20),
-                            FilledButton.icon(
-                              onPressed: () => context.push(Routes.createGroup),
-                              icon: const Icon(Icons.add),
-                              label: const Text('Create Group'),
+                            SizedBox(
+                              width: double.infinity,
+                              child: FilledButton.icon(
+                                onPressed: seedState.isLoading
+                                    ? null
+                                    : () => ref
+                                        .read(seedDemoGroupsProvider.notifier)
+                                        .seed(),
+                                icon: seedState.isLoading
+                                    ? const SizedBox(
+                                        width: 16,
+                                        height: 16,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color: Colors.white,
+                                        ),
+                                      )
+                                    : const Icon(Icons.auto_fix_high_outlined),
+                                label: Text(
+                                  seedState.isLoading
+                                      ? 'Seeding…'
+                                      : 'Seed Demo Groups',
+                                ),
+                              ),
+                            ),
+                          ],
+                          if (groups.isEmpty && canManage) ...[
+                            const SizedBox(height: 12),
+                            SizedBox(
+                              width: double.infinity,
+                              child: OutlinedButton.icon(
+                                onPressed: () =>
+                                    context.push(Routes.createGroup),
+                                icon: const Icon(Icons.add),
+                                label: const Text('Create Group'),
+                              ),
                             ),
                           ],
                         ],

@@ -1,4 +1,5 @@
 import 'package:speakup_connect/features/groups/domain/entities/group_entity.dart';
+import 'package:speakup_connect/features/groups/domain/entities/group_position_role.dart';
 import 'package:speakup_connect/features/groups/domain/repositories/group_repository.dart';
 
 class CreateGroupUseCase {
@@ -12,6 +13,7 @@ class CreateGroupUseCase {
     required String createdBy,
     String? description,
     String? avatarUrl,
+    List<GroupPositionRole> positionRoles = const [],
   }) {
     return _repository.createGroup(
       organizationId: organizationId,
@@ -19,6 +21,7 @@ class CreateGroupUseCase {
       createdBy: createdBy,
       description: description,
       avatarUrl: avatarUrl,
+      positionRoles: positionRoles,
     );
   }
 }

@@ -5,6 +5,7 @@ import 'package:speakup_connect/features/auth/presentation/providers/auth_provid
 import 'package:speakup_connect/features/notifications/data/repositories/notification_repository_impl.dart';
 import 'package:speakup_connect/features/notifications/domain/entities/app_notification_entity.dart';
 import 'package:speakup_connect/features/notifications/domain/repositories/notification_repository.dart';
+import 'package:speakup_connect/features/reminders/presentation/providers/reminder_response_provider.dart';
 
 // ── Infrastructure ───────────────────────────────────────────────────────────
 
@@ -28,10 +29,21 @@ final notificationsProvider =
       );
 });
 
-/// Count of unread notifications (drives the app-bar badge).
+/// Count of notifications needing attention (drives the app-bar badge).
+///
+/// Includes unread items and response-required alerts until the user submits
+/// a response.
 final unreadNotificationCountProvider = Provider.autoDispose<int>((ref) {
-  return ref.watch(notificationsProvider).asData?.value.where((n) => !n.read).length ??
-      0;
+  final items = ref.watch(notificationsProvider).asData?.value ?? const [];
+  var count = 0;
+  for (final n in items) {
+    final reminderId = n.reminderId;
+    final hasResponded = reminderId != null && n.responseRequired
+        ? ref.watch(myReminderResponseProvider(reminderId)).value != null
+        : true;
+    if (n.needsAttention(hasResponded: hasResponded)) count++;
+  }
+  return count;
 });
 
 // ── Actions ──────────────────────────────────────────────────────────────────
@@ -60,28 +72,43 @@ class NotificationActions extends Notifier<AsyncValue<void>> {
     if (user == null) return;
     state = const AsyncLoading();
     try {
-      await ref.read(notificationRepositoryProvider).markAllAsRead(
-            organizationId: AppConfig.defaultOrganizationId,
-            userId: user.uid,
-          );
+      final items = ref.read(notificationsProvider).value ?? const [];
+      final repo = ref.read(notificationRepositoryProvider);
+      final orgId = AppConfig.defaultOrganizationId;
+      for (final n in items) {
+        if (n.read) continue;
+        final reminderId = n.reminderId;
+        if (n.responseRequired && reminderId != null) {
+          final responded =
+              ref.read(myReminderResponseProvider(reminderId)).value != null;
+          if (!responded) continue;
+        }
+        await repo.markAsRead(
+          organizationId: orgId,
+          userId: user.uid,
+          notificationId: n.id,
+        );
+      }
       state = const AsyncData(null);
     } catch (e, st) {
       state = AsyncError(e, st);
     }
   }
 
-  Future<void> delete(String notificationId) async {
-    if (notificationId.startsWith('broadcast-')) return;
+  Future<bool> delete(String notificationId) async {
+    if (notificationId.startsWith('broadcast-')) return false;
     final user = ref.read(currentUserProvider);
-    if (user == null) return;
+    if (user == null) return false;
     try {
       await ref.read(notificationRepositoryProvider).deleteNotification(
             organizationId: AppConfig.defaultOrganizationId,
             userId: user.uid,
             notificationId: notificationId,
           );
+      return true;
     } catch (e, st) {
       state = AsyncError(e, st);
+      rethrow;
     }
   }
 

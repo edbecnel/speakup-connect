@@ -8,6 +8,7 @@ import 'package:speakup_connect/features/admin/presentation/screens/admin_dashbo
 import 'package:speakup_connect/features/admin/presentation/screens/admin_report_detail_screen.dart';
 import 'package:speakup_connect/features/admin/presentation/screens/enrolled_users_screen.dart';
 import 'package:speakup_connect/features/admin/presentation/screens/member_approval_queue_screen.dart';
+import 'package:speakup_connect/features/admin/presentation/screens/add_student_screen.dart';
 import 'package:speakup_connect/features/admin/presentation/screens/roster_management_screen.dart';
 import 'package:speakup_connect/features/admin/presentation/screens/school_grades_settings_screen.dart';
 import 'package:speakup_connect/features/auth/presentation/providers/auth_provider.dart';
@@ -21,6 +22,7 @@ import 'package:speakup_connect/features/auth/presentation/screens/splash_screen
 import 'package:speakup_connect/features/groups/presentation/providers/group_provider.dart';
 import 'package:speakup_connect/features/groups/presentation/screens/add_group_members_screen.dart';
 import 'package:speakup_connect/features/groups/presentation/screens/create_group_screen.dart';
+import 'package:speakup_connect/features/groups/presentation/screens/edit_group_position_roles_screen.dart';
 import 'package:speakup_connect/features/groups/presentation/screens/group_members_screen.dart';
 import 'package:speakup_connect/features/groups/presentation/screens/groups_list_screen.dart';
 import 'package:speakup_connect/features/notifications/presentation/screens/alerts_screen.dart';
@@ -248,6 +250,11 @@ GoRouter appRouter(Ref ref) {
         builder: (context, state) => const RosterManagementScreen(),
       ),
       GoRoute(
+        path: Routes.addStudent,
+        name: 'addStudent',
+        builder: (context, state) => const AddStudentScreen(),
+      ),
+      GoRoute(
         path: Routes.schoolGradesSettings,
         name: 'schoolGradesSettings',
         builder: (context, state) => const SchoolGradesSettingsScreen(),
@@ -290,6 +297,24 @@ GoRouter appRouter(Ref ref) {
         builder: (context, state) {
           final groupId = state.pathParameters['groupId']!;
           return AddGroupMembersScreen(groupId: groupId);
+        },
+      ),
+      GoRoute(
+        path: Routes.editGroupPositionRoles,
+        name: 'editGroupPositionRoles',
+        redirect: (context, state) {
+          final canManage = ref.read(canManageGroupsProvider);
+          final groupId = state.pathParameters['groupId'];
+          if (!canManage) {
+            return groupId != null
+                ? Routes.groupMembersPath(groupId)
+                : Routes.groupsList;
+          }
+          return null;
+        },
+        builder: (context, state) {
+          final groupId = state.pathParameters['groupId']!;
+          return EditGroupPositionRolesScreen(groupId: groupId);
         },
       ),
       GoRoute(

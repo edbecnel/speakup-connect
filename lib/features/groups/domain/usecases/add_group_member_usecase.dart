@@ -13,6 +13,7 @@ class AddGroupMemberUseCase {
     required String displayName,
     required String addedBy,
     GroupRole groupRole = GroupRole.member,
+    String? positionRoleId,
   }) {
     return _repository.addGroupMember(
       organizationId: organizationId,
@@ -21,6 +22,7 @@ class AddGroupMemberUseCase {
       displayName: displayName,
       addedBy: addedBy,
       groupRole: groupRole,
+      positionRoleId: positionRoleId,
     );
   }
 }

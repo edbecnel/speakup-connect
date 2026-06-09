@@ -220,6 +220,13 @@ class NotificationRepositoryImpl implements NotificationRepository {
       });
     } on FirebaseFunctionsException catch (e) {
       if (e.code == 'permission-denied') throw const PermissionException();
+      if (e.code == 'failed-precondition') {
+        throw DatabaseException(
+          message: e.message ??
+              'Submit your response before dismissing this alert.',
+          code: e.code,
+        );
+      }
       throw DatabaseException(
         message: e.message ?? 'Failed to delete notification',
         code: e.code,

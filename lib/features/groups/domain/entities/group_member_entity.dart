@@ -11,6 +11,7 @@ class GroupMemberEntity {
     required this.groupRole,
     required this.joinedAt,
     required this.addedBy,
+    this.positionRoleId,
   });
 
   final String userId;
@@ -22,6 +23,9 @@ class GroupMemberEntity {
 
   /// UID of the admin or leader who added this member.
   final String addedBy;
+
+  /// References [GroupEntity.positionRoles] when the group defines offices.
+  final String? positionRoleId;
 
   bool get isLeader => groupRole == GroupRole.leader;
 }

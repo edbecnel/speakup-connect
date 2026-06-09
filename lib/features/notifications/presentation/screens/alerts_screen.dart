@@ -10,6 +10,7 @@ import 'package:speakup_connect/features/notifications/presentation/providers/no
 import 'package:speakup_connect/features/notifications/presentation/screens/notification_detail_screen.dart';
 import 'package:speakup_connect/features/reminders/presentation/screens/broadcast_detail_screen.dart';
 import 'package:speakup_connect/features/reminders/presentation/providers/reminder_provider.dart';
+import 'package:speakup_connect/features/reminders/presentation/providers/reminder_response_provider.dart';
 import 'package:speakup_connect/features/reminders/presentation/widgets/edit_reminder_dialog.dart';
 
 /// Alerts — the in-app notification feed. Lists reminders and other
@@ -208,11 +209,19 @@ class _NotificationRow extends ConsumerWidget {
     final isSynthetic = notification.id.startsWith('broadcast-');
     final busy = ref.watch(recallReminderProvider).isLoading ||
         ref.watch(updateReminderProvider).isLoading;
+    final hasResponded = reminderId != null && notification.responseRequired
+        ? ref.watch(myReminderResponseProvider(reminderId)).value != null
+        : true;
+    final canDismiss = !notification.responseRequired || hasResponded;
+    final needsAttention =
+        notification.needsAttention(hasResponded: hasResponded);
 
     final tile = _NotificationTile(
       notification: notification,
       canManage: canManage,
       busy: busy,
+      needsAttention: needsAttention,
+      responsePending: notification.responseRequired && !hasResponded,
       onTap: () => _openNotificationDetail(context, notification),
       onEdit: reminderId != null && canManage
           ? () => _editBroadcast(context, ref, reminderId)
@@ -222,6 +231,7 @@ class _NotificationRow extends ConsumerWidget {
         ref,
         reminderId: reminderId,
         canManage: canManage,
+        canDismiss: canDismiss,
       ),
     );
 
@@ -256,6 +266,19 @@ class _NotificationRow extends ConsumerWidget {
             color: Theme.of(context).colorScheme.onErrorContainer,
           ),
         ),
+        confirmDismiss: (_) async {
+          if (!canDismiss) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text(
+                  'Submit your response before dismissing this alert.',
+                ),
+              ),
+            );
+            return false;
+          }
+          return true;
+        },
         onDismissed: (_) {
           ref.read(notificationActionsProvider.notifier).delete(notification.id);
           ScaffoldMessenger.of(context)
@@ -317,9 +340,19 @@ class _NotificationRow extends ConsumerWidget {
     WidgetRef ref, {
     required String? reminderId,
     required bool canManage,
+    required bool canDismiss,
   }) async {
     if (reminderId != null && canManage) {
       await _confirmRecallBroadcast(context, ref, reminderId);
+      return;
+    }
+
+    if (!canDismiss) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Submit your response before dismissing this alert.'),
+        ),
+      );
       return;
     }
 
@@ -343,9 +376,17 @@ class _NotificationRow extends ConsumerWidget {
       ),
     );
     if (confirmed == true) {
-      await ref
-          .read(notificationActionsProvider.notifier)
-          .delete(notification.id);
+      try {
+        await ref
+            .read(notificationActionsProvider.notifier)
+            .delete(notification.id);
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(e.toString())),
+          );
+        }
+      }
     }
   }
 
@@ -392,6 +433,8 @@ class _NotificationTile extends ConsumerWidget {
     required this.notification,
     required this.canManage,
     required this.busy,
+    required this.needsAttention,
+    required this.responsePending,
     required this.onTap,
     required this.onDelete,
     this.onEdit,
@@ -400,6 +443,8 @@ class _NotificationTile extends ConsumerWidget {
   final AppNotificationEntity notification;
   final bool canManage;
   final bool busy;
+  final bool needsAttention;
+  final bool responsePending;
   final VoidCallback onTap;
   final VoidCallback onDelete;
   final VoidCallback? onEdit;
@@ -407,7 +452,7 @@ class _NotificationTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final isUnread = !notification.read;
+    final isUnread = needsAttention;
     final icon = switch (notification.type) {
       'reminder' => Icons.campaign_outlined,
       'status_update' => Icons.assignment_turned_in_outlined,
@@ -443,6 +488,17 @@ class _NotificationTile extends ConsumerWidget {
             style: theme.textTheme.labelSmall
                 ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
           ),
+          if (responsePending)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text(
+                'Response required',
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: theme.colorScheme.tertiary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
         ],
       ),
       isThreeLine: true,

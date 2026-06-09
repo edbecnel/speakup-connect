@@ -13,6 +13,7 @@ class GroupMemberModel extends GroupMemberEntity {
     required super.groupRole,
     required super.joinedAt,
     required super.addedBy,
+    super.positionRoleId,
   });
 
   factory GroupMemberModel.fromFirestore(
@@ -31,6 +32,7 @@ class GroupMemberModel extends GroupMemberEntity {
       groupRole: GroupRole.fromValue(data['groupRole'] as String? ?? 'member'),
       joinedAt: toDate(data['joinedAt']) ?? DateTime.now(),
       addedBy: data['addedBy'] as String? ?? '',
+      positionRoleId: data['positionRoleId'] as String?,
     );
   }
 
@@ -41,6 +43,7 @@ class GroupMemberModel extends GroupMemberEntity {
       'groupId': groupId,
       'displayName': displayName,
       'groupRole': groupRole.value,
+      if (positionRoleId != null) 'positionRoleId': positionRoleId,
       'joinedAt': FieldValue.serverTimestamp(),
       'addedBy': addedBy,
     };

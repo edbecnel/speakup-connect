@@ -2,12 +2,18 @@
 class ReminderResponseConfig {
   const ReminderResponseConfig({
     this.enabled = false,
+    this.responseRequired = false,
     this.type = ReminderResponseType.freeText,
     this.maxTextLength = AppReminderResponseLimits.defaultMaxTextLength,
     this.options = const [],
   });
 
   final bool enabled;
+
+  /// When true, recipients must submit a response before dismissing the alert.
+  /// Only applies when [enabled] is true.
+  final bool responseRequired;
+
   final ReminderResponseType type;
 
   /// Max characters for [ReminderResponseType.freeText].
@@ -40,12 +46,14 @@ class ReminderResponseConfig {
 
   ReminderResponseConfig copyWith({
     bool? enabled,
+    bool? responseRequired,
     ReminderResponseType? type,
     int? maxTextLength,
     List<ReminderResponseOption>? options,
   }) {
     return ReminderResponseConfig(
       enabled: enabled ?? this.enabled,
+      responseRequired: responseRequired ?? this.responseRequired,
       type: type ?? this.type,
       maxTextLength: maxTextLength ?? this.maxTextLength,
       options: options ?? this.options,

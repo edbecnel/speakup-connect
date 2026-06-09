@@ -46,6 +46,16 @@ class ResponseConfigSection extends StatelessWidget {
           },
         ),
         if (value.enabled) ...[
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            title: const Text('Response required'),
+            subtitle: const Text(
+              'Recipients must respond before they can dismiss the alert',
+            ),
+            value: value.responseRequired,
+            onChanged: (on) =>
+                onChanged(value.copyWith(responseRequired: on)),
+          ),
           const SizedBox(height: 4),
           SegmentedButton<ReminderResponseType>(
             segments: const [

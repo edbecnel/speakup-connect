@@ -36,11 +36,13 @@ abstract class Routes {
   static const String memberApprovals = '/join-applications';
   static const String enrolledUsers = '/enrolled-users';
   static const String rosterManagement = '/roster';
+  static const String addStudent = '/roster/add';
   static const String schoolGradesSettings = '/school-grades';
   static const String groupsList = '/groups';
   static const String createGroup = '/groups/new';
   static const String groupMembers = '/groups/:groupId/members';
   static const String addGroupMembers = '/groups/:groupId/members/add';
+  static const String editGroupPositionRoles = '/groups/:groupId/roles';
   static const String accountBlocked = '/account-blocked';
   static const String accountUnenrolled = '/account-unenrolled';
 
@@ -75,4 +77,8 @@ abstract class Routes {
   /// Builds the add-members picker path for a concrete [groupId].
   static String addGroupMembersPath(String groupId) =>
       '/groups/$groupId/members/add';
+
+  /// Builds the club positions editor path for a concrete [groupId].
+  static String editGroupPositionRolesPath(String groupId) =>
+      '/groups/$groupId/roles';
 }

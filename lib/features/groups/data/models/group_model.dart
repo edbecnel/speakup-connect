@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:speakup_connect/features/groups/data/models/group_position_role_codec.dart';
 import 'package:speakup_connect/features/groups/domain/entities/group_entity.dart';
 
 /// Firestore data model for a group document.
@@ -16,6 +17,7 @@ class GroupModel extends GroupEntity {
     required super.updatedAt,
     super.description,
     super.avatarUrl,
+    super.positionRoles = const [],
   });
 
   factory GroupModel.fromFirestore(
@@ -35,6 +37,8 @@ class GroupModel extends GroupEntity {
       createdBy: data['createdBy'] as String? ?? '',
       createdAt: toDate(data['createdAt']) ?? DateTime.now(),
       updatedAt: toDate(data['updatedAt']) ?? DateTime.now(),
+      positionRoles:
+          GroupPositionRoleCodec.fromList(data['positionRoles']),
     );
   }
 
@@ -45,6 +49,8 @@ class GroupModel extends GroupEntity {
       'name': name,
       if (description != null) 'description': description,
       if (avatarUrl != null) 'avatarUrl': avatarUrl,
+      if (positionRoles.isNotEmpty)
+        'positionRoles': GroupPositionRoleCodec.toList(positionRoles),
       'isActive': isActive,
       'memberCount': memberCount,
       'createdBy': createdBy,

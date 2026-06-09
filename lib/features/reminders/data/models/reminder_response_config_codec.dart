@@ -27,6 +27,7 @@ abstract class ReminderResponseConfigCodec {
 
     return ReminderResponseConfig(
       enabled: true,
+      responseRequired: raw['responseRequired'] as bool? ?? false,
       type: type,
       maxTextLength: maxTextLength,
       options: options,
@@ -37,6 +38,7 @@ abstract class ReminderResponseConfigCodec {
     if (config == null || !config.enabled || !config.isValid) return null;
     return {
       'enabled': true,
+      if (config.responseRequired) 'responseRequired': true,
       'type': config.type.value,
       if (config.type == ReminderResponseType.freeText)
         'maxTextLength': config.maxTextLength,

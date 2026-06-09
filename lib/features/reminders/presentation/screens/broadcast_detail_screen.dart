@@ -36,10 +36,27 @@ class _BroadcastDetailScreenState extends ConsumerState<BroadcastDetailScreen> {
     super.initState();
     final n = widget.notification;
     if (n != null && !n.read && !n.id.startsWith('broadcast-')) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        ref.read(notificationActionsProvider.notifier).markRead(n.id);
-      });
+      WidgetsBinding.instance.addPostFrameCallback((_) => _maybeMarkRead(n));
     }
+  }
+
+  Future<void> _maybeMarkRead(AppNotificationEntity notification) async {
+    final reminderId = _reminderId;
+    if (reminderId == null) return;
+
+    if (notification.responseRequired) {
+      final reminder = await ref.read(reminderByIdProvider(reminderId).future);
+      if (reminder?.responseRequired ?? notification.responseRequired) {
+        final existing =
+            ref.read(myReminderResponseProvider(reminderId)).value;
+        if (existing == null) return;
+      }
+    }
+
+    if (!mounted) return;
+    await ref
+        .read(notificationActionsProvider.notifier)
+        .markRead(notification.id);
   }
 
   String? get _reminderId =>
@@ -214,6 +231,36 @@ class _BroadcastDetailScreenState extends ConsumerState<BroadcastDetailScreen> {
                 reminder.body,
                 style: theme.textTheme.bodyLarge?.copyWith(height: 1.5),
               ),
+              if (reminder.responseRequired &&
+                  (myResponseAsync?.asData?.value == null) &&
+                  myResponseAsync?.isLoading != true) ...[
+                const SizedBox(height: 16),
+                Material(
+                  color: theme.colorScheme.tertiaryContainer,
+                  borderRadius: BorderRadius.circular(8),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.info_outline,
+                          color: theme.colorScheme.onTertiaryContainer,
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            'Response required — submit your answer to dismiss '
+                            'this alert.',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onTertiaryContainer,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
               if (canRespond && reminder.responseConfig != null) ...[
                 const SizedBox(height: 28),
                 myResponseAsync == null

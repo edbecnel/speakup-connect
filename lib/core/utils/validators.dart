@@ -34,6 +34,52 @@ abstract class Validators {
     return null;
   }
 
+  /// Login password — relaxed minimum for student-ID-as-password accounts.
+  static String? loginPassword(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Password is required';
+    }
+    if (value.length < 6) {
+      return 'Password must be at least 6 characters';
+    }
+    return null;
+  }
+
+  /// Email address or school-issued student ID.
+  static String? loginIdentifier(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Email or student ID is required';
+    }
+    final trimmed = value.trim();
+    if (trimmed.contains('@')) {
+      return email(trimmed);
+    }
+    return studentId(trimmed);
+  }
+
+  /// Optional email — validates format only when non-empty.
+  static String? optionalEmail(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return null;
+    }
+    return email(value.trim());
+  }
+
+  /// School-issued student ID used for roster and initial login password.
+  static String? studentId(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Student ID is required';
+    }
+    final trimmed = value.trim();
+    if (trimmed.length < 6) {
+      return 'Student ID must be at least 6 characters';
+    }
+    if (!RegExp(r'^[a-zA-Z0-9-]+$').hasMatch(trimmed)) {
+      return 'Use letters, numbers, and hyphens only';
+    }
+    return null;
+  }
+
   /// Validates that [confirmValue] matches [originalValue].
   static String? confirmPassword(String? confirmValue, String? originalValue) {
     if (confirmValue == null || confirmValue.isEmpty) {

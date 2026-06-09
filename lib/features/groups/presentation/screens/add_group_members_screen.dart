@@ -24,6 +24,7 @@ class _AddGroupMembersScreenState extends ConsumerState<AddGroupMembersScreen> {
   final _selectedIds = <String>{};
   String _filter = '';
   GroupRole _role = GroupRole.member;
+  String? _positionRoleId;
 
   @override
   void dispose() {
@@ -36,7 +37,10 @@ class _AddGroupMembersScreenState extends ConsumerState<AddGroupMembersScreen> {
     final theme = Theme.of(context);
     final usersAsync = ref.watch(approvedOrgUsersProvider);
     final membersAsync = ref.watch(groupMembersProvider(widget.groupId));
+    final groupAsync = ref.watch(groupByIdProvider(widget.groupId));
     final isLoading = ref.watch(groupMemberActionsProvider).isLoading;
+    final positionRoles = groupAsync.asData?.value?.positionRoles ?? const [];
+    final hasPositions = positionRoles.isNotEmpty;
 
     final existingIds =
         membersAsync.asData?.value.map((m) => m.userId).toSet() ?? {};
@@ -54,10 +58,25 @@ class _AddGroupMembersScreenState extends ConsumerState<AddGroupMembersScreen> {
       }
     });
 
+    final hasSelection = _selectedIds.isNotEmpty;
+
     return Scaffold(
       appBar: AppBar(
         leading: BackButton(onPressed: () => context.pop()),
         title: const Text('Add Members'),
+        actions: [
+          if (hasSelection)
+            TextButton(
+              onPressed: isLoading ? null : _addSelected,
+              child: isLoading
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : Text('Add (${_selectedIds.length})'),
+            ),
+        ],
       ),
       body: usersAsync.when(
         loading: () => const AppLoadingIndicator(),
@@ -94,33 +113,6 @@ class _AddGroupMembersScreenState extends ConsumerState<AddGroupMembersScreen> {
                       onChanged: (v) =>
                           setState(() => _filter = v.toLowerCase()),
                     ),
-                    const SizedBox(height: 12),
-                    InputDecorator(
-                      decoration: const InputDecoration(
-                        labelText: 'Group role for new members',
-                        border: OutlineInputBorder(),
-                        isDense: true,
-                      ),
-                      child: DropdownButtonHideUnderline(
-                        child: DropdownButton<GroupRole>(
-                          value: _role,
-                          isExpanded: true,
-                          items: GroupRole.values
-                              .map(
-                                (r) => DropdownMenuItem(
-                                  value: r,
-                                  child: Text(r.label),
-                                ),
-                              )
-                              .toList(),
-                          onChanged: isLoading
-                              ? null
-                              : (v) {
-                                  if (v != null) setState(() => _role = v);
-                                },
-                        ),
-                      ),
-                    ),
                     if (filtered.isNotEmpty) ...[
                       const SizedBox(height: 8),
                       Align(
@@ -146,43 +138,6 @@ class _AddGroupMembersScreenState extends ConsumerState<AddGroupMembersScreen> {
                   ],
                 ),
               ),
-              if (_selectedIds.isNotEmpty)
-                Material(
-                  color: theme.colorScheme.primaryContainer,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 10,
-                    ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            '${_selectedIds.length} selected',
-                            style: theme.textTheme.titleSmall?.copyWith(
-                              color: theme.colorScheme.onPrimaryContainer,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                        FilledButton(
-                          onPressed: isLoading ? null : _addSelected,
-                          child: isLoading
-                              ? const SizedBox(
-                                  width: 18,
-                                  height: 18,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                  ),
-                                )
-                              : Text(
-                                  'Add ${_selectedIds.length}',
-                                ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
               Expanded(
                 child: filtered.isEmpty
                     ? Center(
@@ -200,7 +155,7 @@ class _AddGroupMembersScreenState extends ConsumerState<AddGroupMembersScreen> {
                         ),
                       )
                     : ListView.separated(
-                        padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+                        padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
                         itemCount: filtered.length,
                         separatorBuilder: (_, __) => const SizedBox(height: 4),
                         itemBuilder: (_, i) {
@@ -209,13 +164,16 @@ class _AddGroupMembersScreenState extends ConsumerState<AddGroupMembersScreen> {
                             user: user,
                             selected: _selectedIds.contains(user.userId),
                             enabled: !isLoading,
-                            onChanged: (selected) => setState(() {
-                              if (selected) {
-                                _selectedIds.add(user.userId);
-                              } else {
-                                _selectedIds.remove(user.userId);
-                              }
-                            }),
+                            onChanged: (selected) {
+                              FocusScope.of(context).unfocus();
+                              setState(() {
+                                if (selected) {
+                                  _selectedIds.add(user.userId);
+                                } else {
+                                  _selectedIds.remove(user.userId);
+                                }
+                              });
+                            },
                           );
                         },
                       ),
@@ -223,6 +181,94 @@ class _AddGroupMembersScreenState extends ConsumerState<AddGroupMembersScreen> {
             ],
           );
         },
+      ),
+      bottomNavigationBar: SafeArea(
+        child: Material(
+          elevation: 8,
+          color: theme.colorScheme.surfaceContainerHighest,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  'Role for selected members',
+                  style: theme.textTheme.labelLarge,
+                ),
+                const SizedBox(height: 8),
+                SegmentedButton<GroupRole>(
+                  segments: GroupRole.values
+                      .map(
+                        (r) => ButtonSegment(
+                          value: r,
+                          label: Text(r.label),
+                          icon: Icon(
+                            r == GroupRole.leader
+                                ? Icons.star_outline
+                                : Icons.person_outline,
+                          ),
+                        ),
+                      )
+                      .toList(),
+                  selected: {_role},
+                  onSelectionChanged: isLoading
+                      ? null
+                      : (selected) {
+                          setState(() => _role = selected.first);
+                        },
+                ),
+                if (hasPositions) ...[
+                  const SizedBox(height: 12),
+                  DropdownButtonFormField<String?>(
+                    value: _positionRoleId,
+                    decoration: const InputDecoration(
+                      labelText: 'Club position (optional)',
+                      border: OutlineInputBorder(),
+                      isDense: true,
+                    ),
+                    items: [
+                      const DropdownMenuItem<String?>(
+                        value: null,
+                        child: Text('No position'),
+                      ),
+                      ...positionRoles.map(
+                        (r) => DropdownMenuItem<String?>(
+                          value: r.id,
+                          child: Text(r.label),
+                        ),
+                      ),
+                    ],
+                    onChanged: isLoading
+                        ? null
+                        : (v) => setState(() => _positionRoleId = v),
+                  ),
+                ],
+                const SizedBox(height: 12),
+                FilledButton.icon(
+                  onPressed:
+                      hasSelection && !isLoading ? _addSelected : null,
+                  icon: isLoading
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Icon(Icons.group_add_outlined),
+                  label: Text(
+                    hasSelection
+                        ? 'Add ${_selectedIds.length} member'
+                            '${_selectedIds.length == 1 ? '' : 's'}'
+                        : 'Select members above',
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -239,6 +285,7 @@ class _AddGroupMembersScreenState extends ConsumerState<AddGroupMembersScreen> {
           groupId: widget.groupId,
           users: toAdd,
           groupRole: _role,
+          positionRoleId: _positionRoleId,
         );
 
     if (!mounted) return;
@@ -291,7 +338,18 @@ class _UserSelectTile extends StatelessWidget {
           ),
         ),
         title: Text(user.displayName),
-        subtitle: Text(user.studentId ?? user.email ?? user.role),
+        subtitle: Text(
+          () {
+            final parts = <String>[
+              if (user.studentId != null && user.studentId!.isNotEmpty)
+                'ID: ${user.studentId}',
+              if (user.email != null && user.email!.isNotEmpty) user.email!,
+            ];
+            return parts.isEmpty ? user.fullName : parts.join(' · ');
+          }(),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+        ),
         controlAffinity: ListTileControlAffinity.leading,
       ),
     );

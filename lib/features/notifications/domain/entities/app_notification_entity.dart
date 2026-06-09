@@ -38,4 +38,16 @@ class AppNotificationEntity {
   final Map<String, dynamic> data;
 
   final DateTime createdAt;
+
+  String? get reminderId => data['reminderId'] as String?;
+
+  bool get responseRequired => data['responseRequired'] == true;
+
+  /// True when this item should appear in the alerts badge count.
+  bool needsAttention({required bool hasResponded}) {
+    if (responseRequired && reminderId != null && !hasResponded) {
+      return true;
+    }
+    return !read;
+  }
 }

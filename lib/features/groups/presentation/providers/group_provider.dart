@@ -9,6 +9,7 @@ import 'package:speakup_connect/features/groups/data/datasources/group_remote_da
 import 'package:speakup_connect/features/groups/data/repositories/group_repository_impl.dart';
 import 'package:speakup_connect/features/groups/domain/entities/group_entity.dart';
 import 'package:speakup_connect/features/groups/domain/entities/group_member_entity.dart';
+import 'package:speakup_connect/features/groups/domain/entities/group_position_role.dart';
 import 'package:speakup_connect/features/groups/domain/repositories/group_repository.dart';
 import 'package:speakup_connect/features/groups/domain/usecases/add_group_member_usecase.dart';
 import 'package:speakup_connect/features/groups/domain/usecases/create_group_usecase.dart';
@@ -128,6 +129,7 @@ class CreateGroupNotifier extends Notifier<AsyncValue<GroupEntity?>> {
   Future<GroupEntity?> submit({
     required String name,
     String? description,
+    List<GroupPositionRole> positionRoles = const [],
   }) async {
     final user = ref.read(currentUserProvider);
     if (user == null) return null;
@@ -142,6 +144,7 @@ class CreateGroupNotifier extends Notifier<AsyncValue<GroupEntity?>> {
               final trimmed = description?.trim();
               return trimmed == null || trimmed.isEmpty ? null : trimmed;
             }(),
+            positionRoles: positionRoles,
           );
       state = AsyncData(group);
       return group;
@@ -157,6 +160,36 @@ final createGroupActionProvider =
   CreateGroupNotifier.new,
 );
 
+class UpdateGroupPositionRolesNotifier extends Notifier<AsyncValue<void>> {
+  @override
+  AsyncValue<void> build() => const AsyncData(null);
+
+  Future<bool> submit({
+    required String groupId,
+    required List<GroupPositionRole> positionRoles,
+  }) async {
+    state = const AsyncLoading();
+    try {
+      await ref.read(groupRepositoryProvider).updateGroupPositionRoles(
+            organizationId: AppConfig.defaultOrganizationId,
+            groupId: groupId,
+            positionRoles: positionRoles,
+          );
+      ref.invalidate(groupByIdProvider(groupId));
+      state = const AsyncData(null);
+      return true;
+    } catch (e, st) {
+      state = AsyncError(e, st);
+      return false;
+    }
+  }
+}
+
+final updateGroupPositionRolesProvider =
+    NotifierProvider<UpdateGroupPositionRolesNotifier, AsyncValue<void>>(
+  UpdateGroupPositionRolesNotifier.new,
+);
+
 class GroupMemberActionsNotifier extends Notifier<AsyncValue<void>> {
   @override
   AsyncValue<void> build() => const AsyncData(null);
@@ -165,11 +198,13 @@ class GroupMemberActionsNotifier extends Notifier<AsyncValue<void>> {
     required String groupId,
     required UserProfileEntity user,
     GroupRole groupRole = GroupRole.member,
+    String? positionRoleId,
   }) async {
     final added = await addMembers(
       groupId: groupId,
       users: [user],
       groupRole: groupRole,
+      positionRoleId: positionRoleId,
     );
     return added > 0;
   }
@@ -179,6 +214,7 @@ class GroupMemberActionsNotifier extends Notifier<AsyncValue<void>> {
     required String groupId,
     required List<UserProfileEntity> users,
     GroupRole groupRole = GroupRole.member,
+    String? positionRoleId,
   }) async {
     final actor = ref.read(currentUserProvider);
     if (actor == null || users.isEmpty) return 0;
@@ -197,6 +233,7 @@ class GroupMemberActionsNotifier extends Notifier<AsyncValue<void>> {
               displayName: user.displayName,
               addedBy: actor.uid,
               groupRole: groupRole,
+              positionRoleId: positionRoleId,
             );
         added++;
       } catch (e, st) {
@@ -252,9 +289,109 @@ class GroupMemberActionsNotifier extends Notifier<AsyncValue<void>> {
       return false;
     }
   }
+
+  Future<bool> updatePosition({
+    required String groupId,
+    required String userId,
+    String? positionRoleId,
+  }) async {
+    state = const AsyncLoading();
+    try {
+      await ref.read(groupRepositoryProvider).updateMemberPosition(
+            organizationId: AppConfig.defaultOrganizationId,
+            groupId: groupId,
+            userId: userId,
+            positionRoleId: positionRoleId,
+          );
+      state = const AsyncData(null);
+      return true;
+    } catch (e, st) {
+      state = AsyncError(e, st);
+      return false;
+    }
+  }
 }
 
 final groupMemberActionsProvider =
     NotifierProvider<GroupMemberActionsNotifier, AsyncValue<void>>(
   GroupMemberActionsNotifier.new,
 );
+
+// ── One-time demo seed (MONHS walkthrough) ───────────────────────────────────
+
+/// Idempotent seed for SPJ, Drum and Lyre Corps, and SSLG — same data as
+/// `scripts/seed_groups.js`, runnable from the app without Admin SDK keys.
+class SeedDemoGroups extends Notifier<AsyncValue<void>> {
+  static const _demoGroups = [
+    (
+      id: 'spj',
+      name: 'Special Program in Journalism (SPJ)',
+      description:
+          'Students participating in the Special Program in Journalism. '
+          'This is a program cohort group.',
+    ),
+    (
+      id: 'drum-and-lyre-corps',
+      name: 'Drum and Lyre Corps',
+      description: 'Marching drum and lyre ensemble.',
+    ),
+    (
+      id: 'sslg',
+      name: 'Supreme Secondary Learner Government (SSLG)',
+      description:
+          'Student government organization representing the secondary student body.',
+    ),
+  ];
+
+  @override
+  AsyncValue<void> build() => const AsyncData(null);
+
+  Future<void> seed() async {
+    final user = ref.read(currentUserProvider);
+    if (user == null) return;
+
+    state = const AsyncLoading();
+    try {
+      final groupsRef = FirebaseFirestore.instance
+          .collection(AppConstants.organizationsCollection)
+          .doc(AppConfig.defaultOrganizationId)
+          .collection(AppConstants.groupsCollection);
+      final now = FieldValue.serverTimestamp();
+      final orgId = AppConfig.defaultOrganizationId;
+
+      for (final group in _demoGroups) {
+        final docRef = groupsRef.doc(group.id);
+        final snap = await docRef.get();
+
+        final payload = <String, dynamic>{
+          'groupId': group.id,
+          'organizationId': orgId,
+          'name': group.name,
+          'description': group.description,
+          'isActive': true,
+          'createdBy': user.uid,
+          'updatedAt': now,
+        };
+
+        if (group.id == 'sslg') {
+          payload['positionRoles'] = SslgDefaultPositionRoles.toFirestoreMaps();
+        }
+
+        if (!snap.exists) {
+          payload['memberCount'] = 0;
+          payload['createdAt'] = now;
+          await docRef.set(payload);
+        } else {
+          await docRef.set(payload, SetOptions(merge: true));
+        }
+      }
+
+      state = const AsyncData(null);
+    } catch (e, st) {
+      state = AsyncError(e, st);
+    }
+  }
+}
+
+final seedDemoGroupsProvider =
+    NotifierProvider<SeedDemoGroups, AsyncValue<void>>(SeedDemoGroups.new);

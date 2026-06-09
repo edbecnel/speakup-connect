@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:speakup_connect/core/constants/route_constants.dart';
 import 'package:speakup_connect/core/permissions/app_permission.dart';
 import 'package:speakup_connect/core/permissions/providers/permission_provider.dart';
 import 'package:speakup_connect/features/organization/domain/entities/roster_entry_entity.dart';
@@ -39,6 +40,9 @@ class _RosterManagementScreenState
         (profile?.isAdmin ?? false);
   }
 
+  bool get _isOrgAdmin =>
+      ref.read(userProfileProvider).value?.isAdmin ?? false;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -72,6 +76,12 @@ class _RosterManagementScreenState
         leading: BackButton(onPressed: () => context.pop()),
         title: const Text('Student Roster'),
         actions: [
+          if (_isOrgAdmin)
+            IconButton(
+              tooltip: 'Add student',
+              icon: const Icon(Icons.person_add_alt_1_outlined),
+              onPressed: busy ? null : () => context.push(Routes.addStudent),
+            ),
           if (_canManage && filtered.isNotEmpty)
             TextButton(
               onPressed: busy
@@ -184,6 +194,13 @@ class _RosterManagementScreenState
                 Expanded(child: _buildList(rosterAsync, filtered, busy)),
               ],
             ),
+      floatingActionButton: _isOrgAdmin
+          ? FloatingActionButton.extended(
+              onPressed: busy ? null : () => context.push(Routes.addStudent),
+              icon: const Icon(Icons.person_add_alt_1_outlined),
+              label: const Text('Add Student'),
+            )
+          : null,
     );
   }
 
@@ -220,7 +237,7 @@ class _RosterManagementScreenState
       return Center(
         child: Text(
           _query.isEmpty && _gradeFilter == null
-              ? 'No students found. Members with a student ID appear here automatically.'
+              ? 'No students yet. Tap Add Student to provision an account.'
               : 'No students match your filters.',
         ),
       );

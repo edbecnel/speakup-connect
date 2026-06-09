@@ -3,7 +3,9 @@ import 'package:speakup_connect/core/constants/app_constants.dart';
 import 'package:speakup_connect/core/errors/app_exception.dart';
 import 'package:speakup_connect/features/groups/data/models/group_member_model.dart';
 import 'package:speakup_connect/features/groups/data/models/group_model.dart';
+import 'package:speakup_connect/features/groups/data/models/group_position_role_codec.dart';
 import 'package:speakup_connect/features/groups/domain/entities/group_member_entity.dart';
+import 'package:speakup_connect/features/groups/domain/entities/group_position_role.dart';
 import 'package:uuid/uuid.dart';
 
 /// Low-level Firestore access for groups and member rosters.
@@ -37,6 +39,7 @@ class GroupRemoteDataSource {
     required String createdBy,
     String? description,
     String? avatarUrl,
+    List<GroupPositionRole> positionRoles = const [],
   }) async {
     try {
       final groupId = const Uuid().v4();
@@ -46,6 +49,7 @@ class GroupRemoteDataSource {
         name: name,
         description: description,
         avatarUrl: avatarUrl,
+        positionRoles: positionRoles,
         isActive: true,
         memberCount: 0,
         createdBy: createdBy,
@@ -155,6 +159,21 @@ class GroupRemoteDataSource {
         );
   }
 
+  Future<void> updateGroupPositionRoles({
+    required String organizationId,
+    required String groupId,
+    required List<GroupPositionRole> positionRoles,
+  }) async {
+    try {
+      await _groupDoc(organizationId, groupId).update({
+        'positionRoles': GroupPositionRoleCodec.toList(positionRoles),
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+    } on FirebaseException catch (e) {
+      throw _mapFirebaseException(e, 'Failed to update group roles');
+    }
+  }
+
   Future<void> addGroupMember({
     required String organizationId,
     required String groupId,
@@ -162,6 +181,7 @@ class GroupRemoteDataSource {
     required String displayName,
     required String addedBy,
     GroupRole groupRole = GroupRole.member,
+    String? positionRoleId,
   }) async {
     try {
       final groupRef = _groupDoc(organizationId, groupId);
@@ -186,6 +206,7 @@ class GroupRemoteDataSource {
           groupId: groupId,
           displayName: displayName,
           groupRole: groupRole,
+          positionRoleId: positionRoleId,
           joinedAt: DateTime.now(),
           addedBy: addedBy,
         );
@@ -234,12 +255,37 @@ class GroupRemoteDataSource {
     try {
       await _membersRef(organizationId, groupId).doc(userId).update({
         'groupRole': groupRole.value,
+        'updatedAt': FieldValue.serverTimestamp(),
       });
       await _groupDoc(organizationId, groupId).update({
         'updatedAt': FieldValue.serverTimestamp(),
       });
     } on FirebaseException catch (e) {
       throw _mapFirebaseException(e, 'Failed to update member role');
+    }
+  }
+
+  Future<void> updateMemberPosition({
+    required String organizationId,
+    required String groupId,
+    required String userId,
+    String? positionRoleId,
+  }) async {
+    try {
+      final update = <String, dynamic>{
+        'updatedAt': FieldValue.serverTimestamp(),
+      };
+      if (positionRoleId == null) {
+        update['positionRoleId'] = FieldValue.delete();
+      } else {
+        update['positionRoleId'] = positionRoleId;
+      }
+      await _membersRef(organizationId, groupId).doc(userId).update(update);
+      await _groupDoc(organizationId, groupId).update({
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+    } on FirebaseException catch (e) {
+      throw _mapFirebaseException(e, 'Failed to update member position');
     }
   }
 

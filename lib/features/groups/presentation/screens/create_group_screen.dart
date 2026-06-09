@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:speakup_connect/core/constants/route_constants.dart';
+import 'package:speakup_connect/features/groups/domain/entities/group_position_role.dart';
 import 'package:speakup_connect/features/groups/presentation/providers/group_provider.dart';
+import 'package:speakup_connect/features/groups/presentation/widgets/group_position_roles_editor.dart';
 import 'package:speakup_connect/shared/widgets/app_button.dart';
 import 'package:speakup_connect/shared/widgets/app_text_field.dart';
 
@@ -18,6 +20,8 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _descriptionController = TextEditingController();
+  bool _definePositions = false;
+  List<GroupPositionRole> _positionRoles = const [];
 
   @override
   void dispose() {
@@ -32,6 +36,7 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
     final group = await ref.read(createGroupActionProvider.notifier).submit(
           name: _nameController.text,
           description: _descriptionController.text,
+          positionRoles: _definePositions ? _positionRoles : const [],
         );
 
     if (!mounted) return;
@@ -90,6 +95,41 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
               maxLines: 4,
               maxLength: 500,
             ),
+            const SizedBox(height: 16),
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              title: const Text('Define club positions'),
+              subtitle: const Text(
+                'Optional offices like President or Treasurer',
+              ),
+              value: _definePositions,
+              onChanged: isLoading
+                  ? null
+                  : (v) => setState(() {
+                        _definePositions = v;
+                        if (v && _positionRoles.isEmpty) {
+                          _positionRoles = const [
+                            GroupPositionRole(
+                              id: 'president',
+                              label: 'President',
+                            ),
+                            GroupPositionRole(
+                              id: 'vice-president',
+                              label: 'Vice President',
+                            ),
+                          ];
+                        }
+                      }),
+            ),
+            if (_definePositions) ...[
+              const SizedBox(height: 8),
+              GroupPositionRolesEditor(
+                roles: _positionRoles,
+                enabled: !isLoading,
+                onChanged: (roles) =>
+                    setState(() => _positionRoles = roles),
+              ),
+            ],
             const SizedBox(height: 24),
             AppButton.primary(
               label: 'Create Group',
