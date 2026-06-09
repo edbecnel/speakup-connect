@@ -22,6 +22,8 @@ class OrgConfigCacheService {
   static const String _keyDisplayName = 'org_display_name';
   static const String _keyPrimaryColor = 'org_primary_color';
   static const String _keySecondaryColor = 'org_secondary_color';
+  static const String _keyRequireReminderApproval =
+      'org_require_reminder_approval';
 
   /// Saves the branding fields from [config] to local storage.
   static Future<void> save(OrganizationConfigEntity config) async {
@@ -30,6 +32,10 @@ class OrgConfigCacheService {
     await prefs.setString(_keyPrimaryColor, _toHex(config.themeColors.primary));
     await prefs.setString(
         _keySecondaryColor, _toHex(config.themeColors.secondary));
+    await prefs.setBool(
+      _keyRequireReminderApproval,
+      config.requireReminderApproval,
+    );
   }
 
   /// Loads cached branding, or returns null if no cache exists yet
@@ -46,6 +52,8 @@ class OrgConfigCacheService {
         primary: _fromHex(primaryHex),
         secondary: _fromHex(secondaryHex),
       ),
+      requireReminderApproval:
+          prefs.getBool(_keyRequireReminderApproval) ?? false,
     );
   }
 
@@ -66,8 +74,10 @@ class CachedOrgBranding {
   const CachedOrgBranding({
     required this.displayName,
     required this.colors,
+    this.requireReminderApproval = false,
   });
 
   final String displayName;
   final OrgThemeColors colors;
+  final bool requireReminderApproval;
 }

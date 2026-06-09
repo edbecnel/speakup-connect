@@ -38,6 +38,8 @@ class OrganizationConfig extends _$OrganizationConfig {
 
   @override
   Future<OrganizationConfigEntity> build() async {
+    ref.keepAlive();
+
     final orgId = AppConfig.defaultOrganizationId;
     final repository = ref.read(organizationRepositoryProvider);
 
@@ -78,10 +80,29 @@ class OrganizationConfig extends _$OrganizationConfig {
           themeColors: cached.colors,
           allowAnonymousReports: true,
           reportCodePrefix: 'ORG',
+          requireReminderApproval: cached.requireReminderApproval,
         );
       }
       return OrganizationConfigModel.offline();
     }
+  }
+
+  /// Re-reads org settings from Firestore (server-first) and updates app state.
+  Future<OrganizationConfigEntity> refreshFromServer() async {
+    final orgId = AppConfig.defaultOrganizationId;
+    final repository = ref.read(organizationRepositoryProvider);
+    OrganizationConfigEntity config;
+    try {
+      config = await repository.getOrganizationConfig(
+        orgId,
+        preferServer: true,
+      );
+    } catch (_) {
+      config = await repository.getOrganizationConfig(orgId);
+    }
+    state = AsyncValue.data(config);
+    await OrgConfigCacheService.save(config);
+    return config;
   }
 }
 

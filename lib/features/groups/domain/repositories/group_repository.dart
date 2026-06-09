@@ -1,6 +1,7 @@
 import 'package:speakup_connect/features/groups/domain/entities/group_entity.dart';
 import 'package:speakup_connect/features/groups/domain/entities/group_member_entity.dart';
 import 'package:speakup_connect/features/groups/domain/entities/group_position_role.dart';
+import 'package:speakup_connect/features/groups/domain/entities/my_group_membership.dart';
 
 /// Abstract repository for org groups and their member rosters.
 abstract class GroupRepository {
@@ -26,6 +27,12 @@ abstract class GroupRepository {
 
   /// Streams groups the [userId] belongs to within [organizationId].
   Stream<List<GroupEntity>> watchMyGroups({
+    required String organizationId,
+    required String userId,
+  });
+
+  /// Streams group memberships for [userId] with group details for display.
+  Stream<List<MyGroupMembership>> watchMyGroupMemberships({
     required String organizationId,
     required String userId,
   });
@@ -73,5 +80,10 @@ abstract class GroupRepository {
     required String groupId,
     required String userId,
     String? positionRoleId,
+  });
+
+  /// Repairs per-user groupMemberships indexes from roster data (admin only).
+  Future<int> backfillGroupMembershipIndexes({
+    required String organizationId,
   });
 }

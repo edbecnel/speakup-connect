@@ -38,6 +38,7 @@ If your account was blocked or unenrolled, contact your school administrator. Th
 
 The home screen is your starting point:
 
+- **My Groups & Clubs** — clubs, SSLG, program cohorts, and other groups you belong to (shown when you are on at least one roster)
 - **Submit a concern** — report a safety issue, bullying, maintenance need, suggestion, or other category
 - **My Reports** — track reports you submitted and their status
 - **Alerts** — reminders and announcements sent to you
@@ -74,7 +75,11 @@ Some alerts ask you to respond (free text, checkboxes, or multiple choice):
 
 1. Open the alert
 2. Fill in the response form
-3. Tap **Submit response**
+3. Tap **Submit response** (or **Update response** if changes are allowed)
+
+**Checkboxes:** You do not have to check any box — leaving all unchecked and tapping **Submit** is valid when the alert only offers optional choices.
+
+**Locked responses:** For votes and one-time polls, the sender may disable changes. After you submit, your answer is shown as read-only and cannot be edited.
 
 ### Required responses
 
@@ -90,16 +95,41 @@ After you respond (or if no response is required), you can dismiss alerts you no
 
 Open **Settings** from the bottom navigation (labeled Profile).
 
+- **My Groups & Clubs** — full list of groups you belong to, with your role and club position
 - **Theme** — light, dark, or system default
-- **About** — app version and organization name
 - **Help Center** — this guide and other help for your role
+- **About** — app version and organization name
 - **Sign Out** — leave the app on this device
 
 ---
 
 ## Groups and clubs
 
-If you belong to groups (clubs, SSLG, program cohorts, etc.), your admin adds you to the roster. Group membership affects which **group-targeted alerts** you receive. Your **club position** (e.g. President, Secretary) may be shown on the group roster when your admin assigns it.
+Your administrator adds you to group rosters (clubs, SSLG, SPJ cohort, Drum and Lyre, etc.). You cannot join a group yourself from the app — wait for an admin or adviser to add you.
+
+### Viewing your groups
+
+| Where | What you see |
+|-------|----------------|
+| **Home** | **My Groups & Clubs** section (up to three groups, **See all** for the full list) |
+| **Settings → My Groups & Clubs** | Every group you belong to |
+
+Each entry shows the group name, whether you are a **Leader** or **Member**, and your **club position** when assigned (e.g. President, Secretary).
+
+### Why groups matter
+
+- **Group-targeted alerts** — reminders sent only to your group appear in **Alerts**
+- **Club position** — your office label for student government or club leadership (assigned by an admin)
+
+If you expect to be in a group but see **No groups yet**, contact your adviser or the school office. Open **My Groups & Clubs** once after being added — the list syncs from the school roster.
+
+### Group leaders
+
+If you are a **Leader** on a group roster, **My Groups & Clubs** also offers:
+
+- **View Members** / **Manage Members**
+- **Send Alert** to your group
+- **Sent Group Alerts** — see alerts you sent and view member responses
 
 ---
 

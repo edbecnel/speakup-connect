@@ -13,9 +13,11 @@ Open **Settings**. If you have admin access, you will see an **Administration** 
 
 | Item | Typical permission |
 |------|-------------------|
+| My Groups & Clubs | All members — groups *you* belong to (not admin-only) |
 | Admin Dashboard | `viewAllReports` / `manageReports` or org admin |
-| Groups & Clubs | `manageGroupRoster` or org admin |
+| Groups & Clubs *(Administration)* | `manageGroupRoster` or org admin — manage *all* org groups |
 | Join Applications | Org admin |
+| Reminder Approvals | Org admin or `approveReminders` |
 | Member Management | Org admin |
 | Student Roster | Org admin (schools with grade levels) |
 | School Grades | Org admin |
@@ -78,9 +80,22 @@ CSV/PDF bulk import is planned; use **Add Student** for pilot walkthroughs.
 
 ## Groups and clubs
 
+### What members see (all users)
+
+Students and staff view their own memberships under:
+
+- **Home → My Groups & Clubs**
+- **Settings → My Groups & Clubs**
+
+They see group name, Leader/Member role, and club position. They do **not** manage rosters from these screens.
+
+After you add someone to a group, tell them to check **My Groups & Clubs** or pull to refresh on **Home**.
+
+### Managing all org groups (admins)
+
 **Requires:** `manageGroupRoster` or org admin
 
-**Settings → Groups & Clubs**
+**Settings → Administration → Groups & Clubs**
 
 ### Demo seed (MONHS pilot)
 
@@ -125,6 +140,16 @@ Members are sorted by position order, then name. SSLG seed includes default offi
 - **Add Members** — search approved org members, set Leader/Member and optional position
 - **⋮ menu** on a member — change leader status, assign position, or remove
 
+### Group leaders (student officers)
+
+Members with **Leader** on a group roster (e.g. SSLG officers) can, for groups they lead:
+
+- **View Members** and **Manage Members** (add members, change roles/positions)
+- **Send Alert** — group-targeted reminder from **My Groups & Clubs**
+- **Sent Group Alerts** — review broadcasts they sent and **View responses**
+
+Leaders do **not** need org-wide `broadcastReminders`; group alerts may still require **admin approval** if your org has that setting enabled.
+
 ---
 
 ## Admin dashboard (reports)
@@ -142,25 +167,45 @@ Members are sorted by position order, then name. SSLG seed includes default offi
 
 ## Reminders and broadcasts
 
-**Requires:** `broadcastReminders` and/or `approveReminders` (varies by org)
+**Requires:** `broadcastReminders`, group **Leader** role, and/or `approveReminders` / org admin (varies by action)
+
+### Organization Settings — reminder approval
+
+**Settings → Administration → Organization Settings** (org admin)
+
+- **Require approval before publishing** — when **ON**, reminders from group leaders and other non-approvers go to **Reminder Approvals** until an admin approves
+- The toggle shows **Currently ON / OFF** and is verified on the server after you save
 
 ### Compose a reminder
 
-**Alerts → compose (FAB)** or **Compose Reminder**
+**Alerts → compose (FAB)** or **Compose Reminder** (org broadcasters)
+
+Group leaders: **My Groups & Clubs → Send Alert** on a group they lead
 
 - Title and body
-- **Audience** — all members, specific **groups**, or **roles**
+- **Audience** — all members, specific **groups**, or **roles** (leaders: their group only)
 - Optional expiration
-- Optional **responses** (text, checkboxes, multiple choice)
-- **Response required** — recipients must respond before dismissing the alert
+- Optional **Request a response**:
+  - **Free text**, **Checkboxes**, or **Multiple choice**
+  - **Response required** — recipients must respond before dismissing
+  - **Allow changing responses** — turn **OFF** for votes/polls (answers lock after submit)
+  - Checkbox alerts support a **single option** (e.g. “I will attend”); recipients may leave it unchecked
 
 ### Approval queue
 
-If your org requires approval, drafts appear in the **approval queue** for authorized approvers.
+When **Require approval** is enabled, pending alerts appear in:
 
-### My Broadcasts
+- **Settings → Reminder Approvals** (badge count)
+- **Admin Dashboard** toolbar (checklist icon)
+- **Alerts** app bar (checklist icon)
 
-Authors and admins can view sent broadcasts, edit/recall where allowed, and review **aggregated responses**.
+Org **admins** can approve/reject even without a separate `approveReminders` grant.
+
+### My Broadcasts / Sent Group Alerts
+
+Authors and admins: **Alerts → My broadcasts**. Group leaders: **Sent Group Alerts**.
+
+Edit/recall where allowed, and open **View responses** for polls and forms.
 
 ---
 
@@ -178,11 +223,15 @@ See [RBAC_ARCHITECTURE.md](../RBAC_ARCHITECTURE.md) for the full permission list
 
 When composing a reminder with responses enabled:
 
-1. Turn on **Allow responses**
-2. Turn on **Response required** if students must answer before dismissing
-3. Publish (or submit for approval)
+1. Turn on **Request a response**
+2. Choose response type and options
+3. Turn on **Response required** if students must answer before dismissing
+4. For votes, turn **Allow changing responses** **OFF**
+5. Publish (or submit for approval if your org requires it)
 
 Students see the alert until they submit a response. **Clear all** on the alerts feed leaves required items in place.
+
+**Checkbox tip:** One checkbox is enough for yes/no style questions. An unchecked box is a valid answer (e.g. “not attending”).
 
 ---
 

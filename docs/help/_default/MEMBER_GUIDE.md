@@ -16,6 +16,7 @@ If your application is still **pending approval**, wait for an administrator to 
 
 ## Home dashboard
 
+- **My Groups & Clubs** — organizations and groups you belong to (when your admin has added you)
 - **Submit a concern** — safety, maintenance, suggestions, and other categories
 - **My Reports** — track status of reports you submitted
 - **Alerts** — reminders and announcements sent to you
@@ -33,15 +34,30 @@ If your application is still **pending approval**, wait for an administrator to 
 
 ## Alerts and reminders
 
-Open **Alerts** to read broadcasts. Some alerts include response forms.
+Open **Alerts** to read broadcasts. Some alerts include response forms (text, checkboxes, or choices).
 
-If an alert is **response required**, you must submit a response before dismissing it.
+- **Response required** — you must submit before dismissing
+- **Checkboxes** — you may submit with none checked if that is your answer
+- **Locked responses** — some alerts (e.g. votes) do not allow changing your answer after submit
+
+Group **leaders** can send alerts to groups they lead from **My Groups & Clubs**.
 
 ---
 
 ## Settings
 
-Open **Settings** from the bottom navigation for theme, **Help Center**, and sign out.
+Open **Settings** from the bottom navigation for:
+
+- **My Groups & Clubs** — full list of your group memberships
+- **Theme**
+- **Help Center**
+- **Sign out**
+
+---
+
+## Groups and clubs
+
+If your organization uses groups, an administrator adds you to the roster. You can view memberships on **Home** or **Settings → My Groups & Clubs**. Group membership may determine which **Alerts** you receive.
 
 ---
 

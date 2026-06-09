@@ -503,8 +503,11 @@ Posts by groups/clubs. Visible to all org members or group members depending on 
   "rejectionReason": "string | null",
   "responseConfig": {
     "enabled": "boolean",
+    "responseRequired": "boolean (default false) — recipient must respond before dismissing alert",
     "type": "free_text | checkbox | multiple_choice",
-    "maxTextLength": "number (free_text only, default 500)",
+    "maxTextLength": "number (free_text or optional explanation, default 500)",
+    "allowAdditionalText": "boolean (checkbox/choice only) — optional explanation field",
+    "allowResponseUpdates": "boolean (default true) — when false, response locked after first submit",
     "options": [
       { "id": "string (UUID)", "label": "string" }
     ]
@@ -516,7 +519,7 @@ Posts by groups/clubs. Visible to all org members or group members depending on 
 
 **Permission Note:** Holders of `broadcastReminders` may create reminders; `approveReminders` or admins approve/reject pending items. Delivery and expiration are server-side (Cloud Functions).
 
-**Response config:** Optional. When `responseConfig.enabled` is true, recipients submit one response per user via the `submitReminderResponse` callable until `expiresAt` (if set).
+**Response config:** Optional. When `responseConfig.enabled` is true, recipients submit one response per user via the `submitReminderResponse` callable until `expiresAt` (if set). Checkbox responses may be an empty selection (`selectedOptionIds: []`). When `allowResponseUpdates` is `false`, a second submit is rejected server-side.
 
 ---
 

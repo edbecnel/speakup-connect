@@ -18,7 +18,8 @@ class GroupMembersScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final groupAsync = ref.watch(groupByIdProvider(groupId));
     final membersAsync = ref.watch(groupMembersProvider(groupId));
-    final canManage = ref.watch(canManageGroupsProvider);
+    final canManageRoster = ref.watch(canManageGroupRosterProvider(groupId));
+    final canEditPositions = ref.watch(canManageGroupsProvider);
     final actionState = ref.watch(groupMemberActionsProvider);
 
     return Scaffold(
@@ -30,7 +31,7 @@ class GroupMembersScreen extends ConsumerWidget {
           error: (_, __) => const Text('Group Members'),
         ),
         actions: [
-          if (canManage)
+          if (canEditPositions)
             IconButton(
               tooltip: 'Edit club positions',
               onPressed: () =>
@@ -39,7 +40,7 @@ class GroupMembersScreen extends ConsumerWidget {
             ),
         ],
       ),
-      floatingActionButton: canManage
+      floatingActionButton: canManageRoster
           ? FloatingActionButton.extended(
               onPressed: actionState.isLoading
                   ? null
@@ -57,7 +58,7 @@ class GroupMembersScreen extends ConsumerWidget {
           error: (e, _) => AppErrorWidget(message: e.toString()),
           data: (members) {
             if (members.isEmpty) {
-              return _EmptyMembers(canManage: canManage);
+              return _EmptyMembers(canManage: canManageRoster);
             }
 
             final sorted = List<GroupMemberEntity>.from(members)
@@ -79,7 +80,7 @@ class GroupMembersScreen extends ConsumerWidget {
                 member: sorted[i],
                 group: group,
                 groupId: groupId,
-                canManage: canManage,
+                canManage: canManageRoster,
                 isBusy: actionState.isLoading,
               ),
             );

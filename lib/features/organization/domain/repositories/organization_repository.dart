@@ -7,7 +7,13 @@ import 'package:speakup_connect/features/organization/domain/entities/organizati
 /// concrete Firestore implementation.
 abstract class OrganizationRepository {
   /// Loads the organization configuration once for the given [organizationId].
-  Future<OrganizationConfigEntity> getOrganizationConfig(String organizationId);
+  ///
+  /// When [preferServer] is true, reads from the Firestore server first to
+  /// bypass a stale on-device cache (e.g. after verifying a settings write).
+  Future<OrganizationConfigEntity> getOrganizationConfig(
+    String organizationId, {
+    bool preferServer = false,
+  });
 
   /// Emits a new [OrganizationConfigEntity] every time the org document
   /// changes in Firestore, enabling real-time theme propagation to all

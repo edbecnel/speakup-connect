@@ -145,6 +145,14 @@
         { "fieldPath": "userId", "order": "ASCENDING" },
         { "fieldPath": "organizationId", "order": "ASCENDING" }
       ]
+    },
+    {
+      "collectionGroup": "groupMemberships",
+      "queryScope": "COLLECTION_GROUP",
+      "fields": [
+        { "fieldPath": "organizationId", "order": "ASCENDING" },
+        { "fieldPath": "groupId", "order": "ASCENDING" }
+      ]
     }
   ],
   "fieldOverrides": [
@@ -152,6 +160,7 @@
       "collectionGroup": "notifications",
       "fieldPath": "data.reminderId",
       "indexes": [
+        { "order": "ASCENDING", "queryScope": "COLLECTION" },
         { "order": "ASCENDING", "queryScope": "COLLECTION_GROUP" }
       ]
     }

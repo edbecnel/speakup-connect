@@ -36,8 +36,8 @@
 
 #### 📋 Scope (stretch — if time remains)
 - [ ] `GroupDetailScreen` — group info + member list (no chat/news yet)
-- [ ] Show user's groups on Profile screen (Epic 1.13 partial)
-- [ ] Home dashboard tile or section for "My Groups"
+- [x] `MyGroupsScreen` — read-only list with role and club position (Settings + Home)
+- [x] Home dashboard section for "My Groups & Clubs"
 - [ ] Unit test: `CreateGroupUseCase`; widget test: `GroupsListScreen`
 
 #### 🚫 Explicitly out of scope (later sprints)

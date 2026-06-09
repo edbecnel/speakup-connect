@@ -30,17 +30,26 @@ class ReminderResponseEntity {
   final DateTime submittedAt;
 
   String displayValue(ReminderResponseConfig config) {
-    return switch (responseType) {
+    final selection = switch (responseType) {
       ReminderResponseType.freeText => text ?? '',
-      ReminderResponseType.checkbox => _labelsForIds(
-          config,
-          selectedOptionIds,
-        ).join(', '),
+      ReminderResponseType.checkbox => () {
+          final labels = _labelsForIds(config, selectedOptionIds);
+          if (labels.isEmpty) return 'None selected';
+          return labels.join(', ');
+        }(),
       ReminderResponseType.multipleChoice => _labelsForIds(
           config,
           selectedOptionId == null ? const [] : [selectedOptionId!],
         ).join(', '),
     };
+
+    final explanation = text?.trim();
+    if (responseType != ReminderResponseType.freeText &&
+        explanation != null &&
+        explanation.isNotEmpty) {
+      return selection.isEmpty ? explanation : '$selection — $explanation';
+    }
+    return selection;
   }
 
   List<String> _labelsForIds(

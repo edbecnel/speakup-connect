@@ -11,15 +11,20 @@ class OrganizationRepositoryImpl implements OrganizationRepository {
 
   final FirebaseFirestore _firestore;
 
+  DocumentReference<Map<String, dynamic>> _orgDoc(String organizationId) =>
+      _firestore
+          .collection(AppConstants.organizationsCollection)
+          .doc(organizationId);
+
   @override
   Future<OrganizationConfigEntity> getOrganizationConfig(
-    String organizationId,
-  ) async {
+    String organizationId, {
+    bool preferServer = false,
+  }) async {
     try {
-      final doc = await _firestore
-          .collection(AppConstants.organizationsCollection)
-          .doc(organizationId)
-          .get();
+      final doc = await _orgDoc(organizationId).get(
+        preferServer ? const GetOptions(source: Source.server) : null,
+      );
 
       if (!doc.exists || doc.data() == null) {
         throw NotFoundException(
@@ -118,13 +123,36 @@ class OrganizationRepositoryImpl implements OrganizationRepository {
     required bool requireApproval,
   }) async {
     try {
-      await _firestore
-          .collection(AppConstants.organizationsCollection)
-          .doc(organizationId)
-          .update({
+      final docRef = _orgDoc(organizationId);
+      await docRef.update({
         'requireReminderApproval': requireApproval,
         'updatedAt': FieldValue.serverTimestamp(),
       });
+
+      // Firestore may resolve the write locally before the server accepts it.
+      // Read back from the server so a rejected rule does not look like success.
+      DocumentSnapshot<Map<String, dynamic>> verifySnap;
+      try {
+        verifySnap = await docRef.get(const GetOptions(source: Source.server));
+      } on FirebaseException {
+        verifySnap = await docRef.get();
+      }
+
+      if (!verifySnap.exists || verifySnap.data() == null) {
+        throw const DatabaseException(
+          message: 'Organization document not found after update.',
+        );
+      }
+
+      final saved = OrganizationConfigModel.fromJson(
+        organizationId,
+        verifySnap.data()!,
+      ).requireReminderApproval;
+      if (saved != requireApproval) {
+        throw const PermissionException();
+      }
+    } on PermissionException {
+      rethrow;
     } on FirebaseException catch (e) {
       if (e.code == 'permission-denied') {
         throw const PermissionException();

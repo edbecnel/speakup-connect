@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:speakup_connect/core/constants/route_constants.dart';
-import 'package:speakup_connect/core/permissions/app_permission.dart';
 import 'package:speakup_connect/core/permissions/providers/permission_provider.dart';
+import 'package:speakup_connect/shared/widgets/notification_badge_icon.dart';
+import 'package:speakup_connect/features/groups/presentation/providers/group_provider.dart';
 import 'package:speakup_connect/features/notifications/domain/entities/app_notification_entity.dart';
 import 'package:speakup_connect/features/notifications/presentation/providers/notification_history_provider.dart';
 import 'package:speakup_connect/features/notifications/presentation/providers/notification_provider.dart';
@@ -22,10 +23,10 @@ class AlertsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final notificationsAsync = ref.watch(notificationsProvider);
     final unread = ref.watch(unreadNotificationCountProvider);
-    final canBroadcast =
-        ref.watch(hasPermissionProvider(AppPermission.broadcastReminders));
-    final canApprove =
-        ref.watch(hasPermissionProvider(AppPermission.approveReminders));
+    final canBroadcast = ref.watch(canComposeRemindersProvider);
+    final leaderOnly = ref.watch(isGroupLeaderOnlyComposerProvider);
+    final canApprove = ref.watch(canReviewPendingRemindersProvider);
+    final pendingApprovalCount = ref.watch(pendingReminderCountProvider);
     final canViewHistory = ref.watch(canViewNotificationHistoryProvider);
     final count = notificationsAsync.asData?.value.length ?? 0;
 
@@ -93,15 +94,18 @@ class AlertsScreen extends ConsumerWidget {
             ),
           if (canBroadcast)
             IconButton(
-              tooltip: 'My broadcasts',
+              tooltip: leaderOnly ? 'Sent group alerts' : 'My broadcasts',
               icon: const Icon(Icons.outbox_outlined),
               onPressed: () => context.push(Routes.myBroadcasts),
             ),
           if (canApprove)
             IconButton(
               tooltip: 'Reminder approvals',
-              icon: const Icon(Icons.fact_check_outlined),
               onPressed: () => context.push(Routes.reminderApprovals),
+              icon: NotificationBadgeIcon(
+                icon: Icons.fact_check_outlined,
+                unreadCount: pendingApprovalCount,
+              ),
             ),
           if (count > 0)
             PopupMenuButton<String>(
@@ -146,7 +150,7 @@ class AlertsScreen extends ConsumerWidget {
           ? FloatingActionButton.extended(
               onPressed: () => context.push(Routes.composeReminder),
               icon: const Icon(Icons.campaign_outlined),
-              label: const Text('Reminder'),
+              label: Text(leaderOnly ? 'Group Alert' : 'Reminder'),
             )
           : null,
       body: notificationsAsync.when(
@@ -209,19 +213,14 @@ class _NotificationRow extends ConsumerWidget {
     final isSynthetic = notification.id.startsWith('broadcast-');
     final busy = ref.watch(recallReminderProvider).isLoading ||
         ref.watch(updateReminderProvider).isLoading;
-    final hasResponded = reminderId != null && notification.responseRequired
-        ? ref.watch(myReminderResponseProvider(reminderId)).value != null
-        : true;
-    final canDismiss = !notification.responseRequired || hasResponded;
-    final needsAttention =
-        notification.needsAttention(hasResponded: hasResponded);
+    final attention = ref.watch(notificationAttentionProvider(notification));
 
     final tile = _NotificationTile(
       notification: notification,
       canManage: canManage,
       busy: busy,
-      needsAttention: needsAttention,
-      responsePending: notification.responseRequired && !hasResponded,
+      needsAttention: attention.needsAttention,
+      responsePending: attention.responsePending,
       onTap: () => _openNotificationDetail(context, notification),
       onEdit: reminderId != null && canManage
           ? () => _editBroadcast(context, ref, reminderId)
@@ -231,7 +230,7 @@ class _NotificationRow extends ConsumerWidget {
         ref,
         reminderId: reminderId,
         canManage: canManage,
-        canDismiss: canDismiss,
+        canDismiss: attention.canDismiss,
       ),
     );
 
@@ -267,7 +266,7 @@ class _NotificationRow extends ConsumerWidget {
           ),
         ),
         confirmDismiss: (_) async {
-          if (!canDismiss) {
+          if (!attention.canDismiss) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
                 content: Text(
@@ -511,7 +510,9 @@ class _NotificationTile extends ConsumerWidget {
               height: 10,
               margin: const EdgeInsets.only(right: 4),
               decoration: BoxDecoration(
-                color: theme.colorScheme.primary,
+                color: responsePending
+                    ? theme.colorScheme.error
+                    : theme.colorScheme.primary,
                 shape: BoxShape.circle,
               ),
             ),

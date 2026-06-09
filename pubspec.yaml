@@ -86,6 +86,8 @@ flutter:
     - assets/images/
     - assets/icons/
     - assets/lottie/
+    - assets/help/member_guide.md
+    - assets/help/admin_guide.md
     - assets/help/_default/
     - assets/help/orgs/monhs-ph-001/
 

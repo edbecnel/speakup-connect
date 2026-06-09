@@ -6,6 +6,8 @@ class ReminderResponseConfig {
     this.type = ReminderResponseType.freeText,
     this.maxTextLength = AppReminderResponseLimits.defaultMaxTextLength,
     this.options = const [],
+    this.allowAdditionalText = false,
+    this.allowResponseUpdates = true,
   });
 
   final bool enabled;
@@ -16,22 +18,35 @@ class ReminderResponseConfig {
 
   final ReminderResponseType type;
 
-  /// Max characters for [ReminderResponseType.freeText].
+  /// Max characters for free text, or optional explanation on checkbox/choice.
   final int maxTextLength;
 
   /// Checkbox labels or multiple-choice options.
   final List<ReminderResponseOption> options;
 
+  /// When true with checkbox or multiple choice, recipients may add optional
+  /// explanation text (e.g. why they cannot attend).
+  final bool allowAdditionalText;
+
+  /// When false, a recipient may submit once but cannot change their answer
+  /// afterward (e.g. votes, polls).
+  final bool allowResponseUpdates;
+
   bool get isValid {
     if (!enabled) return true;
-    return switch (type) {
-      ReminderResponseType.freeText =>
+    final textLimitValid =
         maxTextLength >= AppReminderResponseLimits.minMaxTextLength &&
-            maxTextLength <= AppReminderResponseLimits.maxMaxTextLength,
-      ReminderResponseType.checkbox ||
+            maxTextLength <= AppReminderResponseLimits.maxMaxTextLength;
+    return switch (type) {
+      ReminderResponseType.freeText => textLimitValid,
+      ReminderResponseType.checkbox =>
+        _validOptionLabels.length >= 1 &&
+            _validOptionLabels.length <= AppReminderResponseLimits.maxOptions &&
+            (!allowAdditionalText || textLimitValid),
       ReminderResponseType.multipleChoice =>
         _validOptionLabels.length >= 2 &&
-            _validOptionLabels.length <= AppReminderResponseLimits.maxOptions,
+            _validOptionLabels.length <= AppReminderResponseLimits.maxOptions &&
+            (!allowAdditionalText || textLimitValid),
     };
   }
 
@@ -42,7 +57,11 @@ class ReminderResponseConfig {
       .take(AppReminderResponseLimits.maxOptions)
       .toList();
 
-  String get typeLabel => type.label;
+  String get typeLabel {
+    if (type == ReminderResponseType.freeText) return type.label;
+    if (allowAdditionalText) return '${type.label} + explanation';
+    return type.label;
+  }
 
   ReminderResponseConfig copyWith({
     bool? enabled,
@@ -50,6 +69,8 @@ class ReminderResponseConfig {
     ReminderResponseType? type,
     int? maxTextLength,
     List<ReminderResponseOption>? options,
+    bool? allowAdditionalText,
+    bool? allowResponseUpdates,
   }) {
     return ReminderResponseConfig(
       enabled: enabled ?? this.enabled,
@@ -57,6 +78,9 @@ class ReminderResponseConfig {
       type: type ?? this.type,
       maxTextLength: maxTextLength ?? this.maxTextLength,
       options: options ?? this.options,
+      allowAdditionalText: allowAdditionalText ?? this.allowAdditionalText,
+      allowResponseUpdates:
+          allowResponseUpdates ?? this.allowResponseUpdates,
     );
   }
 }

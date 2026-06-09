@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:speakup_connect/core/permissions/app_permission.dart';
 import 'package:speakup_connect/core/permissions/providers/permission_provider.dart';
+import 'package:speakup_connect/features/groups/domain/entities/my_group_membership.dart';
+import 'package:speakup_connect/features/groups/presentation/providers/group_provider.dart';
 import 'package:speakup_connect/features/organization/presentation/providers/organization_provider.dart';
 import 'package:speakup_connect/features/reminders/domain/entities/reminder_entity.dart';
 import 'package:speakup_connect/features/reminders/presentation/providers/reminder_provider.dart';
@@ -17,7 +19,10 @@ import 'package:speakup_connect/shared/widgets/app_button.dart';
 /// Gated on [AppPermission.broadcastReminders] (also enforced by the route
 /// guard and Firestore rules).
 class ComposeReminderScreen extends ConsumerStatefulWidget {
-  const ComposeReminderScreen({super.key});
+  const ComposeReminderScreen({this.initialGroupId, super.key});
+
+  /// When set, pre-selects this group as the audience (group leaders).
+  final String? initialGroupId;
 
   @override
   ConsumerState<ComposeReminderScreen> createState() =>
@@ -27,6 +32,8 @@ class ComposeReminderScreen extends ConsumerStatefulWidget {
 class _ComposeReminderScreenState extends ConsumerState<ComposeReminderScreen> {
   final _titleCtrl = TextEditingController();
   final _bodyCtrl = TextEditingController();
+  var _didPresetGroup = false;
+  var _scheduledPreset = false;
 
   @override
   void dispose() {
@@ -38,11 +45,30 @@ class _ComposeReminderScreenState extends ConsumerState<ComposeReminderScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final canBroadcast =
-        ref.watch(hasPermissionProvider(AppPermission.broadcastReminders));
+    final canBroadcast = ref.watch(canComposeRemindersProvider);
+    final leaderOnly = ref.watch(isGroupLeaderOnlyComposerProvider);
     final form = ref.watch(composeReminderProvider);
     final notifier = ref.read(composeReminderProvider.notifier);
     final submitState = ref.watch(submitReminderProvider);
+
+    if (!_scheduledPreset) {
+      _scheduledPreset = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        _tryPresetLeaderAudience();
+      });
+    }
+
+    if (leaderOnly) {
+      ref.listen(myGroupMembershipsProvider, (prev, next) {
+        if (next.isLoading || _didPresetGroup) return;
+        _tryPresetLeaderAudience();
+      });
+      ref.listen(ledGroupMembershipsProvider, (prev, next) {
+        if (_didPresetGroup) return;
+        _tryPresetLeaderAudience();
+      });
+    }
 
     final requireApproval = ref
             .watch(organizationConfigProvider)
@@ -50,9 +76,9 @@ class _ComposeReminderScreenState extends ConsumerState<ComposeReminderScreen> {
             ?.value
             .requireReminderApproval ??
         false;
-    final canApprove =
-        ref.watch(hasPermissionProvider(AppPermission.approveReminders));
-    final willNeedApproval = requireApproval && !canApprove;
+    final canPublishDirectly =
+        ref.watch(canReviewPendingRemindersProvider);
+    final willNeedApproval = requireApproval && !canPublishDirectly;
 
     ref.listen(submitReminderProvider, (prev, next) {
       if (prev?.isLoading == true && !next.isLoading) {
@@ -86,21 +112,121 @@ class _ComposeReminderScreenState extends ConsumerState<ComposeReminderScreen> {
       );
     }
 
+    if (leaderOnly) {
+      return _buildScaffold(
+        context: context,
+        theme: theme,
+        form: form,
+        notifier: notifier,
+        submitState: submitState,
+        submitLabel: willNeedApproval ? 'Submit for Approval' : 'Send Reminder',
+        leaderOnly: true,
+        willNeedApproval: willNeedApproval,
+      );
+    }
+
     final submitLabel =
         willNeedApproval ? 'Submit for Approval' : 'Send Reminder';
 
+    return _buildScaffold(
+      context: context,
+      theme: theme,
+      form: form,
+      notifier: notifier,
+      submitState: submitState,
+      submitLabel: submitLabel,
+      leaderOnly: false,
+      willNeedApproval: willNeedApproval,
+    );
+  }
+
+  void _tryPresetLeaderAudience() {
+    if (_didPresetGroup || !ref.read(isGroupLeaderOnlyComposerProvider)) {
+      return;
+    }
+    final notifier = ref.read(composeReminderProvider.notifier);
+    _ensureLeaderGroupAudience(notifier);
+    _maybePresetGroupAudience(true, notifier);
+  }
+
+  void _ensureLeaderGroupAudience(ComposeReminderNotifier notifier) {
+    if (ref.read(composeReminderProvider).audienceType !=
+        ReminderAudienceType.group) {
+      notifier.setAudienceType(ReminderAudienceType.group);
+    }
+  }
+
+  MyGroupMembership? _ledMembershipFor(String groupId) {
+    for (final m in ref.read(ledGroupMembershipsProvider)) {
+      if (m.group.groupId == groupId) return m;
+    }
+    final all = ref.read(myGroupMembershipsProvider).asData?.value;
+    if (all == null) return null;
+    for (final m in all) {
+      if (m.group.groupId == groupId && m.membership.isLeader) return m;
+    }
+    return null;
+  }
+
+  void _maybePresetGroupAudience(
+    bool leaderOnly,
+    ComposeReminderNotifier notifier,
+  ) {
+    if (_didPresetGroup || !leaderOnly) return;
+
+    final groupId = widget.initialGroupId;
+    if (groupId != null) {
+      final membership = _ledMembershipFor(groupId);
+      if (membership == null) return;
+      _didPresetGroup = true;
+      notifier.presetGroupAudience(
+        groupId: groupId,
+        groupName: membership.group.name,
+      );
+      return;
+    }
+
+    final led = ref.read(ledGroupMembershipsProvider);
+    if (led.length == 1) {
+      _didPresetGroup = true;
+      notifier.presetGroupAudience(
+        groupId: led.first.group.groupId,
+        groupName: led.first.group.name,
+      );
+    }
+  }
+
+  Widget _buildScaffold({
+    required BuildContext context,
+    required ThemeData theme,
+    required ComposeReminderState form,
+    required ComposeReminderNotifier notifier,
+    required AsyncValue<SubmitReminderResult?> submitState,
+    required String submitLabel,
+    required bool leaderOnly,
+    required bool willNeedApproval,
+  }) {
     return Scaffold(
       appBar: AppBar(
         leading: BackButton(onPressed: () => context.pop()),
-        title: const Text('Compose Reminder'),
+        title: Text(leaderOnly ? 'Send Group Alert' : 'Compose Reminder'),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (willNeedApproval)
-              _ApprovalBanner(),
+            if (leaderOnly)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Text(
+                  'This alert will be sent only to members of the group you select.',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
+            if (willNeedApproval) _ApprovalBanner(),
             TextField(
               controller: _titleCtrl,
               onChanged: notifier.setTitle,
@@ -129,15 +255,19 @@ class _ComposeReminderScreenState extends ConsumerState<ComposeReminderScreen> {
             const SizedBox(height: 8),
             Text('Audience', style: theme.textTheme.titleSmall),
             const SizedBox(height: 8),
-            _AudienceSelector(
-              selected: form.audienceType,
-              onChanged: notifier.setAudienceType,
-            ),
-            const SizedBox(height: 12),
-            if (form.audienceType == ReminderAudienceType.group)
-              _GroupPicker(form: form, notifier: notifier),
-            if (form.audienceType == ReminderAudienceType.role)
-              _RolePicker(form: form, notifier: notifier),
+            if (leaderOnly)
+              _GroupPicker(form: form, notifier: notifier)
+            else ...[
+              _AudienceSelector(
+                selected: form.audienceType,
+                onChanged: notifier.setAudienceType,
+              ),
+              const SizedBox(height: 12),
+              if (form.audienceType == ReminderAudienceType.group)
+                _GroupPicker(form: form, notifier: notifier),
+              if (form.audienceType == ReminderAudienceType.role)
+                _RolePicker(form: form, notifier: notifier),
+            ],
             const SizedBox(height: 16),
             _ScheduleSection(form: form, notifier: notifier),
             const SizedBox(height: 8),
@@ -152,9 +282,19 @@ class _ComposeReminderScreenState extends ConsumerState<ComposeReminderScreen> {
               onChanged: notifier.setResponseConfig,
             ),
             const SizedBox(height: 28),
+            if (!form.isValid && form.validationMessage != null)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Text(
+                  form.validationMessage!,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.error,
+                  ),
+                ),
+              ),
             AppButton.primary(
               label: submitLabel,
-              icon: willNeedApproval
+              icon: submitLabel.contains('Approval')
                   ? Icons.send_outlined
                   : Icons.campaign_outlined,
               isLoading: submitState.isLoading,
@@ -248,14 +388,40 @@ class _GroupPicker extends ConsumerWidget {
         if (groups.isEmpty) {
           return const Text('No groups exist yet. Create a group first.');
         }
+        final selectedId = form.targetId != null &&
+                groups.any((g) => g.id == form.targetId)
+            ? form.targetId
+            : null;
         return DropdownButtonFormField<String>(
-          initialValue: form.targetId,
+          isExpanded: true,
+          value: selectedId,
           decoration: const InputDecoration(
             labelText: 'Select group',
             border: OutlineInputBorder(),
           ),
           items: groups
-              .map((g) => DropdownMenuItem(value: g.id, child: Text(g.label)))
+              .map(
+                (g) => DropdownMenuItem(
+                  value: g.id,
+                  child: Text(
+                    g.label,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 2,
+                  ),
+                ),
+              )
+              .toList(),
+          selectedItemBuilder: (context) => groups
+              .map(
+                (g) => Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: Text(
+                    g.label,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                  ),
+                ),
+              )
               .toList(),
           onChanged: (id) {
             if (id == null) return;
@@ -285,14 +451,35 @@ class _RolePicker extends ConsumerWidget {
           return const Text('No roles defined yet.');
         }
         return DropdownButtonFormField<String>(
+          isExpanded: true,
           initialValue: form.targetId,
           decoration: const InputDecoration(
             labelText: 'Select role',
             border: OutlineInputBorder(),
           ),
           items: roles
-              .map((r) =>
-                  DropdownMenuItem(value: r.id, child: Text(r.displayName)))
+              .map(
+                (r) => DropdownMenuItem(
+                  value: r.id,
+                  child: Text(
+                    r.displayName,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 2,
+                  ),
+                ),
+              )
+              .toList(),
+          selectedItemBuilder: (context) => roles
+              .map(
+                (r) => Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: Text(
+                    r.displayName,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                  ),
+                ),
+              )
               .toList(),
           onChanged: (id) {
             if (id == null) return;

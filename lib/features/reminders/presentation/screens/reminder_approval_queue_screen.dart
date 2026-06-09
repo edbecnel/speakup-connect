@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:speakup_connect/core/permissions/app_permission.dart';
 import 'package:speakup_connect/core/permissions/providers/permission_provider.dart';
 import 'package:speakup_connect/features/reminders/domain/entities/reminder_entity.dart';
 import 'package:speakup_connect/features/reminders/presentation/providers/reminder_provider.dart';
@@ -9,16 +8,14 @@ import 'package:speakup_connect/features/reminders/presentation/providers/remind
 /// Admin Approval Queue — lists reminders awaiting review and lets approvers
 /// approve or reject each one.
 ///
-/// Gated on [AppPermission.approveReminders] (also enforced by the admin
-/// route guard and Firestore rules).
+/// Gated on [canReviewPendingRemindersProvider] (org admins and approvers).
 class ReminderApprovalQueueScreen extends ConsumerWidget {
   const ReminderApprovalQueueScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final canApprove =
-        ref.watch(hasPermissionProvider(AppPermission.approveReminders));
+    final canApprove = ref.watch(canReviewPendingRemindersProvider);
     final pendingAsync = ref.watch(pendingRemindersProvider);
 
     ref.listen(reminderReviewProvider, (prev, next) {
@@ -40,7 +37,23 @@ class ReminderApprovalQueueScreen extends ConsumerWidget {
           : pendingAsync.when(
               loading: () =>
                   const Center(child: CircularProgressIndicator()),
-              error: (e, _) => Center(child: Text('Failed to load: $e')),
+              error: (e, _) => Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text('Failed to load pending reminders: $e'),
+                      const SizedBox(height: 16),
+                      FilledButton.icon(
+                        onPressed: () => ref.invalidate(pendingRemindersProvider),
+                        icon: const Icon(Icons.refresh),
+                        label: const Text('Retry'),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
               data: (reminders) {
                 if (reminders.isEmpty) {
                   return const _EmptyQueue();
@@ -74,9 +87,11 @@ class _PendingReminderCard extends ConsumerWidget {
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
                   child: Text(
@@ -85,7 +100,10 @@ class _PendingReminderCard extends ConsumerWidget {
                         ?.copyWith(fontWeight: FontWeight.w700),
                   ),
                 ),
-                _AudienceChip(audience: reminder.audience),
+                const SizedBox(width: 8),
+                Flexible(
+                  child: _AudienceChip(audience: reminder.audience),
+                ),
               ],
             ),
             const SizedBox(height: 8),
@@ -124,8 +142,10 @@ class _PendingReminderCard extends ConsumerWidget {
               ),
             ],
             const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
+            Wrap(
+              alignment: WrapAlignment.end,
+              spacing: 8,
+              runSpacing: 8,
               children: [
                 TextButton.icon(
                   onPressed:
@@ -136,7 +156,6 @@ class _PendingReminderCard extends ConsumerWidget {
                     foregroundColor: theme.colorScheme.error,
                   ),
                 ),
-                const SizedBox(width: 8),
                 FilledButton.icon(
                   onPressed: busy
                       ? null

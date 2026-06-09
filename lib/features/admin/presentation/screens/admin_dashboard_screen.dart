@@ -7,6 +7,7 @@ import 'package:speakup_connect/features/admin/presentation/widgets/admin_filter
 import 'package:speakup_connect/features/auth/presentation/providers/auth_provider.dart';
 import 'package:speakup_connect/features/organization/presentation/providers/organization_provider.dart';
 import 'package:speakup_connect/features/organization/presentation/providers/user_profile_provider.dart';
+import 'package:speakup_connect/features/reminders/presentation/providers/reminder_provider.dart';
 import 'package:speakup_connect/features/reports/domain/entities/report_entity.dart';
 import 'package:speakup_connect/features/reports/presentation/providers/report_provider.dart';
 import 'package:speakup_connect/shared/widgets/app_error_widget.dart';
@@ -22,6 +23,7 @@ class AdminDashboardScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final pendingCount = ref.watch(pendingMemberApplicationCountProvider);
+    final pendingReminderCount = ref.watch(pendingReminderCountProvider);
     final supportsGrades = ref.watch(orgSupportsStudentGradesProvider);
 
     return DefaultTabController(
@@ -45,6 +47,14 @@ class AdminDashboardScreen extends ConsumerWidget {
               icon: NotificationBadgeIcon(
                 icon: Icons.person_add_alt_1_outlined,
                 unreadCount: pendingCount,
+              ),
+            ),
+            IconButton(
+              tooltip: 'Reminder Approvals',
+              onPressed: () => context.push(Routes.reminderApprovals),
+              icon: NotificationBadgeIcon(
+                icon: Icons.fact_check_outlined,
+                unreadCount: pendingReminderCount,
               ),
             ),
             IconButton(

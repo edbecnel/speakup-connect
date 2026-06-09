@@ -67,6 +67,14 @@ service cloud.firestore {
           );
     }
 
+    // Approved member — used for roster pickers (group leaders, etc.).
+    function isApprovedOrgMember(orgId) {
+      return isSignedIn()
+          && exists(/databases/$(database)/documents/organizations/$(orgId)/users/$(request.auth.uid))
+          && get(/databases/$(database)/documents/organizations/$(orgId)/users/$(request.auth.uid)).data.get('organizationId', '') == orgId
+          && get(/databases/$(database)/documents/organizations/$(orgId)/users/$(request.auth.uid)).data.get('approvalStatus', '') == 'approved';
+    }
+
     // Convenience aliases
     function isAdminOrAbove(orgId) {
       return isSuperAdmin() || isOrgAdmin(orgId);
@@ -120,6 +128,38 @@ service cloud.firestore {
       return isAdminOrAbove(orgId)
           || hasClaimedPermission('approveReminders')
           || get(/databases/$(database)/documents/organizations/$(orgId)).data.get('requireReminderApproval', false) == false;
+    }
+
+    // True when the signed-in user is a leader of [groupId] in [orgId].
+    // Checks roster and per-user groupMemberships index (My Groups).
+    function isGroupLeader(orgId, groupId) {
+      return isSignedIn()
+          && (
+            (exists(/databases/$(database)/documents/organizations/$(orgId)/groups/$(groupId)/members/$(request.auth.uid))
+                && get(/databases/$(database)/documents/organizations/$(orgId)/groups/$(groupId)/members/$(request.auth.uid)).data.get('groupRole', '') == 'leader')
+            || (exists(/databases/$(database)/documents/organizations/$(orgId)/users/$(request.auth.uid)/groupMemberships/$(groupId))
+                && get(/databases/$(database)/documents/organizations/$(orgId)/users/$(request.auth.uid)/groupMemberships/$(groupId)).data.get('groupRole', '') == 'leader')
+          );
+    }
+
+    // Group leaders may only touch roster-related metadata on the group document.
+    function onlyGroupLeaderGroupUpdate() {
+      let keys = request.resource.data.diff(resource.data).affectedKeys();
+      return keys.hasOnly(['updatedAt'])
+          || keys.hasOnly(['memberCount', 'updatedAt']);
+    }
+
+    // Group leaders may create reminders targeted only at a group they lead.
+    function canCreateGroupLeaderReminder(orgId) {
+      return request.resource.data.createdBy == request.auth.uid
+          && request.resource.data.get('audienceType', '') == 'group'
+          && request.resource.data.get('audienceId', '') != ''
+          && isGroupLeader(orgId, request.resource.data.audienceId)
+          && (
+            request.resource.data.status == 'pending'
+            || (request.resource.data.status == 'published'
+                && canPublishRemindersDirectly(orgId))
+          );
     }
 
     // True when the update only touches branding fields (+ updatedAt).
@@ -304,7 +344,9 @@ service cloud.firestore {
         allow read: if isAdminOrAbove(orgId)
                     || hasPermission(orgId, 'approveApplications')
                     || hasPermission(orgId, 'blockUsers')
-                    || (isSignedIn() && request.auth.uid == userId);
+                    || (isSignedIn() && request.auth.uid == userId)
+                    || (isApprovedOrgMember(orgId)
+                        && resource.data.get('approvalStatus', '') == 'approved');
 
         // Users may create their own profile; admins may create any
         allow create: if isSuperAdmin()
@@ -351,6 +393,17 @@ service cloud.firestore {
           allow write: if isAdminOrAbove(orgId)
                        || (hasClaimedPermission('manageRoles')
                            && request.auth.token.get('orgId', '') == orgId);
+        }
+
+        // ── Group membership index (My Groups) ───────────────────────────────
+        // Denormalized list of groups this user belongs to. Readable by the
+        // member; written by roster managers when adding/removing members.
+        match /groupMemberships/{groupId} {
+          allow read: if isAdminOrAbove(orgId)
+                      || (isSignedIn() && request.auth.uid == userId);
+          allow write: if isAdminOrAbove(orgId)
+                       || hasClaimedPermission('manageGroupRoster')
+                       || isGroupLeader(orgId, groupId);
         }
 
         // ── In-App Notification Feed ─────────────────────────────────────────
@@ -417,13 +470,16 @@ service cloud.firestore {
         allow read:   if isSuperAdmin() || isOrgMember(orgId);
         allow create: if isAdminOrAbove(orgId);
         allow update: if isAdminOrAbove(orgId)
-                      || hasClaimedPermission('manageGroupRoster');
+                      || hasClaimedPermission('manageGroupRoster')
+                      || (isGroupLeader(orgId, groupId)
+                          && onlyGroupLeaderGroupUpdate());
         allow delete: if isAdminOrAbove(orgId);
 
         match /members/{memberId} {
           allow read:  if isSuperAdmin() || isOrgMember(orgId);
           allow write: if isAdminOrAbove(orgId)
-                       || hasClaimedPermission('manageGroupRoster');
+                       || hasClaimedPermission('manageGroupRoster')
+                       || isGroupLeader(orgId, groupId);
         }
       }
 
@@ -508,21 +564,27 @@ service cloud.firestore {
       match /reminders/{reminderId} {
         allow read:   if isSuperAdmin() || isOrgMember(orgId);
 
-        allow create: if (isAdminOrAbove(orgId)
+        allow create: if (
+                        (isAdminOrAbove(orgId)
                           || hasClaimedPermission('broadcastReminders'))
-                      && request.resource.data.createdBy == request.auth.uid
-                      && (
-                        request.resource.data.status == 'pending'
-                        || (request.resource.data.status == 'published'
-                            && canPublishRemindersDirectly(orgId))
-                      );
+                        && request.resource.data.createdBy == request.auth.uid
+                        && (
+                          request.resource.data.status == 'pending'
+                          || (request.resource.data.status == 'published'
+                              && canPublishRemindersDirectly(orgId))
+                        )
+                      )
+                      || canCreateGroupLeaderReminder(orgId);
 
         allow update: if isAdminOrAbove(orgId)
                       || hasClaimedPermission('approveReminders');
 
         allow delete: if isAdminOrAbove(orgId)
                       || (hasClaimedPermission('broadcastReminders')
-                          && resource.data.createdBy == request.auth.uid);
+                          && resource.data.createdBy == request.auth.uid)
+                      || (resource.data.createdBy == request.auth.uid
+                          && resource.data.get('audienceType', '') == 'group'
+                          && isGroupLeader(orgId, resource.data.get('audienceId', '')));
 
         // Recipient responses — written via submitReminderResponse callable.
         match /responses/{userId} {
@@ -616,6 +678,13 @@ service cloud.firestore {
     // ── Platform Collection (Super Admin only) ────────────────────────────────
     match /platform/{document=**} {
       allow read, write: if isSuperAdmin();
+    }
+
+    // ── Group members (collection group) ────────────────────────────────────
+    // Lets any member query their own roster rows across all groups via
+    // collectionGroup('members'). Document ID is the member's userId.
+    match /{path=**}/members/{memberId} {
+      allow read: if isSignedIn() && request.auth.uid == memberId;
     }
 
     // ── Role Assignments (collection group) ─────────────────────────────────

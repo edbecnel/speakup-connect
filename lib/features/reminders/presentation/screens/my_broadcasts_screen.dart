@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:speakup_connect/core/constants/route_constants.dart';
-import 'package:speakup_connect/core/permissions/app_permission.dart';
-import 'package:speakup_connect/core/permissions/providers/permission_provider.dart';
+import 'package:speakup_connect/features/groups/presentation/providers/group_provider.dart';
 import 'package:speakup_connect/features/reminders/domain/entities/reminder_entity.dart';
 import 'package:speakup_connect/features/auth/presentation/providers/auth_provider.dart';
 import 'package:speakup_connect/features/reminders/presentation/providers/reminder_provider.dart';
@@ -17,14 +16,14 @@ import 'package:speakup_connect/features/organization/presentation/providers/use
 /// recall (delete) any of them. Recalling a *published* reminder also removes
 /// the copies already delivered to recipients' feeds (handled server-side).
 ///
-/// Gated on [AppPermission.broadcastReminders].
+/// Gated on [canComposeRemindersProvider] (org broadcasters and group leaders).
 class MyBroadcastsScreen extends ConsumerWidget {
   const MyBroadcastsScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final canBroadcast =
-        ref.watch(hasPermissionProvider(AppPermission.broadcastReminders));
+    final canAccess = ref.watch(canComposeRemindersProvider);
+    final leaderOnly = ref.watch(isGroupLeaderOnlyComposerProvider);
     final canViewHistory = ref.watch(canViewNotificationHistoryProvider);
     final mineAsync = ref.watch(myRemindersProvider);
 
@@ -80,7 +79,7 @@ class MyBroadcastsScreen extends ConsumerWidget {
           onPressed: () =>
               context.canPop() ? context.pop() : context.go(Routes.alerts),
         ),
-        title: const Text('My Broadcasts'),
+        title: Text(leaderOnly ? 'Sent Group Alerts' : 'My Broadcasts'),
         actions: [
           if (canViewHistory)
             IconButton(
@@ -90,13 +89,15 @@ class MyBroadcastsScreen extends ConsumerWidget {
             ),
         ],
       ),
-      body: !canBroadcast
+      body: !canAccess
           ? const _NoAccessPlaceholder()
           : mineAsync.when(
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (e, _) => Center(child: Text('Failed to load: $e')),
               data: (reminders) {
-                if (reminders.isEmpty) return const _EmptyState();
+                if (reminders.isEmpty) {
+                  return _EmptyState(leaderOnly: leaderOnly);
+                }
                 return ListView.separated(
                   padding: const EdgeInsets.all(16),
                   itemCount: reminders.length,
@@ -158,40 +159,25 @@ class _BroadcastCard extends ConsumerWidget {
             const SizedBox(height: 8),
             Text(reminder.body, style: theme.textTheme.bodyMedium),
             const SizedBox(height: 12),
-            Row(
+            Wrap(
+              spacing: 12,
+              runSpacing: 6,
+              crossAxisAlignment: WrapCrossAlignment.center,
               children: [
-                Icon(Icons.groups_outlined,
-                    size: 16, color: theme.colorScheme.onSurfaceVariant),
-                const SizedBox(width: 4),
-                Text(
-                  reminder.audience.displayLabel,
-                  style: theme.textTheme.bodySmall
-                      ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                _MetaItem(
+                  icon: Icons.groups_outlined,
+                  label: reminder.audience.displayLabel,
                 ),
-                if (reminder.scheduledAt != null) ...[
-                  const SizedBox(width: 12),
-                  Icon(Icons.schedule,
-                      size: 16, color: theme.colorScheme.onSurfaceVariant),
-                  const SizedBox(width: 4),
-                  Text(
-                    _formatDateTime(reminder.scheduledAt!),
-                    style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant),
+                if (reminder.scheduledAt != null)
+                  _MetaItem(
+                    icon: Icons.schedule,
+                    label: _formatDateTime(reminder.scheduledAt!),
                   ),
-                ],
-                if (reminder.expiresAt != null) ...[
-                  const SizedBox(width: 12),
-                  Icon(Icons.timer_outlined,
-                      size: 16, color: theme.colorScheme.onSurfaceVariant),
-                  const SizedBox(width: 4),
-                  Expanded(
-                    child: Text(
-                      'Expires ${_formatDateTime(reminder.expiresAt!)}',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant),
-                    ),
+                if (reminder.expiresAt != null)
+                  _MetaItem(
+                    icon: Icons.timer_outlined,
+                    label: 'Expires ${_formatDateTime(reminder.expiresAt!)}',
                   ),
-                ],
               ],
             ),
             const SizedBox(height: 8),
@@ -213,8 +199,9 @@ class _BroadcastCard extends ConsumerWidget {
                 ),
               ),
             if (canManage)
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
+              Wrap(
+                alignment: WrapAlignment.end,
+                spacing: 4,
                 children: [
                   TextButton.icon(
                     onPressed: busy ? null : () => _edit(context, ref),
@@ -292,6 +279,40 @@ class _BroadcastCard extends ConsumerWidget {
   }
 }
 
+class _MetaItem extends StatelessWidget {
+  const _MetaItem({required this.icon, required this.label});
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final style = theme.textTheme.bodySmall?.copyWith(
+      color: theme.colorScheme.onSurfaceVariant,
+    );
+    final maxWidth = MediaQuery.sizeOf(context).width - 64;
+
+    return ConstrainedBox(
+      constraints: BoxConstraints(maxWidth: maxWidth),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 16, color: theme.colorScheme.onSurfaceVariant),
+          const SizedBox(width: 4),
+          Expanded(
+            child: Text(
+              label,
+              style: style,
+              softWrap: true,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _StatusChip extends StatelessWidget {
   const _StatusChip({required this.status});
 
@@ -324,24 +345,43 @@ class _StatusChip extends StatelessWidget {
 }
 
 class _EmptyState extends StatelessWidget {
-  const _EmptyState();
+  const _EmptyState({required this.leaderOnly});
+
+  final bool leaderOnly;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.campaign_outlined,
-              size: 56, color: theme.colorScheme.onSurfaceVariant),
-          const SizedBox(height: 12),
-          Text(
-            'You haven\'t sent any broadcasts yet',
-            style: theme.textTheme.titleMedium
-                ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-          ),
-        ],
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.campaign_outlined,
+                size: 56, color: theme.colorScheme.onSurfaceVariant),
+            const SizedBox(height: 12),
+            Text(
+              leaderOnly
+                  ? 'No group alerts sent yet'
+                  : 'You haven\'t sent any broadcasts yet',
+              textAlign: TextAlign.center,
+              style: theme.textTheme.titleMedium
+                  ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+            ),
+            if (leaderOnly) ...[
+              const SizedBox(height: 8),
+              Text(
+                'Send an alert from My Groups & Clubs, then return here '
+                'to view member responses.',
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ],
+        ),
       ),
     );
   }

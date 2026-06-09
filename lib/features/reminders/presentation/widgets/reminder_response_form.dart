@@ -62,19 +62,26 @@ class _ReminderResponseFormState extends ConsumerState<ReminderResponseForm> {
   bool get _canSubmit {
     return switch (widget.config.type) {
       ReminderResponseType.freeText => _textController.text.trim().isNotEmpty,
-      ReminderResponseType.checkbox => _checkedIds.isNotEmpty,
+      // Unchecked boxes are a valid answer (e.g. "none of the above").
+      ReminderResponseType.checkbox => true,
       ReminderResponseType.multipleChoice => _selectedChoiceId != null,
     };
   }
 
+  String? get _submittedText {
+    final trimmed = _textController.text.trim();
+    if (trimmed.isEmpty) return null;
+    return trimmed;
+  }
+
   Future<void> _submit() async {
     final notifier = ref.read(submitReminderResponseProvider.notifier);
+    final includeText = widget.config.type == ReminderResponseType.freeText ||
+        widget.config.allowAdditionalText;
     final ok = await notifier.submit(
       organizationId: widget.organizationId,
       reminderId: widget.reminderId,
-      text: widget.config.type == ReminderResponseType.freeText
-          ? _textController.text.trim()
-          : null,
+      text: includeText ? _submittedText : null,
       selectedOptionIds: widget.config.type == ReminderResponseType.checkbox
           ? _checkedIds.toList()
           : null,
@@ -94,6 +101,15 @@ class _ReminderResponseFormState extends ConsumerState<ReminderResponseForm> {
     final theme = Theme.of(context);
     final submitState = ref.watch(submitReminderResponseProvider);
     final hasExisting = widget.existing != null;
+    final isLocked =
+        hasExisting && !widget.config.allowResponseUpdates;
+
+    if (isLocked && widget.existing != null) {
+      return _LockedResponseView(
+        config: widget.config,
+        existing: widget.existing!,
+      );
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -158,6 +174,22 @@ class _ReminderResponseFormState extends ConsumerState<ReminderResponseForm> {
               }).toList(),
             ),
         },
+        if (widget.config.allowAdditionalText &&
+            widget.config.type != ReminderResponseType.freeText) ...[
+          const SizedBox(height: 12),
+          TextField(
+            controller: _textController,
+            maxLines: 3,
+            maxLength: widget.config.maxTextLength,
+            decoration: InputDecoration(
+              labelText: 'Additional comments (optional)',
+              hintText: 'Add an explanation if needed…',
+              border: const OutlineInputBorder(),
+              counterText: 'Max ${widget.config.maxTextLength} characters',
+            ),
+            onChanged: (_) => setState(() {}),
+          ),
+        ],
         const SizedBox(height: 12),
         AppButton.primary(
           label: hasExisting ? 'Update response' : 'Submit response',
@@ -174,6 +206,71 @@ class _ReminderResponseFormState extends ConsumerState<ReminderResponseForm> {
               ),
             ),
           ),
+      ],
+    );
+  }
+}
+
+class _LockedResponseView extends StatelessWidget {
+  const _LockedResponseView({
+    required this.config,
+    required this.existing,
+  });
+
+  final ReminderResponseConfig config;
+  final ReminderResponseEntity existing;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final answer = existing.displayValue(config);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Your response',
+          style: theme.textTheme.titleSmall?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Material(
+          color: theme.colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(8),
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(
+                  Icons.lock_outline,
+                  size: 20,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        answer.isNotEmpty ? answer : 'Submitted',
+                        style: theme.textTheme.bodyMedium,
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        'Your answer is locked and cannot be changed.',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ],
     );
   }

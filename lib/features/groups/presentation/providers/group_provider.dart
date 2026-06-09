@@ -9,6 +9,7 @@ import 'package:speakup_connect/features/groups/data/datasources/group_remote_da
 import 'package:speakup_connect/features/groups/data/repositories/group_repository_impl.dart';
 import 'package:speakup_connect/features/groups/domain/entities/group_entity.dart';
 import 'package:speakup_connect/features/groups/domain/entities/group_member_entity.dart';
+import 'package:speakup_connect/features/groups/domain/entities/my_group_membership.dart';
 import 'package:speakup_connect/features/groups/domain/entities/group_position_role.dart';
 import 'package:speakup_connect/features/groups/domain/repositories/group_repository.dart';
 import 'package:speakup_connect/features/groups/domain/usecases/add_group_member_usecase.dart';
@@ -64,6 +65,17 @@ final myGroupsProvider = StreamProvider.autoDispose<List<GroupEntity>>((ref) {
       );
 });
 
+/// Memberships with group details — for My Groups UI.
+final myGroupMembershipsProvider =
+    StreamProvider.autoDispose<List<MyGroupMembership>>((ref) {
+  final user = ref.watch(currentUserProvider);
+  if (user == null) return const Stream.empty();
+  return ref.watch(groupRepositoryProvider).watchMyGroupMemberships(
+        organizationId: AppConfig.defaultOrganizationId,
+        userId: user.uid,
+      );
+});
+
 /// Member roster for a single group.
 final groupMembersProvider = StreamProvider.autoDispose
     .family<List<GroupMemberEntity>, String>((ref, groupId) {
@@ -83,8 +95,15 @@ final groupByIdProvider = FutureProvider.autoDispose
 });
 
 /// Approved org members for the add-member picker.
+///
+/// Only fetched when the user may manage at least one group roster.
 final approvedOrgUsersProvider =
     FutureProvider.autoDispose<List<UserProfileEntity>>((ref) async {
+  final canPick =
+      ref.watch(canManageGroupsProvider) ||
+      ref.watch(isLeaderOfAnyGroupProvider);
+  if (!canPick) return const [];
+
   final snap = await FirebaseFirestore.instance
       .collection(AppConstants.organizationsCollection)
       .doc(AppConfig.defaultOrganizationId)
@@ -113,11 +132,75 @@ class GroupsSearchQueryNotifier extends Notifier<String> {
   void clear() => state = '';
 }
 
-/// True when the user may create groups or manage rosters.
+/// True when the user may create groups or manage all org rosters (admin/RBAC).
 final canManageGroupsProvider = Provider<bool>((ref) {
   final profile = ref.watch(userProfileProvider).value;
   if (profile?.isAdmin == true) return true;
   return ref.watch(hasPermissionProvider(AppPermission.manageGroupRoster));
+});
+
+/// Current user's membership in a specific group, if any.
+final myGroupMembershipInGroupProvider =
+    Provider.autoDispose.family<GroupMemberEntity?, String>((ref, groupId) {
+  final user = ref.watch(currentUserProvider);
+  if (user == null) return null;
+  final members = ref.watch(groupMembersProvider(groupId)).asData?.value;
+  if (members == null) return null;
+  for (final member in members) {
+    if (member.userId == user.uid) return member;
+  }
+  return null;
+});
+
+/// True when the user may manage roster for [groupId] (admin, RBAC, or leader).
+final canManageGroupRosterProvider =
+    Provider.autoDispose.family<bool, String>((ref, groupId) {
+  if (ref.watch(canManageGroupsProvider)) return true;
+  return ref.watch(myGroupMembershipInGroupProvider(groupId))?.isLeader ??
+      false;
+});
+
+/// Groups the signed-in user leads (from My Groups memberships).
+final ledGroupMembershipsProvider = Provider.autoDispose<List<MyGroupMembership>>((ref) {
+  final memberships =
+      ref.watch(myGroupMembershipsProvider).asData?.value ?? const [];
+  return memberships.where((m) => m.membership.isLeader).toList();
+});
+
+/// True when the user leads at least one group.
+final isLeaderOfAnyGroupProvider = Provider.autoDispose<bool>((ref) {
+  return ref.watch(ledGroupMembershipsProvider).isNotEmpty;
+});
+
+/// True when the user may broadcast to the whole org or any group (RBAC/admin).
+final canBroadcastOrgWideProvider = Provider<bool>((ref) {
+  final profile = ref.watch(userProfileProvider).value;
+  if (profile?.isAdmin == true) return true;
+  return ref.watch(hasPermissionProvider(AppPermission.broadcastReminders));
+});
+
+/// True when the user may open the compose-reminder flow (org-wide or as a leader).
+final canComposeRemindersProvider = Provider<bool>((ref) {
+  return ref.watch(canBroadcastOrgWideProvider) ||
+      ref.watch(isLeaderOfAnyGroupProvider);
+});
+
+/// True when compose is limited to groups this user leads (no org-wide broadcast).
+final isGroupLeaderOnlyComposerProvider = Provider<bool>((ref) {
+  return !ref.watch(canBroadcastOrgWideProvider) &&
+      ref.watch(isLeaderOfAnyGroupProvider);
+});
+
+/// True when the user may send a reminder to [groupId].
+final canBroadcastToGroupProvider =
+    Provider.autoDispose.family<bool, String>((ref, groupId) {
+  if (ref.watch(canBroadcastOrgWideProvider)) return true;
+  final leadsGroup = ref
+      .watch(ledGroupMembershipsProvider)
+      .any((m) => m.group.groupId == groupId);
+  if (leadsGroup) return true;
+  return ref.watch(myGroupMembershipInGroupProvider(groupId))?.isLeader ??
+      false;
 });
 
 // ── Actions ──────────────────────────────────────────────────────────────────
@@ -395,3 +478,30 @@ class SeedDemoGroups extends Notifier<AsyncValue<void>> {
 
 final seedDemoGroupsProvider =
     NotifierProvider<SeedDemoGroups, AsyncValue<void>>(SeedDemoGroups.new);
+
+/// Repairs per-user groupMembership indexes so members can see My Groups.
+class BackfillGroupMembershipIndexes extends Notifier<AsyncValue<void>> {
+  @override
+  AsyncValue<void> build() => const AsyncData(null);
+
+  Future<int> run() async {
+    state = const AsyncLoading();
+    try {
+      final count = await ref
+          .read(groupRepositoryProvider)
+          .backfillGroupMembershipIndexes(
+            organizationId: AppConfig.defaultOrganizationId,
+          );
+      state = const AsyncData(null);
+      return count;
+    } catch (e, st) {
+      state = AsyncError(e, st);
+      rethrow;
+    }
+  }
+}
+
+final backfillGroupMembershipIndexesProvider =
+    NotifierProvider<BackfillGroupMembershipIndexes, AsyncValue<void>>(
+  BackfillGroupMembershipIndexes.new,
+);

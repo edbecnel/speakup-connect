@@ -4,7 +4,9 @@ import 'package:speakup_connect/config/app_config.dart';
 import 'package:speakup_connect/features/auth/presentation/providers/auth_provider.dart';
 import 'package:speakup_connect/features/notifications/data/repositories/notification_repository_impl.dart';
 import 'package:speakup_connect/features/notifications/domain/entities/app_notification_entity.dart';
+import 'package:speakup_connect/features/notifications/domain/entities/notification_attention.dart';
 import 'package:speakup_connect/features/notifications/domain/repositories/notification_repository.dart';
+import 'package:speakup_connect/features/reminders/presentation/providers/reminder_provider.dart';
 import 'package:speakup_connect/features/reminders/presentation/providers/reminder_response_provider.dart';
 
 // ── Infrastructure ───────────────────────────────────────────────────────────
@@ -29,19 +31,38 @@ final notificationsProvider =
       );
 });
 
+/// Resolved attention state for one feed item (badge, row styling, dismiss).
+final notificationAttentionProvider = Provider.autoDispose
+    .family<NotificationAttention, AppNotificationEntity>((ref, notification) {
+  final reminderId = notification.reminderId;
+  final reminderAsync = reminderId == null
+      ? null
+      : ref.watch(reminderByIdProvider(reminderId));
+  final reminder = reminderAsync?.asData?.value;
+  final reminderStillLoading = reminderId != null &&
+      reminderAsync != null &&
+      reminderAsync.isLoading;
+  final myResponse = reminderId == null
+      ? null
+      : ref.watch(myReminderResponseProvider(reminderId)).asData?.value;
+
+  return NotificationAttention.resolve(
+    notification: notification,
+    reminder: reminder,
+    myResponse: myResponse,
+    reminderStillLoading: reminderStillLoading,
+  );
+});
+
 /// Count of notifications needing attention (drives the app-bar badge).
 ///
-/// Includes unread items and response-required alerts until the user submits
-/// a response.
+/// Includes unread items and mandatory-response alerts until the user submits
+/// a response (even if they already opened the alert).
 final unreadNotificationCountProvider = Provider.autoDispose<int>((ref) {
   final items = ref.watch(notificationsProvider).asData?.value ?? const [];
   var count = 0;
   for (final n in items) {
-    final reminderId = n.reminderId;
-    final hasResponded = reminderId != null && n.responseRequired
-        ? ref.watch(myReminderResponseProvider(reminderId)).value != null
-        : true;
-    if (n.needsAttention(hasResponded: hasResponded)) count++;
+    if (ref.watch(notificationAttentionProvider(n)).needsAttention) count++;
   }
   return count;
 });
@@ -76,13 +97,9 @@ class NotificationActions extends Notifier<AsyncValue<void>> {
       final repo = ref.read(notificationRepositoryProvider);
       final orgId = AppConfig.defaultOrganizationId;
       for (final n in items) {
-        if (n.read) continue;
-        final reminderId = n.reminderId;
-        if (n.responseRequired && reminderId != null) {
-          final responded =
-              ref.read(myReminderResponseProvider(reminderId)).value != null;
-          if (!responded) continue;
-        }
+        final attention = ref.read(notificationAttentionProvider(n));
+        if (!attention.needsAttention) continue;
+        if (attention.responsePending) continue;
         await repo.markAsRead(
           organizationId: orgId,
           userId: user.uid,

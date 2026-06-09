@@ -25,6 +25,7 @@ class GroupsListScreen extends ConsumerWidget {
               hasPermissionProvider(AppPermission.manageOrganizationSettings),
             );
     final seedState = ref.watch(seedDemoGroupsProvider);
+    final backfillState = ref.watch(backfillGroupMembershipIndexesProvider);
     final theme = Theme.of(context);
 
     ref.listen(seedDemoGroupsProvider, (prev, next) {
@@ -43,6 +44,17 @@ class GroupsListScreen extends ConsumerWidget {
       }
     });
 
+    ref.listen(backfillGroupMembershipIndexesProvider, (prev, next) {
+      if (!next.isLoading && prev?.isLoading == true) {
+        if (next.hasError) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text('Sync failed: ${next.error}'),
+            backgroundColor: theme.colorScheme.error,
+          ));
+        }
+      }
+    });
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Groups & Clubs'),
@@ -50,15 +62,30 @@ class GroupsListScreen extends ConsumerWidget {
           if (canSeedDemoGroups)
             PopupMenuButton<String>(
               tooltip: 'More actions',
-              onSelected: (value) {
+              onSelected: (value) async {
                 if (value == 'seed' && !seedState.isLoading) {
                   ref.read(seedDemoGroupsProvider.notifier).seed();
+                } else if (value == 'backfill' && !backfillState.isLoading) {
+                  try {
+                    final count = await ref
+                        .read(backfillGroupMembershipIndexesProvider.notifier)
+                        .run();
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                        content: Text(
+                          'Synced $count membership${count == 1 ? '' : 's'} '
+                          'for My Groups',
+                        ),
+                        backgroundColor: Colors.green,
+                      ));
+                    }
+                  } catch (_) {}
                 }
               },
               itemBuilder: (context) => [
                 PopupMenuItem(
                   value: 'seed',
-                  enabled: !seedState.isLoading,
+                  enabled: !seedState.isLoading && !backfillState.isLoading,
                   child: ListTile(
                     contentPadding: EdgeInsets.zero,
                     leading: seedState.isLoading
@@ -72,6 +99,28 @@ class GroupsListScreen extends ConsumerWidget {
                       seedState.isLoading ? 'Seeding…' : 'Seed Demo Groups',
                     ),
                     subtitle: const Text('SPJ, Drum & Lyre, SSLG'),
+                  ),
+                ),
+                PopupMenuItem(
+                  value: 'backfill',
+                  enabled: !seedState.isLoading && !backfillState.isLoading,
+                  child: ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: backfillState.isLoading
+                        ? const SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.sync_outlined),
+                    title: Text(
+                      backfillState.isLoading
+                          ? 'Syncing…'
+                          : 'Sync My Groups Indexes',
+                    ),
+                    subtitle: const Text(
+                      'Repair member visibility after roster changes',
+                    ),
                   ),
                 ),
               ],

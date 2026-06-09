@@ -2,6 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:speakup_connect/config/app_config.dart';
 import 'package:speakup_connect/core/constants/app_constants.dart';
+import 'package:speakup_connect/core/permissions/app_permission.dart';
+import 'package:speakup_connect/core/permissions/providers/permission_provider.dart';
 import 'package:speakup_connect/features/auth/presentation/providers/auth_provider.dart';
 import 'package:speakup_connect/features/organization/data/repositories/user_profile_repository_impl.dart';
 import 'package:speakup_connect/features/organization/domain/entities/enrolled_member.dart';
@@ -130,9 +132,15 @@ final permissionDelegationProvider = NotifierProvider.autoDispose<
 /// Join applications awaiting admin approval.
 ///
 /// Kept alive (non-autoDispose) so the dashboard badge and queue screen
-/// always share the same Firestore snapshot.
+/// always share the same Firestore snapshot. Subscribes only for admins /
+/// approvers — avoids a whole-collection listen for regular members.
 final pendingMemberApplicationsProvider =
     StreamProvider<List<UserProfileEntity>>((ref) {
+  final profile = ref.watch(userProfileProvider).value;
+  final canReview = profile?.isAdmin == true ||
+      ref.watch(hasPermissionProvider(AppPermission.approveApplications));
+  if (!canReview) return Stream.value(const []);
+
   final orgId = AppConfig.defaultOrganizationId;
   return ref
       .read(userProfileRepositoryProvider)

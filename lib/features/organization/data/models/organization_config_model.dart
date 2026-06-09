@@ -53,10 +53,29 @@ class OrganizationConfigModel extends OrganizationConfigEntity {
       welcomeMessage: json['welcomeMessage'] as String?,
       country: json['country'] as String? ?? 'PH',
       isActive: json['isActive'] as bool? ?? true,
-      requireReminderApproval:
-          json['requireReminderApproval'] as bool? ?? false,
+      requireReminderApproval: _parseBool(
+        json['requireReminderApproval'],
+        defaultValue: false,
+      ),
       gradeLevels: _parseGradeLevels(json['gradeLevels']),
     );
+  }
+
+  /// Accepts Firestore bools and legacy string/number encodings.
+  static bool _parseBool(dynamic raw, {required bool defaultValue}) {
+    if (raw == null) return defaultValue;
+    if (raw is bool) return raw;
+    if (raw is num) return raw != 0;
+    if (raw is String) {
+      final normalized = raw.trim().toLowerCase();
+      if (normalized == 'true' || normalized == '1' || normalized == 'yes') {
+        return true;
+      }
+      if (normalized == 'false' || normalized == '0' || normalized == 'no') {
+        return false;
+      }
+    }
+    return defaultValue;
   }
 
   static List<int>? _parseGradeLevels(dynamic raw) {

@@ -92,7 +92,13 @@ Lists guides for the current organization. Subtitle shows the org display name w
 
 1. Edit `docs/help/orgs/{orgId}/MEMBER_GUIDE.md` (or `_default/`)
 2. Copy to `assets/help/orgs/{orgId}/member_guide.md`
-3. Hot restart the app
+3. Reload the app:
+   - **Edited existing asset text** — hot restart is usually enough
+   - **Moved/renamed asset paths or changed `pubspec.yaml` assets** — stop `flutter run` (Ctrl+C) and start a **full** `flutter run` (hot restart will error looking for deleted paths)
+
+If you see `PathNotFoundException: assets/help/admin_guide.md`, the dev session is stale from before org-specific folders — run `flutter clean`, then **stop** `flutter run` (Ctrl+C) and start a full `flutter run` again (not hot restart alone).
+
+Legacy shim files at `assets/help/member_guide.md` and `assets/help/admin_guide.md` (copies of `_default`) are kept so Flutter hot restart can sync assets; the app still loads `orgs/{orgId}/` via `HelpAssetResolver`.
 
 ---
 

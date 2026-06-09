@@ -113,6 +113,11 @@ class NotificationRepositoryImpl implements NotificationRepository {
     final data = doc.data();
     DateTime? toDate(dynamic v) => v is Timestamp ? v.toDate() : null;
 
+    final responseConfig =
+        data['responseConfig'] as Map<String, dynamic>? ?? const {};
+    final responseRequired = responseConfig['enabled'] == true &&
+        responseConfig['responseRequired'] == true;
+
     return AppNotificationModel(
       id: 'broadcast-${doc.id}',
       type: 'reminder',
@@ -124,6 +129,7 @@ class NotificationRepositoryImpl implements NotificationRepository {
         'reminderId': doc.id,
         'audienceType': data['audienceType'] as String? ?? 'all',
         'synthetic': true,
+        if (responseRequired) 'responseRequired': true,
       },
       createdAt: toDate(data['publishedAt']) ??
           toDate(data['deliveredAt']) ??

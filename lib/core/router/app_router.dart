@@ -25,6 +25,7 @@ import 'package:speakup_connect/features/groups/presentation/screens/create_grou
 import 'package:speakup_connect/features/groups/presentation/screens/edit_group_position_roles_screen.dart';
 import 'package:speakup_connect/features/groups/presentation/screens/group_members_screen.dart';
 import 'package:speakup_connect/features/groups/presentation/screens/groups_list_screen.dart';
+import 'package:speakup_connect/features/groups/presentation/screens/my_groups_screen.dart';
 import 'package:speakup_connect/features/help/presentation/screens/help_article_screen.dart';
 import 'package:speakup_connect/features/help/presentation/screens/help_hub_screen.dart';
 import 'package:speakup_connect/features/notifications/presentation/screens/alerts_screen.dart';
@@ -232,7 +233,9 @@ GoRouter appRouter(Ref ref) {
       GoRoute(
         path: Routes.composeReminder,
         name: 'composeReminder',
-        builder: (context, state) => const ComposeReminderScreen(),
+        builder: (context, state) => ComposeReminderScreen(
+          initialGroupId: state.uri.queryParameters['groupId'],
+        ),
       ),
       GoRoute(
         path: Routes.reminderApprovals,
@@ -280,6 +283,11 @@ GoRouter appRouter(Ref ref) {
         builder: (context, state) => const GroupsListScreen(),
       ),
       GoRoute(
+        path: Routes.myGroups,
+        name: 'myGroups',
+        builder: (context, state) => const MyGroupsScreen(),
+      ),
+      GoRoute(
         path: Routes.createGroup,
         name: 'createGroup',
         redirect: (context, state) {
@@ -300,13 +308,10 @@ GoRouter appRouter(Ref ref) {
         path: Routes.addGroupMembers,
         name: 'addGroupMembers',
         redirect: (context, state) {
-          final canManage = ref.read(canManageGroupsProvider);
           final groupId = state.pathParameters['groupId'];
-          if (!canManage) {
-            return groupId != null
-                ? Routes.groupMembersPath(groupId)
-                : Routes.groupsList;
-          }
+          if (groupId == null) return Routes.groupsList;
+          final canManage = ref.read(canManageGroupRosterProvider(groupId));
+          if (!canManage) return Routes.groupMembersPath(groupId);
           return null;
         },
         builder: (context, state) {

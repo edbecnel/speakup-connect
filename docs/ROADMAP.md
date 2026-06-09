@@ -80,10 +80,10 @@ This roadmap tracks the evolution from MVP pilot to a full multi-tenant SaaS pla
 - [ ] Account settings & profile management
 
 **Groups & Organizations**
-- [ ] Admin-defined groups and organizations (e.g., Journalism Club, Chess Club, Drum & Lyre Corps)
-- [ ] Group member list management (admin adds/removes members)
-- [ ] Group roles: leader, member (group leader can post news and send group messages)
-- [ ] Groups visible in user profile and home dashboard
+- [x] Admin-defined groups and organizations (e.g., Journalism Club, Chess Club, Drum & Lyre Corps)
+- [x] Group member list management (admin/leader adds/removes members, club positions)
+- [~] Group roles: leader, member — leaders send **group alerts**, manage roster; news/chat not yet built
+- [x] Groups visible on home dashboard and Settings (**My Groups & Clubs**)
 
 **Communications: Boards**
 - [ ] Bulletin board — admin-only org-wide announcements
@@ -92,12 +92,13 @@ This roadmap tracks the evolution from MVP pilot to a full multi-tenant SaaS pla
 - [ ] Push notifications for new bulletin and news posts
 
 **Communications: Reminders** *(Sprint 10)*
-- [ ] Reminder broadcasts by admin, teachers, or role-authorized users (e.g., club leader)
-- [ ] Broadcast audience: all members, specific group, or custom role
-- [ ] Reminders appear as push notification + in-app notification feed
-- [ ] Role-based permission: `broadcastReminders` (compose & send) + `approveReminders` (approve pending)
-- [ ] Org-level toggle: `requireReminderApproval` — when enabled, reminders from non-approvers go into a pending queue before publishing
-- [ ] Admin approval queue screen for pending reminders
+- [x] Reminder broadcasts by admin, role-authorized users, and **group leaders** (group-targeted alerts)
+- [x] Broadcast audience: all members, specific group, or custom role
+- [x] Reminders appear as push notification + in-app notification feed
+- [x] Role-based permission: `broadcastReminders` (compose & send) + `approveReminders` / org admin (approve pending)
+- [x] Org-level toggle: `requireReminderApproval` — non-approvers submit to pending queue (Organization Settings)
+- [x] Admin approval queue with badge (`Reminder Approvals` in Settings, Admin Dashboard, Alerts)
+- [x] Optional recipient responses — free text, checkboxes, multiple choice; **response required**; **lock after submit** for votes
 
 **Messaging**
 - [ ] Peer-to-peer direct messaging between members

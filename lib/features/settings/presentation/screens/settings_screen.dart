@@ -7,6 +7,7 @@ import 'package:speakup_connect/core/permissions/providers/permission_provider.d
 import 'package:speakup_connect/features/auth/presentation/providers/auth_provider.dart';
 import 'package:speakup_connect/features/groups/presentation/providers/group_provider.dart';
 import 'package:speakup_connect/features/organization/presentation/providers/organization_provider.dart';
+import 'package:speakup_connect/features/reminders/presentation/providers/reminder_provider.dart';
 import 'package:speakup_connect/features/organization/presentation/providers/user_profile_provider.dart';
 import 'package:speakup_connect/features/settings/presentation/providers/settings_provider.dart';
 import 'package:speakup_connect/shared/widgets/app_button.dart';
@@ -24,9 +25,12 @@ class SettingsScreen extends ConsumerWidget {
     final profileAsync = ref.watch(userProfileProvider);
     final profile = profileAsync.value;
     final pendingJoinCount = ref.watch(pendingMemberApplicationCountProvider);
+    final pendingReminderCount = ref.watch(pendingReminderCountProvider);
     final supportsGrades = ref.watch(orgSupportsStudentGradesProvider);
     final canTriageReports = ref.watch(canAccessAdminReportsProvider);
     final canManageGroups = ref.watch(canManageGroupsProvider);
+    final canComposeAlerts = ref.watch(canComposeRemindersProvider);
+    final leaderOnlyAlerts = ref.watch(isGroupLeaderOnlyComposerProvider);
 
     final orgName = orgConfigAsync.value?.displayName ?? '—';
     final theme = Theme.of(context);
@@ -84,6 +88,30 @@ class SettingsScreen extends ConsumerWidget {
               ],
             ),
           ),
+
+          const Divider(),
+
+          // --- My groups ---
+          const _SectionHeader(title: 'Groups & Clubs'),
+          ListTile(
+            leading: const Icon(Icons.groups_outlined),
+            title: const Text('My Groups & Clubs'),
+            subtitle: const Text('Clubs and organizations you belong to'),
+            trailing: const Icon(Icons.chevron_right_rounded),
+            onTap: () => context.push(Routes.myGroups),
+          ),
+          if (canComposeAlerts)
+            ListTile(
+              leading: const Icon(Icons.outbox_outlined),
+              title: Text(leaderOnlyAlerts ? 'Sent Group Alerts' : 'My Broadcasts'),
+              subtitle: Text(
+                leaderOnlyAlerts
+                    ? 'View alerts you sent and member responses'
+                    : 'Manage sent reminders and view responses',
+              ),
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () => context.push(Routes.myBroadcasts),
+            ),
 
           const Divider(),
 
@@ -194,6 +222,22 @@ class SettingsScreen extends ConsumerWidget {
                 subtitle: const Text('Approve new member sign-ups'),
                 trailing: const Icon(Icons.chevron_right_rounded),
                 onTap: () => context.push(Routes.memberApprovals),
+              ),
+              ListTile(
+                leading: SizedBox(
+                  width: 40,
+                  height: 40,
+                  child: Center(
+                    child: NotificationBadgeIcon(
+                      icon: Icons.fact_check_outlined,
+                      unreadCount: pendingReminderCount,
+                    ),
+                  ),
+                ),
+                title: const Text('Reminder Approvals'),
+                subtitle: const Text('Review group alerts awaiting publish'),
+                trailing: const Icon(Icons.chevron_right_rounded),
+                onTap: () => context.push(Routes.reminderApprovals),
               ),
               ListTile(
                 leading: const Icon(Icons.people_outline),

@@ -37,7 +37,11 @@ class ResponseConfigSection extends StatelessWidget {
                   maxTextLength: value.maxTextLength,
                   options: value.options.isNotEmpty
                       ? value.options
-                      : _defaultOptions(),
+                      : value.type == ReminderResponseType.freeText
+                          ? const []
+                          : value.type == ReminderResponseType.checkbox
+                              ? _defaultCheckboxOptions()
+                              : _defaultChoiceOptions(),
                 ),
               );
             } else {
@@ -55,6 +59,18 @@ class ResponseConfigSection extends StatelessWidget {
             value: value.responseRequired,
             onChanged: (on) =>
                 onChanged(value.copyWith(responseRequired: on)),
+          ),
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            title: const Text('Allow changing responses'),
+            subtitle: Text(
+              value.allowResponseUpdates
+                  ? 'Recipients can update their answer after submitting'
+                  : 'Locked after submit — use for votes and one-time polls',
+            ),
+            value: value.allowResponseUpdates,
+            onChanged: (on) =>
+                onChanged(value.copyWith(allowResponseUpdates: on)),
           ),
           const SizedBox(height: 4),
           SegmentedButton<ReminderResponseType>(
@@ -81,11 +97,18 @@ class ResponseConfigSection extends StatelessWidget {
               onChanged(
                 value.copyWith(
                   type: type,
+                  allowAdditionalText: type == ReminderResponseType.freeText
+                      ? false
+                      : value.allowAdditionalText,
                   options: type == ReminderResponseType.freeText
                       ? const []
-                      : (value.options.length >= 2
-                          ? value.options
-                          : _defaultOptions()),
+                      : type == ReminderResponseType.checkbox
+                          ? (value.options.isNotEmpty
+                              ? value.options
+                              : _defaultCheckboxOptions())
+                          : (value.options.length >= 2
+                              ? value.options
+                              : _defaultChoiceOptions()),
                 ),
               );
             },
@@ -96,13 +119,33 @@ class ResponseConfigSection extends StatelessWidget {
               maxLength: value.maxTextLength,
               onChanged: (n) => onChanged(value.copyWith(maxTextLength: n)),
             )
-          else
+          else ...[
             _OptionsEditor(
               key: ValueKey('${value.type}-${value.options.length}'),
               type: value.type,
               options: value.options,
               onChanged: (options) => onChanged(value.copyWith(options: options)),
             ),
+            const SizedBox(height: 8),
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              title: const Text('Allow explanation text'),
+              subtitle: const Text(
+                'Optional text box for comments (e.g. why they cannot attend)',
+              ),
+              value: value.allowAdditionalText,
+              onChanged: (on) =>
+                  onChanged(value.copyWith(allowAdditionalText: on)),
+            ),
+            if (value.allowAdditionalText)
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: _FreeTextLimitPicker(
+                  maxLength: value.maxTextLength,
+                  onChanged: (n) => onChanged(value.copyWith(maxTextLength: n)),
+                ),
+              ),
+          ],
           if (!value.isValid)
             Padding(
               padding: const EdgeInsets.only(top: 8),
@@ -111,7 +154,9 @@ class ResponseConfigSection extends StatelessWidget {
                     ? 'Set a character limit between '
                         '${AppReminderResponseLimits.minMaxTextLength} and '
                         '${AppReminderResponseLimits.maxMaxTextLength}.'
-                    : 'Add at least 2 options with labels.',
+                    : value.type == ReminderResponseType.checkbox
+                        ? 'Add at least one checkbox option with a label.'
+                        : 'Add at least 2 answer choices with labels.',
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.error,
                 ),
@@ -122,7 +167,11 @@ class ResponseConfigSection extends StatelessWidget {
     );
   }
 
-  List<ReminderResponseOption> _defaultOptions() => [
+  List<ReminderResponseOption> _defaultCheckboxOptions() => [
+        ReminderResponseOption(id: const Uuid().v4(), label: ''),
+      ];
+
+  List<ReminderResponseOption> _defaultChoiceOptions() => [
         ReminderResponseOption(id: const Uuid().v4(), label: ''),
         ReminderResponseOption(id: const Uuid().v4(), label: ''),
       ];
@@ -237,16 +286,23 @@ class _OptionsEditorState extends State<_OptionsEditor> {
         ...widget.options.asMap().entries.map((entry) {
           final index = entry.key;
           final option = entry.value;
+          final minOptions =
+              widget.type == ReminderResponseType.checkbox ? 1 : 2;
+          final canRemove = widget.options.length > minOptions;
           return Padding(
             padding: const EdgeInsets.only(bottom: 8),
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(
-                  widget.type == ReminderResponseType.checkbox
-                      ? Icons.check_box_outlined
-                      : Icons.radio_button_unchecked,
-                  size: 20,
-                  color: theme.colorScheme.onSurfaceVariant,
+                Padding(
+                  padding: const EdgeInsets.only(top: 12),
+                  child: Icon(
+                    widget.type == ReminderResponseType.checkbox
+                        ? Icons.check_box_outlined
+                        : Icons.radio_button_unchecked,
+                    size: 20,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
                 ),
                 const SizedBox(width: 8),
                 Expanded(
@@ -260,16 +316,27 @@ class _OptionsEditorState extends State<_OptionsEditor> {
                     onChanged: (_) => _emit(),
                   ),
                 ),
-                if (widget.options.length > 2)
-                  IconButton(
-                    tooltip: 'Remove option',
-                    onPressed: () {
-                      widget.onChanged(
-                        widget.options.where((o) => o.id != option.id).toList(),
-                      );
-                    },
-                    icon: const Icon(Icons.remove_circle_outline),
-                  ),
+                SizedBox(
+                  width: 40,
+                  child: canRemove
+                      ? IconButton(
+                          tooltip: 'Remove option',
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(
+                            minWidth: 40,
+                            minHeight: 40,
+                          ),
+                          onPressed: () {
+                            widget.onChanged(
+                              widget.options
+                                  .where((o) => o.id != option.id)
+                                  .toList(),
+                            );
+                          },
+                          icon: const Icon(Icons.remove_circle_outline),
+                        )
+                      : null,
+                ),
               ],
             ),
           );

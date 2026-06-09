@@ -517,27 +517,36 @@
 ### Epic 2.6 — Groups & Clubs
 
 **Domain**
-- [ ] Create `GroupEntity`
-- [ ] Create `GroupMemberEntity`
-- [ ] Create `GroupRepository` abstract interface
-- [ ] Create `CreateGroupUseCase`
-- [ ] Create `AddGroupMemberUseCase`
-- [ ] Create `GetGroupsUseCase`
-- [ ] Create `GetMyGroupsUseCase`
+- [x] Create `GroupEntity`
+- [x] Create `GroupMemberEntity`
+- [x] Create `GroupRepository` abstract interface
+- [x] Create `CreateGroupUseCase`
+- [x] Create `AddGroupMemberUseCase`
+- [x] Create `GetGroupsUseCase`
+- [x] Create `GetMyGroupsUseCase`
 
 **Data**
-- [ ] Create `GroupModel` (with `fromJson`/`toJson`)
-- [ ] Create `GroupMemberModel`
-- [ ] Create `GroupRemoteDataSource`
-- [ ] Create `GroupRepositoryImpl`
+- [x] Create `GroupModel` (with `fromJson`/`toJson`)
+- [x] Create `GroupMemberModel`
+- [x] Create `GroupRemoteDataSource`
+- [x] Create `GroupRepositoryImpl`
+- [x] Per-user `groupMemberships` index + `syncMyGroupMemberships` / `syncUserGroupMembershipIndex` Cloud Functions
 
 **Presentation**
-- [ ] Build `GroupsListScreen` — all org groups, searchable
+- [x] Build `GroupsListScreen` — all org groups, searchable
 - [ ] Build `GroupDetailScreen` — group info, member list, news posts, group chat
-- [ ] Build `CreateGroupScreen` (admin) — name, description, avatar
-- [ ] Build `GroupMembersScreen` (admin/leader) — add/remove members, assign leader
-- [ ] Show user's groups on home dashboard and profile
-- [ ] Group role badge: leader vs. member
+- [x] Build `CreateGroupScreen` (admin) — name, description, custom club positions
+- [x] Build `GroupMembersScreen` (admin/leader) — add/remove members, assign leader & club position
+- [x] Build `AddGroupMembersScreen` — search, role/position assignment, scroll-safe layout
+- [x] Build `MyGroupsScreen` — member view with leader actions (view/manage members, send alert)
+- [x] Show user's groups on home dashboard (`MyGroupsHomeSection`) and Settings
+- [x] Group role badge: leader vs. member; club position display
+
+**Group leaders** *(subset of roster + reminders)*
+- [x] Leaders can view group roster, add members, change leader/member role and club position
+- [x] Leaders can compose **group alerts** to groups they lead (`createGroupLeaderReminder` callable)
+- [x] Leaders can view **Sent Group Alerts** and **View responses** for their broadcasts
+- [x] `My Groups` index auto-repair on stream attach (roster → `users/{uid}/groupMemberships`)
 
 **Testing**
 - [ ] Unit test: `CreateGroupUseCase`
@@ -596,45 +605,42 @@
 ### Epic 2.9 — Reminders *(Sprint 10)*
 
 **Permissions**
-- [ ] Add `approveReminders` to `AppPermission` enum (group: Reminders)
+- [x] Add `approveReminders` to `AppPermission` enum (group: Reminders)
 - [ ] Update `org-admin` seed role in `SeedRoles` notifier to include `approveReminders`
 - [ ] Update `seed_roles.js` script to include `approveReminders` in org-admin
 
 **Org Settings**
-- [ ] Add `requireReminderApproval` boolean field to `organizations/{orgId}` document (default: `false`)
-- [ ] Admin toggle UI for this setting (org settings screen or inline on reminders screen)
+- [x] Add `requireReminderApproval` boolean field to `organizations/{orgId}` document (default: `false`)
+- [x] Admin toggle UI — **Organization Settings → Reminder Approval** with server-verified save
 
 **Domain**
-- [ ] Create `ReminderEntity` — id, title, body, audience, status (draft/pending/published/rejected), authorId, createdAt, publishedAt
-- [ ] Create `ReminderRepository` abstract interface
-- [ ] Create `BroadcastReminderUseCase` — publishes directly if approved, else saves as `pending`
-- [ ] Create `ApproveReminderUseCase` (requires `approveReminders` permission)
-- [ ] Create `RejectReminderUseCase` (requires `approveReminders` permission)
-- [ ] Create `GetRemindersUseCase`
-- [ ] Create `WatchPendingRemindersUseCase` (for approval queue)
+- [x] Create `ReminderEntity` — id, title, body, audience, status (draft/pending/published/rejected), authorId, createdAt, publishedAt
+- [x] Create `ReminderRepository` abstract interface
+- [x] Submit/approve/reject logic in `reminder_provider` (replaces separate use-case classes)
+- [x] Pending queue stream (`pendingRemindersProvider`)
 
 **Data**
-- [ ] Create `ReminderModel` with `fromFirestore` / `toFirestore`
-- [ ] Create `ReminderRemoteDataSource`
-- [ ] Create `ReminderRepositoryImpl`
-- [ ] Firestore path: `organizations/{orgId}/reminders/{reminderId}`
-- [ ] Firestore security rules: `broadcastReminders` to create, `approveReminders` to approve/reject, members to read published only
+- [x] Create `ReminderModel` with `fromFirestore` / `toFirestore`
+- [x] Create `ReminderRepositoryImpl` (+ `createGroupLeaderReminder` callable for student leaders)
+- [x] Firestore path: `organizations/{orgId}/reminders/{reminderId}`
+- [x] Firestore security rules: `broadcastReminders` to create, `approveReminders`/admins to approve/reject, group leaders via callable
 
 **Presentation**
-- [ ] Build `ComposeReminderScreen` — title, body, audience selector (all org / specific group / specific role)
-- [ ] Submit logic: if `requireReminderApproval && !can(approveReminders)` → save as `pending`; else publish directly
-- [ ] Build `RemindersHistoryScreen` — list of sent/published reminders
-- [ ] Build `PendingRemindersScreen` (admin) — approval queue, approve/reject actions; gated on `approveReminders`
-- [ ] Gate Compose button on `broadcastReminders` permission
-- [ ] Reminders appear in user in-app notification feed on publish
-- [ ] Push notification delivered to audience on publish (Cloud Function `onReminderPublished`)
+- [x] Build `ComposeReminderScreen` — title, body, audience selector (all org / specific group / specific role)
+- [x] Submit logic: if `requireReminderApproval && !canPublishDirectly` → `pending`; else `published` (leaders via `createGroupLeaderReminder`)
+- [x] Build `MyBroadcastsScreen` — sent reminders, edit/recall, view responses
+- [x] Build `ReminderApprovalQueueScreen` — approve/reject; org admins + `approveReminders` holders
+- [x] Pending count badges — Admin Dashboard, Settings, Alerts app bar
+- [x] Gate Compose button on `canComposeRemindersProvider` (org broadcasters + group leaders)
+- [x] Reminders appear in user in-app notification feed on publish
+- [x] Push notification delivered to audience on publish (Cloud Functions `onReminderPublished`, `publishDueReminders`)
 
 **Indexes**
-- [ ] Add composite index: `reminders(status ASC, createdAt DESC)` to `firestore.indexes.json`
+- [x] Add composite index: `reminders(status ASC, createdAt DESC)` to `firestore.indexes.json`
 
 **Testing**
-- [ ] Unit test: `BroadcastReminderUseCase`
-- [ ] Unit test: `ApproveReminderUseCase`
+- [ ] Unit test: reminder submit / approve flows
+- [ ] Unit test: `ApproveReminderUseCase` (or provider equivalent)
 
 ### Epic 2.9.1 — Reminder Enhancements *(Sprint 12)*
 
@@ -661,21 +667,31 @@ Optional expiration, notification history, broadcast management, full-screen det
 - [x] `BroadcastDetailScreen` — full-screen reminder view with back button, expiration display
 
 **Recipient responses** *(optional per broadcast)*
-- [x] `responseConfig` on reminder document — `enabled`, `type`, `maxTextLength`, `options[]`
+- [x] `responseConfig` on reminder document — `enabled`, `responseRequired`, `type`, `maxTextLength`, `options[]`, `allowAdditionalText`, `allowResponseUpdates`
 - [x] Response types: `free_text` (character limit), `checkbox` (multi-select), `multiple_choice` (single-select)
-- [x] Compose UI: `ResponseConfigSection` — admin optionally configures response type and options
+- [x] Compose UI: `ResponseConfigSection` — response type, options, **response required**, **allow changing responses**
+- [x] Checkbox options: minimum **one** option row; recipients may submit with **none checked** (valid “none of the above” answer)
+- [x] **Allow changing responses** — when off, answers lock after first submit (votes/polls); server + UI enforced
 - [x] Subcollection `organizations/{orgId}/reminders/{reminderId}/responses/{userId}` — one response per recipient
-- [x] Callable `submitReminderResponse` — validates response against config; upserts per-user doc
-- [x] `ReminderResponseForm` on `BroadcastDetailScreen` — submit/update response until expiration
-- [x] `ReminderResponsesScreen` — author/admin view all responses (poll icon + My Broadcasts link)
+- [x] Callable `submitReminderResponse` — validates response against config; upserts per-user doc; rejects locked updates
+- [x] `ReminderResponseForm` on `BroadcastDetailScreen` — submit/update or read-only locked view
+- [x] `ReminderResponsesScreen` — author/admin/group leader view all responses
 - [x] Firestore rules: author/admin read all responses; recipient read own; writes server-only
+
+**Delivery & approval hardening**
+- [x] `resolveReminderRecipients` — roster + `groupMemberships` union; author always receives copy
+- [x] Roll back `deliveredAt` when zero recipients; `retryReminderDelivery` callable
+- [x] Pending reminders query without `orderBy` (avoids missing `createdAt` on server timestamps)
+- [x] Org admins see approval queue without separate `approveReminders` grant
 
 **Indexes**
 - [x] Collection-group index: `reminders(status ASC, expiresAt ASC)` for expiration job
+- [x] Collection-group index: `groupMemberships(organizationId, groupId)` for delivery
 
 **Testing**
 - [ ] On-device: compose with each response type → recipient submits → author views responses
 - [ ] On-device: expiration via duration and date/time; verify auto-removal and history entry
+- [ ] On-device: locked checkbox vote — submit, verify no update when `allowResponseUpdates` is off
 - [ ] Unit test: `ReminderResponseConfig` validation
 - [ ] Widget test: `ResponseConfigSection`, `ReminderResponseForm`
 

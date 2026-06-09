@@ -21,6 +21,10 @@ abstract class Routes {
   static const String reportDetails = '/reports/:reportId';
   static const String alerts = '/alerts';
   static const String composeReminder = '/reminders/compose';
+
+  /// Opens compose with a group pre-selected (for group leaders).
+  static String composeReminderForGroupPath(String groupId) =>
+      '/reminders/compose?groupId=$groupId';
   static const String reminderApprovals = '/reminders/approvals';
   static const String myBroadcasts = '/reminders/mine';
   static const String notificationHistory = '/notifications/history';
@@ -41,6 +45,7 @@ abstract class Routes {
   static const String addStudent = '/roster/add';
   static const String schoolGradesSettings = '/school-grades';
   static const String groupsList = '/groups';
+  static const String myGroups = '/my-groups';
   static const String createGroup = '/groups/new';
   static const String groupMembers = '/groups/:groupId/members';
   static const String addGroupMembers = '/groups/:groupId/members/add';

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:speakup_connect/features/notifications/domain/entities/app_notification_entity.dart';
+import 'package:speakup_connect/features/notifications/domain/entities/notification_attention.dart';
 import 'package:speakup_connect/features/notifications/presentation/providers/notification_provider.dart';
 import 'package:speakup_connect/features/reminders/domain/entities/reminder_entity.dart';
+import 'package:speakup_connect/features/reminders/domain/entities/reminder_response_entity.dart';
 import 'package:speakup_connect/config/app_config.dart';
 import 'package:speakup_connect/features/reminders/presentation/providers/reminder_provider.dart';
 import 'package:speakup_connect/features/reminders/presentation/providers/reminder_response_provider.dart';
@@ -35,7 +37,7 @@ class _BroadcastDetailScreenState extends ConsumerState<BroadcastDetailScreen> {
   void initState() {
     super.initState();
     final n = widget.notification;
-    if (n != null && !n.read && !n.id.startsWith('broadcast-')) {
+    if (n != null && !n.id.startsWith('broadcast-')) {
       WidgetsBinding.instance.addPostFrameCallback((_) => _maybeMarkRead(n));
     }
   }
@@ -44,16 +46,24 @@ class _BroadcastDetailScreenState extends ConsumerState<BroadcastDetailScreen> {
     final reminderId = _reminderId;
     if (reminderId == null) return;
 
-    if (notification.responseRequired) {
-      final reminder = await ref.read(reminderByIdProvider(reminderId).future);
-      if (reminder?.responseRequired ?? notification.responseRequired) {
-        final existing =
-            ref.read(myReminderResponseProvider(reminderId)).value;
-        if (existing == null) return;
-      }
+    final reminder = await ref.read(reminderByIdProvider(reminderId).future);
+    ReminderResponseEntity? myResponse;
+    try {
+      myResponse =
+          await ref.read(myReminderResponseProvider(reminderId).future);
+    } catch (_) {
+      myResponse = null;
     }
+    final attention = NotificationAttention.resolve(
+      notification: notification,
+      reminder: reminder,
+      myResponse: myResponse,
+    );
 
-    if (!mounted) return;
+    // Mandatory-response alerts stay highlighted until answered.
+    if (attention.responsePending) return;
+
+    if (!mounted || notification.read) return;
     await ref
         .read(notificationActionsProvider.notifier)
         .markRead(notification.id);

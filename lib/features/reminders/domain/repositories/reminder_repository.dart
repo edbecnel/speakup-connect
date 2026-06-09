@@ -26,6 +26,19 @@ abstract class ReminderRepository {
     ReminderResponseConfig? responseConfig,
   });
 
+  /// Creates a group-targeted reminder via the server callable (group leaders).
+  Future<ReminderEntity> createGroupLeaderReminder({
+    required String organizationId,
+    required String title,
+    required String body,
+    required String groupId,
+    String? groupLabel,
+    required String createdBy,
+    DateTime? scheduledAt,
+    DateTime? expiresAt,
+    ReminderResponseConfig? responseConfig,
+  });
+
   /// Streams reminders awaiting approval, newest first.
   Stream<List<ReminderEntity>> watchPendingReminders(String organizationId);
 

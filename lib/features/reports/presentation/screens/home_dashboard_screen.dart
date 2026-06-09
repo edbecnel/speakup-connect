@@ -6,6 +6,7 @@ import 'package:speakup_connect/core/theme/app_theme.dart';
 import 'package:speakup_connect/features/auth/presentation/providers/auth_provider.dart';
 import 'package:speakup_connect/features/notifications/presentation/providers/notification_provider.dart';
 import 'package:speakup_connect/features/organization/presentation/providers/organization_provider.dart';
+import 'package:speakup_connect/features/groups/presentation/widgets/my_groups_home_section.dart';
 import 'package:speakup_connect/shared/widgets/notification_badge_icon.dart';
 
 /// Home Dashboard — the main screen for authenticated users.
@@ -59,6 +60,9 @@ class HomeDashboardScreen extends ConsumerWidget {
                 message: orgConfig?.effectiveWelcomeMessage ??
                     'How can we help make things better?',
               ),
+              const SizedBox(height: 24),
+
+              const MyGroupsHomeSection(),
               const SizedBox(height: 24),
 
               // --- Feature Grid ---

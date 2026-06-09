@@ -34,13 +34,9 @@ If your application is still **pending approval**, wait for an administrator to 
 
 ## Alerts and reminders
 
-Open **Alerts** to read broadcasts. Some alerts include response forms (text, checkboxes, or choices).
+Open **Alerts** to read broadcasts. Some alerts include response forms.
 
-- **Response required** — you must submit before dismissing
-- **Checkboxes** — you may submit with none checked if that is your answer
-- **Locked responses** — some alerts (e.g. votes) do not allow changing your answer after submit
-
-Group **leaders** can send alerts to groups they lead from **My Groups & Clubs**.
+If an alert is **response required**, you must submit a response before dismissing it.
 
 ---
 

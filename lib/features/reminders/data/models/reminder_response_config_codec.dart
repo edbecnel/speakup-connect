@@ -31,6 +31,8 @@ abstract class ReminderResponseConfigCodec {
       type: type,
       maxTextLength: maxTextLength,
       options: options,
+      allowAdditionalText: raw['allowAdditionalText'] as bool? ?? false,
+      allowResponseUpdates: raw['allowResponseUpdates'] as bool? ?? true,
     );
   }
 
@@ -40,12 +42,17 @@ abstract class ReminderResponseConfigCodec {
       'enabled': true,
       if (config.responseRequired) 'responseRequired': true,
       'type': config.type.value,
-      if (config.type == ReminderResponseType.freeText)
+      if (config.type == ReminderResponseType.freeText ||
+          config.allowAdditionalText)
         'maxTextLength': config.maxTextLength,
       if (config.type != ReminderResponseType.freeText)
         'options': config.validOptions
             .map((o) => {'id': o.id, 'label': o.label.trim()})
             .toList(),
+      if (config.allowAdditionalText &&
+          config.type != ReminderResponseType.freeText)
+        'allowAdditionalText': true,
+      if (!config.allowResponseUpdates) 'allowResponseUpdates': false,
     };
   }
 }

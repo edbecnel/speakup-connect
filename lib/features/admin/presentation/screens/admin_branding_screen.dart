@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:speakup_connect/config/app_config.dart';
+import 'package:speakup_connect/core/errors/app_exception.dart';
 import 'package:speakup_connect/core/theme/app_theme.dart';
 import 'package:speakup_connect/features/admin/presentation/providers/admin_branding_provider.dart';
 import 'package:speakup_connect/features/organization/domain/entities/organization_config_entity.dart';
@@ -760,15 +761,26 @@ class _ReminderApprovalCard extends ConsumerStatefulWidget {
 
 class _ReminderApprovalCardState extends ConsumerState<_ReminderApprovalCard> {
   bool _saving = false;
+  bool? _localOverride;
 
   Future<void> _toggle(bool value) async {
-    setState(() => _saving = true);
+    setState(() {
+      _saving = true;
+      _localOverride = value;
+    });
     try {
       await ref.read(organizationRepositoryProvider).updateReminderApproval(
             organizationId: AppConfig.defaultOrganizationId,
             requireApproval: value,
           );
+      final config = await ref
+          .read(organizationConfigProvider.notifier)
+          .refreshFromServer();
+      if (config.requireReminderApproval != value) {
+        throw StateError('Reminder approval setting did not save.');
+      }
       if (mounted) {
+        setState(() => _localOverride = null);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
@@ -782,9 +794,13 @@ class _ReminderApprovalCardState extends ConsumerState<_ReminderApprovalCard> {
       }
     } catch (e) {
       if (mounted) {
+        setState(() => _localOverride = null);
+        final message = e is PermissionException
+            ? 'You do not have permission to change this setting.'
+            : 'Update failed: $e';
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Update failed: $e'),
+            content: Text(message),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
@@ -796,9 +812,22 @@ class _ReminderApprovalCardState extends ConsumerState<_ReminderApprovalCard> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final orgAsync = ref.watch(organizationConfigProvider);
-    final requireApproval =
+    final remoteValue =
         orgAsync.asData?.value.requireReminderApproval ?? false;
+
+    ref.listen(organizationConfigProvider, (prev, next) {
+      final nextValue = next.asData?.value.requireReminderApproval;
+      if (!_saving &&
+          mounted &&
+          _localOverride != null &&
+          nextValue == _localOverride) {
+        setState(() => _localOverride = null);
+      }
+    });
+
+    final requireApproval = _localOverride ?? remoteValue;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -815,6 +844,18 @@ class _ReminderApprovalCardState extends ConsumerState<_ReminderApprovalCard> {
         SwitchListTile(
           contentPadding: EdgeInsets.zero,
           title: const Text('Require approval before publishing'),
+          subtitle: Text(
+            requireApproval
+                ? 'Currently ON — reminders from non-approvers are held for review'
+                : 'Currently OFF — reminders publish immediately',
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: requireApproval
+                  ? theme.colorScheme.primary
+                  : theme.colorScheme.onSurfaceVariant,
+              fontWeight:
+                  requireApproval ? FontWeight.w600 : FontWeight.normal,
+            ),
+          ),
           value: requireApproval,
           onChanged: _saving ? null : _toggle,
           secondary: _saving

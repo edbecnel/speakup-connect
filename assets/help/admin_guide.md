@@ -18,7 +18,6 @@ Common areas:
 | Admin Dashboard | Review and manage submitted reports |
 | Groups & Clubs *(Administration)* | Create groups and manage all org rosters |
 | Join Applications | Approve new member sign-ups |
-| Reminder Approvals | Approve pending group/org alerts (when enabled) |
 | Member Management | Block, unenroll, or restore members |
 | Roles | Assign staff capabilities |
 
@@ -38,17 +37,13 @@ Users with report-triage permissions can open the **Admin Dashboard**, update re
 
 **Staff with `manageGroupRoster`** (or org admins) use **Settings → Administration → Groups & Clubs** to create groups, add members, and assign leader/member roles. Some organizations also support **custom club positions** (offices such as President or Secretary).
 
-**Group leaders** (roster role Leader) may manage their group's roster and send **group alerts** from **My Groups & Clubs** without org-wide broadcast permission.
-
 After adding a member to a group, they should see it under **My Groups & Clubs** within a few seconds.
 
 ---
 
 ## Reminders
 
-Authorized staff and group leaders can compose reminders (audience varies by role). Org admins may enable **Require approval before publishing** under **Organization Settings**; pending items appear under **Reminder Approvals**.
-
-Optional **Request a response** supports free text, checkboxes, and multiple choice, plus **response required** and **allow changing responses** (turn off for votes).
+Authorized staff can compose reminders to all members, specific groups, or roles. Optional recipient responses and **response required** settings may be available depending on org configuration.
 
 ---
 

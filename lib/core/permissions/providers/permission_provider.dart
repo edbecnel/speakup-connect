@@ -88,3 +88,17 @@ final canAccessAdminReportsProvider = Provider<bool>((ref) {
   return ref.watch(hasPermissionProvider(AppPermission.viewAllReports)) ||
       ref.watch(hasPermissionProvider(AppPermission.manageReports));
 });
+
+/// True when the user may review reminders in the approval queue.
+///
+/// Org admins always have this ability (mirrors Firestore rules). Other
+/// members need the explicit [AppPermission.approveReminders] grant.
+final canReviewPendingRemindersProvider = Provider<bool>((ref) {
+  final profileAsync = ref.watch(userProfileProvider);
+  final profile = profileAsync.value;
+  if (profile?.isAdmin == true) return true;
+  // While the profile is still loading, avoid denying admins who lack a
+  // separate approveReminders grant — wait for profile before hiding UI.
+  if (profileAsync.isLoading && profile == null) return false;
+  return ref.watch(hasPermissionProvider(AppPermission.approveReminders));
+});

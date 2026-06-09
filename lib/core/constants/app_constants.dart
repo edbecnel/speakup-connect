@@ -45,6 +45,10 @@ abstract class AppConstants {
   static const String reminderResponsesCollection = 'responses';
   static const String groupsCollection = 'groups';
   static const String groupMembersCollection = 'members';
+
+  /// Per-user index of group rosters for "My Groups" (denormalized):
+  /// `organizations/{orgId}/users/{userId}/groupMemberships/{groupId}`.
+  static const String userGroupMembershipsCollection = 'groupMemberships';
   static const String rosterCollection = 'roster';
 
   /// Per-user in-app notification feed:

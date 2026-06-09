@@ -381,6 +381,9 @@ interface ResponseConfig {
   responseRequired?: boolean;
   type?: string;
   maxTextLength?: number;
+  allowAdditionalText?: boolean;
+  /** When false, responses are locked after the first submission. */
+  allowResponseUpdates?: boolean;
   options?: ResponseOption[];
 }
 
@@ -559,6 +562,66 @@ export const recallReminder = onCall(async (request) => {
   return { ok: true, deletedNotifications };
 });
 
+// ── Callable: retryReminderDelivery ───────────────────────────────────────────
+
+/**
+ * Re-attempts delivery for a published reminder that was never delivered
+ * (e.g. a prior delivery attempt failed after claiming).
+ */
+export const retryReminderDelivery = onCall(async (request) => {
+  if (!request.auth) {
+    throw new HttpsError('unauthenticated', 'Sign in required.');
+  }
+
+  const { orgId, reminderId } = (request.data ?? {}) as {
+    orgId?: string;
+    reminderId?: string;
+  };
+  if (!orgId || !reminderId) {
+    throw new HttpsError(
+      'invalid-argument',
+      'orgId and reminderId are required.',
+    );
+  }
+
+  const uid = request.auth.uid;
+  const token = request.auth.token as Record<string, unknown>;
+  const permissions = (token['permissions'] as string[] | undefined) ?? [];
+  const role = token['role'] as string | undefined;
+  const isAdmin =
+    role === 'admin' || role === 'super_admin' || role === 'owner';
+
+  const reminderRef = db
+    .collection('organizations').doc(orgId)
+    .collection('reminders').doc(reminderId);
+  const snap = await reminderRef.get();
+  if (!snap.exists) {
+    throw new HttpsError('not-found', 'Reminder not found.');
+  }
+
+  const data = snap.data() as ReminderData;
+  const isOwner = data.createdBy === uid;
+  if (!isOwner && !isAdmin && !permissions.includes('broadcastReminders')) {
+    throw new HttpsError(
+      'permission-denied',
+      'You do not have permission to retry this reminder.',
+    );
+  }
+  if (data.status !== 'published') {
+    throw new HttpsError(
+      'failed-precondition',
+      'Only published reminders can be retried.',
+    );
+  }
+
+  await reminderRef.update({
+    deliveredAt: admin.firestore.FieldValue.delete(),
+  });
+  const delivered = await deliverReminder(orgId, reminderId);
+
+  return { ok: true, delivered };
+});
+
 // ── Callable: updateReminder ──────────────────────────────────────────────────
 
 /**
@@ -698,22 +761,33 @@ async function markUserReminderNotificationsRead(
   uid: string,
   reminderId: string,
 ): Promise<void> {
-  const snap = await db
-    .collection('organizations').doc(orgId)
-    .collection('users').doc(uid)
-    .collection('notifications')
-    .where('data.reminderId', '==', reminderId)
-    .get();
-  if (snap.empty) return;
+  try {
+    const snap = await db
+      .collection('organizations').doc(orgId)
+      .collection('users').doc(uid)
+      .collection('notifications')
+      .where('data.reminderId', '==', reminderId)
+      .get();
+    if (snap.empty) return;
 
-  const batch = db.batch();
-  for (const doc of snap.docs) {
-    batch.update(doc.ref, {
-      read: true,
-      readAt: admin.firestore.FieldValue.serverTimestamp(),
+    const batch = db.batch();
+    for (const doc of snap.docs) {
+      batch.update(doc.ref, {
+        read: true,
+        readAt: admin.firestore.FieldValue.serverTimestamp(),
+        'data.hasResponded': true,
+      });
+    }
+    await batch.commit();
+  } catch (err) {
+    // Response is already saved; do not fail the callable if feed sync fails.
+    logger.warn('markUserReminderNotificationsRead failed', {
+      orgId,
+      uid,
+      reminderId,
+      err,
     });
   }
-  await batch.commit();
 }
 
 // ── Callable: dismissNotification ─────────────────────────────────────────────
@@ -916,6 +990,17 @@ export const submitReminderResponse = onCall(async (request) => {
     );
   }
 
+  const allowResponseUpdates = config.allowResponseUpdates !== false;
+  const existingResponseSnap = await reminderRef
+    .collection('responses').doc(uid)
+    .get();
+  if (existingResponseSnap.exists && !allowResponseUpdates) {
+    throw new HttpsError(
+      'failed-precondition',
+      'This response cannot be changed after submission.',
+    );
+  }
+
   const responseType = config.type ?? 'free_text';
   const optionIds = new Set(
     (config.options ?? [])
@@ -946,12 +1031,6 @@ export const submitReminderResponse = onCall(async (request) => {
     payload.text = trimmed;
   } else if (responseType === 'checkbox') {
     const ids = (selectedOptionIds ?? []).filter((id) => optionIds.has(id));
-    if (ids.length === 0) {
-      throw new HttpsError(
-        'invalid-argument',
-        'Select at least one option.',
-      );
-    }
     payload.selectedOptionIds = ids;
   } else if (responseType === 'multiple_choice') {
     const id = selectedOptionId ?? '';
@@ -961,6 +1040,23 @@ export const submitReminderResponse = onCall(async (request) => {
     payload.selectedOptionId = id;
   } else {
     throw new HttpsError('invalid-argument', 'Unknown response type.');
+  }
+
+  if (
+    responseType !== 'free_text' &&
+    config.allowAdditionalText === true
+  ) {
+    const trimmed = (text ?? '').trim();
+    const maxLen = config.maxTextLength ?? 500;
+    if (trimmed.length > maxLen) {
+      throw new HttpsError(
+        'invalid-argument',
+        `Explanation must be at most ${maxLen} characters.`,
+      );
+    }
+    if (trimmed) {
+      payload.text = trimmed;
+    }
   }
 
   const userSnap = await db
@@ -974,7 +1070,185 @@ export const submitReminderResponse = onCall(async (request) => {
   await markUserReminderNotificationsRead(orgId, uid, reminderId);
 
   logger.info('submitReminderResponse completed', { orgId, reminderId, uid });
-  return { ok: true };
+  return { ok: true, reminderId };
+});
+
+// ── Callable: createGroupLeaderReminder ───────────────────────────────────────
+
+async function assertGroupLeader(
+  orgId: string,
+  groupId: string,
+  uid: string,
+): Promise<void> {
+  const rosterSnap = await db
+    .collection('organizations').doc(orgId)
+    .collection('groups').doc(groupId)
+    .collection('members').doc(uid)
+    .get();
+  if (rosterSnap.exists
+      && rosterSnap.data()?.['groupRole'] === 'leader') {
+    return;
+  }
+
+  const indexSnap = await db
+    .collection('organizations').doc(orgId)
+    .collection('users').doc(uid)
+    .collection('groupMemberships').doc(groupId)
+    .get();
+  if (indexSnap.exists
+      && indexSnap.data()?.['groupRole'] === 'leader') {
+    return;
+  }
+
+  throw new HttpsError(
+    'permission-denied',
+    'You must be a leader of this group to send alerts.',
+  );
+}
+
+async function resolveAuthorReminderStatus(
+  orgId: string,
+  uid: string,
+  tokenPermissions: string[],
+): Promise<'pending' | 'published'> {
+  const orgSnap = await db.collection('organizations').doc(orgId).get();
+  const requireApproval =
+    orgSnap.data()?.['requireReminderApproval'] === true;
+  if (!requireApproval) return 'published';
+
+  const profileSnap = await db
+    .collection('organizations').doc(orgId)
+    .collection('users').doc(uid)
+    .get();
+  const profile = profileSnap.data() ?? {};
+  const role = (profile['role'] as string | undefined) ?? 'user';
+  if (['admin', 'super_admin', 'owner'].includes(role)) {
+    return 'published';
+  }
+
+  const profilePerms =
+    (profile['permissions'] as string[] | undefined) ?? [];
+  if (tokenPermissions.includes('approveReminders')
+      || profilePerms.includes('approveReminders')) {
+    return 'published';
+  }
+
+  return 'pending';
+}
+
+/**
+ * Creates a group-targeted reminder for a verified group leader (Admin SDK).
+ * Avoids fragile client-side Security Rule edge cases for student leaders.
+ */
+export const createGroupLeaderReminder = onCall(async (request) => {
+  if (!request.auth) {
+    throw new HttpsError('unauthenticated', 'Sign in required.');
+  }
+
+  const {
+    orgId,
+    title,
+    body,
+    groupId,
+    groupLabel,
+    scheduledAt,
+    expiresAt,
+    responseConfig,
+  } = (request.data ?? {}) as {
+    orgId?: string;
+    title?: string;
+    body?: string;
+    groupId?: string;
+    groupLabel?: string;
+    scheduledAt?: string;
+    expiresAt?: string;
+    responseConfig?: ResponseConfig;
+  };
+
+  if (!orgId || !groupId) {
+    throw new HttpsError(
+      'invalid-argument',
+      'orgId and groupId are required.',
+    );
+  }
+
+  const trimmedTitle = (title ?? '').trim();
+  const trimmedBody = (body ?? '').trim();
+  if (trimmedTitle.length < 3) {
+    throw new HttpsError(
+      'invalid-argument',
+      'Title must be at least 3 characters.',
+    );
+  }
+  if (trimmedBody.length < 5) {
+    throw new HttpsError(
+      'invalid-argument',
+      'Message must be at least 5 characters.',
+    );
+  }
+
+  const uid = request.auth.uid;
+  await assertGroupLeader(orgId, groupId, uid);
+
+  const tokenPerms =
+    (request.auth.token['permissions'] as string[] | undefined) ?? [];
+  const status = await resolveAuthorReminderStatus(orgId, uid, tokenPerms);
+
+  const userSnap = await db
+    .collection('organizations').doc(orgId)
+    .collection('users').doc(uid)
+    .get();
+  const createdByName =
+    (userSnap.data()?.['displayName'] as string | undefined) ?? null;
+
+  const reminderRef = db
+    .collection('organizations').doc(orgId)
+    .collection('reminders').doc();
+
+  const payload: Record<string, unknown> = {
+    organizationId: orgId,
+    title: trimmedTitle,
+    body: trimmedBody,
+    audienceType: 'group',
+    audienceId: groupId,
+    audienceLabel: groupLabel ?? null,
+    status,
+    createdBy: uid,
+    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+  };
+
+  if (createdByName) payload['createdByName'] = createdByName;
+
+  if (scheduledAt) {
+    payload['scheduledAt'] = admin.firestore.Timestamp.fromDate(
+      new Date(scheduledAt),
+    );
+  }
+  if (expiresAt) {
+    payload['expiresAt'] = admin.firestore.Timestamp.fromDate(
+      new Date(expiresAt),
+    );
+  }
+  if (responseConfig?.enabled) {
+    payload['responseConfig'] = responseConfig;
+  }
+
+  await reminderRef.set(payload);
+
+  logger.info('createGroupLeaderReminder completed', {
+    orgId,
+    reminderId: reminderRef.id,
+    groupId,
+    uid,
+    status,
+  });
+
+  return {
+    ok: true,
+    reminderId: reminderRef.id,
+    status,
+  };
 });
 
 // ── Reminders: delivery helpers ───────────────────────────────────────────────
@@ -1001,14 +1275,37 @@ async function resolveReminderRecipients(
   }
 
   if (audienceType === 'group' && audienceId) {
+    const recipientIds = new Set<string>();
+
     const membersSnap = await db
       .collection('organizations').doc(orgId)
       .collection('groups').doc(audienceId)
       .collection('members')
       .get();
-    return membersSnap.docs.map(
-      (d) => (d.data()['userId'] as string | undefined) ?? d.id,
-    );
+    for (const d of membersSnap.docs) {
+      recipientIds.add((d.data()['userId'] as string | undefined) ?? d.id);
+    }
+
+    // Union My Groups indexes when available (optional — roster is primary).
+    try {
+      const indexSnap = await db
+        .collectionGroup('groupMemberships')
+        .where('organizationId', '==', orgId)
+        .where('groupId', '==', audienceId)
+        .get();
+      for (const doc of indexSnap.docs) {
+        const userId = doc.ref.parent.parent?.id;
+        if (userId) recipientIds.add(userId);
+      }
+    } catch (err) {
+      logger.warn('resolveReminderRecipients: groupMemberships query failed', {
+        orgId,
+        audienceId,
+        err,
+      });
+    }
+
+    return Array.from(recipientIds);
   }
 
   if (audienceType === 'role' && audienceId) {
@@ -1075,15 +1372,29 @@ async function deliverReminder(
   const audienceType = claimed.audienceType ?? 'all';
   const audienceId = claimed.audienceId ?? null;
 
-  const recipientIds = await resolveReminderRecipients(
+  let recipientIds = await resolveReminderRecipients(
     orgId,
     audienceType,
     audienceId,
   );
 
+  // Authors always receive a copy (group leaders may only be on the index).
+  const authorId = claimed.createdBy;
+  if (authorId && !recipientIds.includes(authorId)) {
+    recipientIds = [...recipientIds, authorId];
+  }
+
   if (recipientIds.length === 0) {
-    logger.info('deliverReminder: no recipients', { orgId, reminderId });
-    return true;
+    logger.warn('deliverReminder: no recipients — rolling back claim', {
+      orgId,
+      reminderId,
+      audienceType,
+      audienceId,
+    });
+    await reminderRef.update({
+      deliveredAt: admin.firestore.FieldValue.delete(),
+    });
+    return false;
   }
 
   // 2. Write in-app feed entries (batched, ≤450 writes per batch).
@@ -1585,4 +1896,209 @@ export const provisionStudent = onCall(async (request) => {
     userId: uid,
     authEmail,
   };
+});
+
+// ── Trigger: syncUserGroupMembershipIndex ─────────────────────────────────────
+
+/**
+ * Keeps `users/{userId}/groupMemberships/{groupId}` in sync when roster
+ * managers add, update, or remove group members. Powers the My Groups screen
+ * for non-admin members without a collectionGroup query on `members`.
+ */
+export const syncUserGroupMembershipIndex = onDocumentWritten(
+  'organizations/{orgId}/groups/{groupId}/members/{userId}',
+  async (event) => {
+    const { orgId, groupId, userId } = event.params;
+    const indexRef = db
+      .collection('organizations').doc(orgId)
+      .collection('users').doc(userId)
+      .collection('groupMemberships').doc(groupId);
+
+    if (!event.data?.after.exists) {
+      await indexRef.delete();
+      logger.info('groupMembership index removed', { orgId, groupId, userId });
+      return;
+    }
+
+    const memberData = event.data.after.data() ?? {};
+    const groupSnap = await db
+      .collection('organizations').doc(orgId)
+      .collection('groups').doc(groupId)
+      .get();
+    const groupData = groupSnap.data() ?? {};
+
+    const indexPayload: Record<string, unknown> = {
+      organizationId: orgId,
+      groupId,
+      groupName: (groupData['name'] as string | undefined) ?? 'Group',
+      groupRole: (memberData['groupRole'] as string | undefined) ?? 'member',
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    };
+    const positionRoleId = memberData['positionRoleId'] as string | undefined;
+    if (positionRoleId) {
+      indexPayload['positionRoleId'] = positionRoleId;
+    }
+
+    await indexRef.set(indexPayload, { merge: true });
+    logger.info('groupMembership index synced', { orgId, groupId, userId });
+  },
+);
+
+// ── Callable: backfillGroupMembershipIndexes ──────────────────────────────────
+
+/**
+ * One-time (or repair) sync of all group member docs into per-user
+ * groupMemberships indexes. Org admin only.
+ */
+export const backfillGroupMembershipIndexes = onCall(async (request) => {
+  if (!request.auth) {
+    throw new HttpsError('unauthenticated', 'Sign in required.');
+  }
+
+  const orgId = request.data?.['orgId'] as string | undefined;
+  if (!orgId || typeof orgId !== 'string') {
+    throw new HttpsError('invalid-argument', 'orgId is required.');
+  }
+
+  const adminUid = request.auth.uid;
+  const token = request.auth.token as Record<string, unknown>;
+  await assertOrgAdminCaller(adminUid, orgId, token);
+
+  const groupsSnap = await db
+    .collection('organizations').doc(orgId)
+    .collection('groups')
+    .get();
+
+  let synced = 0;
+  const batchSize = 400;
+  let batch = db.batch();
+  let batchCount = 0;
+
+  for (const groupDoc of groupsSnap.docs) {
+    const groupData = groupDoc.data();
+    const groupName = (groupData['name'] as string | undefined) ?? 'Group';
+    const membersSnap = await groupDoc.ref.collection('members').get();
+
+    for (const memberDoc of membersSnap.docs) {
+      const memberData = memberDoc.data();
+      const userId = memberDoc.id;
+      const indexRef = db
+        .collection('organizations').doc(orgId)
+        .collection('users').doc(userId)
+        .collection('groupMemberships').doc(groupDoc.id);
+
+      const indexPayload: Record<string, unknown> = {
+        organizationId: orgId,
+        groupId: groupDoc.id,
+        groupName,
+        groupRole: (memberData['groupRole'] as string | undefined) ?? 'member',
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      };
+      const positionRoleId = memberData['positionRoleId'] as string | undefined;
+      if (positionRoleId) {
+        indexPayload['positionRoleId'] = positionRoleId;
+      }
+
+      batch.set(indexRef, indexPayload, { merge: true });
+      batchCount++;
+      synced++;
+
+      if (batchCount >= batchSize) {
+        await batch.commit();
+        batch = db.batch();
+        batchCount = 0;
+      }
+    }
+  }
+
+  if (batchCount > 0) {
+    await batch.commit();
+  }
+
+  logger.info('backfillGroupMembershipIndexes completed', { orgId, synced, by: adminUid });
+  return { ok: true, synced };
+});
+
+// ── Callable: syncMyGroupMemberships ────────────────────────────────────────────
+
+/**
+ * Rebuilds the calling user's groupMemberships index from group rosters.
+ * Any approved org member may invoke this for themselves (no collectionGroup).
+ */
+export const syncMyGroupMemberships = onCall(async (request) => {
+  if (!request.auth) {
+    throw new HttpsError('unauthenticated', 'Sign in required.');
+  }
+
+  const orgId = request.data?.['orgId'] as string | undefined;
+  if (!orgId || typeof orgId !== 'string') {
+    throw new HttpsError('invalid-argument', 'orgId is required.');
+  }
+
+  const uid = request.auth.uid;
+  const profileSnap = await db
+    .collection('organizations').doc(orgId)
+    .collection('users').doc(uid)
+    .get();
+  const profile = profileSnap.data() ?? {};
+  if (
+    profile['organizationId'] !== orgId ||
+    profile['approvalStatus'] !== 'approved'
+  ) {
+    throw new HttpsError('permission-denied', 'Not an approved member of this org.');
+  }
+
+  const groupsSnap = await db
+    .collection('organizations').doc(orgId)
+    .collection('groups')
+    .get();
+
+  const activeGroupIds = new Set<string>();
+  let synced = 0;
+  const batch = db.batch();
+
+  for (const groupDoc of groupsSnap.docs) {
+    const memberSnap = await groupDoc.ref.collection('members').doc(uid).get();
+    if (!memberSnap.exists) continue;
+
+    activeGroupIds.add(groupDoc.id);
+    const memberData = memberSnap.data() ?? {};
+    const groupData = groupDoc.data();
+    const indexRef = db
+      .collection('organizations').doc(orgId)
+      .collection('users').doc(uid)
+      .collection('groupMemberships').doc(groupDoc.id);
+
+    const indexPayload: Record<string, unknown> = {
+      organizationId: orgId,
+      groupId: groupDoc.id,
+      groupName: (groupData['name'] as string | undefined) ?? 'Group',
+      groupRole: (memberData['groupRole'] as string | undefined) ?? 'member',
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    };
+    const positionRoleId = memberData['positionRoleId'] as string | undefined;
+    if (positionRoleId) {
+      indexPayload['positionRoleId'] = positionRoleId;
+    }
+
+    batch.set(indexRef, indexPayload, { merge: true });
+    synced++;
+  }
+
+  const indexSnap = await db
+    .collection('organizations').doc(orgId)
+    .collection('users').doc(uid)
+    .collection('groupMemberships')
+    .get();
+
+  for (const indexDoc of indexSnap.docs) {
+    if (!activeGroupIds.has(indexDoc.id)) {
+      batch.delete(indexDoc.ref);
+    }
+  }
+
+  await batch.commit();
+
+  logger.info('syncMyGroupMemberships completed', { orgId, uid, synced });
+  return { ok: true, synced };
 });

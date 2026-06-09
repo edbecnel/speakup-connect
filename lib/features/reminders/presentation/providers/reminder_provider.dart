@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:speakup_connect/config/app_config.dart';
-import 'package:speakup_connect/core/permissions/app_permission.dart';
 import 'package:speakup_connect/core/permissions/providers/permission_provider.dart';
 import 'package:speakup_connect/features/auth/presentation/providers/auth_provider.dart';
 import 'package:speakup_connect/features/groups/presentation/providers/group_provider.dart';
@@ -9,8 +8,8 @@ import 'package:speakup_connect/features/organization/presentation/providers/org
 import 'package:speakup_connect/features/organization/presentation/providers/user_profile_provider.dart';
 import 'package:speakup_connect/features/reminders/data/repositories/reminder_repository_impl.dart';
 import 'package:speakup_connect/features/reminders/domain/entities/reminder_entity.dart';
-import 'package:speakup_connect/features/reminders/domain/repositories/reminder_repository.dart';
 import 'package:speakup_connect/features/reminders/domain/entities/reminder_response_config.dart';
+import 'package:speakup_connect/features/reminders/domain/repositories/reminder_repository.dart';
 import 'package:speakup_connect/features/reminders/presentation/widgets/expiration_picker_section.dart';
 
 /// Extracts the source reminder ID from a feed notification, if any.
@@ -27,11 +26,30 @@ final reminderRepositoryProvider = Provider<ReminderRepository>((ref) {
 // ── Streams ──────────────────────────────────────────────────────────────────
 
 /// Reminders awaiting approval — drives the Admin Approval Queue.
-final pendingRemindersProvider =
-    StreamProvider.autoDispose<List<ReminderEntity>>((ref) {
+///
+/// Kept alive so badge counts and the queue screen share one Firestore
+/// listener. Access to the queue UI is gated separately via
+/// [canReviewPendingRemindersProvider] (do not gate the stream itself —
+/// returning an empty stream on permission flicker was clearing real data).
+final pendingRemindersProvider = StreamProvider<List<ReminderEntity>>((ref) {
+  ref.keepAlive();
+
+  final user = ref.watch(currentUserProvider);
+  if (user == null) return Stream.value(const []);
+
   return ref
       .watch(reminderRepositoryProvider)
       .watchPendingReminders(AppConfig.defaultOrganizationId);
+});
+
+/// Count of reminders awaiting approval — for admin badges.
+final pendingReminderCountProvider = Provider<int>((ref) {
+  if (!ref.watch(canReviewPendingRemindersProvider)) return 0;
+
+  return ref.watch(pendingRemindersProvider).maybeWhen(
+        data: (reminders) => reminders.length,
+        orElse: () => 0,
+      );
 });
 
 /// Reminders authored by the current user — drives the compose-history list
@@ -56,14 +74,24 @@ class AudienceOption {
   final String label;
 }
 
-/// Streams the org's groups for the audience picker (id + display label).
+/// Streams groups available in the compose audience picker.
+///
+/// Org-wide broadcasters see every group; group leaders only see groups they
+/// lead.
 final audienceGroupsProvider =
     StreamProvider.autoDispose<List<AudienceOption>>((ref) {
+  final orgWide = ref.watch(canBroadcastOrgWideProvider);
+  final ledIds = ref
+      .watch(ledGroupMembershipsProvider)
+      .map((m) => m.group.groupId)
+      .toSet();
+
   return ref
       .watch(getGroupsUseCaseProvider)
       .call(AppConfig.defaultOrganizationId)
       .map(
         (groups) => groups
+            .where((g) => orgWide || ledIds.contains(g.groupId))
             .map((g) => AudienceOption(id: g.groupId, label: g.name))
             .toList(),
       );
@@ -98,19 +126,32 @@ class ComposeReminderState {
   DateTime? get resolvedExpiresAt =>
       expiration.resolve(scheduledAt: scheduledAt);
 
-  bool get isValid {
-    if (title.trim().length < 3) return false;
-    if (body.trim().length < 5) return false;
+  bool get isValid => validationMessage == null;
+
+  /// Human-readable reason the compose form cannot be submitted yet.
+  String? get validationMessage {
+    if (title.trim().length < 3) {
+      return 'Title must be at least 3 characters.';
+    }
+    if (body.trim().length < 5) {
+      return 'Message must be at least 5 characters.';
+    }
     if (audienceType != ReminderAudienceType.all && targetId == null) {
-      return false;
+      return audienceType == ReminderAudienceType.group
+          ? 'Select a group for this alert.'
+          : 'Select an audience for this reminder.';
     }
     if (expiration.isEnabled && !expiration.isValid(scheduledAt: scheduledAt)) {
-      return false;
+      return 'Set a valid expiration date and time.';
     }
     if (responseConfig.enabled && !responseConfig.isValid) {
-      return false;
+      return responseConfig.type == ReminderResponseType.checkbox
+          ? 'Add at least one checkbox option with a label.'
+          : responseConfig.type == ReminderResponseType.multipleChoice
+              ? 'Add at least 2 answer choices with labels.'
+              : 'Set a valid character limit for responses.';
     }
-    return true;
+    return null;
   }
 
   ReminderResponseConfig? get resolvedResponseConfig =>
@@ -176,6 +217,15 @@ class ComposeReminderNotifier extends Notifier<ComposeReminderState> {
       state = state.copyWith(responseConfig: value);
 
   void reset() => state = const ComposeReminderState();
+
+  /// Pre-fills a group audience (used when leaders tap Send Alert from My Groups).
+  void presetGroupAudience({required String groupId, required String groupName}) {
+    state = state.copyWith(
+      audienceType: ReminderAudienceType.group,
+      targetId: groupId,
+      targetLabel: groupName,
+    );
+  }
 }
 
 final composeReminderProvider =
@@ -210,16 +260,41 @@ class SubmitReminderNotifier extends Notifier<AsyncValue<SubmitReminderResult?>>
     final user = ref.read(currentUserProvider);
     if (user == null) return null;
 
-    final requireApproval = ref
-            .read(organizationConfigProvider)
-            .asData
-            ?.value
-            .requireReminderApproval ??
-        false;
-    final canApprove =
-        ref.read(hasPermissionProvider(AppPermission.approveReminders));
+    if (ref.read(isGroupLeaderOnlyComposerProvider)) {
+      final groupId = form.audience.targetId;
+      if (form.audience.type != ReminderAudienceType.group || groupId == null) {
+        state = AsyncError(
+          StateError('Select a group for this alert.'),
+          StackTrace.current,
+        );
+        return null;
+      }
+      if (!ref.read(canBroadcastToGroupProvider(groupId))) {
+        state = AsyncError(
+          StateError('You can only send alerts to groups you lead.'),
+          StackTrace.current,
+        );
+        return null;
+      }
+    }
 
-    final status = (requireApproval && !canApprove)
+    final orgConfig = ref.read(organizationConfigProvider);
+    if (!orgConfig.hasValue) {
+      state = AsyncError(
+        StateError(
+          'Organization settings are still loading. Wait a moment and try again.',
+        ),
+        StackTrace.current,
+      );
+      return null;
+    }
+
+    final requireApproval = orgConfig.value!.requireReminderApproval;
+    final canPublishDirectly =
+        ref.read(canReviewPendingRemindersProvider);
+    final leaderOnly = ref.read(isGroupLeaderOnlyComposerProvider);
+
+    final status = (requireApproval && !canPublishDirectly)
         ? ReminderStatus.pending
         : ReminderStatus.published;
 
@@ -229,21 +304,39 @@ class SubmitReminderNotifier extends Notifier<AsyncValue<SubmitReminderResult?>>
 
     state = const AsyncLoading();
     try {
-      final reminder =
-          await ref.read(reminderRepositoryProvider).createReminder(
-                organizationId: AppConfig.defaultOrganizationId,
-                title: form.title.trim(),
-                body: form.body.trim(),
-                audience: form.audience,
-                status: status,
-                createdBy: user.uid,
-                createdByName: authorName,
-                scheduledAt: form.scheduledAt,
-                expiresAt: form.resolvedExpiresAt,
-                responseConfig: form.resolvedResponseConfig,
-              );
+      final repo = ref.read(reminderRepositoryProvider);
+      final ReminderEntity reminder;
 
-      final result = SubmitReminderResult(status: status, reminder: reminder);
+      if (leaderOnly) {
+        final groupId = form.audience.targetId!;
+        reminder = await repo.createGroupLeaderReminder(
+          organizationId: AppConfig.defaultOrganizationId,
+          title: form.title.trim(),
+          body: form.body.trim(),
+          groupId: groupId,
+          groupLabel: form.audience.targetLabel,
+          createdBy: user.uid,
+          scheduledAt: form.scheduledAt,
+          expiresAt: form.resolvedExpiresAt,
+          responseConfig: form.resolvedResponseConfig,
+        );
+      } else {
+        reminder = await repo.createReminder(
+          organizationId: AppConfig.defaultOrganizationId,
+          title: form.title.trim(),
+          body: form.body.trim(),
+          audience: form.audience,
+          status: status,
+          createdBy: user.uid,
+          createdByName: authorName,
+          scheduledAt: form.scheduledAt,
+          expiresAt: form.resolvedExpiresAt,
+          responseConfig: form.resolvedResponseConfig,
+        );
+      }
+
+      final resultStatus = reminder.status;
+      final result = SubmitReminderResult(status: resultStatus, reminder: reminder);
       state = AsyncData(result);
       ref.read(composeReminderProvider.notifier).reset();
       return result;
