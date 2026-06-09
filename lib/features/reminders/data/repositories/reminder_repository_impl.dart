@@ -28,6 +28,7 @@ class ReminderRepositoryImpl implements ReminderRepository {
     required String createdBy,
     String? createdByName,
     DateTime? scheduledAt,
+    DateTime? expiresAt,
   }) async {
     try {
       final reminderId = const Uuid().v4();
@@ -41,6 +42,7 @@ class ReminderRepositoryImpl implements ReminderRepository {
         createdBy: createdBy,
         createdByName: createdByName,
         scheduledAt: scheduledAt,
+        expiresAt: expiresAt,
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
       );
@@ -132,6 +134,58 @@ class ReminderRepositoryImpl implements ReminderRepository {
       if (e.code == 'permission-denied') throw const PermissionException();
       throw DatabaseException(
         message: e.message ?? 'Failed to reject reminder',
+        code: e.code,
+      );
+    }
+  }
+
+  @override
+  Future<ReminderEntity?> getReminder({
+    required String organizationId,
+    required String reminderId,
+  }) async {
+    try {
+      final doc = await _remindersRef(organizationId).doc(reminderId).get();
+      if (!doc.exists || doc.data() == null) return null;
+      return ReminderModel.fromFirestore(doc.data()!, doc.id);
+    } on FirebaseException catch (e) {
+      if (e.code == 'permission-denied') throw const PermissionException();
+      throw DatabaseException(
+        message: e.message ?? 'Failed to load reminder',
+        code: e.code,
+      );
+    }
+  }
+
+  @override
+  Future<int> updateReminder({
+    required String organizationId,
+    required String reminderId,
+    required String title,
+    required String body,
+    DateTime? expiresAt,
+    bool clearExpiration = false,
+  }) async {
+    try {
+      final callable =
+          FirebaseFunctions.instance.httpsCallable('updateReminder');
+      final payload = <String, dynamic>{
+        'orgId': organizationId,
+        'reminderId': reminderId,
+        'title': title,
+        'body': body,
+      };
+      if (clearExpiration) {
+        payload['clearExpiresAt'] = true;
+      } else if (expiresAt != null) {
+        payload['expiresAt'] = expiresAt.millisecondsSinceEpoch;
+      }
+      final result = await callable.call<Map<String, dynamic>>(payload);
+      return (result.data['updatedNotifications'] as num?)?.toInt() ?? 0;
+    } on FirebaseFunctionsException catch (e) {
+      if (e.code == 'permission-denied') throw const PermissionException();
+      throw DatabaseException(
+        message: e.message ?? 'Failed to update reminder',
         code: e.code,
       );
     }

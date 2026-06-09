@@ -1,15 +1,21 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:speakup_connect/config/app_config.dart';
-import 'package:speakup_connect/core/constants/app_constants.dart';
 import 'package:speakup_connect/core/permissions/app_permission.dart';
 import 'package:speakup_connect/core/permissions/providers/permission_provider.dart';
 import 'package:speakup_connect/features/auth/presentation/providers/auth_provider.dart';
+import 'package:speakup_connect/features/groups/presentation/providers/group_provider.dart';
 import 'package:speakup_connect/features/organization/presentation/providers/organization_provider.dart';
 import 'package:speakup_connect/features/organization/presentation/providers/user_profile_provider.dart';
 import 'package:speakup_connect/features/reminders/data/repositories/reminder_repository_impl.dart';
 import 'package:speakup_connect/features/reminders/domain/entities/reminder_entity.dart';
 import 'package:speakup_connect/features/reminders/domain/repositories/reminder_repository.dart';
+import 'package:speakup_connect/features/reminders/presentation/widgets/expiration_picker_section.dart';
+
+/// Extracts the source reminder ID from a feed notification, if any.
+String? reminderIdFromNotificationData(Map<String, dynamic> data) {
+  return data['reminderId'] as String?;
+}
 
 // ── Infrastructure ───────────────────────────────────────────────────────────
 
@@ -52,18 +58,14 @@ class AudienceOption {
 /// Streams the org's groups for the audience picker (id + display label).
 final audienceGroupsProvider =
     StreamProvider.autoDispose<List<AudienceOption>>((ref) {
-  return FirebaseFirestore.instance
-      .collection(AppConstants.organizationsCollection)
-      .doc(AppConfig.defaultOrganizationId)
-      .collection(AppConstants.groupsCollection)
-      .snapshots()
-      .map((snap) => snap.docs.map((d) {
-            final data = d.data();
-            final label = (data['name'] as String?) ??
-                (data['displayName'] as String?) ??
-                d.id;
-            return AudienceOption(id: d.id, label: label);
-          }).toList());
+  return ref
+      .watch(getGroupsUseCaseProvider)
+      .call(AppConfig.defaultOrganizationId)
+      .map(
+        (groups) => groups
+            .map((g) => AudienceOption(id: g.groupId, label: g.name))
+            .toList(),
+      );
 });
 
 // ── Compose Form ─────────────────────────────────────────────────────────────
@@ -76,6 +78,7 @@ class ComposeReminderState {
     this.targetId,
     this.targetLabel,
     this.scheduledAt,
+    this.expiration = const ExpirationPickerValue(),
   });
 
   final String title;
@@ -87,10 +90,18 @@ class ComposeReminderState {
   /// Null = send now; a future value schedules the reminder.
   final DateTime? scheduledAt;
 
+  final ExpirationPickerValue expiration;
+
+  DateTime? get resolvedExpiresAt =>
+      expiration.resolve(scheduledAt: scheduledAt);
+
   bool get isValid {
     if (title.trim().length < 3) return false;
     if (body.trim().length < 5) return false;
     if (audienceType != ReminderAudienceType.all && targetId == null) {
+      return false;
+    }
+    if (expiration.isEnabled && !expiration.isValid(scheduledAt: scheduledAt)) {
       return false;
     }
     return true;
@@ -110,6 +121,7 @@ class ComposeReminderState {
     String? targetId,
     String? targetLabel,
     DateTime? scheduledAt,
+    ExpirationPickerValue? expiration,
     bool clearTarget = false,
     bool clearSchedule = false,
   }) {
@@ -120,6 +132,7 @@ class ComposeReminderState {
       targetId: clearTarget ? null : (targetId ?? this.targetId),
       targetLabel: clearTarget ? null : (targetLabel ?? this.targetLabel),
       scheduledAt: clearSchedule ? null : (scheduledAt ?? this.scheduledAt),
+      expiration: expiration ?? this.expiration,
     );
   }
 }
@@ -142,6 +155,9 @@ class ComposeReminderNotifier extends Notifier<ComposeReminderState> {
   void setSchedule(DateTime? when) => when == null
       ? state = state.copyWith(clearSchedule: true)
       : state = state.copyWith(scheduledAt: when);
+
+  void setExpiration(ExpirationPickerValue value) =>
+      state = state.copyWith(expiration: value);
 
   void reset() => state = const ComposeReminderState();
 }
@@ -207,6 +223,7 @@ class SubmitReminderNotifier extends Notifier<AsyncValue<SubmitReminderResult?>>
                 createdBy: user.uid,
                 createdByName: authorName,
                 scheduledAt: form.scheduledAt,
+                expiresAt: form.resolvedExpiresAt,
               );
 
       final result = SubmitReminderResult(status: status, reminder: reminder);
@@ -303,4 +320,63 @@ class RecallReminderNotifier extends Notifier<AsyncValue<int?>> {
 final recallReminderProvider =
     NotifierProvider<RecallReminderNotifier, AsyncValue<int?>>(
   RecallReminderNotifier.new,
+);
+
+// ── Lookup & permissions ─────────────────────────────────────────────────────
+
+final reminderByIdProvider =
+    FutureProvider.autoDispose.family<ReminderEntity?, String>((ref, id) {
+  return ref.read(reminderRepositoryProvider).getReminder(
+        organizationId: AppConfig.defaultOrganizationId,
+        reminderId: id,
+      );
+});
+
+/// True when the current user may edit or globally delete a broadcast
+/// (author or org admin).
+final canManageBroadcastProvider =
+    FutureProvider.autoDispose.family<bool, String>((ref, reminderId) async {
+  final reminder = await ref.watch(reminderByIdProvider(reminderId).future);
+  if (reminder == null) return false;
+  final user = ref.watch(currentUserProvider);
+  final profile = ref.watch(userProfileProvider).value;
+  if (user == null) return false;
+  return reminder.createdBy == user.uid || (profile?.isAdmin ?? false);
+});
+
+// ── Update ───────────────────────────────────────────────────────────────────
+
+class UpdateReminderNotifier extends Notifier<AsyncValue<int?>> {
+  @override
+  AsyncValue<int?> build() => const AsyncData(null);
+
+  Future<bool> update({
+    required String reminderId,
+    required String title,
+    required String body,
+    DateTime? expiresAt,
+    bool clearExpiration = false,
+  }) async {
+    state = const AsyncLoading();
+    try {
+      final updated = await ref.read(reminderRepositoryProvider).updateReminder(
+            organizationId: AppConfig.defaultOrganizationId,
+            reminderId: reminderId,
+            title: title,
+            body: body,
+            expiresAt: expiresAt,
+            clearExpiration: clearExpiration,
+          );
+      state = AsyncData(updated);
+      return true;
+    } catch (e, st) {
+      state = AsyncError(e, st);
+      return false;
+    }
+  }
+}
+
+final updateReminderProvider =
+    NotifierProvider<UpdateReminderNotifier, AsyncValue<int?>>(
+  UpdateReminderNotifier.new,
 );

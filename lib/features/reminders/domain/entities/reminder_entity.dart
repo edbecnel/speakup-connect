@@ -20,6 +20,7 @@ class ReminderEntity {
     required this.updatedAt,
     this.createdByName,
     this.scheduledAt,
+    this.expiresAt,
     this.publishedAt,
     this.reviewedBy,
     this.reviewedByName,
@@ -47,6 +48,10 @@ class ReminderEntity {
   /// A future value means the scheduled Cloud Function will publish it.
   final DateTime? scheduledAt;
 
+  /// When this broadcast should be automatically removed from all feeds.
+  /// Null means it stays until manually recalled.
+  final DateTime? expiresAt;
+
   /// When the reminder actually transitioned to `published`.
   final DateTime? publishedAt;
 
@@ -68,6 +73,9 @@ class ReminderEntity {
   /// been published.
   bool get isScheduled =>
       scheduledAt != null && scheduledAt!.isAfter(DateTime.now());
+
+  bool get isExpired =>
+      expiresAt != null && !expiresAt!.isAfter(DateTime.now());
 
   bool get isPending => status == ReminderStatus.pending;
   bool get isPublished => status == ReminderStatus.published;

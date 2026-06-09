@@ -40,11 +40,16 @@ abstract class AppConstants {
   static const String roleAssignmentsCollection = 'roleAssignments';
   static const String remindersCollection = 'reminders';
   static const String groupsCollection = 'groups';
+  static const String groupMembersCollection = 'members';
   static const String rosterCollection = 'roster';
 
   /// Per-user in-app notification feed:
   /// `organizations/{orgId}/users/{userId}/notifications/{notificationId}`.
   static const String notificationsCollection = 'notifications';
+
+  /// Archived notifications (expired, recalled, dismissed):
+  /// `organizations/{orgId}/notification_history/{historyId}`.
+  static const String notificationHistoryCollection = 'notification_history';
 
   // --- Firestore Document IDs ---
   static const String mainConfigDocId = 'main';

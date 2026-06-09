@@ -5,7 +5,12 @@ import 'package:speakup_connect/core/constants/route_constants.dart';
 import 'package:speakup_connect/core/permissions/app_permission.dart';
 import 'package:speakup_connect/core/permissions/providers/permission_provider.dart';
 import 'package:speakup_connect/features/reminders/domain/entities/reminder_entity.dart';
+import 'package:speakup_connect/features/auth/presentation/providers/auth_provider.dart';
 import 'package:speakup_connect/features/reminders/presentation/providers/reminder_provider.dart';
+import 'package:speakup_connect/features/notifications/presentation/providers/notification_history_provider.dart';
+import 'package:speakup_connect/features/reminders/presentation/screens/broadcast_detail_screen.dart';
+import 'package:speakup_connect/features/reminders/presentation/widgets/edit_reminder_dialog.dart';
+import 'package:speakup_connect/features/organization/presentation/providers/user_profile_provider.dart';
 
 /// My Broadcasts — lists the reminders the current user has sent and lets them
 /// recall (delete) any of them. Recalling a *published* reminder also removes
@@ -19,7 +24,31 @@ class MyBroadcastsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final canBroadcast =
         ref.watch(hasPermissionProvider(AppPermission.broadcastReminders));
+    final canViewHistory = ref.watch(canViewNotificationHistoryProvider);
     final mineAsync = ref.watch(myRemindersProvider);
+
+    ref.listen(updateReminderProvider, (prev, next) {
+      if (prev?.isLoading == true && !next.isLoading) {
+        final messenger = ScaffoldMessenger.of(context);
+        messenger.hideCurrentSnackBar();
+        if (next.hasError) {
+          messenger.showSnackBar(SnackBar(
+            content: Text('Update failed: ${next.error}'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ));
+        } else {
+          final updated = next.asData?.value ?? 0;
+          messenger.showSnackBar(SnackBar(
+            content: Text(
+              updated > 0
+                  ? 'Broadcast updated — $updated alert(s) refreshed.'
+                  : 'Broadcast updated.',
+            ),
+            backgroundColor: Colors.green.shade700,
+          ));
+        }
+      }
+    });
 
     ref.listen(recallReminderProvider, (prev, next) {
       if (prev?.isLoading == true && !next.isLoading) {
@@ -51,6 +80,14 @@ class MyBroadcastsScreen extends ConsumerWidget {
               context.canPop() ? context.pop() : context.go(Routes.alerts),
         ),
         title: const Text('My Broadcasts'),
+        actions: [
+          if (canViewHistory)
+            IconButton(
+              tooltip: 'Notification history',
+              icon: const Icon(Icons.history),
+              onPressed: () => context.push(Routes.notificationHistory),
+            ),
+        ],
       ),
       body: !canBroadcast
           ? const _NoAccessPlaceholder()
@@ -80,15 +117,27 @@ class _BroadcastCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final busy = ref.watch(recallReminderProvider).isLoading;
+    final busy = ref.watch(recallReminderProvider).isLoading ||
+        ref.watch(updateReminderProvider).isLoading;
+    final user = ref.watch(currentUserProvider);
+    final profile = ref.watch(userProfileProvider).value;
+    final canManage =
+        reminder.createdBy == user?.uid || (profile?.isAdmin ?? false);
     final isPublished = reminder.status == ReminderStatus.published;
-    // "Recall" implies pulling back something already delivered; otherwise it
-    // is just a delete of a draft/pending/rejected item.
-    final actionLabel = isPublished ? 'Recall' : 'Delete';
+    final actionLabel = isPublished ? 'Delete' : 'Delete';
 
     return Card(
       margin: EdgeInsets.zero,
-      child: Padding(
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () {
+          Navigator.of(context).push(
+            MaterialPageRoute<void>(
+              builder: (_) => BroadcastDetailScreen(reminder: reminder),
+            ),
+          );
+        },
+        child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -123,9 +172,20 @@ class _BroadcastCard extends ConsumerWidget {
                   Icon(Icons.schedule,
                       size: 16, color: theme.colorScheme.onSurfaceVariant),
                   const SizedBox(width: 4),
+                  Text(
+                    _formatDateTime(reminder.scheduledAt!),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant),
+                  ),
+                ],
+                if (reminder.expiresAt != null) ...[
+                  const SizedBox(width: 12),
+                  Icon(Icons.timer_outlined,
+                      size: 16, color: theme.colorScheme.onSurfaceVariant),
+                  const SizedBox(width: 4),
                   Expanded(
                     child: Text(
-                      _formatDateTime(reminder.scheduledAt!),
+                      'Expires ${_formatDateTime(reminder.expiresAt!)}',
                       style: theme.textTheme.bodySmall?.copyWith(
                           color: theme.colorScheme.onSurfaceVariant),
                     ),
@@ -134,22 +194,49 @@ class _BroadcastCard extends ConsumerWidget {
               ],
             ),
             const SizedBox(height: 8),
-            Align(
-              alignment: Alignment.centerRight,
-              child: TextButton.icon(
-                onPressed:
-                    busy ? null : () => _confirm(context, ref, isPublished),
-                icon: const Icon(Icons.delete_outline_rounded, size: 18),
-                label: Text(actionLabel),
-                style: TextButton.styleFrom(
-                  foregroundColor: theme.colorScheme.error,
-                ),
+            if (canManage)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton.icon(
+                    onPressed: busy ? null : () => _edit(context, ref),
+                    icon: const Icon(Icons.edit_outlined, size: 18),
+                    label: const Text('Edit'),
+                  ),
+                  TextButton.icon(
+                    onPressed:
+                        busy ? null : () => _confirm(context, ref, isPublished),
+                    icon: const Icon(Icons.delete_outline_rounded, size: 18),
+                    label: Text(actionLabel),
+                    style: TextButton.styleFrom(
+                      foregroundColor: theme.colorScheme.error,
+                    ),
+                  ),
+                ],
               ),
-            ),
           ],
+        ),
         ),
       ),
     );
+  }
+
+  Future<void> _edit(BuildContext context, WidgetRef ref) async {
+    final edited = await EditReminderDialog.show(
+      context,
+      initialTitle: reminder.title,
+      initialBody: reminder.body,
+      initialExpiresAt: reminder.expiresAt,
+    );
+    if (edited == null || !context.mounted) return;
+
+    await ref.read(updateReminderProvider.notifier).update(
+          reminderId: reminder.reminderId,
+          title: edited.title,
+          body: edited.body,
+          expiresAt: edited.expiresAt,
+          clearExpiration: edited.clearExpiration,
+        );
   }
 
   Future<void> _confirm(

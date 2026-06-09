@@ -5,6 +5,7 @@ import 'package:speakup_connect/config/app_config.dart';
 import 'package:speakup_connect/core/constants/route_constants.dart';
 import 'package:speakup_connect/core/permissions/providers/permission_provider.dart';
 import 'package:speakup_connect/features/auth/presentation/providers/auth_provider.dart';
+import 'package:speakup_connect/features/groups/presentation/providers/group_provider.dart';
 import 'package:speakup_connect/features/organization/presentation/providers/organization_provider.dart';
 import 'package:speakup_connect/features/organization/presentation/providers/user_profile_provider.dart';
 import 'package:speakup_connect/features/settings/presentation/providers/settings_provider.dart';
@@ -25,6 +26,7 @@ class SettingsScreen extends ConsumerWidget {
     final pendingJoinCount = ref.watch(pendingMemberApplicationCountProvider);
     final supportsGrades = ref.watch(orgSupportsStudentGradesProvider);
     final canTriageReports = ref.watch(canAccessAdminReportsProvider);
+    final canManageGroups = ref.watch(canManageGroupsProvider);
 
     final orgName = orgConfigAsync.value?.displayName ?? '—';
     final theme = Theme.of(context);
@@ -143,7 +145,9 @@ class SettingsScreen extends ConsumerWidget {
           const Divider(),
 
           // --- Admin ---
-          if (profile?.isAdmin == true || canTriageReports) ...[
+          if (profile?.isAdmin == true ||
+              canTriageReports ||
+              canManageGroups) ...[
             const _SectionHeader(title: 'Administration'),
             if (canTriageReports)
               ListTile(
@@ -153,6 +157,15 @@ class SettingsScreen extends ConsumerWidget {
                 trailing: const Icon(Icons.chevron_right_rounded),
                 onTap: () => context.push(Routes.adminDashboard),
               ),
+            if (profile?.isAdmin == true || canManageGroups) ...[
+              ListTile(
+                leading: const Icon(Icons.groups_outlined),
+                title: const Text('Groups & Clubs'),
+                subtitle: const Text('Create groups and manage member rosters'),
+                trailing: const Icon(Icons.chevron_right_rounded),
+                onTap: () => context.push(Routes.groupsList),
+              ),
+            ],
             if (profile?.isAdmin == true) ...[
               ListTile(
                 leading: SizedBox(

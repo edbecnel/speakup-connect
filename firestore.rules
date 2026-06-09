@@ -365,7 +365,8 @@ service cloud.firestore {
                         && request.auth.uid == userId
                         && request.resource.data.diff(resource.data)
                             .affectedKeys().hasOnly(['read', 'readAt']);
-          allow delete: if isSignedIn() && request.auth.uid == userId;
+          allow delete: if (isSignedIn() && request.auth.uid == userId)
+                        || isAdminOrAbove(orgId);
           // Client creates are not allowed — only Cloud Functions write feed entries.
           allow create: if false;
         }
@@ -410,16 +411,19 @@ service cloud.firestore {
       }
 
       // ── Groups ──────────────────────────────────────────────────────────────
+      // Group creation/deletion is org-admin only; roster edits also allowed
+      // for holders of the manageGroupRoster permission (club advisers, etc.).
       match /groups/{groupId} {
         allow read:   if isSuperAdmin() || isOrgMember(orgId);
         allow create: if isAdminOrAbove(orgId);
-        allow update: if isAdminOrAbove(orgId);
+        allow update: if isAdminOrAbove(orgId)
+                      || hasClaimedPermission('manageGroupRoster');
         allow delete: if isAdminOrAbove(orgId);
 
-        // Group membership
         match /members/{memberId} {
           allow read:  if isSuperAdmin() || isOrgMember(orgId);
-          allow write: if isAdminOrAbove(orgId);
+          allow write: if isAdminOrAbove(orgId)
+                       || hasClaimedPermission('manageGroupRoster');
         }
       }
 
@@ -490,6 +494,17 @@ service cloud.firestore {
       //   - Holders of approveReminders (or admins) may update reminders
       //     (approve / reject). Delivery writes (deliveredAt/publishedAt) are
       //     performed by Cloud Functions via the Admin SDK, which bypass rules.
+      // ── Notification History ────────────────────────────────────────────────
+      // Server-written archive of expired, recalled, and dismissed notifications.
+      match /notification_history/{historyId} {
+        allow read: if isAdminOrAbove(orgId)
+                    || (isSignedIn()
+                        && resource.data.createdBy == request.auth.uid)
+                    || (isSignedIn()
+                        && resource.data.userId == request.auth.uid);
+        allow write: if false;
+      }
+
       match /reminders/{reminderId} {
         allow read:   if isSuperAdmin() || isOrgMember(orgId);
 

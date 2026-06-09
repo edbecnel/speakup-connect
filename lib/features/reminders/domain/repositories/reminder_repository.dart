@@ -21,6 +21,7 @@ abstract class ReminderRepository {
     required String createdBy,
     String? createdByName,
     DateTime? scheduledAt,
+    DateTime? expiresAt,
   });
 
   /// Streams reminders awaiting approval, newest first.
@@ -50,6 +51,24 @@ abstract class ReminderRepository {
     required String reviewerId,
     String? reviewerName,
     required String reason,
+  });
+
+  /// Fetches a single reminder by ID. Returns null when not found.
+  Future<ReminderEntity?> getReminder({
+    required String organizationId,
+    required String reminderId,
+  });
+
+  /// Updates title/body and propagates to all delivered notification copies.
+  ///
+  /// Returns the number of feed entries updated.
+  Future<int> updateReminder({
+    required String organizationId,
+    required String reminderId,
+    required String title,
+    required String body,
+    DateTime? expiresAt,
+    bool clearExpiration = false,
   });
 
   /// Recalls a reminder: deletes the reminder document and removes any copies

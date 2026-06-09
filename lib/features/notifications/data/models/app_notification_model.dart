@@ -11,6 +11,7 @@ class AppNotificationModel extends AppNotificationEntity {
     required super.createdAt,
     super.read,
     super.readAt,
+    super.expiresAt,
     super.data,
   });
 
@@ -27,6 +28,7 @@ class AppNotificationModel extends AppNotificationEntity {
       body: data['body'] as String? ?? '',
       read: data['read'] as bool? ?? false,
       readAt: toDate(data['readAt']),
+      expiresAt: toDate(data['expiresAt']),
       data: (data['data'] as Map<String, dynamic>?) ?? const {},
       createdAt: toDate(data['createdAt']) ?? DateTime.now(),
     );

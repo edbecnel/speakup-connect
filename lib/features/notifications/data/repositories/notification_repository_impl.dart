@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:speakup_connect/core/constants/app_constants.dart';
 import 'package:speakup_connect/core/errors/app_exception.dart';
 import 'package:speakup_connect/features/notifications/data/models/app_notification_model.dart';
@@ -34,6 +35,7 @@ class NotificationRepositoryImpl implements NotificationRepository {
         .snapshots()
         .map((snap) => snap.docs
             .map((d) => AppNotificationModel.fromFirestore(d.data(), d.id))
+            .where(_isActiveNotification)
             .toList());
   }
 
@@ -92,6 +94,10 @@ class NotificationRepositoryImpl implements NotificationRepository {
               .where((doc) {
                 final data = doc.data();
                 final audience = data['audienceType'] as String? ?? 'all';
+                final expiresAt = _toDate(data['expiresAt']);
+                if (expiresAt != null && !expiresAt.isAfter(DateTime.now())) {
+                  return false;
+                }
                 // Include all org-wide published broadcasts — covers missed
                 // server-side delivery as well as late-approved members.
                 return audience == 'all';
@@ -113,6 +119,7 @@ class NotificationRepositoryImpl implements NotificationRepository {
       title: data['title'] as String? ?? 'New reminder',
       body: data['body'] as String? ?? '',
       read: false,
+      expiresAt: toDate(data['expiresAt']),
       data: {
         'reminderId': doc.id,
         'audienceType': data['audienceType'] as String? ?? 'all',
@@ -123,6 +130,14 @@ class NotificationRepositoryImpl implements NotificationRepository {
           toDate(data['createdAt']) ??
           DateTime.now(),
     );
+  }
+
+  DateTime? _toDate(dynamic v) => v is Timestamp ? v.toDate() : null;
+
+  bool _isActiveNotification(AppNotificationEntity n) {
+    final expiresAt = n.expiresAt;
+    if (expiresAt == null) return true;
+    return expiresAt.isAfter(DateTime.now());
   }
 
   List<AppNotificationEntity> _mergeAlertFeed(
@@ -197,8 +212,14 @@ class NotificationRepositoryImpl implements NotificationRepository {
     required String notificationId,
   }) async {
     try {
-      await _ref(organizationId, userId).doc(notificationId).delete();
-    } on FirebaseException catch (e) {
+      final callable =
+          FirebaseFunctions.instance.httpsCallable('dismissNotification');
+      await callable.call<Map<String, dynamic>>({
+        'orgId': organizationId,
+        'notificationId': notificationId,
+      });
+    } on FirebaseFunctionsException catch (e) {
+      if (e.code == 'permission-denied') throw const PermissionException();
       throw DatabaseException(
         message: e.message ?? 'Failed to delete notification',
         code: e.code,
@@ -212,14 +233,13 @@ class NotificationRepositoryImpl implements NotificationRepository {
     required String userId,
   }) async {
     try {
-      final all = await _ref(organizationId, userId).get();
-      if (all.docs.isEmpty) return;
-      final batch = _firestore.batch();
-      for (final doc in all.docs) {
-        batch.delete(doc.reference);
-      }
-      await batch.commit();
-    } on FirebaseException catch (e) {
+      final callable =
+          FirebaseFunctions.instance.httpsCallable('clearNotificationFeed');
+      await callable.call<Map<String, dynamic>>({
+        'orgId': organizationId,
+      });
+    } on FirebaseFunctionsException catch (e) {
+      if (e.code == 'permission-denied') throw const PermissionException();
       throw DatabaseException(
         message: e.message ?? 'Failed to clear notifications',
         code: e.code,

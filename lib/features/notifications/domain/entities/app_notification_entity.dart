@@ -14,6 +14,7 @@ class AppNotificationEntity {
     required this.createdAt,
     this.read = false,
     this.readAt,
+    this.expiresAt,
     this.data = const {},
   });
 
@@ -29,6 +30,9 @@ class AppNotificationEntity {
   /// Whether the recipient has opened/seen this notification.
   final bool read;
   final DateTime? readAt;
+
+  /// When this feed item should be auto-removed. Mirrors the source reminder.
+  final DateTime? expiresAt;
 
   /// Type-specific payload (e.g. `{ 'reminderId': '...' }`).
   final Map<String, dynamic> data;

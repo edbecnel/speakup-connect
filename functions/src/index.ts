@@ -363,6 +363,113 @@ export const notifyReporterOnStatusChange = onDocumentUpdated(
   },
 );
 
+// ── Notification history & expiration ───────────────────────────────────────
+
+type RemovalReason = 'expired' | 'recalled' | 'user_dismissed' | 'cleared_all';
+
+interface ReminderData {
+  title?: string;
+  body?: string;
+  status?: string;
+  audienceType?: string;
+  audienceId?: string | null;
+  audienceLabel?: string | null;
+  scheduledAt?: admin.firestore.Timestamp | null;
+  deliveredAt?: admin.firestore.Timestamp | null;
+  publishedAt?: admin.firestore.Timestamp | null;
+  expiresAt?: admin.firestore.Timestamp | null;
+  createdBy?: string;
+  createdByName?: string;
+}
+
+async function getFeedCopiesForReminder(
+  orgId: string,
+  reminderId: string,
+): Promise<admin.firestore.QueryDocumentSnapshot[]> {
+  const notifSnap = await db
+    .collectionGroup('notifications')
+    .where('data.reminderId', '==', reminderId)
+    .get();
+  return notifSnap.docs.filter((d) => {
+    const orgDoc = d.ref.parent.parent?.parent.parent;
+    return orgDoc?.id === orgId;
+  });
+}
+
+async function writeBroadcastHistory(
+  orgId: string,
+  reminderId: string,
+  data: ReminderData,
+  reason: RemovalReason,
+  removedBy: string | null,
+  feedCopiesAffected: number,
+): Promise<void> {
+  await db
+    .collection('organizations').doc(orgId)
+    .collection('notification_history')
+    .add({
+      organizationId: orgId,
+      sourceType: 'reminder',
+      sourceId: reminderId,
+      reminderId,
+      title: data.title ?? '',
+      body: data.body ?? '',
+      type: 'reminder',
+      audienceType: data.audienceType ?? 'all',
+      audienceId: data.audienceId ?? null,
+      audienceLabel: data.audienceLabel ?? null,
+      createdBy: data.createdBy ?? null,
+      createdByName: data.createdByName ?? null,
+      publishedAt: data.publishedAt ?? data.deliveredAt ?? null,
+      expiresAt: data.expiresAt ?? null,
+      removedAt: admin.firestore.FieldValue.serverTimestamp(),
+      removalReason: reason,
+      removedBy,
+      feedCopiesAffected,
+    });
+}
+
+async function archiveAndRemoveBroadcast(
+  orgId: string,
+  reminderId: string,
+  reason: RemovalReason,
+  removedBy: string | null,
+): Promise<{ deletedNotifications: number }> {
+  const reminderRef = db
+    .collection('organizations').doc(orgId)
+    .collection('reminders').doc(reminderId);
+  const snap = await reminderRef.get();
+  const data = (snap.data() ?? {}) as ReminderData;
+
+  const toDelete = await getFeedCopiesForReminder(orgId, reminderId);
+
+  if (snap.exists) {
+    await writeBroadcastHistory(
+      orgId,
+      reminderId,
+      data,
+      reason,
+      removedBy,
+      toDelete.length,
+    );
+  }
+
+  let deletedNotifications = 0;
+  for (let i = 0; i < toDelete.length; i += 450) {
+    const batch = db.batch();
+    const slice = toDelete.slice(i, i + 450);
+    for (const d of slice) batch.delete(d.ref);
+    await batch.commit();
+    deletedNotifications += slice.length;
+  }
+
+  if (snap.exists) {
+    await reminderRef.delete();
+  }
+
+  return { deletedNotifications };
+}
+
 // ── Callable: recallReminder ──────────────────────────────────────────────────
 
 /**
@@ -408,7 +515,7 @@ export const recallReminder = onCall(async (request) => {
     throw new HttpsError('not-found', 'Reminder not found.');
   }
 
-  const data = snap.data() as ReminderData & { createdBy?: string };
+  const data = snap.data() as ReminderData;
   const isOwner = data.createdBy === uid;
   if (!isOwner && !isAdmin && !canApprove) {
     throw new HttpsError(
@@ -417,27 +524,12 @@ export const recallReminder = onCall(async (request) => {
     );
   }
 
-  // Remove delivered feed copies (matched by data.reminderId), scoped to this org.
-  const notifSnap = await db
-    .collectionGroup('notifications')
-    .where('data.reminderId', '==', reminderId)
-    .get();
-  const toDelete = notifSnap.docs.filter((d) => {
-    // Path: organizations/{orgId}/users/{uid}/notifications/{id}
-    const orgDoc = d.ref.parent.parent?.parent.parent;
-    return orgDoc?.id === orgId;
-  });
-
-  let deletedNotifications = 0;
-  for (let i = 0; i < toDelete.length; i += 450) {
-    const batch = db.batch();
-    const slice = toDelete.slice(i, i + 450);
-    for (const d of slice) batch.delete(d.ref);
-    await batch.commit();
-    deletedNotifications += slice.length;
-  }
-
-  await reminderRef.delete();
+  const { deletedNotifications } = await archiveAndRemoveBroadcast(
+    orgId,
+    reminderId,
+    'recalled',
+    uid,
+  );
 
   logger.info('recallReminder completed', {
     orgId,
@@ -449,19 +541,229 @@ export const recallReminder = onCall(async (request) => {
   return { ok: true, deletedNotifications };
 });
 
-// ── Reminders: delivery helpers ───────────────────────────────────────────────
+// ── Callable: updateReminder ──────────────────────────────────────────────────
 
-interface ReminderData {
-  title?: string;
-  body?: string;
-  status?: string;
-  audienceType?: string;
-  audienceId?: string | null;
-  audienceLabel?: string | null;
-  scheduledAt?: admin.firestore.Timestamp | null;
-  deliveredAt?: admin.firestore.Timestamp | null;
-  publishedAt?: admin.firestore.Timestamp | null;
-}
+/**
+ * Updates a reminder's title/body and propagates the change to every delivered
+ * in-app notification copy (matched by `data.reminderId`).
+ *
+ * Authorized for the reminder's author or org admins.
+ *
+ * Returns: { ok: true, updatedNotifications: number }
+ */
+export const updateReminder = onCall(async (request) => {
+  if (!request.auth) {
+    throw new HttpsError('unauthenticated', 'Sign in required.');
+  }
+
+  const { orgId, reminderId, title, body, expiresAt, clearExpiresAt } =
+    (request.data ?? {}) as {
+      orgId?: string;
+      reminderId?: string;
+      title?: string;
+      body?: string;
+      expiresAt?: number;
+      clearExpiresAt?: boolean;
+    };
+  if (!orgId || !reminderId) {
+    throw new HttpsError(
+      'invalid-argument',
+      'orgId and reminderId are required.',
+    );
+  }
+
+  const trimmedTitle = (title ?? '').trim();
+  const trimmedBody = (body ?? '').trim();
+  if (!trimmedTitle || !trimmedBody) {
+    throw new HttpsError(
+      'invalid-argument',
+      'title and body are required.',
+    );
+  }
+
+  const uid = request.auth.uid;
+  const token = request.auth.token as Record<string, unknown>;
+  const role = token['role'] as string | undefined;
+  const isAdmin =
+    role === 'admin' || role === 'super_admin' || role === 'owner';
+
+  const reminderRef = db
+    .collection('organizations').doc(orgId)
+    .collection('reminders').doc(reminderId);
+  const snap = await reminderRef.get();
+  if (!snap.exists) {
+    throw new HttpsError('not-found', 'Reminder not found.');
+  }
+
+  const data = snap.data() as ReminderData;
+  const isOwner = data.createdBy === uid;
+  if (!isOwner && !isAdmin) {
+    throw new HttpsError(
+      'permission-denied',
+      'You do not have permission to edit this reminder.',
+    );
+  }
+
+  const reminderUpdate: Record<string, unknown> = {
+    title: trimmedTitle,
+    body: trimmedBody,
+    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+  };
+  if (clearExpiresAt) {
+    reminderUpdate.expiresAt = admin.firestore.FieldValue.delete();
+  } else if (typeof expiresAt === 'number' && expiresAt > 0) {
+    reminderUpdate.expiresAt = admin.firestore.Timestamp.fromMillis(expiresAt);
+  }
+
+  await reminderRef.update(reminderUpdate);
+
+  const toUpdate = await getFeedCopiesForReminder(orgId, reminderId);
+  const feedUpdate: Record<string, unknown> = {
+    title: trimmedTitle,
+    body: trimmedBody,
+  };
+  if (clearExpiresAt) {
+    feedUpdate.expiresAt = admin.firestore.FieldValue.delete();
+  } else if (typeof expiresAt === 'number' && expiresAt > 0) {
+    feedUpdate.expiresAt = admin.firestore.Timestamp.fromMillis(expiresAt);
+  }
+
+  let updatedNotifications = 0;
+  for (let i = 0; i < toUpdate.length; i += 450) {
+    const batch = db.batch();
+    const slice = toUpdate.slice(i, i + 450);
+    for (const d of slice) {
+      batch.update(d.ref, feedUpdate);
+    }
+    await batch.commit();
+    updatedNotifications += slice.length;
+  }
+
+  logger.info('updateReminder completed', {
+    orgId,
+    reminderId,
+    updatedNotifications,
+    by: uid,
+  });
+
+  return { ok: true, updatedNotifications };
+});
+
+// ── Callable: dismissNotification ─────────────────────────────────────────────
+
+/**
+ * Archives and removes a single notification from the caller's feed.
+ */
+export const dismissNotification = onCall(async (request) => {
+  if (!request.auth) {
+    throw new HttpsError('unauthenticated', 'Sign in required.');
+  }
+
+  const { orgId, notificationId } = (request.data ?? {}) as {
+    orgId?: string;
+    notificationId?: string;
+  };
+  if (!orgId || !notificationId) {
+    throw new HttpsError(
+      'invalid-argument',
+      'orgId and notificationId are required.',
+    );
+  }
+
+  const uid = request.auth.uid;
+  const ref = db
+    .collection('organizations').doc(orgId)
+    .collection('users').doc(uid)
+    .collection('notifications').doc(notificationId);
+  const snap = await ref.get();
+  if (!snap.exists) {
+    throw new HttpsError('not-found', 'Notification not found.');
+  }
+
+  const data = snap.data() as Record<string, unknown>;
+  const payload = (data['data'] as Record<string, unknown> | undefined) ?? {};
+
+  await db
+    .collection('organizations').doc(orgId)
+    .collection('notification_history')
+    .add({
+      organizationId: orgId,
+      sourceType: 'notification',
+      sourceId: notificationId,
+      reminderId: (payload['reminderId'] as string | undefined) ?? null,
+      userId: uid,
+      title: (data['title'] as string | undefined) ?? '',
+      body: (data['body'] as string | undefined) ?? '',
+      type: (data['type'] as string | undefined) ?? 'general',
+      expiresAt: data['expiresAt'] ?? null,
+      removedAt: admin.firestore.FieldValue.serverTimestamp(),
+      removalReason: 'user_dismissed',
+      removedBy: uid,
+    });
+
+  await ref.delete();
+  return { ok: true };
+});
+
+// ── Callable: clearNotificationFeed ───────────────────────────────────────────
+
+/**
+ * Archives and removes every notification in the caller's feed.
+ */
+export const clearNotificationFeed = onCall(async (request) => {
+  if (!request.auth) {
+    throw new HttpsError('unauthenticated', 'Sign in required.');
+  }
+
+  const { orgId } = (request.data ?? {}) as { orgId?: string };
+  if (!orgId) {
+    throw new HttpsError('invalid-argument', 'orgId is required.');
+  }
+
+  const uid = request.auth.uid;
+  const feedRef = db
+    .collection('organizations').doc(orgId)
+    .collection('users').doc(uid)
+    .collection('notifications');
+  const all = await feedRef.get();
+  if (all.empty) return { ok: true, cleared: 0 };
+
+  let cleared = 0;
+  for (let i = 0; i < all.docs.length; i += 200) {
+    const slice = all.docs.slice(i, i + 200);
+    const batch = db.batch();
+    for (const doc of slice) {
+      const data = doc.data() as Record<string, unknown>;
+      const payload =
+        (data['data'] as Record<string, unknown> | undefined) ?? {};
+      const historyRef = db
+        .collection('organizations').doc(orgId)
+        .collection('notification_history')
+        .doc();
+      batch.set(historyRef, {
+        organizationId: orgId,
+        sourceType: 'notification',
+        sourceId: doc.id,
+        reminderId: (payload['reminderId'] as string | undefined) ?? null,
+        userId: uid,
+        title: (data['title'] as string | undefined) ?? '',
+        body: (data['body'] as string | undefined) ?? '',
+        type: (data['type'] as string | undefined) ?? 'general',
+        expiresAt: data['expiresAt'] ?? null,
+        removedAt: admin.firestore.FieldValue.serverTimestamp(),
+        removalReason: 'cleared_all',
+        removedBy: uid,
+      });
+      batch.delete(doc.ref);
+      cleared++;
+    }
+    await batch.commit();
+  }
+
+  return { ok: true, cleared };
+});
+
+// ── Reminders: delivery helpers ───────────────────────────────────────────────
 
 /**
  * Resolves the set of recipient user IDs for a reminder based on its audience.
@@ -571,7 +873,7 @@ async function deliverReminder(
   }
 
   // 2. Write in-app feed entries (batched, ≤450 writes per batch).
-  const notification = {
+  const notification: Record<string, unknown> = {
     type: 'reminder',
     title,
     body,
@@ -579,6 +881,9 @@ async function deliverReminder(
     data: { reminderId, audienceType },
     createdAt: admin.firestore.FieldValue.serverTimestamp(),
   };
+  if (claimed.expiresAt) {
+    notification.expiresAt = claimed.expiresAt;
+  }
 
   for (let i = 0; i < recipientIds.length; i += 450) {
     const batch = db.batch();
@@ -731,6 +1036,34 @@ export const publishDueReminders = onSchedule('every 5 minutes', async () => {
   });
 });
 
+// ── Scheduled: expireReminders ────────────────────────────────────────────────
+
+/**
+ * Runs every 5 minutes and archives + removes published reminders whose
+ * `expiresAt` time has passed.
+ */
+export const expireReminders = onSchedule('every 5 minutes', async () => {
+  const now = admin.firestore.Timestamp.now();
+  const expiredSnap = await db
+    .collectionGroup('reminders')
+    .where('status', '==', 'published')
+    .where('expiresAt', '<=', now)
+    .get();
+
+  let expired = 0;
+  for (const doc of expiredSnap.docs) {
+    const orgDoc = doc.ref.parent.parent;
+    if (!orgDoc) continue;
+    await archiveAndRemoveBroadcast(orgDoc.id, doc.id, 'expired', null);
+    expired++;
+  }
+
+  logger.info('expireReminders completed', {
+    candidates: expiredSnap.size,
+    expired,
+  });
+});
+
 // ── Trigger: onMemberApproved ─────────────────────────────────────────────────
 
 /**
@@ -750,6 +1083,7 @@ async function backfillMissedBroadcasts(
   let written = 0;
   for (const doc of publishedSnap.docs) {
     const data = doc.data() as ReminderData;
+    if (data.expiresAt && data.expiresAt.toMillis() <= Date.now()) continue;
     if ((data.audienceType ?? 'all') !== 'all') continue;
 
     const existing = await db
@@ -761,18 +1095,27 @@ async function backfillMissedBroadcasts(
       .get();
     if (!existing.empty) continue;
 
+    const backfillEntry: Record<string, unknown> = {
+      type: 'reminder',
+      title: data.title ?? 'New reminder',
+      body: data.body ?? '',
+      read: false,
+      data: { reminderId: doc.id, audienceType: 'all' },
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+    };
+    if (data.expiresAt) {
+      const expiresAt = data.expiresAt.toMillis();
+      if (expiresAt > Date.now()) {
+        backfillEntry.expiresAt = data.expiresAt;
+      } else {
+        continue;
+      }
+    }
     await db
       .collection('organizations').doc(orgId)
       .collection('users').doc(userId)
       .collection('notifications')
-      .add({
-        type: 'reminder',
-        title: data.title ?? 'New reminder',
-        body: data.body ?? '',
-        read: false,
-        data: { reminderId: doc.id, audienceType: 'all' },
-        createdAt: admin.firestore.FieldValue.serverTimestamp(),
-      });
+      .add(backfillEntry);
     written++;
   }
   return written;

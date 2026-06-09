@@ -23,6 +23,7 @@ abstract class Routes {
   static const String composeReminder = '/reminders/compose';
   static const String reminderApprovals = '/reminders/approvals';
   static const String myBroadcasts = '/reminders/mine';
+  static const String notificationHistory = '/notifications/history';
   static const String profile = '/profile';
   static const String settings = '/settings';
   static const String organizationInfo = '/org/info';
@@ -36,6 +37,10 @@ abstract class Routes {
   static const String enrolledUsers = '/enrolled-users';
   static const String rosterManagement = '/roster';
   static const String schoolGradesSettings = '/school-grades';
+  static const String groupsList = '/groups';
+  static const String createGroup = '/groups/new';
+  static const String groupMembers = '/groups/:groupId/members';
+  static const String addGroupMembers = '/groups/:groupId/members/add';
   static const String accountBlocked = '/account-blocked';
   static const String accountUnenrolled = '/account-unenrolled';
 
@@ -63,4 +68,11 @@ abstract class Routes {
   /// Builds the role assignment path for a concrete [roleId].
   static String adminRoleAssignPath(String roleId) =>
       '/admin/roles/$roleId/assign';
+
+  /// Builds the group members roster path for a concrete [groupId].
+  static String groupMembersPath(String groupId) => '/groups/$groupId/members';
+
+  /// Builds the add-members picker path for a concrete [groupId].
+  static String addGroupMembersPath(String groupId) =>
+      '/groups/$groupId/members/add';
 }

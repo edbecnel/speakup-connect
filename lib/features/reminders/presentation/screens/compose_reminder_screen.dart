@@ -6,6 +6,7 @@ import 'package:speakup_connect/core/permissions/providers/permission_provider.d
 import 'package:speakup_connect/features/organization/presentation/providers/organization_provider.dart';
 import 'package:speakup_connect/features/reminders/domain/entities/reminder_entity.dart';
 import 'package:speakup_connect/features/reminders/presentation/providers/reminder_provider.dart';
+import 'package:speakup_connect/features/reminders/presentation/widgets/expiration_picker_section.dart';
 import 'package:speakup_connect/features/roles/presentation/providers/roles_provider.dart';
 import 'package:speakup_connect/shared/widgets/app_button.dart';
 
@@ -138,6 +139,12 @@ class _ComposeReminderScreenState extends ConsumerState<ComposeReminderScreen> {
               _RolePicker(form: form, notifier: notifier),
             const SizedBox(height: 16),
             _ScheduleSection(form: form, notifier: notifier),
+            const SizedBox(height: 8),
+            ExpirationPickerSection(
+              value: form.expiration,
+              scheduledAt: form.scheduledAt,
+              onChanged: notifier.setExpiration,
+            ),
             const SizedBox(height: 28),
             AppButton.primary(
               label: submitLabel,

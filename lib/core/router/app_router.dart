@@ -18,7 +18,13 @@ import 'package:speakup_connect/features/auth/presentation/screens/login_screen.
 import 'package:speakup_connect/features/auth/presentation/screens/pending_approval_screen.dart';
 import 'package:speakup_connect/features/auth/presentation/screens/register_screen.dart';
 import 'package:speakup_connect/features/auth/presentation/screens/splash_screen.dart';
+import 'package:speakup_connect/features/groups/presentation/providers/group_provider.dart';
+import 'package:speakup_connect/features/groups/presentation/screens/add_group_members_screen.dart';
+import 'package:speakup_connect/features/groups/presentation/screens/create_group_screen.dart';
+import 'package:speakup_connect/features/groups/presentation/screens/group_members_screen.dart';
+import 'package:speakup_connect/features/groups/presentation/screens/groups_list_screen.dart';
 import 'package:speakup_connect/features/notifications/presentation/screens/alerts_screen.dart';
+import 'package:speakup_connect/features/notifications/presentation/screens/notification_history_screen.dart';
 import 'package:speakup_connect/features/organization/presentation/providers/user_profile_provider.dart';
 import 'package:speakup_connect/features/reminders/presentation/screens/compose_reminder_screen.dart';
 import 'package:speakup_connect/features/reminders/presentation/screens/my_broadcasts_screen.dart';
@@ -222,6 +228,11 @@ GoRouter appRouter(Ref ref) {
         builder: (context, state) => const MyBroadcastsScreen(),
       ),
       GoRoute(
+        path: Routes.notificationHistory,
+        name: 'notificationHistory',
+        builder: (context, state) => const NotificationHistoryScreen(),
+      ),
+      GoRoute(
         path: Routes.memberApprovals,
         name: 'memberApprovals',
         builder: (context, state) => const MemberApprovalQueueScreen(),
@@ -240,6 +251,46 @@ GoRouter appRouter(Ref ref) {
         path: Routes.schoolGradesSettings,
         name: 'schoolGradesSettings',
         builder: (context, state) => const SchoolGradesSettingsScreen(),
+      ),
+      GoRoute(
+        path: Routes.groupsList,
+        name: 'groupsList',
+        builder: (context, state) => const GroupsListScreen(),
+      ),
+      GoRoute(
+        path: Routes.createGroup,
+        name: 'createGroup',
+        redirect: (context, state) {
+          final canManage = ref.read(canManageGroupsProvider);
+          return canManage ? null : Routes.groupsList;
+        },
+        builder: (context, state) => const CreateGroupScreen(),
+      ),
+      GoRoute(
+        path: Routes.groupMembers,
+        name: 'groupMembers',
+        builder: (context, state) {
+          final groupId = state.pathParameters['groupId']!;
+          return GroupMembersScreen(groupId: groupId);
+        },
+      ),
+      GoRoute(
+        path: Routes.addGroupMembers,
+        name: 'addGroupMembers',
+        redirect: (context, state) {
+          final canManage = ref.read(canManageGroupsProvider);
+          final groupId = state.pathParameters['groupId'];
+          if (!canManage) {
+            return groupId != null
+                ? Routes.groupMembersPath(groupId)
+                : Routes.groupsList;
+          }
+          return null;
+        },
+        builder: (context, state) {
+          final groupId = state.pathParameters['groupId']!;
+          return AddGroupMembersScreen(groupId: groupId);
+        },
       ),
       GoRoute(
         path: Routes.accountBlocked,

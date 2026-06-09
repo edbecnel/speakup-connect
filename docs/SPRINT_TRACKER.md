@@ -1,7 +1,7 @@
 # Sprint Tracker — SpeakUp Connect
 
-> Last Updated: June 1, 2026  
-> Current Sprint: **Sprint 10** (Reminders Feature)  
+> Last Updated: June 8, 2026  
+> Current Sprint: **Sprint 11** (Groups & Clubs)  
 > Sprint Duration: 2 weeks
 
 > **Development Velocity Note:** Development has significantly outpaced the original planned schedule. As of May 23, 2026 (day 5 of the project), the codebase covers work originally scoped for Sprints 1–6. Sprint numbering below reflects original plan order but completion dates reflect actual delivery dates.
@@ -10,43 +10,67 @@
 
 ## Active Sprint
 
-### Sprint 10 — Reminders Feature
-- **Status:** ✅ Implemented & deployed — backend (rules, indexes, functions) live on `speakup-connect-891dd`; pending on-device smoke test
-- **Goal:** Build the full reminders feature — compose screen, broadcast delivery (push + in-app feed), optional approval workflow, and the `approveReminders` permission.
-- **Scope decisions:** full scheduling (scheduled Cloud Function), robust per-user notification feed (read/unread), and full audience targeting (all / group / role).
-- **Verification:** `flutter analyze` clean (no new errors/warnings); `functions` `npm run build` (tsc, strict) passes; deployed `firestore:rules`, `firestore:indexes`, and all functions (`onReminderPublished` asia-southeast1, `publishDueReminders` us-central1, plus existing functions).
+### Sprint 11 — Groups & Clubs *(client demo priority)*
+- **Status:** 🔄 In Progress
+- **Goal:** Stand up org groups end-to-end so admins can create clubs, manage rosters, and members see their groups — unlocking the **group audience** path in Compose Reminder and a credible client demo narrative (e.g. broadcast to Journalism Club).
+- **Source epic:** [MASTER_TASK_LIST.md → Epic 2.6](MASTER_TASK_LIST.md)
+- **Prerequisite context:** Sprint 10 reminders already read `organizations/{orgId}/groups` and show *"No groups exist yet. Create a group first."* when empty; `onReminderPublished` resolves `group` audience via `groups/{id}/members`. No groups feature code exists in `lib/` yet.
 
-#### 📋 Scope
-- [x] Add `approveReminders` to `AppPermission` enum (+ `displayName`/`groupLabel`) + update `org-admin` seed role (`roles_provider.dart`)
-- [x] Add `requireReminderApproval` boolean field to `organizations/{orgId}` document (entity + model + repository + admin Branding Settings toggle)
-- [x] Firestore data model: `organizations/{orgId}/reminders/{id}` with `status: draft|pending|published|rejected`, `audienceType/audienceId/audienceLabel`, `scheduledAt`, `deliveredAt`, review fields
-- [x] Build `ReminderEntity` + `ReminderModel` (domain + data layers)
-- [x] Build reminder providers — `pendingRemindersProvider`, `myRemindersProvider`, compose-form notifier, submit notifier, review notifier
-- [x] Build Compose Reminder screen — title, body, audience (all / group / role), schedule or send now
-- [x] Submit flow: if `requireReminderApproval == true` AND user lacks `approveReminders` → save as `pending`; otherwise publish directly
-- [x] Build Admin Approval Queue screen — list of `pending` reminders with approve/reject actions
-- [x] Push notification on publish — Cloud Function `onReminderPublished` (FCM fan-out by audience + stale-token pruning)
-- [x] Scheduled publisher — Cloud Function `publishDueReminders` (`every 5 minutes`) for future-scheduled reminders
-- [x] In-app notification feed — per-user `notifications` subcollection written by the publish function; `AlertsScreen` with read/unread; registered `Routes.alerts`
-- [x] Gate Compose button on `broadcastReminders` permission
-- [x] Gate Approval Queue on `approveReminders` permission
-- [x] Firestore security rules for `reminders` (broadcast/approve/pending flow) + per-user `notifications`
-- [x] Composite indexes — `reminders` (status+createdAt, createdBy+createdAt) and collection-group (status+scheduledAt)
+#### 🚀 AI Context Prompt
+> "We are implementing Sprint 11 — Groups & Clubs for SpeakUp Connect. Stack: Flutter 3.44, Riverpod 3.x, go_router, Firebase Firestore. Build the groups feature per Epic 2.6 and `docs/DATABASE_DESIGN.md` (`organizations/{orgId}/groups/{groupId}` + `members` subcollection). Default org: `monhs-ph-001`. Mirror RBAC patterns from classes (`manageGroupRoster` in rules). Compose Reminder already consumes `audienceGroupsProvider` — wire real group CRUD so group-targeted reminders work in-app."
 
-#### Done in this session
-- [x] `flutter analyze` — clean (no new errors/warnings; only pre-existing info lints remain)
-- [x] `functions` `npm run build` — passes under strict tsc
-- [x] Deployed `firestore:rules` + `firestore:indexes`
-- [x] Deployed all Cloud Functions (first 2nd-gen deploy on this project; required Eventarc/Pub-Sub/Cloud Run APIs auto-enabled, artifact cleanup policy set)
+#### 📋 Scope (demo-critical — ship first)
+- [x] Domain: `GroupEntity`, `GroupMemberEntity`, `GroupRepository`, `CreateGroupUseCase`, `AddGroupMemberUseCase`, `GetGroupsUseCase`, `GetMyGroupsUseCase`
+- [x] Data: `GroupModel`, `GroupMemberModel`, `GroupRemoteDataSource`, `GroupRepositoryImpl`
+- [x] Providers: `orgGroupsProvider`, `myGroupsProvider`, `groupMembersProvider` (+ action notifiers)
+- [x] Admin `GroupsListScreen` — searchable list of org groups; entry from Settings (admin section)
+- [x] Admin `CreateGroupScreen` — name, description
+- [x] Admin `GroupMembersScreen` — view roster, add member (user search), remove member, assign `leader` vs `member`
+- [x] Firestore rules: gate `groups` / `members` writes on `manageGroupRoster` (keep `isAdminOrAbove` as fallback), matching `classes` pattern
+- [ ] Seed 2–3 demo groups for MONHS client walkthrough (e.g. Journalism Club, Chess Club)
+- [ ] Verify Compose Reminder **group audience** picker populates and publishes → members appear in Alerts feed
 
-#### Follow-ups / known gaps
-- [ ] On-device smoke test of the full flow (compose → approve → feed entry; scheduled publish)
-- [ ] **Client FCM not wired up project-wide:** the app does not yet register `fcmTokens` or handle incoming messages, so push delivery is a no-op until that's built. The in-app notification feed works regardless. (Pre-existing gap — also affects the Sprint 7 status-change push.)
-- [ ] Once client FCM is added, create the Android notification channels (`reminders`, `status_updates`) referenced by the push payloads.
+#### 📋 Scope (stretch — if time remains)
+- [ ] `GroupDetailScreen` — group info + member list (no chat/news yet)
+- [ ] Show user's groups on Profile screen (Epic 1.13 partial)
+- [ ] Home dashboard tile or section for "My Groups"
+- [ ] Unit test: `CreateGroupUseCase`; widget test: `GroupsListScreen`
+
+#### 🚫 Explicitly out of scope (later sprints)
+- Group chat (Epic 2.11)
+- News board posts per group (Epic 2.8)
+- Bulk member import
+- Classes / homeroom management (separate `classes/` collection — not started in app)
+
+#### 👁️ Stakeholder Demo Asset
+- **Asset Type:** Screen recording
+- **Location:** `./docs/demos/sprint-011-groups.mp4`
+- **Stakeholder Note:** Admin creates a club, adds student members, assigns a leader; member sees the group on profile; admin broadcasts a reminder to that group and recipients see it in Alerts.
+
+#### Next up
+- **Sprint 12 — Client FCM (Epic 1.12):** standard Android push notifications (lock screen / background) without opening the app. Server-side send paths already exist (`onReminderPublished`, `notifyReporterOnStatusChange`); client must register `fcmTokens` and handle taps.
 
 ---
 
 ## Completed Sprints
+
+### Sprint 10 — Reminders Feature
+- **Date/Time:** June 1, 2026 (implemented); closed June 8, 2026
+- **Status:** ✅ Complete — core scope shipped & deployed; follow-ups deferred (see below)
+- **Goal:** Full reminders feature — compose, broadcast delivery (push + in-app feed), optional approval workflow, `approveReminders` permission.
+- **Verification:** `flutter analyze` clean; `functions` `npm run build` passes; deployed `firestore:rules`, `firestore:indexes`, and Cloud Functions on `speakup-connect-891dd`.
+
+#### 📝 Done
+- [x] All Sprint 10 scope items (see git history / `lib/features/reminders/`)
+- [x] `onReminderPublished` + `publishDueReminders` Cloud Functions live
+- [x] In-app Alerts feed + approval queue + compose screen with all / group / role audience
+
+#### Deferred follow-ups
+- [ ] On-device smoke test: compose → approve → feed entry; scheduled publish *(can run anytime)*
+- [ ] **Group audience demo** — in progress via Sprint 11
+- [ ] **Client FCM (Epic 1.12)** — scheduled as **Sprint 12** (after Groups)
+
+---
 
 ### Sprint 9 — RBAC Phase 2: Permission Enforcement + UX
 - **Date/Time:** June 1, 2026
@@ -176,6 +200,31 @@ Each sprint entry follows this format:
 - **Location:** ./docs/demos/sprint-NNN-[slug].png
 - **Stakeholder Note:** What this delivers from the roadmap perspective
 ```
+
+### Sprint 12 — Client FCM & Push Notifications *(planned — after Sprint 11)*
+- **Status:** 📋 Planned
+- **Goal:** Wire `firebase_messaging` on Android so users receive system notifications when the app is backgrounded or closed. Unblocks push delivery for reminders, report status updates, and future broadcasts.
+- **Source epic:** [MASTER_TASK_LIST.md → Epic 1.12](MASTER_TASK_LIST.md)
+- **Prerequisite:** Sprint 11 Groups complete (demo flow: group reminder → verify push on member device). Server Cloud Functions already call `admin.messaging()` when `users/{uid}.fcmTokens` is populated.
+
+#### 📋 Scope
+- [ ] `FcmService` (or `core/notifications/`) — init `FirebaseMessaging`, request permission (Android 13+)
+- [ ] On login / app start: get token, `arrayUnion` into `organizations/{orgId}/users/{uid}.fcmTokens`
+- [ ] On token refresh: update Firestore; on logout: `arrayRemove` current device token
+- [ ] Android notification channels: `reminders`, `status_updates` (IDs already referenced in Cloud Function payloads)
+- [ ] Foreground: in-app banner or local notification when message received while app open
+- [ ] Background / terminated: tap navigates to `Routes.alerts` or report detail via `data.type` + `reminderId` / `reportId`
+- [ ] Respect `notificationPreferences` (`reminders`, `statusUpdates`) before showing local UI (server already skips push when opted out)
+- [ ] On-device test: publish group reminder → notification appears in shade without opening app; tap opens Alerts
+
+#### 🚫 Out of scope (defer)
+- iOS APNs setup
+- Admin FCM topic subscribe/unsubscribe (master list item — evaluate if still needed vs per-user tokens)
+- Epic 1.11 new-report admin topic push
+
+#### 👁️ Stakeholder Demo Asset
+- **Asset Type:** Screen recording (phone locked → notification arrives → tap → Alerts)
+- **Location:** `./docs/demos/sprint-012-fcm-push.mp4`
 
 ---
 
