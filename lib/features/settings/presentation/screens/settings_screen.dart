@@ -126,6 +126,18 @@ class SettingsScreen extends ConsumerWidget {
 
           const Divider(),
 
+          // --- Help ---
+          const _SectionHeader(title: 'Help & Support'),
+          ListTile(
+            leading: const Icon(Icons.help_outline_rounded),
+            title: const Text('Help Center'),
+            subtitle: const Text('Guides for members and administrators'),
+            trailing: const Icon(Icons.chevron_right_rounded),
+            onTap: () => context.push(Routes.helpHub),
+          ),
+
+          const Divider(),
+
           // --- About ---
           const _SectionHeader(title: 'About'),
           ListTile(

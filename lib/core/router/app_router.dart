@@ -25,6 +25,8 @@ import 'package:speakup_connect/features/groups/presentation/screens/create_grou
 import 'package:speakup_connect/features/groups/presentation/screens/edit_group_position_roles_screen.dart';
 import 'package:speakup_connect/features/groups/presentation/screens/group_members_screen.dart';
 import 'package:speakup_connect/features/groups/presentation/screens/groups_list_screen.dart';
+import 'package:speakup_connect/features/help/presentation/screens/help_article_screen.dart';
+import 'package:speakup_connect/features/help/presentation/screens/help_hub_screen.dart';
 import 'package:speakup_connect/features/notifications/presentation/screens/alerts_screen.dart';
 import 'package:speakup_connect/features/notifications/presentation/screens/notification_history_screen.dart';
 import 'package:speakup_connect/features/organization/presentation/providers/user_profile_provider.dart';
@@ -206,6 +208,19 @@ GoRouter appRouter(Ref ref) {
         path: Routes.settings,
         name: 'settings',
         builder: (context, state) => const SettingsScreen(),
+      ),
+      GoRoute(
+        path: Routes.helpHub,
+        name: 'helpHub',
+        builder: (context, state) => const HelpHubScreen(),
+      ),
+      GoRoute(
+        path: Routes.helpArticle,
+        name: 'helpArticle',
+        builder: (context, state) {
+          final articleId = state.pathParameters['articleId']!;
+          return HelpArticleScreen(articleId: articleId);
+        },
       ),
 
       // --- Alerts & Reminders ---

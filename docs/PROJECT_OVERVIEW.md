@@ -22,11 +22,12 @@ The platform provides:
 - News board where school groups and organizations post updates
 - Bulletin board for organization-wide admin announcements
 - Student/member reminders broadcast by teachers, admins, or role-authorized users
-- Admin-defined groups and clubs (e.g., Journalism Club, Chess Club, Drum and Lyre Corps)
+- Admin-defined groups and clubs (e.g., Journalism Club, Chess Club, Drum and Lyre Corps) with customizable club positions (President, Treasurer, etc.)
+- In-app Help Center with **per-organization** member and administrator guides (each tenant ships its own markdown; generic `_default` fallback for new orgs)
 
 **Organization & Administration**
 - Custom app name per organization (e.g., "SpeakUp MONHSIAN")
-- Student/member roster management with import support (CSV, text, Word, PDF)
+- Student/member roster management — admin can provision students with school ID login; bulk import (CSV, text, Word, PDF) planned
 - Apply-to-join signup flow: students find their school and apply using their name and school-issued ID
 - Multi-language support with per-user language selection
 - Customizable community rules displayed at signup and on the main page

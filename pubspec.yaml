@@ -43,6 +43,7 @@ dependencies:
   google_fonts: ^6.2.1
   flutter_svg: ^2.0.10+1
   lottie: ^3.1.3
+  flutter_markdown: ^0.7.7+1
 
   # --- Utilities ---
   intl: ^0.19.0
@@ -85,6 +86,8 @@ flutter:
     - assets/images/
     - assets/icons/
     - assets/lottie/
+    - assets/help/_default/
+    - assets/help/orgs/monhs-ph-001/
 
   # Uncomment to add custom fonts:
   # fonts:

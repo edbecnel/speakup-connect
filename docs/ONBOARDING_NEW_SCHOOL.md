@@ -231,6 +231,18 @@ flutter run --flavor {orgId} -t lib/main_{orgId}.dart -d <device-id>
 flutter build appbundle --flavor {orgId} -t lib/main_{orgId}.dart --release
 ```
 
+### 5.5b Organization-specific help (in-app)
+
+Each tenant ships its own Help Center content — schools, LGUs, and other org types differ in sign-in, menus, and enabled features.
+
+- [ ] Create `docs/help/orgs/{orgId}/MEMBER_GUIDE.md` and `ADMIN_GUIDE.md` (copy from [`docs/help/_default/`](../help/_default/) or [MONHS example](../help/orgs/monhs-ph-001/))
+- [ ] Copy to `assets/help/orgs/{orgId}/member_guide.md` and `admin_guide.md`
+- [ ] Register `assets/help/orgs/{orgId}/` in `pubspec.yaml`
+- [ ] Remove or tailor school-only sections (student ID login, roster, grades) for non-school org types
+- [ ] Smoke-test **Settings → Help Center** on a device signed into `{orgId}`
+
+See [docs/help/README.md](../help/README.md) for layout and fallback behavior.
+
 ### 5.6 Verification before handoff
 
 - [ ] Home-screen icon label reads **`Speakup {shortName}`** (not `Speakup Connect`)
@@ -255,6 +267,7 @@ These are configured in **Firestore** (`organizations/{orgId}`) or the **admin p
 | In-app org display name | `displayName` on org document (splash: "SpeakUp {displayName}") |
 | Report categories, roles, permissions | Admin screens |
 | Reminder approval toggle | Admin branding settings |
+| In-app Help Center text | `docs/help/orgs/{orgId}/` + `assets/help/orgs/{orgId}/` (requires app rebuild to ship new assets) |
 
 These **require a new client build** (or reinstall):
 

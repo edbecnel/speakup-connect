@@ -1,7 +1,7 @@
 # Sprint Tracker — SpeakUp Connect
 
-> Last Updated: June 8, 2026  
-> Current Sprint: **Sprint 11** (Groups & Clubs) — reminder enhancements (Epic 2.9.1) shipped in parallel  
+> Last Updated: June 5, 2026  
+> Current Sprint: **Sprint 11** (Groups & Clubs) — shipped with student roster, club positions, and in-app help  
 > Sprint Duration: 2 weeks
 
 > **Development Velocity Note:** Development has significantly outpaced the original planned schedule. As of May 23, 2026 (day 5 of the project), the codebase covers work originally scoped for Sprints 1–6. Sprint numbering below reflects original plan order but completion dates reflect actual delivery dates.
@@ -11,10 +11,9 @@
 ## Active Sprint
 
 ### Sprint 11 — Groups & Clubs *(client demo priority)*
-- **Status:** 🔄 In Progress
-- **Goal:** Stand up org groups end-to-end so admins can create clubs, manage rosters, and members see their groups — unlocking the **group audience** path in Compose Reminder and a credible client demo narrative (e.g. broadcast to Journalism Club).
+- **Status:** ✅ Complete — commit `828738e` and follow-ups
+- **Goal:** Stand up org groups end-to-end so admins can create clubs, manage rosters, assign club positions, and members see their groups — unlocking the **group audience** path in Compose Reminder and a credible client demo narrative (e.g. broadcast to Journalism Club).
 - **Source epic:** [MASTER_TASK_LIST.md → Epic 2.6](MASTER_TASK_LIST.md)
-- **Prerequisite context:** Sprint 10 reminders already read `organizations/{orgId}/groups` and show *"No groups exist yet. Create a group first."* when empty; `onReminderPublished` resolves `group` audience via `groups/{id}/members`. No groups feature code exists in `lib/` yet.
 
 #### 🚀 AI Context Prompt
 > "We are implementing Sprint 11 — Groups & Clubs for SpeakUp Connect. Stack: Flutter 3.44, Riverpod 3.x, go_router, Firebase Firestore. Build the groups feature per Epic 2.6 and `docs/DATABASE_DESIGN.md` (`organizations/{orgId}/groups/{groupId}` + `members` subcollection). Default org: `monhs-ph-001`. Mirror RBAC patterns from classes (`manageGroupRoster` in rules). Compose Reminder already consumes `audienceGroupsProvider` — wire real group CRUD so group-targeted reminders work in-app."
@@ -24,11 +23,16 @@
 - [x] Data: `GroupModel`, `GroupMemberModel`, `GroupRemoteDataSource`, `GroupRepositoryImpl`
 - [x] Providers: `orgGroupsProvider`, `myGroupsProvider`, `groupMembersProvider` (+ action notifiers)
 - [x] Admin `GroupsListScreen` — searchable list of org groups; entry from Settings (admin section)
-- [x] Admin `CreateGroupScreen` — name, description
-- [x] Admin `GroupMembersScreen` — view roster, add member (user search), remove member, assign `leader` vs `member`
+- [x] Admin `CreateGroupScreen` — name, description, optional club position definitions
+- [x] Admin `GroupMembersScreen` — view roster, add member (user search), remove member, assign `leader` vs `member`, assign club position
+- [x] `EditGroupPositionRolesScreen` — customize offices (President, Treasurer, etc.) per group
+- [x] `positionRoles` on group docs + `positionRoleId` on member docs; SSLG seed defaults
+- [x] In-app **Seed Demo Groups** + `scripts/seed_groups.js` (SPJ, Drum and Lyre Corps, SSLG)
 - [x] Firestore rules: gate `groups` / `members` writes on `manageGroupRoster` (keep `isAdminOrAbove` as fallback), matching `classes` pattern
-- [ ] Seed MONHS demo groups via `scripts/seed_groups.js`: **SPJ** (program cohort, not a club), **Drum and Lyre Corps**, **SSLG**
-- [ ] Verify Compose Reminder **group audience** picker populates and publishes → members appear in Alerts feed
+- [x] **Student roster:** `AddStudentScreen`, `provisionStudent` Cloud Function, student ID login (ID as password)
+- [x] **Response required** on reminders — recipients must respond before dismissing
+- [x] In-app help: per-org Member + Admin guides (`docs/help/orgs/{orgId}/`, `assets/help/`, Settings → Help Center; `_default` fallback)
+- [ ] Verify Compose Reminder **group audience** picker populates and publishes → members appear in Alerts feed (on-device smoke test)
 
 #### 📋 Scope (stretch — if time remains)
 - [ ] `GroupDetailScreen` — group info + member list (no chat/news yet)

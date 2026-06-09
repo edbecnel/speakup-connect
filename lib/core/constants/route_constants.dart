@@ -26,6 +26,8 @@ abstract class Routes {
   static const String notificationHistory = '/notifications/history';
   static const String profile = '/profile';
   static const String settings = '/settings';
+  static const String helpHub = '/help';
+  static const String helpArticle = '/help/:articleId';
   static const String organizationInfo = '/org/info';
   static const String announcements = '/announcements';
 
@@ -81,4 +83,7 @@ abstract class Routes {
   /// Builds the club positions editor path for a concrete [groupId].
   static String editGroupPositionRolesPath(String groupId) =>
       '/groups/$groupId/roles';
+
+  /// Builds the help article path for a concrete [articleId] (`member`, `admin`).
+  static String helpArticlePath(String articleId) => '/help/$articleId';
 }
