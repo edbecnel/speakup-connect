@@ -14,7 +14,7 @@ class ThemeModeNotifier extends _$ThemeModeNotifier {
   ThemeMode build() {
     // Load persisted value asynchronously and update state when ready.
     _loadSavedMode();
-    return ThemeMode.system;
+    return ThemeMode.light;
   }
 
   Future<void> _loadSavedMode() async {
@@ -23,7 +23,7 @@ class ThemeModeNotifier extends _$ThemeModeNotifier {
     if (saved != null) {
       state = ThemeMode.values.firstWhere(
         (m) => m.name == saved,
-        orElse: () => ThemeMode.system,
+        orElse: () => ThemeMode.light,
       );
     }
   }

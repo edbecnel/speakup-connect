@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:speakup_connect/core/theme/app_colors.dart';
 import 'package:speakup_connect/features/organization/domain/entities/organization_config_entity.dart';
+import 'package:speakup_connect/flavor_config.dart';
 
 /// Persists org branding fields (display name + theme colors) to
 /// [SharedPreferences] so they are available on the very first frame of
@@ -26,6 +27,7 @@ class OrgConfigCacheService {
       'org_require_reminder_approval';
   static const String _keyAllowMemberProfilePhotos =
       'org_allow_member_profile_photos';
+  static const String _keyOrganizationType = 'org_type';
 
   /// Saves the branding fields from [config] to local storage.
   static Future<void> save(OrganizationConfigEntity config) async {
@@ -42,6 +44,7 @@ class OrgConfigCacheService {
       _keyAllowMemberProfilePhotos,
       config.allowMemberProfilePhotos,
     );
+    await prefs.setString(_keyOrganizationType, config.type.value);
   }
 
   /// Loads cached branding, or returns null if no cache exists yet
@@ -52,12 +55,16 @@ class OrgConfigCacheService {
     final primaryHex = prefs.getString(_keyPrimaryColor);
     final secondaryHex = prefs.getString(_keySecondaryColor);
     if (name == null || primaryHex == null || secondaryHex == null) return null;
+    final typeValue = prefs.getString(_keyOrganizationType);
     return CachedOrgBranding(
       displayName: name,
       colors: OrgThemeColors(
         primary: _fromHex(primaryHex),
         secondary: _fromHex(secondaryHex),
       ),
+      organizationType: typeValue != null
+          ? OrganizationType.fromValue(typeValue)
+          : FlavorConfig.instance.orgDefaults?.type,
       requireReminderApproval:
           prefs.getBool(_keyRequireReminderApproval) ?? false,
       allowMemberProfilePhotos:
@@ -82,12 +89,14 @@ class CachedOrgBranding {
   const CachedOrgBranding({
     required this.displayName,
     required this.colors,
+    this.organizationType,
     this.requireReminderApproval = false,
     this.allowMemberProfilePhotos = false,
   });
 
   final String displayName;
   final OrgThemeColors colors;
+  final OrganizationType? organizationType;
   final bool requireReminderApproval;
   final bool allowMemberProfilePhotos;
 }

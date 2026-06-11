@@ -25,16 +25,24 @@ abstract class AppConfig {
   /// Shown on the splash screen and used as the offline display-name
   /// fallback before Firestore config loads.
   static String get clientDisplayName {
+    final baked = FlavorConfig.instance.orgDefaults?.displayName;
+    if (baked != null) return baked;
+
     final name = FlavorConfig.instance.appDisplayName;
     if (name.startsWith('Speakup ')) {
       return name.substring('Speakup '.length);
     }
-    return 'MONHS';
+    return 'Connect';
   }
 
   /// Default fallback theme colors used before org config loads.
-  static const OrgThemeColors defaultThemeColors = OrgThemeColors(
-    primary: AppColors.primary,
-    secondary: AppColors.secondary,
-  );
+  static OrgThemeColors get defaultThemeColors {
+    final baked = FlavorConfig.instance.orgDefaults?.themeColors;
+    if (baked != null) return baked;
+
+    return const OrgThemeColors(
+      primary: AppColors.primary,
+      secondary: AppColors.secondary,
+    );
+  }
 }

@@ -9,6 +9,7 @@ import 'package:speakup_connect/features/organization/data/repositories/organiza
 import 'package:speakup_connect/features/organization/data/services/org_config_cache_service.dart';
 import 'package:speakup_connect/features/organization/domain/entities/organization_config_entity.dart';
 import 'package:speakup_connect/features/organization/domain/repositories/organization_repository.dart';
+import 'package:speakup_connect/flavor_config.dart';
 
 part 'organization_provider.g.dart';
 
@@ -73,18 +74,27 @@ class OrganizationConfig extends _$OrganizationConfig {
       return config;
     } catch (_) {
       if (cached != null) {
+        final baked = FlavorConfig.instance.orgDefaults;
         return OrganizationConfigModel(
           organizationId: orgId,
           displayName: cached.displayName,
-          type: OrganizationType.school,
+          type: cached.organizationType ??
+              baked?.type ??
+              OrganizationType.other,
           themeColors: cached.colors,
           allowAnonymousReports: true,
-          reportCodePrefix: 'ORG',
+          reportCodePrefix:
+              baked?.effectiveReportCodePrefix ?? AppConfig.clientDisplayName,
           requireReminderApproval: cached.requireReminderApproval,
           allowMemberProfilePhotos: cached.allowMemberProfilePhotos,
         );
       }
-      return OrganizationConfigModel.offline();
+
+      final fallback = OrganizationConfigModel.offline();
+      if (FlavorConfig.instance.hasBakedOrgDefaults) {
+        await OrgConfigCacheService.save(fallback);
+      }
+      return fallback;
     }
   }
 

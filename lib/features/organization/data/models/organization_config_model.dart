@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:speakup_connect/client_org_defaults.dart';
 import 'package:speakup_connect/config/app_config.dart';
 import 'package:speakup_connect/core/constants/app_constants.dart';
 import 'package:speakup_connect/core/theme/app_colors.dart';
 import 'package:speakup_connect/features/organization/domain/entities/organization_config_entity.dart';
+import 'package:speakup_connect/flavor_config.dart';
 
 /// Firestore data model for organization configuration.
 ///
@@ -119,18 +121,39 @@ class OrganizationConfigModel extends OrganizationConfigEntity {
     return '#${color.toARGB32().toRadixString(16).substring(2).toUpperCase()}';
   }
 
-  /// Returns a minimal offline-safe config using the app-level defaults
-  /// from [AppConfig]. Used when Firestore is unreachable and no local
-  /// cache exists (e.g., the very first launch with no network).
-  ///
-  /// The [organizationId] is read from [AppConfig.defaultOrganizationId] —
-  /// the only place in the codebase where a specific org ID is configured.
-  factory OrganizationConfigModel.offline() => OrganizationConfigModel(
-        organizationId: AppConfig.defaultOrganizationId,
-        displayName: AppConfig.clientDisplayName,
-        type: OrganizationType.other,
-        themeColors: AppConfig.defaultThemeColors,
-        allowAnonymousReports: false,
-        reportCodePrefix: 'ORG',
+  /// Client-build defaults baked into the APK (see [FlavorConfig.orgDefaults]).
+  factory OrganizationConfigModel.fromClientDefaults(
+    ClientOrgDefaults defaults, {
+    required String organizationId,
+  }) =>
+      OrganizationConfigModel(
+        organizationId: organizationId,
+        displayName: defaults.displayName,
+        type: defaults.type,
+        themeColors: defaults.themeColors,
+        allowAnonymousReports: true,
+        reportCodePrefix: defaults.effectiveReportCodePrefix,
       );
+
+  /// Returns a minimal offline-safe config using flavor defaults for client
+  /// builds, or generic [AppConfig] values for the standard app.
+  factory OrganizationConfigModel.offline() {
+    final orgId = AppConfig.defaultOrganizationId;
+    final baked = FlavorConfig.instance.orgDefaults;
+    if (baked != null && orgId.isNotEmpty) {
+      return OrganizationConfigModel.fromClientDefaults(
+        baked,
+        organizationId: orgId,
+      );
+    }
+
+    return OrganizationConfigModel(
+      organizationId: orgId,
+      displayName: AppConfig.clientDisplayName,
+      type: OrganizationType.other,
+      themeColors: AppConfig.defaultThemeColors,
+      allowAnonymousReports: false,
+      reportCodePrefix: 'ORG',
+    );
+  }
 }
