@@ -17,6 +17,8 @@ If your application is still **pending approval**, wait for an administrator to 
 
 After an admin resets your password, sign in with the new password using **either** identifier.
 
+To change your password yourself while signed in, use **Settings → Account → Change Password**. You must know your current password. If you forgot it, ask an administrator to reset it.
+
 ---
 
 ## Settings
@@ -24,6 +26,7 @@ After an admin resets your password, sign in with the new password using **eithe
 Open **Settings** from the bottom navigation for:
 
 - **Your account** — username/student ID and contact email (members can update contact email)
+- **Change Password** — enter your current password and a new password twice (use the eye icon to show or hide each field; minimum 8 characters for the new password)
 - **My Groups & Clubs** — full list of your group memberships
 - **Browse Groups & Clubs** — request to join open groups (when enabled)
 - **Theme**

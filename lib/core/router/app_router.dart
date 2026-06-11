@@ -48,6 +48,7 @@ import 'package:speakup_connect/features/roles/presentation/screens/capabilities
 import 'package:speakup_connect/features/roles/presentation/screens/role_editor_screen.dart';
 import 'package:speakup_connect/features/roles/presentation/screens/roles_management_screen.dart';
 import 'package:speakup_connect/features/roles/presentation/screens/user_assignments_screen.dart';
+import 'package:speakup_connect/features/settings/presentation/screens/change_password_screen.dart';
 import 'package:speakup_connect/features/settings/presentation/screens/settings_screen.dart';
 
 part 'app_router.g.dart';
@@ -213,6 +214,11 @@ GoRouter appRouter(Ref ref) {
         path: Routes.settings,
         name: 'settings',
         builder: (context, state) => const SettingsScreen(),
+      ),
+      GoRoute(
+        path: Routes.changePassword,
+        name: 'changePassword',
+        builder: (context, state) => const ChangePasswordScreen(),
       ),
       GoRoute(
         path: Routes.helpHub,

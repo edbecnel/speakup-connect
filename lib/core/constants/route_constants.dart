@@ -30,6 +30,7 @@ abstract class Routes {
   static const String notificationHistory = '/notifications/history';
   static const String profile = '/profile';
   static const String settings = '/settings';
+  static const String changePassword = '/settings/change-password';
   static const String helpHub = '/help';
   static const String helpArticle = '/help/:articleId';
   static const String organizationInfo = '/org/info';

@@ -124,6 +124,19 @@ Below your name and organization:
 
 Your student ID is assigned by the school and cannot be changed here.
 
+### Changing your password
+
+You can update your password yourself after signing in:
+
+1. Open **Settings → Account → Change Password**
+2. Enter your **current password**
+3. Enter your **new password** and **confirm** it (at least 8 characters)
+4. Tap **Update Password**
+
+Each field has an **eye icon** to show or hide what you type. Your new password must be different from your current one.
+
+If you forgot your current password, ask a school administrator to **reset** it for you — you cannot change it without knowing the old password.
+
 ### Other settings
 
 - **My Groups & Clubs** — full list of groups you belong to, with your role and club position

@@ -41,6 +41,8 @@ class AuthException extends AppException {
         return 'Invalid email, student ID, or password.';
       case 'wrong-password':
         return 'Incorrect password. Please try again.';
+      case 'requires-recent-login':
+        return 'For security, sign out and sign in again, then try changing your password.';
       case 'email-already-in-use':
         return 'An account already exists with this email.';
       case 'weak-password':

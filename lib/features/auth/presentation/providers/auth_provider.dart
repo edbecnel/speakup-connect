@@ -110,4 +110,22 @@ class AuthNotifier extends _$AuthNotifier {
       state = AsyncError(e, StackTrace.current);
     }
   }
+
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    state = const AsyncLoading();
+    try {
+      await ref.read(authRepositoryProvider).changePassword(
+            currentPassword: currentPassword,
+            newPassword: newPassword,
+          );
+      state = const AsyncData(null);
+    } on AppException catch (e) {
+      state = AsyncError(e.toFailure(), StackTrace.current);
+    } catch (e) {
+      state = AsyncError(e, StackTrace.current);
+    }
+  }
 }

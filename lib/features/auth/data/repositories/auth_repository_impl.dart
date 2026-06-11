@@ -121,6 +121,43 @@ class AuthRepositoryImpl implements AuthRepository {
     }
   }
 
+  @override
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    final user = _firebaseAuth.currentUser;
+    if (user == null) {
+      throw const AuthException(
+        message: 'You must be signed in to change your password.',
+        code: 'user-not-found',
+      );
+    }
+
+    final email = user.email;
+    if (email == null || email.isEmpty) {
+      throw const AuthException(
+        message:
+            'Your account cannot change its password here. Contact your administrator.',
+        code: 'invalid-email',
+      );
+    }
+
+    try {
+      final credential = EmailAuthProvider.credential(
+        email: email,
+        password: currentPassword,
+      );
+      await user.reauthenticateWithCredential(credential);
+      await user.updatePassword(newPassword);
+    } on FirebaseAuthException catch (e) {
+      throw AuthException(
+        message: e.message ?? 'Password change failed',
+        code: e.code,
+      );
+    }
+  }
+
   UserEntity _mapUser(User user) {
     return UserEntity(
       uid: user.uid,

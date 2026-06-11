@@ -146,12 +146,7 @@ class SettingsScreen extends ConsumerWidget {
             leading: const Icon(Icons.lock_outline_rounded),
             title: const Text('Change Password'),
             trailing: const Icon(Icons.chevron_right_rounded),
-            onTap: () {
-              // TODO: Navigate to change password — Sprint 2
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Change password — coming soon')),
-              );
-            },
+            onTap: () => context.push(Routes.changePassword),
           ),
           ListTile(
             leading: const Icon(Icons.notifications_outlined),
