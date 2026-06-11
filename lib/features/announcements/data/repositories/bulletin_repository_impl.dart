@@ -35,6 +35,7 @@ class BulletinRepositoryImpl implements BulletinRepository {
     String? sourceGroupId,
     String? sourceGroupName,
     bool isPinned = false,
+    DateTime? scheduledAt,
     DateTime? expiresAt,
     ReminderResponseConfig? responseConfig,
     String? imageUrl,
@@ -53,11 +54,10 @@ class BulletinRepositoryImpl implements BulletinRepository {
         sourceGroupId: sourceGroupId,
         sourceGroupName: sourceGroupName,
         isPinned: isPinned,
+        scheduledAt: scheduledAt,
         expiresAt: expiresAt,
         responseConfig: responseConfig,
         imageUrl: imageUrl,
-        publishedAt:
-            status == BulletinStatus.published ? DateTime.now() : null,
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
       );
@@ -86,6 +86,7 @@ class BulletinRepositoryImpl implements BulletinRepository {
     required String groupId,
     String? groupLabel,
     required String authorId,
+    DateTime? scheduledAt,
     DateTime? expiresAt,
     ReminderResponseConfig? responseConfig,
   }) async {
@@ -98,6 +99,7 @@ class BulletinRepositoryImpl implements BulletinRepository {
         'body': body,
         'groupId': groupId,
         if (groupLabel != null) 'groupLabel': groupLabel,
+        if (scheduledAt != null) 'scheduledAt': scheduledAt.toIso8601String(),
         if (expiresAt != null) 'expiresAt': expiresAt.toIso8601String(),
         if (ReminderResponseConfigCodec.toMap(responseConfig) != null)
           'responseConfig': ReminderResponseConfigCodec.toMap(responseConfig),
@@ -131,9 +133,9 @@ class BulletinRepositoryImpl implements BulletinRepository {
         authorId: authorId,
         sourceGroupId: groupId,
         sourceGroupName: groupLabel,
+        scheduledAt: scheduledAt,
         expiresAt: expiresAt,
         responseConfig: responseConfig,
-        publishedAt: status == BulletinStatus.published ? DateTime.now() : null,
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
       );
@@ -287,15 +289,15 @@ class BulletinRepositoryImpl implements BulletinRepository {
         .map((snap) {
       final bulletins = snap.docs
           .map((d) => BulletinModel.fromFirestore(d.data(), d.id))
-          .where((b) => !b.isExpired)
+          .where((b) => !b.isExpired && !b.isScheduled)
           .toList()
         ..sort((a, b) {
           final pin = b.isPinned == a.isPinned
               ? 0
               : (b.isPinned ? 1 : -1);
           if (pin != 0) return pin;
-          final aTime = a.publishedAt ?? a.createdAt;
-          final bTime = b.publishedAt ?? b.createdAt;
+          final aTime = a.publishedAt ?? a.scheduledAt ?? a.createdAt;
+          final bTime = b.publishedAt ?? b.scheduledAt ?? b.createdAt;
           return bTime.compareTo(aTime);
         });
       return bulletins;
@@ -361,7 +363,6 @@ class BulletinRepositoryImpl implements BulletinRepository {
         'reviewedBy': reviewerId,
         if (reviewerName != null) 'reviewedByName': reviewerName,
         'reviewedAt': FieldValue.serverTimestamp(),
-        'publishedAt': FieldValue.serverTimestamp(),
         'rejectionReason': FieldValue.delete(),
         'updatedAt': FieldValue.serverTimestamp(),
       });

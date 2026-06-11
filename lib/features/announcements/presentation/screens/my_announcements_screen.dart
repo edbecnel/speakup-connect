@@ -7,6 +7,7 @@ import 'package:speakup_connect/features/announcements/domain/entities/bulletin_
 import 'package:speakup_connect/features/announcements/presentation/providers/announcement_provider.dart';
 import 'package:speakup_connect/features/announcements/presentation/screens/announcement_responses_screen.dart';
 import 'package:speakup_connect/features/announcements/presentation/widgets/edit_announcement_dialog.dart';
+import 'package:speakup_connect/features/reminders/presentation/widgets/expiration_picker_section.dart';
 
 class MyAnnouncementsScreen extends ConsumerWidget {
   const MyAnnouncementsScreen({super.key});
@@ -131,6 +132,16 @@ class _MyAnnouncementCard extends ConsumerWidget {
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
               ),
+              if (bulletin.scheduledAt != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: Text(
+                    'Scheduled ${formatDateTime(bulletin.scheduledAt!)}',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.primary,
+                    ),
+                  ),
+                ),
               if (bulletin.acceptsResponses)
                 Padding(
                   padding: const EdgeInsets.only(top: 8),
@@ -178,7 +189,8 @@ class _MyAnnouncementCard extends ConsumerWidget {
   String _statusLabel(BulletinEntity bulletin) {
     return switch (bulletin.status) {
       BulletinStatus.pending => 'Pending approval',
-      BulletinStatus.published => 'Published',
+      BulletinStatus.published =>
+        bulletin.isScheduled ? 'Scheduled' : 'Published',
       BulletinStatus.rejected => 'Rejected',
     };
   }

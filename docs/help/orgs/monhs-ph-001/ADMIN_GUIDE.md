@@ -231,7 +231,9 @@ Announcements are always **organization-wide** — every approved member can rea
 
 **Home → Announcements → Post** (or the compose action from the announcements screen)
 
-- Title and message; optional expiration
+- Title and message
+- **Schedule for later** — send at a chosen date and time instead of immediately (expiration can count from the scheduled send)
+- Optional **expiration**
 - **Pin to top** — admins only; pinned posts sort first for all members
 - Optional **image** — attach when composing or add/change/remove in **Edit**
 - Optional **Request a response** — free text, checkboxes, or multiple choice; **response required** and **allow changing responses** (turn off for one-time polls)
@@ -240,7 +242,7 @@ Announcements are always **organization-wide** — every approved member can rea
 
 Authors and admins can **Edit** or **Delete** from the announcement detail screen. **Edit** updates title, body, expiration, image, and response settings — tap **Save** after changing the image.
 
-Use **My announcements** (or the author list on the announcements screen) to manage your posts. When a post requested responses, open **View responses** to read submitted answers.
+Use **My announcements** (or the author list on the announcements screen) to manage your posts. Scheduled posts show **Scheduled** and the send time until they go live. When a post requested responses, open **View responses** to read submitted answers.
 
 ### Group leaders
 
@@ -248,7 +250,7 @@ Leaders use **My Groups & Clubs → Post Announcement** and select which club th
 
 ### Approval
 
-When **Require approval before publishing** is **ON** (see below), leader and staff announcements go to **Pending Approvals** until an approver publishes them. The same setting applies to **group alerts**.
+When **Require approval before publishing** is **ON** (see below), leader and staff announcements go to **Pending Approvals** until an approver publishes them. Approvers see a scheduled send time when one was set. The same setting applies to **group alerts**.
 
 ---
 

@@ -174,6 +174,25 @@ class _PendingBulletinCard extends ConsumerWidget {
                 ),
               ),
             ],
+            if (bulletin.scheduledAt != null) ...[
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Icon(
+                    Icons.schedule,
+                    size: 16,
+                    color: theme.colorScheme.primary,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    _formatDateTime(bulletin.scheduledAt!),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.primary,
+                    ),
+                  ),
+                ],
+              ),
+            ],
             const SizedBox(height: 12),
             Text(
               'By ${bulletin.authorName ?? 'Unknown'}',

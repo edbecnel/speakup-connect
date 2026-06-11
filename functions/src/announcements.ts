@@ -1,4 +1,5 @@
 import { onDocumentWritten } from 'firebase-functions/v2/firestore';
+import { onSchedule } from 'firebase-functions/v2/scheduler';
 import { onCall, HttpsError } from 'firebase-functions/v2/https';
 import { logger } from 'firebase-functions';
 import * as admin from 'firebase-admin';
@@ -29,6 +30,7 @@ type BulletinData = {
   sourceGroupId?: string | null;
   sourceGroupName?: string | null;
   deliveredAt?: admin.firestore.Timestamp;
+  scheduledAt?: admin.firestore.Timestamp;
   expiresAt?: admin.firestore.Timestamp;
   publishedAt?: admin.firestore.Timestamp;
   responseConfig?: ResponseConfig;
@@ -256,6 +258,9 @@ async function deliverBulletin(
 
     if (data.status !== 'published') return null;
     if (data.deliveredAt) return null;
+    if (data.scheduledAt && data.scheduledAt.toMillis() > Date.now()) {
+      return null;
+    }
 
     tx.update(bulletinRef, {
       deliveredAt: admin.firestore.FieldValue.serverTimestamp(),
@@ -433,6 +438,7 @@ export const createGroupLeaderAnnouncement = onCall(async (request) => {
     groupId,
     groupLabel,
     expiresAt,
+    scheduledAt,
     responseConfig,
   } = (request.data ?? {}) as {
     orgId?: string;
@@ -441,6 +447,7 @@ export const createGroupLeaderAnnouncement = onCall(async (request) => {
     groupId?: string;
     groupLabel?: string;
     expiresAt?: string;
+    scheduledAt?: string;
     responseConfig?: ResponseConfig;
   };
 
@@ -498,8 +505,10 @@ export const createGroupLeaderAnnouncement = onCall(async (request) => {
   };
 
   if (authorName) payload['authorName'] = authorName;
-  if (status === 'published') {
-    payload['publishedAt'] = admin.firestore.FieldValue.serverTimestamp();
+  if (scheduledAt) {
+    payload['scheduledAt'] = admin.firestore.Timestamp.fromDate(
+      new Date(scheduledAt),
+    );
   }
   if (expiresAt) {
     payload['expiresAt'] = admin.firestore.Timestamp.fromDate(
@@ -911,8 +920,40 @@ export const onBulletinPublished = onDocumentWritten(
 
     if (after.status !== 'published') return;
     if (after.deliveredAt) return;
+    if (after.scheduledAt && after.scheduledAt.toMillis() > Date.now()) {
+      return;
+    }
 
     const { orgId, bulletinId } = event.params;
     await deliverBulletin(orgId, bulletinId);
   },
 );
+
+/**
+ * Runs every 5 minutes and delivers published announcements whose
+ * scheduledAt time has arrived but which have not yet been delivered.
+ */
+export const publishDueBulletins = onSchedule('every 5 minutes', async () => {
+  const now = admin.firestore.Timestamp.now();
+  const dueSnap = await db
+    .collectionGroup('bulletins')
+    .where('status', '==', 'published')
+    .where('scheduledAt', '<=', now)
+    .get();
+
+  let delivered = 0;
+  for (const doc of dueSnap.docs) {
+    const data = doc.data() as BulletinData;
+    if (data.deliveredAt) continue;
+
+    const orgDoc = doc.ref.parent.parent;
+    if (!orgDoc) continue;
+    const ok = await deliverBulletin(orgDoc.id, doc.id);
+    if (ok) delivered++;
+  }
+
+  logger.info('publishDueBulletins completed', {
+    candidates: dueSnap.size,
+    delivered,
+  });
+});

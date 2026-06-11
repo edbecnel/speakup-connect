@@ -513,23 +513,35 @@ Extracurricular units (clubs, organizations, corps). Separate from academic clas
 
 ### `organizations/{organizationId}/bulletins/{bulletinId}` — Bulletin Board
 
-Org-wide announcements posted by admins. Visible to all members.
+Org-wide announcements posted by admins, staff with `postBulletinOrgWide`, or group leaders (on behalf of a club). Visible to all members once **delivered** (immediately or at `scheduledAt`).
 
 ```json
 {
-  "bulletinId": "string",
   "organizationId": "string (denormalized)",
   "title": "string",
   "body": "string",
-  "authorId": "string (admin UID)",
-  "authorName": "string",
+  "status": "pending | published | rejected",
+  "authorId": "string (user UID)",
+  "authorName": "string | null",
+  "sourceGroupId": "string | null (group leader posts)",
+  "sourceGroupName": "string | null",
   "isPinned": "boolean",
-  "attachmentUrls": ["string"],
+  "scheduledAt": "Timestamp | null (null = send now when published)",
+  "expiresAt": "Timestamp | null (auto-remove when reached)",
+  "publishedAt": "Timestamp | null (set when delivery runs)",
+  "deliveredAt": "Timestamp | null (server — in-app feed + push sent)",
+  "reviewedBy": "string | null",
+  "reviewedByName": "string | null",
+  "reviewedAt": "Timestamp | null",
+  "rejectionReason": "string | null",
+  "imageUrl": "string | null",
+  "responseConfig": { "...": "same shape as reminders" },
   "createdAt": "Timestamp",
-  "updatedAt": "Timestamp",
-  "expiresAt": "Timestamp | null"
+  "updatedAt": "Timestamp"
 }
 ```
+
+**Delivery:** `onBulletinPublished` delivers when status becomes `published` and `scheduledAt` is null or in the past. Future `scheduledAt` values are delivered by the scheduled Cloud Function `publishDueBulletins` (every 5 minutes). Delivery is idempotent via `deliveredAt`.
 
 ---
 
@@ -859,6 +871,9 @@ Indexes:
 Collection: organizations/{orgId}/bulletins
 Indexes:
   1. organizationId ASC + isPinned DESC + createdAt DESC
+  2. status ASC + createdAt DESC
+  3. authorId ASC + createdAt DESC
+  4. Collection group: status ASC + scheduledAt ASC (`publishDueBulletins`)
 
 Collection: organizations/{orgId}/newsPosts
 Indexes:

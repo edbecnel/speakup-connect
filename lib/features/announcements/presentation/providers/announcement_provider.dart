@@ -107,6 +107,7 @@ class ComposeAnnouncementState {
     this.sourceGroupId,
     this.sourceGroupLabel,
     this.isPinned = false,
+    this.scheduledAt,
     this.expiration = const ExpirationPickerValue(),
     this.responseConfig = const ReminderResponseConfig(),
     this.imagePath,
@@ -117,25 +118,28 @@ class ComposeAnnouncementState {
   final String? sourceGroupId;
   final String? sourceGroupLabel;
   final bool isPinned;
+  final DateTime? scheduledAt;
   final ExpirationPickerValue expiration;
   final ReminderResponseConfig responseConfig;
   final String? imagePath;
 
-  bool get isValid =>
-      title.trim().length >= 3 &&
-      body.trim().length >= 5 &&
-      responseConfig.isValid;
+  bool get isValid => validationMessage == null;
 
   String? get validationMessage {
     if (title.trim().length < 3) return 'Title must be at least 3 characters.';
     if (body.trim().length < 5) return 'Message must be at least 5 characters.';
+    if (expiration.isEnabled &&
+        !expiration.isValid(scheduledAt: scheduledAt)) {
+      return 'Set a valid expiration date and time.';
+    }
     if (!responseConfig.isValid) {
       return 'Complete the optional response settings or turn them off.';
     }
     return null;
   }
 
-  DateTime? get resolvedExpiresAt => expiration.resolve();
+  DateTime? get resolvedExpiresAt =>
+      expiration.resolve(scheduledAt: scheduledAt);
 
   ComposeAnnouncementState copyWith({
     String? title,
@@ -143,11 +147,13 @@ class ComposeAnnouncementState {
     String? sourceGroupId,
     String? sourceGroupLabel,
     bool? isPinned,
+    DateTime? scheduledAt,
     ExpirationPickerValue? expiration,
     ReminderResponseConfig? responseConfig,
     String? imagePath,
     bool clearImage = false,
     bool clearSourceGroup = false,
+    bool clearSchedule = false,
   }) {
     return ComposeAnnouncementState(
       title: title ?? this.title,
@@ -158,6 +164,7 @@ class ComposeAnnouncementState {
           ? null
           : (sourceGroupLabel ?? this.sourceGroupLabel),
       isPinned: isPinned ?? this.isPinned,
+      scheduledAt: clearSchedule ? null : (scheduledAt ?? this.scheduledAt),
       expiration: expiration ?? this.expiration,
       responseConfig: responseConfig ?? this.responseConfig,
       imagePath: clearImage ? null : (imagePath ?? this.imagePath),
@@ -176,6 +183,9 @@ class ComposeAnnouncementNotifier extends Notifier<ComposeAnnouncementState> {
   }
 
   void setPinned(bool value) => state = state.copyWith(isPinned: value);
+  void setSchedule(DateTime? when) => state = when == null
+      ? state.copyWith(clearSchedule: true)
+      : state.copyWith(scheduledAt: when);
   void setExpiration(ExpirationPickerValue value) =>
       state = state.copyWith(expiration: value);
   void setResponseConfig(ReminderResponseConfig value) =>
@@ -270,6 +280,7 @@ class SubmitAnnouncementNotifier
           groupId: form.sourceGroupId!,
           groupLabel: form.sourceGroupLabel,
           authorId: user.uid,
+          scheduledAt: form.scheduledAt,
           expiresAt: form.resolvedExpiresAt,
           responseConfig: form.responseConfig.enabled ? form.responseConfig : null,
         );
@@ -313,6 +324,7 @@ class SubmitAnnouncementNotifier
           sourceGroupId: form.sourceGroupId,
           sourceGroupName: form.sourceGroupLabel,
           isPinned: form.isPinned,
+          scheduledAt: form.scheduledAt,
           expiresAt: form.resolvedExpiresAt,
           responseConfig: form.responseConfig.enabled ? form.responseConfig : null,
           imageUrl: imageUrl,

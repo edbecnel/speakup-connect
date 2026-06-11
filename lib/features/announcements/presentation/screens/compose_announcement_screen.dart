@@ -15,6 +15,7 @@ import 'package:speakup_connect/features/reminders/presentation/widgets/expirati
 import 'package:speakup_connect/features/reminders/presentation/widgets/response_config_section.dart';
 import 'package:speakup_connect/shared/widgets/app_button.dart';
 import 'package:speakup_connect/shared/widgets/app_text_field.dart';
+import 'package:speakup_connect/shared/widgets/schedule_for_later_section.dart';
 
 class ComposeAnnouncementScreen extends ConsumerStatefulWidget {
   const ComposeAnnouncementScreen({this.initialGroupId, super.key});
@@ -89,9 +90,13 @@ class _ComposeAnnouncementScreenState
           ));
         } else if (next.asData?.value != null) {
           final result = next.asData!.value!;
-          final msg = result.status == BulletinStatus.pending
+          final isPending = result.status == BulletinStatus.pending;
+          final isScheduled = result.bulletin.isScheduled;
+          final msg = isPending
               ? 'Announcement submitted for approval.'
-              : 'Announcement published.';
+              : isScheduled
+                  ? 'Announcement scheduled.'
+                  : 'Announcement published.';
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text(msg),
             backgroundColor: Colors.green.shade700,
@@ -185,8 +190,14 @@ class _ComposeAnnouncementScreenState
               onRemove: _clearImage,
             ),
             const SizedBox(height: 20),
+            ScheduleForLaterSection(
+              scheduledAt: form.scheduledAt,
+              onChanged: notifier.setSchedule,
+            ),
+            const SizedBox(height: 8),
             ExpirationPickerSection(
               value: form.expiration,
+              scheduledAt: form.scheduledAt,
               onChanged: notifier.setExpiration,
             ),
             const SizedBox(height: 20),

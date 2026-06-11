@@ -70,16 +70,18 @@ After adding a member to a group, they should see it under **My Groups & Clubs**
 
 When posting or editing:
 
-- Title and message; optional **expiration**
+- Title and message
+- **Schedule for later** — send at a chosen date and time instead of immediately
+- Optional **expiration** (can count from the scheduled send)
 - **Pin to top** — org admins only; pinned posts sort first
 - Optional **image** (attach at compose or add/change/remove in **Edit**)
 - Optional **Request a response** — free text, checkboxes, or multiple choice; **response required** and **allow changing responses** work the same as group alerts
 
-Authors and admins can **Edit** or **Delete** from the announcement detail screen. Use **My announcements** (or the announcements list for authors) to manage posts.
+Authors and admins can **Edit** or **Delete** from the announcement detail screen. Use **My announcements** (or the announcements list for authors) to manage posts — scheduled items show **Scheduled** and the send time until they go live.
 
 Open **View responses** on a post that requested responses to see submitted answers.
 
-When **Require approval before publishing** is enabled under **Organization Settings**, non-approver posts appear in **Pending Approvals** until an admin publishes them.
+When **Require approval before publishing** is enabled under **Organization Settings**, non-approver posts appear in **Pending Approvals** until an admin publishes them (approvers see any scheduled send time).
 
 ---
 

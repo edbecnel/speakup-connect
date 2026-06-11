@@ -18,6 +18,7 @@ class BulletinEntity {
     this.sourceGroupId,
     this.sourceGroupName,
     this.isPinned = false,
+    this.scheduledAt,
     this.expiresAt,
     this.publishedAt,
     this.reviewedBy,
@@ -41,6 +42,10 @@ class BulletinEntity {
   final String? sourceGroupName;
 
   final bool isPinned;
+
+  /// When the announcement should be published. Null means send now.
+  final DateTime? scheduledAt;
+
   final DateTime? expiresAt;
   final DateTime? publishedAt;
   final String? reviewedBy;
@@ -54,6 +59,9 @@ class BulletinEntity {
 
   bool get isPending => status == BulletinStatus.pending;
   bool get isPublished => status == BulletinStatus.published;
+
+  bool get isScheduled =>
+      scheduledAt != null && scheduledAt!.isAfter(DateTime.now());
 
   bool get isExpired =>
       expiresAt != null && !expiresAt!.isAfter(DateTime.now());

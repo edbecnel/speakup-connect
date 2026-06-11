@@ -719,12 +719,12 @@ Suggested implementation order: **i18n → messaging → parents** (messaging is
 **Data**
 - [x] Create `BulletinModel`
 - [x] Create `BulletinRepositoryImpl` (+ `BulletinResponseRepository`)
-- [x] Cloud Functions: `createGroupLeaderAnnouncement`, `onBulletinPublished`, `submitBulletinResponse`, `updateBulletin`, `deleteBulletin`, `setBulletinImageUrl`
+- [x] Cloud Functions: `createGroupLeaderAnnouncement`, `onBulletinPublished`, `publishDueBulletins`, `submitBulletinResponse`, `updateBulletin`, `deleteBulletin`, `setBulletinImageUrl`
 
 **Presentation**
 - [x] `AnnouncementsScreen` — org-wide list; pinned first
 - [x] `AnnouncementDetailScreen` — full content, image, response form
-- [x] `ComposeAnnouncementScreen` — title, body, pin, expiry, image, request-a-response
+- [x] `ComposeAnnouncementScreen` — title, body, schedule for later, pin, expiry, image, request-a-response
 - [x] `EditAnnouncementDialog` — edit title/body/expiry/image/response settings
 - [x] `MyAnnouncementsScreen` — author manage + view responses
 - [x] Group leaders: **Post Announcement** from My Groups; approval queue when enabled
@@ -734,7 +734,7 @@ Suggested implementation order: **i18n → messaging → parents** (messaging is
 **Home & auth (June 2026)**
 - [x] Home dashboard: **Quick Actions** above **My Groups & Clubs** (collapsed by default)
 - [x] `resolveLoginEmail` — student ID / contact email for members; real email for admin/staff (no synthetic student-email mapping for non-members)
-- [x] In-app + `docs/help` guides updated for sign-in, home, announcements
+- [x] In-app + `docs/help` guides updated for sign-in, home, announcements (incl. schedule for later, June 2026)
 
 **Testing**
 - [ ] Unit test: bulletin submit / update flows

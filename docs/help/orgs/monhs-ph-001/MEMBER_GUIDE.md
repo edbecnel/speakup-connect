@@ -96,7 +96,7 @@ You may also get a push or **Alerts** entry when a new announcement is published
 
 **Group leaders** can post from **My Groups & Clubs → Post Announcement** (on behalf of a club they lead). Staff and admins use **Home → Announcements → Post**. If your school requires approval, the button says **Submit for Approval** until an administrator publishes it.
 
-When composing or editing your own post, you can add an optional **image**, set **expiration**, and turn on **Request a response** (same options as group alerts). Use **Edit** on the detail screen or **My announcements** to update later. Authors and admins can **delete** when allowed.
+When composing or editing your own post, you can **schedule for later**, set optional **expiration** (relative to the scheduled send when applicable), attach an optional **image**, and turn on **Request a response** (same options as group alerts). Use **Edit** on the detail screen or **My announcements** to update later — scheduled posts show **Scheduled** and the send time until they go live. Authors and admins can **delete** when allowed.
 
 ---
 
@@ -309,10 +309,11 @@ Use this for recruitment, club news, or any message the **whole school** should 
 1. From **My Groups & Clubs**, tap **Post Announcement** on the group card  
    **or** open **Home → Announcements → Post**
 2. Choose which **group** you are posting on behalf of
-3. Enter a **title** and **message**; optional **expiration**
-4. Tap **Publish** or **Submit for Approval** (when your school requires admin approval)
+3. Enter a **title** and **message**
+4. Optional: **Schedule for later**, **expiration**, **image**, **Request a response**
+5. Tap **Publish** or **Submit for Approval** (when your school requires admin approval)
 
-Track pending posts from **Announcements → My announcements** (outbox icon).
+Track pending and scheduled posts from **Announcements → My announcements** (outbox icon).
 
 #### Send a group alert
 

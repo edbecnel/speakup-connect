@@ -12,6 +12,7 @@ import 'package:speakup_connect/features/reminders/presentation/widgets/expirati
 import 'package:speakup_connect/features/reminders/presentation/widgets/response_config_section.dart';
 import 'package:speakup_connect/features/roles/presentation/providers/roles_provider.dart';
 import 'package:speakup_connect/shared/widgets/app_button.dart';
+import 'package:speakup_connect/shared/widgets/schedule_for_later_section.dart';
 
 /// Compose Reminder screen — lets authorized members broadcast a reminder to
 /// the whole org, a group, or a role, now or at a scheduled time.
@@ -269,7 +270,10 @@ class _ComposeReminderScreenState extends ConsumerState<ComposeReminderScreen> {
                 _RolePicker(form: form, notifier: notifier),
             ],
             const SizedBox(height: 16),
-            _ScheduleSection(form: form, notifier: notifier),
+            ScheduleForLaterSection(
+              scheduledAt: form.scheduledAt,
+              onChanged: notifier.setSchedule,
+            ),
             const SizedBox(height: 8),
             ExpirationPickerSection(
               value: form.expiration,
@@ -490,81 +494,6 @@ class _RolePicker extends ConsumerWidget {
       },
     );
   }
-}
-
-class _ScheduleSection extends StatelessWidget {
-  const _ScheduleSection({required this.form, required this.notifier});
-
-  final ComposeReminderState form;
-  final ComposeReminderNotifier notifier;
-
-  Future<void> _pick(BuildContext context) async {
-    final now = DateTime.now();
-    final date = await showDatePicker(
-      context: context,
-      initialDate: form.scheduledAt ?? now.add(const Duration(hours: 1)),
-      firstDate: now,
-      lastDate: now.add(const Duration(days: 365)),
-    );
-    if (date == null || !context.mounted) return;
-    final time = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay.fromDateTime(
-        form.scheduledAt ?? now.add(const Duration(hours: 1)),
-      ),
-    );
-    if (time == null) return;
-    final when =
-        DateTime(date.year, date.month, date.day, time.hour, time.minute);
-    notifier.setSchedule(when);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheduled = form.scheduledAt != null;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SwitchListTile(
-          contentPadding: EdgeInsets.zero,
-          title: const Text('Schedule for later'),
-          subtitle: Text(
-            scheduled
-                ? _formatDateTime(form.scheduledAt!)
-                : 'Off — send immediately',
-          ),
-          value: scheduled,
-          onChanged: (on) {
-            if (on) {
-              _pick(context);
-            } else {
-              notifier.setSchedule(null);
-            }
-          },
-        ),
-        if (scheduled)
-          Align(
-            alignment: Alignment.centerLeft,
-            child: TextButton.icon(
-              onPressed: () => _pick(context),
-              icon: const Icon(Icons.edit_calendar_outlined, size: 18),
-              label: Text(
-                'Change time',
-                style: TextStyle(color: theme.colorScheme.primary),
-              ),
-            ),
-          ),
-      ],
-    );
-  }
-}
-
-String _formatDateTime(DateTime dt) {
-  String two(int n) => n.toString().padLeft(2, '0');
-  final h = dt.hour % 12 == 0 ? 12 : dt.hour % 12;
-  final ampm = dt.hour < 12 ? 'AM' : 'PM';
-  return '${dt.year}-${two(dt.month)}-${two(dt.day)} · $h:${two(dt.minute)} $ampm';
 }
 
 class _NoAccessPlaceholder extends StatelessWidget {

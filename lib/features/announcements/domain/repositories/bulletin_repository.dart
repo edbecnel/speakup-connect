@@ -12,6 +12,7 @@ abstract class BulletinRepository {
     String? sourceGroupId,
     String? sourceGroupName,
     bool isPinned = false,
+    DateTime? scheduledAt,
     DateTime? expiresAt,
     ReminderResponseConfig? responseConfig,
     String? imageUrl,
@@ -25,6 +26,7 @@ abstract class BulletinRepository {
     required String groupId,
     String? groupLabel,
     required String authorId,
+    DateTime? scheduledAt,
     DateTime? expiresAt,
     ReminderResponseConfig? responseConfig,
   });

@@ -65,6 +65,14 @@ Suggested next sprint after Sprint 13 closure: **Sprint 15 — i18n foundation**
 
 ---
 
+### Delivered June 11, 2026 — Announcement scheduling
+- [x] **Schedule for later** on **Post Announcement** (parity with Compose Reminder)
+- [x] `scheduledAt` on bulletins; `publishDueBulletins` scheduled Cloud Function
+- [x] Expiration relative to scheduled send; **My announcements** shows scheduled status/time
+- [x] Help guides + `DATABASE_DESIGN.md` updated
+
+---
+
 ### Delivered June 5, 2026 — Announcements parity & login fix
 - **Commits:** `8c894ed`, `abc351d`
 - [x] Announcements: optional image, request-a-response, edit/delete, `submitBulletinResponse` / `updateBulletin` / `setBulletinImageUrl` deployed

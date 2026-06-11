@@ -71,7 +71,7 @@ If your org requires approval, leaders tap **Submit for Approval** until an admi
 
 ### Authors and leaders
 
-When you post or edit your own announcement, you can set an optional **expiration**, attach or change an **image**, and enable **Request a response** (same options as group alerts). Use **Edit** on the detail screen or **My announcements** to update content, image, or response settings later. Admins and authors can **delete** posts when allowed.
+When you post or edit your own announcement, you can **schedule for later**, set optional **expiration**, attach or change an **image**, and enable **Request a response** (same options as group alerts). **My announcements** shows **Scheduled** and the send time until the post goes live. Use **Edit** on the detail screen or **My announcements** to update content, image, or response settings later. Admins and authors can **delete** posts when allowed.
 
 ## Alerts and reminders
 

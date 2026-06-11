@@ -2166,6 +2166,7 @@ export { resetOrgMemberPassword } from './reset_org_member_password';
 export {
   createGroupLeaderAnnouncement,
   onBulletinPublished,
+  publishDueBulletins,
   submitBulletinResponse,
   setBulletinImageUrl,
   updateBulletin,

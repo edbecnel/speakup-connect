@@ -16,6 +16,7 @@ class BulletinModel extends BulletinEntity {
     super.sourceGroupId,
     super.sourceGroupName,
     super.isPinned,
+    super.scheduledAt,
     super.expiresAt,
     super.publishedAt,
     super.reviewedBy,
@@ -43,6 +44,7 @@ class BulletinModel extends BulletinEntity {
       sourceGroupId: data['sourceGroupId'] as String?,
       sourceGroupName: data['sourceGroupName'] as String?,
       isPinned: data['isPinned'] as bool? ?? false,
+      scheduledAt: toDate(data['scheduledAt']),
       expiresAt: toDate(data['expiresAt']),
       publishedAt: toDate(data['publishedAt']),
       reviewedBy: data['reviewedBy'] as String?,
@@ -68,6 +70,7 @@ class BulletinModel extends BulletinEntity {
       if (sourceGroupId != null) 'sourceGroupId': sourceGroupId,
       if (sourceGroupName != null) 'sourceGroupName': sourceGroupName,
       'isPinned': isPinned,
+      if (scheduledAt != null) 'scheduledAt': Timestamp.fromDate(scheduledAt!),
       if (expiresAt != null) 'expiresAt': Timestamp.fromDate(expiresAt!),
       if (publishedAt != null) 'publishedAt': Timestamp.fromDate(publishedAt!),
       if (ReminderResponseConfigCodec.toMap(responseConfig) != null)
