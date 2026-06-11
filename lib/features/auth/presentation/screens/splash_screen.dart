@@ -84,73 +84,83 @@ class _SplashContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final minHeight = MediaQuery.sizeOf(context).height -
+        MediaQuery.paddingOf(context).vertical;
 
-    return Padding(
+    return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 32),
-      child: Column(
-        children: [
-          const Spacer(flex: 2),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(minHeight: minHeight),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const SizedBox(height: 32),
 
-          // --- Logo ---
-          _OrgLogo(logoUrl: logoUrl),
-          const SizedBox(height: 32),
+            // --- Logo ---
+            _OrgLogo(logoUrl: logoUrl),
+            const SizedBox(height: 32),
 
-          // --- App Title: "SpeakUp {orgName}" ---
-          Text(
-            'SpeakUp',
-            style: theme.textTheme.displaySmall?.copyWith(
-              color: theme.colorScheme.primary,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -1,
-              height: 1,
+            // --- App Title: "SpeakUp {orgName}" ---
+            Text(
+              'SpeakUp',
+              style: theme.textTheme.displaySmall?.copyWith(
+                color: theme.colorScheme.primary,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -1,
+                height: 1,
+              ),
+              textAlign: TextAlign.center,
             ),
-            textAlign: TextAlign.center,
-          ),
-          Text(
-            orgName,
-            style: theme.textTheme.displaySmall?.copyWith(
-              color: theme.colorScheme.primary,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -1,
-              height: 1.1,
+            Text(
+              orgName,
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.displaySmall?.copyWith(
+                color: theme.colorScheme.primary,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -1,
+                height: 1.1,
+              ),
+              textAlign: TextAlign.center,
             ),
-            textAlign: TextAlign.center,
-          ),
 
-          const SizedBox(height: 16),
+            const SizedBox(height: 16),
 
-          // --- Tagline ---
-          Text(
-            tagline,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
+            // --- Tagline ---
+            Text(
+              tagline,
+              maxLines: 4,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+              textAlign: TextAlign.center,
             ),
-            textAlign: TextAlign.center,
-          ),
 
-          const Spacer(flex: 2),
+            const SizedBox(height: 40),
 
-          // --- Get Started Button ---
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () => context.go(Routes.login),
-              child: const Text('Get Started'),
+            // --- Get Started Button ---
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () => context.go(Routes.login),
+                child: const Text('Get Started'),
+              ),
             ),
-          ),
 
-          const SizedBox(height: 12),
+            const SizedBox(height: 12),
 
-          // --- Learn More ---
-          TextButton(
-            onPressed: () {
-              // TODO: Show organization info bottom sheet
-            },
-            child: const Text('Learn More'),
-          ),
+            // --- Learn More ---
+            TextButton(
+              onPressed: () {
+                // TODO: Show organization info bottom sheet
+              },
+              child: const Text('Learn More'),
+            ),
 
-          const SizedBox(height: 32),
-        ],
+            const SizedBox(height: 32),
+          ],
+        ),
       ),
     );
   }

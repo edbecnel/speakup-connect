@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:speakup_connect/core/constants/route_constants.dart';
 import 'package:speakup_connect/core/theme/app_theme.dart';
+import 'package:speakup_connect/features/announcements/presentation/providers/announcement_provider.dart';
 import 'package:speakup_connect/features/auth/presentation/providers/auth_provider.dart';
 import 'package:speakup_connect/features/notifications/presentation/providers/notification_provider.dart';
 import 'package:speakup_connect/features/organization/presentation/providers/organization_provider.dart';
@@ -28,6 +29,7 @@ class HomeDashboardScreen extends ConsumerWidget {
     final orgConfig = orgConfigAsync.value;
     final firstName = user?.displayName?.split(' ').first ?? 'there';
     final unreadAlerts = ref.watch(unreadNotificationCountProvider);
+    final unreadAnnouncements = ref.watch(unreadAnnouncementCountProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -62,9 +64,6 @@ class HomeDashboardScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 24),
 
-              const MyGroupsHomeSection(),
-              const SizedBox(height: 24),
-
               // --- Feature Grid ---
               Text(
                 'Quick Actions',
@@ -97,7 +96,10 @@ class HomeDashboardScreen extends ConsumerWidget {
                   _DashboardTile(
                     icon: Icons.campaign_rounded,
                     label: 'Announcements',
-                    color: const Color(0xFFF57C00),
+                    color: unreadAnnouncements > 0
+                        ? theme.colorScheme.primary
+                        : const Color(0xFFF57C00),
+                    badgeCount: unreadAnnouncements,
                     onTap: () => context.push(Routes.announcements),
                   ),
                   _DashboardTile(
@@ -113,6 +115,9 @@ class HomeDashboardScreen extends ConsumerWidget {
                   ),
                 ],
               ),
+              const SizedBox(height: 24),
+
+              const MyGroupsHomeSection(),
             ],
           ),
         ),
@@ -183,12 +188,14 @@ class _DashboardTile extends StatelessWidget {
     required this.label,
     required this.color,
     required this.onTap,
+    this.badgeCount = 0,
   });
 
   final IconData icon;
   final String label;
   final Color color;
   final VoidCallback onTap;
+  final int badgeCount;
 
   @override
   Widget build(BuildContext context) {
@@ -218,13 +225,17 @@ class _DashboardTile extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: effectiveColor.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(12),
+              Badge(
+                isLabelVisible: badgeCount > 0,
+                label: Text(badgeCount > 99 ? '99+' : '$badgeCount'),
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: effectiveColor.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(icon, color: effectiveColor, size: 28),
                 ),
-                child: Icon(icon, color: effectiveColor, size: 28),
               ),
               const SizedBox(height: 12),
               Text(

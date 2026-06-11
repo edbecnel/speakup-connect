@@ -38,7 +38,9 @@ class AuthException extends AppException {
       case 'user-not-found':
       case 'invalid-credential':
       case 'invalid-login-credentials':
-        return 'Invalid email, student ID, or password.';
+        return 'Invalid email, student ID, or password. '
+            'Students signing in with a school email must use their '
+            'student ID as the password unless they changed it.';
       case 'wrong-password':
         return 'Incorrect password. Please try again.';
       case 'requires-recent-login':

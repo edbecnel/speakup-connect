@@ -161,29 +161,38 @@ final myGroupMembershipInGroupProvider = StreamProvider.autoDispose
       );
 });
 
+/// Roster membership when loaded; otherwise the My Groups index row.
+GroupMemberEntity? effectiveMyGroupMembership(Ref ref, String groupId) {
+  final roster =
+      ref.watch(myGroupMembershipInGroupProvider(groupId)).asData?.value;
+  if (roster != null) return roster;
+
+  final memberships =
+      ref.watch(myGroupMembershipsProvider).asData?.value ?? const [];
+  for (final entry in memberships) {
+    if (entry.group.groupId == groupId) return entry.membership;
+  }
+  return null;
+}
+
 /// True when the user may manage roster for [groupId] (admin, RBAC, or leader).
 final canManageGroupRosterProvider =
     Provider.autoDispose.family<bool, String>((ref, groupId) {
   if (ref.watch(canManageGroupsProvider)) return true;
-  return ref
-          .watch(myGroupMembershipInGroupProvider(groupId))
-          .asData
-          ?.value
-          ?.isLeader ??
-      false;
+  return effectiveMyGroupMembership(ref, groupId)?.isLeader ?? false;
 });
 
 /// Groups the signed-in user leads (live roster `groupRole == leader`).
 final ledGroupMembershipsProvider = Provider.autoDispose<List<MyGroupMembership>>((ref) {
   final memberships =
       ref.watch(myGroupMembershipsProvider).asData?.value ?? const [];
-  return memberships.where((m) {
-    final roster = ref
-        .watch(myGroupMembershipInGroupProvider(m.group.groupId))
-        .asData
-        ?.value;
-    return roster?.isLeader ?? false;
-  }).toList();
+  return memberships
+      .where(
+        (m) =>
+            effectiveMyGroupMembership(ref, m.group.groupId)?.isLeader ??
+            m.membership.isLeader,
+      )
+      .toList();
 });
 
 /// True when the user leads at least one group.
@@ -214,16 +223,7 @@ final isGroupLeaderOnlyComposerProvider = Provider<bool>((ref) {
 final canBroadcastToGroupProvider =
     Provider.autoDispose.family<bool, String>((ref, groupId) {
   if (ref.watch(canBroadcastOrgWideProvider)) return true;
-  final leadsGroup = ref
-      .watch(ledGroupMembershipsProvider)
-      .any((m) => m.group.groupId == groupId);
-  if (leadsGroup) return true;
-  return ref
-          .watch(myGroupMembershipInGroupProvider(groupId))
-          .asData
-          ?.value
-          ?.isLeader ??
-      false;
+  return effectiveMyGroupMembership(ref, groupId)?.isLeader ?? false;
 });
 
 // ── Actions ──────────────────────────────────────────────────────────────────

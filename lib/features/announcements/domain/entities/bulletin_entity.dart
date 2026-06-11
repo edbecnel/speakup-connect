@@ -1,3 +1,5 @@
+import 'package:speakup_connect/features/reminders/domain/entities/reminder_response_config.dart';
+
 /// Organization-wide announcement on the bulletin board.
 ///
 /// Stored at `organizations/{orgId}/bulletins/{bulletinId}`.
@@ -22,6 +24,8 @@ class BulletinEntity {
     this.reviewedByName,
     this.reviewedAt,
     this.rejectionReason,
+    this.responseConfig,
+    this.imageUrl,
   });
 
   final String bulletinId;
@@ -43,6 +47,8 @@ class BulletinEntity {
   final String? reviewedByName;
   final DateTime? reviewedAt;
   final String? rejectionReason;
+  final ReminderResponseConfig? responseConfig;
+  final String? imageUrl;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -51,6 +57,11 @@ class BulletinEntity {
 
   bool get isExpired =>
       expiresAt != null && !expiresAt!.isAfter(DateTime.now());
+
+  bool get acceptsResponses => responseConfig?.enabled ?? false;
+
+  bool get responseRequired =>
+      acceptsResponses && (responseConfig?.responseRequired ?? false);
 }
 
 enum BulletinStatus {

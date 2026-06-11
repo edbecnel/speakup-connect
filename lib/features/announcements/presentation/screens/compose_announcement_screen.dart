@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:speakup_connect/core/utils/picked_image_file.dart';
 import 'package:speakup_connect/core/permissions/providers/permission_provider.dart';
 import 'package:speakup_connect/features/announcements/domain/entities/bulletin_entity.dart';
 import 'package:speakup_connect/features/announcements/presentation/providers/announcement_provider.dart';
+import 'package:speakup_connect/features/announcements/presentation/widgets/announcement_image_section.dart';
 import 'package:speakup_connect/features/groups/domain/entities/my_group_membership.dart';
 import 'package:speakup_connect/features/groups/presentation/providers/group_provider.dart';
 import 'package:speakup_connect/features/organization/presentation/providers/organization_provider.dart';
 import 'package:speakup_connect/features/organization/presentation/providers/user_profile_provider.dart';
 import 'package:speakup_connect/features/reminders/presentation/widgets/expiration_picker_section.dart';
+import 'package:speakup_connect/features/reminders/presentation/widgets/response_config_section.dart';
 import 'package:speakup_connect/shared/widgets/app_button.dart';
 import 'package:speakup_connect/shared/widgets/app_text_field.dart';
 
@@ -27,6 +31,8 @@ class _ComposeAnnouncementScreenState
   final _titleCtrl = TextEditingController();
   final _bodyCtrl = TextEditingController();
   var _didPresetGroup = false;
+  var _pickingImage = false;
+  String? _previewImagePath;
 
   @override
   void dispose() {
@@ -90,6 +96,7 @@ class _ComposeAnnouncementScreenState
             content: Text(msg),
             backgroundColor: Colors.green.shade700,
           ));
+          setState(() => _previewImagePath = null);
           if (context.canPop()) context.pop();
         }
       }
@@ -171,9 +178,21 @@ class _ComposeAnnouncementScreenState
               onChanged: notifier.setBody,
             ),
             const SizedBox(height: 20),
+            AnnouncementImageSection(
+              imagePath: _previewImagePath ?? form.imagePath,
+              isLoading: _pickingImage,
+              onPick: _pickImage,
+              onRemove: _clearImage,
+            ),
+            const SizedBox(height: 20),
             ExpirationPickerSection(
               value: form.expiration,
               onChanged: notifier.setExpiration,
+            ),
+            const SizedBox(height: 20),
+            ResponseConfigSection(
+              value: form.responseConfig,
+              onChanged: notifier.setResponseConfig,
             ),
             if (isAdmin) ...[
               const SizedBox(height: 12),
@@ -185,11 +204,22 @@ class _ComposeAnnouncementScreenState
                 onChanged: notifier.setPinned,
               ),
             ],
+            if (!form.isValid && form.validationMessage != null) ...[
+              const SizedBox(height: 12),
+              Text(
+                form.validationMessage!,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.error,
+                ),
+              ),
+            ],
             const SizedBox(height: 28),
             AppButton.primary(
               label: willNeedApproval ? 'Submit for Approval' : 'Publish',
               onPressed: form.isValid
-                  ? () => ref.read(submitAnnouncementProvider.notifier).submit()
+                  ? () => ref.read(submitAnnouncementProvider.notifier).submit(
+                        imagePath: _previewImagePath ?? form.imagePath,
+                      )
                   : null,
               isLoading: submitState.isLoading,
             ),
@@ -207,6 +237,41 @@ class _ComposeAnnouncementScreenState
             label: match.group.name,
           );
     }
+  }
+
+  Future<void> _pickImage(ImageSource source) async {
+    if (_pickingImage) return;
+    setState(() => _pickingImage = true);
+    try {
+      final picked = await ImagePicker().pickImage(
+        source: source,
+        imageQuality: 80,
+        maxWidth: 1600,
+      );
+      if (!mounted) return;
+      if (picked == null) return;
+
+      final path = await persistPickedImage(picked);
+      if (!mounted) return;
+      if (path == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Could not load that image. Try another photo.'),
+          ),
+        );
+        return;
+      }
+
+      setState(() => _previewImagePath = path);
+      ref.read(composeAnnouncementProvider.notifier).setImagePath(path);
+    } finally {
+      if (mounted) setState(() => _pickingImage = false);
+    }
+  }
+
+  void _clearImage() {
+    setState(() => _previewImagePath = null);
+    ref.read(composeAnnouncementProvider.notifier).clearImage();
   }
 }
 
@@ -239,16 +304,20 @@ class _GroupPicker extends StatelessWidget {
     }
 
     return DropdownButtonFormField<String>(
+      isExpanded: true,
       value: selectedId ?? memberships.first.group.groupId,
       decoration: InputDecoration(
-        labelText: required ? 'Posting on behalf of' : 'Group (optional)',
+        labelText: required ? 'On behalf of' : 'Group (optional)',
         prefixIcon: const Icon(Icons.groups_outlined),
       ),
       items: memberships
           .map(
             (m) => DropdownMenuItem(
               value: m.group.groupId,
-              child: Text(m.group.name),
+              child: Text(
+                m.group.name,
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
           )
           .toList(),

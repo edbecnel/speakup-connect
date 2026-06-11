@@ -30,6 +30,10 @@ If a **contact email** is saved on your profile (you or an admin added it):
 
 The app maps your contact email to your school account automatically — you do not use a separate email password unless your admin set one up that way.
 
+### Staff and administrators
+
+Sign in with the **email address on your staff or admin account** and the password set for that account (usually after an admin reset). Student ID login applies to provisioned **member** accounts, not org-admin accounts.
+
 ### After an admin resets your password
 
 Use the **new password** your administrator gave you. Sign in with **either** your student ID **or** your contact email — both work with the same password.
@@ -57,11 +61,10 @@ If your account was blocked or unenrolled, contact your school administrator. Th
 
 The home screen is your starting point:
 
-- **My Groups & Clubs** — clubs, SSLG, program cohorts, and other groups you belong to (shown when you are on at least one roster)
-- **Submit a concern** — report a safety issue, bullying, maintenance need, suggestion, or other category
-- **My Reports** — track reports you submitted and their status
-- **Announcements** — school-wide news and updates (bulletin board for everyone)
-- **Alerts** — group reminders, polls, and personal notifications sent to you
+- **Quick Actions** at the top — **Submit a concern**, **My Reports**, **Announcements**, and other shortcuts
+- **My Groups & Clubs** — below Quick Actions when you are on at least one roster; the section starts **collapsed** — tap the header to expand and see your groups, leader actions, and browse/join options
+
+You can always open your full group list under **Settings → My Groups & Clubs**.
 
 ---
 
@@ -69,13 +72,21 @@ The home screen is your starting point:
 
 **Home → Announcements** shows posts visible to **every** approved member of the school.
 
+### Reading announcements
+
 - Tap a card to read the full message
 - Pinned posts appear at the top
 - Posts may show **From [club name]** when a group leader shared recruitment or club news
+- Some posts include an **image** you can tap to view full size
+- When the author enabled **Request a response**, open the post, fill in the form (free text, checkboxes, or multiple choice), and tap **Submit response**
 
 You may also get a push or **Alerts** entry when a new announcement is published — tap it to open the same post.
 
-**Group leaders** can post school-wide announcements from **My Groups & Clubs → Post Announcement** (on behalf of a club they lead). If your school requires approval, the button says **Submit for Approval** until an administrator publishes it.
+### Posting (leaders and staff)
+
+**Group leaders** can post from **My Groups & Clubs → Post Announcement** (on behalf of a club they lead). Staff and admins use **Home → Announcements → Post**. If your school requires approval, the button says **Submit for Approval** until an administrator publishes it.
+
+When composing or editing your own post, you can add an optional **image**, set **expiration**, and turn on **Request a response** (same options as group alerts). Use **Edit** on the detail screen or **My announcements** to update later. Authors and admins can **delete** when allowed.
 
 ---
 

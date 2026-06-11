@@ -50,7 +50,20 @@ After adding a member to a group, they should see it under **My Groups & Clubs**
 
 **Home → Announcements** is the organization-wide bulletin board. Admins and staff with `postBulletinOrgWide` can publish directly; group leaders use **Post Announcement** and attribute the source club.
 
-Admins may **pin** posts so they stay at the top of the list.
+### Compose and edit
+
+When posting or editing:
+
+- Title and message; optional **expiration**
+- **Pin to top** — org admins only; pinned posts sort first
+- Optional **image** (attach at compose or add/change/remove in **Edit**)
+- Optional **Request a response** — free text, checkboxes, or multiple choice; **response required** and **allow changing responses** work the same as group alerts
+
+Authors and admins can **Edit** or **Delete** from the announcement detail screen. Use **My announcements** (or the announcements list for authors) to manage posts.
+
+Open **View responses** on a post that requested responses to see submitted answers.
+
+When **Require approval before publishing** is enabled under **Organization Settings**, non-approver posts appear in **Pending Approvals** until an admin publishes them.
 
 ---
 

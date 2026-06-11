@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:speakup_connect/core/constants/route_constants.dart';
 import 'package:speakup_connect/features/groups/domain/entities/group_membership_policy.dart';
 import 'package:speakup_connect/features/groups/domain/entities/my_group_membership.dart';
+import 'package:speakup_connect/features/announcements/presentation/providers/announcement_provider.dart';
 import 'package:speakup_connect/features/groups/presentation/providers/group_membership_provider.dart';
 import 'package:speakup_connect/features/groups/presentation/providers/group_provider.dart';
 import 'package:speakup_connect/features/groups/presentation/widgets/group_membership_policy_sheet.dart';
@@ -186,6 +187,8 @@ class _MyGroupCard extends ConsumerWidget {
     final isBusy = ref.watch(groupMembershipActionsProvider).isLoading;
     final canManageRoster =
         ref.watch(canManageGroupRosterProvider(group.groupId));
+    final canPostAnnouncement =
+        ref.watch(canPostAnnouncementForGroupProvider(group.groupId));
     final canEditPolicies =
         ref.watch(canEditGroupMembershipPoliciesProvider(group.groupId));
     final leaveReq =
@@ -265,6 +268,7 @@ class _MyGroupCard extends ConsumerWidget {
                 AppButton.secondary(
                   label: 'Manage Members',
                   icon: Icons.people_outline,
+                  minimumWidth: 0,
                   onPressed: () =>
                       context.push(Routes.groupMembersPath(group.groupId)),
                 ),
@@ -272,6 +276,7 @@ class _MyGroupCard extends ConsumerWidget {
                   AppButton.secondary(
                     label: 'Add Members',
                     icon: Icons.person_add_outlined,
+                    minimumWidth: 0,
                     onPressed: () => context
                         .push(Routes.addGroupMembersPath(group.groupId)),
                   ),
@@ -280,6 +285,7 @@ class _MyGroupCard extends ConsumerWidget {
                         ? 'Requests ($pendingCount)'
                         : 'Requests',
                     icon: Icons.inbox_outlined,
+                    minimumWidth: 0,
                     onPressed: () => context.push(
                       Routes.groupMembershipRequestsPath(group.groupId),
                     ),
@@ -287,21 +293,16 @@ class _MyGroupCard extends ConsumerWidget {
                   AppButton.primary(
                     label: 'Send Alert',
                     icon: Icons.notifications_active_outlined,
+                    minimumWidth: 0,
                     onPressed: () => context.push(
                       Routes.composeReminderForGroupPath(group.groupId),
-                    ),
-                  ),
-                  AppButton.secondary(
-                    label: 'Post Announcement',
-                    icon: Icons.campaign_outlined,
-                    onPressed: () => context.push(
-                      Routes.composeAnnouncementForGroupPath(group.groupId),
                     ),
                   ),
                   if (canEditPolicies)
                     AppButton.secondary(
                       label: 'Settings',
                       icon: Icons.settings_outlined,
+                      minimumWidth: 0,
                       onPressed: () => showGroupMembershipPolicySheet(
                         context: context,
                         ref: ref,
@@ -309,6 +310,15 @@ class _MyGroupCard extends ConsumerWidget {
                       ),
                     ),
                 ],
+                if (canPostAnnouncement)
+                  AppButton.secondary(
+                    label: 'Post Announcement',
+                    icon: Icons.campaign_outlined,
+                    minimumWidth: 0,
+                    onPressed: () => context.push(
+                      Routes.composeAnnouncementForGroupPath(group.groupId),
+                    ),
+                  ),
                 if (!leavePending &&
                     group.memberLeavePolicy == MemberLeavePolicy.voluntary)
                   AppButton.secondary(

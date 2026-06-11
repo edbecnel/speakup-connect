@@ -6,12 +6,25 @@ import 'package:speakup_connect/core/constants/route_constants.dart';
 import 'package:speakup_connect/features/announcements/domain/entities/bulletin_entity.dart';
 import 'package:speakup_connect/features/announcements/presentation/providers/announcement_provider.dart';
 
-/// Organization-wide bulletin board — visible to all members.
-class AnnouncementsScreen extends ConsumerWidget {
+class AnnouncementsScreen extends ConsumerStatefulWidget {
   const AnnouncementsScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<AnnouncementsScreen> createState() =>
+      _AnnouncementsScreenState();
+}
+
+class _AnnouncementsScreenState extends ConsumerState<AnnouncementsScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(announcementReadProvider.notifier).markAllBulletinNotificationsRead();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final bulletinsAsync = ref.watch(publishedBulletinsProvider);
     final canPost = ref.watch(canPostAnnouncementsProvider);
@@ -142,6 +155,19 @@ class _AnnouncementCard extends StatelessWidget {
                 ),
               ],
               const SizedBox(height: 8),
+              if (bulletin.imageUrl?.isNotEmpty == true) ...[
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Image.network(
+                    bulletin.imageUrl!,
+                    width: double.infinity,
+                    height: 140,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                  ),
+                ),
+                const SizedBox(height: 8),
+              ],
               Text(
                 bulletin.body,
                 maxLines: 3,

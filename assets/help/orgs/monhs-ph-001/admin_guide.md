@@ -219,6 +219,14 @@ Announcements are always **organization-wide** — every approved member can rea
 
 - Title and message; optional expiration
 - **Pin to top** — admins only; pinned posts sort first for all members
+- Optional **image** — attach when composing or add/change/remove in **Edit**
+- Optional **Request a response** — free text, checkboxes, or multiple choice; **response required** and **allow changing responses** (turn off for one-time polls)
+
+### Edit, delete, and responses
+
+Authors and admins can **Edit** or **Delete** from the announcement detail screen. **Edit** updates title, body, expiration, image, and response settings — tap **Save** after changing the image.
+
+Use **My announcements** (or the author list on the announcements screen) to manage your posts. When a post requested responses, open **View responses** to read submitted answers.
 
 ### Group leaders
 

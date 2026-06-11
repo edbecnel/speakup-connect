@@ -41,6 +41,8 @@ class AppNotificationEntity {
 
   String? get reminderId => data['reminderId'] as String?;
 
+  String? get bulletinId => data['bulletinId'] as String?;
+
   /// Group membership event from Cloud Functions, e.g. `leave_approved`.
   String? get groupMembershipEvent => data['event'] as String?;
 

@@ -36,8 +36,9 @@ class AuthRemoteDataSource {
         return email.trim();
       }
     } on FirebaseFunctionsException catch (e) {
-      // Student email login requires the callable — do not guess Auth email.
-      if (trimmed.contains('@') &&
+      if (e.code == 'not-found') {
+        // Callable not deployed — fall back to local resolution below.
+      } else if (trimmed.contains('@') &&
           !trimmed.toLowerCase().contains(kStudentAuthEmailDomain)) {
         throw AuthException(
           message: e.message ??

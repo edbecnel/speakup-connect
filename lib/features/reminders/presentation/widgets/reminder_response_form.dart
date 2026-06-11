@@ -1,22 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:speakup_connect/features/announcements/presentation/providers/bulletin_response_provider.dart';
 import 'package:speakup_connect/features/reminders/domain/entities/reminder_response_config.dart';
 import 'package:speakup_connect/features/reminders/domain/entities/reminder_response_entity.dart';
 import 'package:speakup_connect/features/reminders/presentation/providers/reminder_response_provider.dart';
 import 'package:speakup_connect/shared/widgets/app_button.dart';
 
-/// Recipient form for submitting a response to a broadcast reminder.
+/// Recipient form for submitting a response to a broadcast or announcement.
 class ReminderResponseForm extends ConsumerStatefulWidget {
   const ReminderResponseForm({
     required this.organizationId,
-    required this.reminderId,
     required this.config,
+    this.reminderId,
+    this.bulletinId,
     this.existing,
     super.key,
-  });
+  }) : assert(reminderId != null || bulletinId != null);
 
   final String organizationId;
-  final String reminderId;
+  final String? reminderId;
+  final String? bulletinId;
   final ReminderResponseConfig config;
   final ReminderResponseEntity? existing;
 
@@ -75,20 +78,37 @@ class _ReminderResponseFormState extends ConsumerState<ReminderResponseForm> {
   }
 
   Future<void> _submit() async {
-    final notifier = ref.read(submitReminderResponseProvider.notifier);
     final includeText = widget.config.type == ReminderResponseType.freeText ||
         widget.config.allowAdditionalText;
-    final ok = await notifier.submit(
-      organizationId: widget.organizationId,
-      reminderId: widget.reminderId,
-      text: includeText ? _submittedText : null,
-      selectedOptionIds: widget.config.type == ReminderResponseType.checkbox
-          ? _checkedIds.toList()
-          : null,
-      selectedOptionId: widget.config.type == ReminderResponseType.multipleChoice
-          ? _selectedChoiceId
-          : null,
-    );
+    final text = includeText ? _submittedText : null;
+    final selectedOptionIds =
+        widget.config.type == ReminderResponseType.checkbox
+            ? _checkedIds.toList()
+            : null;
+    final selectedOptionId =
+        widget.config.type == ReminderResponseType.multipleChoice
+            ? _selectedChoiceId
+            : null;
+
+    final bool ok;
+    if (widget.bulletinId != null) {
+      ok = await ref.read(submitBulletinResponseProvider.notifier).submit(
+            organizationId: widget.organizationId,
+            bulletinId: widget.bulletinId!,
+            text: text,
+            selectedOptionIds: selectedOptionIds,
+            selectedOptionId: selectedOptionId,
+          );
+    } else {
+      ok = await ref.read(submitReminderResponseProvider.notifier).submit(
+            organizationId: widget.organizationId,
+            reminderId: widget.reminderId!,
+            text: text,
+            selectedOptionIds: selectedOptionIds,
+            selectedOptionId: selectedOptionId,
+          );
+    }
+
     if (ok && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Response submitted')),
@@ -99,7 +119,9 @@ class _ReminderResponseFormState extends ConsumerState<ReminderResponseForm> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final submitState = ref.watch(submitReminderResponseProvider);
+    final submitState = widget.bulletinId != null
+        ? ref.watch(submitBulletinResponseProvider)
+        : ref.watch(submitReminderResponseProvider);
     final hasExisting = widget.existing != null;
     final isLocked =
         hasExisting && !widget.config.allowResponseUpdates;

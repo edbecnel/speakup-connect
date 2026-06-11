@@ -68,7 +68,9 @@ service firebase.storage {
     // Path: organizations/{orgId}/bulletins/{bulletinId}/{fileName}
     match /organizations/{orgId}/bulletins/{bulletinId}/{fileName} {
       allow read:  if isSuperAdmin() || isOrgMember(orgId);
-      allow write: if isAdminOrAbove(orgId)
+      // Org members may upload; only the author/admin can attach the URL on the
+      // bulletin document (enforced via setBulletinImageUrl callable / rules).
+      allow write: if isOrgMember(orgId)
                    && isImage()
                    && isUnderSizeLimit(10);
     }

@@ -10,9 +10,10 @@ import 'package:speakup_connect/features/notifications/presentation/providers/no
 import 'package:speakup_connect/features/notifications/presentation/providers/notification_provider.dart';
 import 'package:speakup_connect/features/notifications/presentation/screens/notification_detail_screen.dart';
 import 'package:speakup_connect/features/reminders/presentation/screens/broadcast_detail_screen.dart';
+import 'package:speakup_connect/features/announcements/presentation/screens/announcement_detail_screen.dart';
 import 'package:speakup_connect/features/announcements/presentation/providers/announcement_provider.dart';
 import 'package:speakup_connect/features/reminders/presentation/providers/reminder_provider.dart';
-import 'package:speakup_connect/features/reminders/presentation/providers/reminder_response_provider.dart';
+import 'package:speakup_connect/features/announcements/presentation/widgets/edit_announcement_dialog.dart';
 import 'package:speakup_connect/features/reminders/presentation/widgets/edit_reminder_dialog.dart';
 
 /// Alerts — the in-app notification feed. Lists reminders and other
@@ -75,6 +76,52 @@ class AlertsScreen extends ConsumerWidget {
               ),
             ),
           );
+        }
+      }
+    });
+
+    ref.listen(deleteAnnouncementProvider, (prev, next) {
+      if (prev?.isLoading == true && !next.isLoading) {
+        final messenger = ScaffoldMessenger.of(context);
+        messenger.hideCurrentSnackBar();
+        if (next.hasError) {
+          messenger.showSnackBar(SnackBar(
+            content: Text('Delete failed: ${next.error}'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ));
+        } else {
+          final removed = next.asData?.value ?? 0;
+          messenger.showSnackBar(SnackBar(
+            content: Text(
+              removed > 0
+                  ? 'Announcement deleted — $removed alert(s) removed.'
+                  : 'Announcement deleted.',
+            ),
+            backgroundColor: Colors.green.shade700,
+          ));
+        }
+      }
+    });
+
+    ref.listen(updateAnnouncementProvider, (prev, next) {
+      if (prev?.isLoading == true && !next.isLoading) {
+        final messenger = ScaffoldMessenger.of(context);
+        messenger.hideCurrentSnackBar();
+        if (next.hasError) {
+          messenger.showSnackBar(SnackBar(
+            content: Text('Update failed: ${next.error}'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ));
+        } else {
+          final updated = next.asData?.value ?? 0;
+          messenger.showSnackBar(SnackBar(
+            content: Text(
+              updated > 0
+                  ? 'Announcement updated — $updated alert(s) refreshed.'
+                  : 'Announcement updated.',
+            ),
+            backgroundColor: Colors.green.shade700,
+          ));
         }
       }
     });
@@ -207,13 +254,22 @@ class _NotificationRow extends ConsumerWidget {
     final reminderId = notification.type == 'reminder'
         ? reminderIdFromNotificationData(notification.data)
         : null;
-    final canManageAsync = reminderId != null
+    final bulletinId = notification.type == 'bulletin'
+        ? bulletinIdFromNotificationData(notification.data)
+        : null;
+    final canManageReminderAsync = reminderId != null
         ? ref.watch(canManageBroadcastProvider(reminderId))
         : const AsyncData(false);
-    final canManage = canManageAsync.asData?.value ?? false;
+    final canManageBulletinAsync = bulletinId != null
+        ? ref.watch(canManageAnnouncementProvider(bulletinId))
+        : const AsyncData(false);
+    final canManage = (canManageReminderAsync.asData?.value ?? false) ||
+        (canManageBulletinAsync.asData?.value ?? false);
     final isSynthetic = notification.id.startsWith('broadcast-');
     final busy = ref.watch(recallReminderProvider).isLoading ||
-        ref.watch(updateReminderProvider).isLoading;
+        ref.watch(updateReminderProvider).isLoading ||
+        ref.watch(deleteAnnouncementProvider).isLoading ||
+        ref.watch(updateAnnouncementProvider).isLoading;
     final attention = ref.watch(notificationAttentionProvider(notification));
 
     final tile = _NotificationTile(
@@ -225,17 +281,20 @@ class _NotificationRow extends ConsumerWidget {
       onTap: () => _openNotificationDetail(context, ref, notification),
       onEdit: reminderId != null && canManage
           ? () => _editBroadcast(context, ref, reminderId)
-          : null,
+          : bulletinId != null && canManage
+              ? () => _editAnnouncement(context, ref, bulletinId)
+              : null,
       onDelete: () => _deleteNotification(
         context,
         ref,
         reminderId: reminderId,
+        bulletinId: bulletinId,
         canManage: canManage,
         canDismiss: attention.canDismiss,
       ),
     );
 
-    if (canManage && reminderId != null) {
+    if (canManage && (reminderId != null || bulletinId != null)) {
       return Dismissible(
         key: ValueKey(notification.id),
         direction: DismissDirection.endToStart,
@@ -248,7 +307,13 @@ class _NotificationRow extends ConsumerWidget {
             color: Theme.of(context).colorScheme.onErrorContainer,
           ),
         ),
-        onDismissed: (_) => _recallBroadcast(ref, reminderId),
+        onDismissed: (_) {
+          if (reminderId != null) {
+            _recallBroadcast(ref, reminderId);
+          } else if (bulletinId != null) {
+            _deleteAnnouncement(ref, bulletinId);
+          }
+        },
         child: tile,
       );
     }
@@ -314,10 +379,14 @@ class _NotificationRow extends ConsumerWidget {
         ? bulletinIdFromNotificationData(notification.data)
         : null;
     if (bulletinId != null && bulletinId.isNotEmpty) {
-      if (!notification.read && !notification.id.startsWith('broadcast-')) {
-        ref.read(notificationActionsProvider.notifier).markRead(notification.id);
-      }
-      context.push(Routes.announcementDetailPath(bulletinId));
+      Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (_) => AnnouncementDetailScreen(
+            bulletinId: bulletinId,
+            notification: notification,
+          ),
+        ),
+      );
       return;
     }
 
@@ -358,15 +427,51 @@ class _NotificationRow extends ConsumerWidget {
         );
   }
 
+  Future<void> _editAnnouncement(
+    BuildContext context,
+    WidgetRef ref,
+    String bulletinId,
+  ) async {
+    final bulletin = await ref.read(bulletinByIdProvider(bulletinId).future);
+    if (bulletin == null || !context.mounted) return;
+
+    final edited = await EditAnnouncementDialog.show(
+      context,
+      bulletin: bulletin,
+    );
+    if (edited == null || !context.mounted) return;
+
+    final ok = await ref.read(updateAnnouncementProvider.notifier).update(
+          bulletinId: bulletinId,
+          title: edited.title,
+          body: edited.body,
+          expiresAt: edited.expiresAt,
+          clearExpiration: edited.clearExpiration,
+          responseConfig: edited.responseConfig,
+          newImageLocalPath: edited.newImageLocalPath,
+          clearImage: edited.clearImage,
+          clearResponseConfig: edited.clearResponseConfig,
+        );
+    if (ok && context.mounted) {
+      ref.invalidate(bulletinByIdProvider(bulletinId));
+    }
+  }
+
   Future<void> _deleteNotification(
     BuildContext context,
     WidgetRef ref, {
     required String? reminderId,
+    required String? bulletinId,
     required bool canManage,
     required bool canDismiss,
   }) async {
     if (reminderId != null && canManage) {
       await _confirmRecallBroadcast(context, ref, reminderId);
+      return;
+    }
+
+    if (bulletinId != null && canManage) {
+      await _confirmDeleteAnnouncement(context, ref, bulletinId);
       return;
     }
 
@@ -448,6 +553,43 @@ class _NotificationRow extends ConsumerWidget {
     String reminderId,
   ) async {
     await ref.read(recallReminderProvider.notifier).recall(reminderId);
+  }
+
+  Future<void> _confirmDeleteAnnouncement(
+    BuildContext context,
+    WidgetRef ref,
+    String bulletinId,
+  ) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete announcement?'),
+        content: const Text(
+          'This deletes the announcement and removes it from every '
+          'member\'s alerts feed. This cannot be undone.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) {
+      await _deleteAnnouncement(ref, bulletinId);
+    }
+  }
+
+  Future<void> _deleteAnnouncement(
+    WidgetRef ref,
+    String bulletinId,
+  ) async {
+    await ref.read(deleteAnnouncementProvider.notifier).delete(bulletinId);
   }
 }
 

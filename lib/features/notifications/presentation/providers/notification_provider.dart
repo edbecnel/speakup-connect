@@ -6,6 +6,8 @@ import 'package:speakup_connect/features/notifications/data/repositories/notific
 import 'package:speakup_connect/features/notifications/domain/entities/app_notification_entity.dart';
 import 'package:speakup_connect/features/notifications/domain/entities/notification_attention.dart';
 import 'package:speakup_connect/features/notifications/domain/repositories/notification_repository.dart';
+import 'package:speakup_connect/features/announcements/presentation/providers/announcement_provider.dart';
+import 'package:speakup_connect/features/announcements/presentation/providers/bulletin_response_provider.dart';
 import 'package:speakup_connect/features/reminders/presentation/providers/reminder_provider.dart';
 import 'package:speakup_connect/features/reminders/presentation/providers/reminder_response_provider.dart';
 
@@ -35,6 +37,8 @@ final notificationsProvider =
 final notificationAttentionProvider = Provider.autoDispose
     .family<NotificationAttention, AppNotificationEntity>((ref, notification) {
   final reminderId = notification.reminderId;
+  final bulletinId = notification.bulletinId;
+
   final reminderAsync = reminderId == null
       ? null
       : ref.watch(reminderByIdProvider(reminderId));
@@ -42,15 +46,31 @@ final notificationAttentionProvider = Provider.autoDispose
   final reminderStillLoading = reminderId != null &&
       reminderAsync != null &&
       reminderAsync.isLoading;
+
+  final bulletinAsync = bulletinId == null
+      ? null
+      : ref.watch(bulletinByIdProvider(bulletinId));
+  final bulletin = bulletinAsync?.asData?.value;
+  final bulletinStillLoading = bulletinId != null &&
+      bulletinAsync != null &&
+      bulletinAsync.isLoading;
+
   final myResponse = reminderId == null
       ? null
       : ref.watch(myReminderResponseProvider(reminderId)).asData?.value;
+
+  final myBulletinResponse = bulletinId == null
+      ? null
+      : ref.watch(myBulletinResponseProvider(bulletinId)).asData?.value;
 
   return NotificationAttention.resolve(
     notification: notification,
     reminder: reminder,
     myResponse: myResponse,
+    bulletin: bulletin,
+    myBulletinResponse: myBulletinResponse,
     reminderStillLoading: reminderStillLoading,
+    bulletinStillLoading: bulletinStillLoading,
   );
 });
 

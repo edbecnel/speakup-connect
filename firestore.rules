@@ -569,9 +569,24 @@ service cloud.firestore {
                       );
 
         allow update: if isAdminOrAbove(orgId)
-                      || hasClaimedPermission('approveReminders');
+                      || hasClaimedPermission('approveReminders')
+                      || (isSignedIn()
+                          && resource.data.authorId == request.auth.uid);
 
-        allow delete: if isAdminOrAbove(orgId);
+        allow delete: if isAdminOrAbove(orgId)
+                      || (isSignedIn()
+                          && resource.data.authorId == request.auth.uid);
+
+        // Recipient responses — written via submitBulletinResponse callable only.
+        match /responses/{userId} {
+          // Recipients read their own response (matches reminders pattern).
+          allow read: if isSignedIn() && request.auth.uid == userId;
+          // Authors and admins read all responses for this announcement.
+          allow read: if isAdminOrAbove(orgId)
+                      || (isSignedIn()
+                          && get(/databases/$(database)/documents/organizations/$(orgId)/bulletins/$(bulletinId)).data.authorId == request.auth.uid);
+          allow write: if false;
+        }
       }
 
       // ── News Posts ──────────────────────────────────────────────────────────

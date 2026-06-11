@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:speakup_connect/features/announcements/domain/entities/bulletin_entity.dart';
+import 'package:speakup_connect/features/reminders/data/models/reminder_response_config_codec.dart';
 
 class BulletinModel extends BulletinEntity {
   const BulletinModel({
@@ -21,6 +22,8 @@ class BulletinModel extends BulletinEntity {
     super.reviewedByName,
     super.reviewedAt,
     super.rejectionReason,
+    super.responseConfig,
+    super.imageUrl,
   });
 
   factory BulletinModel.fromFirestore(
@@ -46,6 +49,9 @@ class BulletinModel extends BulletinEntity {
       reviewedByName: data['reviewedByName'] as String?,
       reviewedAt: toDate(data['reviewedAt']),
       rejectionReason: data['rejectionReason'] as String?,
+      responseConfig:
+          ReminderResponseConfigCodec.fromMap(data['responseConfig']),
+      imageUrl: data['imageUrl'] as String?,
       createdAt: toDate(data['createdAt']) ?? DateTime.now(),
       updatedAt: toDate(data['updatedAt']) ?? DateTime.now(),
     );
@@ -64,6 +70,9 @@ class BulletinModel extends BulletinEntity {
       'isPinned': isPinned,
       if (expiresAt != null) 'expiresAt': Timestamp.fromDate(expiresAt!),
       if (publishedAt != null) 'publishedAt': Timestamp.fromDate(publishedAt!),
+      if (ReminderResponseConfigCodec.toMap(responseConfig) != null)
+        'responseConfig': ReminderResponseConfigCodec.toMap(responseConfig),
+      if (imageUrl != null) 'imageUrl': imageUrl,
       'createdAt': FieldValue.serverTimestamp(),
       'updatedAt': FieldValue.serverTimestamp(),
     };

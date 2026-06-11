@@ -1,4 +1,5 @@
 import 'package:speakup_connect/features/notifications/domain/entities/app_notification_entity.dart';
+import 'package:speakup_connect/features/announcements/domain/entities/bulletin_entity.dart';
 import 'package:speakup_connect/features/reminders/domain/entities/reminder_entity.dart';
 import 'package:speakup_connect/features/reminders/domain/entities/reminder_response_entity.dart';
 
@@ -31,9 +32,30 @@ class NotificationAttention {
     required AppNotificationEntity notification,
     ReminderEntity? reminder,
     ReminderResponseEntity? myResponse,
+    BulletinEntity? bulletin,
+    ReminderResponseEntity? myBulletinResponse,
     bool reminderStillLoading = false,
+    bool bulletinStillLoading = false,
   }) {
     final reminderId = notification.reminderId;
+    final bulletinId = notification.bulletinId;
+
+    if (bulletinId != null) {
+      final responded = notification.data['hasResponded'] == true ||
+          myBulletinResponse != null;
+      final responseRequired = notification.responseRequired ||
+          (bulletin?.responseRequired ?? false) ||
+          (bulletinStillLoading &&
+              notification.type == 'bulletin' &&
+              !responded);
+      final hasResponded = !responseRequired || responded;
+      return NotificationAttention(
+        read: notification.read,
+        responseRequired: responseRequired,
+        hasResponded: hasResponded,
+      );
+    }
+
     final responded =
         notification.data['hasResponded'] == true || myResponse != null;
 

@@ -24,6 +24,9 @@ abstract class AppConstants {
   /// Target compressed photo size in bytes (1 MB).
   static const int targetCompressedPhotoSizeBytes = 1 * 1024 * 1024;
 
+  /// Maximum number of images per announcement (currently one optional image).
+  static const int maxImagesPerAnnouncement = 1;
+
   /// Maximum number of reports a user can submit per day (anti-spam).
   static const int maxReportsPerDay = 5;
 
@@ -104,6 +107,9 @@ abstract class AppConstants {
   // --- Firebase Storage Paths ---
   static String reportPhotosStoragePath(String orgId, String reportId) =>
       'organizations/$orgId/reports/$reportId';
+
+  static String bulletinImageStoragePath(String orgId, String bulletinId) =>
+      'organizations/$orgId/bulletins/$bulletinId';
 
   static String orgLogoStoragePath(String orgId) =>
       'organizations/$orgId/assets/logo';

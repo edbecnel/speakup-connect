@@ -9,7 +9,16 @@ import {
 
 const db = admin.firestore();
 
-/** Looks up a student ID from profile or roster contact email. */
+/** School-issued IDs must not look like contact emails. */
+function isValidStudentId(studentId: string): boolean {
+  const trimmed = studentId.trim();
+  return trimmed.length > 0 && !trimmed.includes('@');
+}
+
+/**
+ * Looks up a roster student ID from a contact email.
+ * Roster is authoritative; staff/admin profiles are ignored.
+ */
 async function findStudentIdByContactEmail(
   orgId: string,
   email: string,
@@ -18,25 +27,7 @@ async function findStudentIdByContactEmail(
   const lower = normalizeContactEmail(trimmed);
   const candidates = [...new Set([trimmed, lower])];
 
-  for (const candidate of candidates) {
-    const byProfile = await db
-      .collection('organizations')
-      .doc(orgId)
-      .collection('users')
-      .where('email', '==', candidate)
-      .limit(1)
-      .get();
-
-    if (!byProfile.empty) {
-      const studentId = byProfile.docs[0].data()['studentId'] as
-        | string
-        | undefined;
-      if (studentId?.trim()) {
-        return studentId.trim();
-      }
-    }
-  }
-
+  // Roster contact email → roster document ID is the canonical student ID.
   for (const candidate of candidates) {
     const byRoster = await db
       .collection('organizations')
@@ -47,13 +38,44 @@ async function findStudentIdByContactEmail(
       .get();
 
     if (!byRoster.empty) {
-      const data = byRoster.docs[0].data();
-      const studentId =
-        (data['studentId'] as string | undefined)?.trim() ||
-        byRoster.docs[0].id;
-      if (studentId) {
-        return studentId;
+      const rosterId = byRoster.docs[0].id;
+      if (isValidStudentId(rosterId)) {
+        return rosterId;
       }
+    }
+  }
+
+  // Registered student profile — never map staff/admin contact emails.
+  for (const candidate of candidates) {
+    const byProfile = await db
+      .collection('organizations')
+      .doc(orgId)
+      .collection('users')
+      .where('email', '==', candidate)
+      .limit(1)
+      .get();
+
+    if (byProfile.empty) continue;
+
+    const data = byProfile.docs[0].data();
+    const role = (data['role'] as string | undefined) ?? 'user';
+    if (role !== 'user') {
+      continue;
+    }
+
+    const studentId = (data['studentId'] as string | undefined)?.trim();
+    if (!studentId || !isValidStudentId(studentId)) {
+      continue;
+    }
+
+    const rosterSnap = await db
+      .collection('organizations')
+      .doc(orgId)
+      .collection('roster')
+      .doc(studentId)
+      .get();
+    if (rosterSnap.exists) {
+      return studentId;
     }
   }
 
@@ -98,7 +120,7 @@ export const resolveLoginEmail = onCall(async (request) => {
       return { email: studentAuthEmail(trimmedOrg, studentId) };
     }
 
-    // Real email/password account (not student-ID provisioned).
+    // Real email/password account (admin, self-registered, etc.).
     return { email: trimmed };
   }
 
