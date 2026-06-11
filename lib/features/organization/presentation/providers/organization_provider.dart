@@ -81,6 +81,7 @@ class OrganizationConfig extends _$OrganizationConfig {
           allowAnonymousReports: true,
           reportCodePrefix: 'ORG',
           requireReminderApproval: cached.requireReminderApproval,
+          allowMemberProfilePhotos: cached.allowMemberProfilePhotos,
         );
       }
       return OrganizationConfigModel.offline();
@@ -105,6 +106,12 @@ class OrganizationConfig extends _$OrganizationConfig {
     return config;
   }
 }
+
+/// Whether members may upload a personal profile badge in Settings.
+final allowMemberProfilePhotosProvider = Provider<bool>((ref) {
+  return ref.watch(organizationConfigProvider).value?.allowMemberProfilePhotos ??
+      false;
+});
 
 /// Whether the active organization uses student grade levels.
 final orgSupportsStudentGradesProvider = Provider<bool>((ref) {

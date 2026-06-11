@@ -5,24 +5,31 @@ import 'package:flutter/material.dart';
 ///
 /// Usage:
 /// ```dart
-/// AppAvatar(displayName: 'Maria Santos', photoUrl: user.photoUrl, radius: 24)
-/// AppAvatar(orgName: 'MONHS', radius: 20) // initials from org name
+/// AppAvatar(displayName: 'Maria Santos', avatarUrl: profile.avatarUrl, radius: 24)
+/// AppAvatar(displayName: 'Juan', officialPhotoUrl: profile.officialPhotoUrl)
 /// ```
 class AppAvatar extends StatelessWidget {
   const AppAvatar({
     super.key,
     this.photoUrl,
+    this.avatarUrl,
+    this.officialPhotoUrl,
     this.displayName,
     this.radius = 20,
     this.backgroundColor,
     this.foregroundColor,
   });
 
-  /// Remote image URL (e.g. Firebase Storage download URL or Google profile photo).
+  /// Legacy single URL — treated like [avatarUrl] when set.
   final String? photoUrl;
 
-  /// Used to derive initials when [photoUrl] is null or fails to load.
-  /// Falls back to a generic icon if also null.
+  /// Member-chosen personal badge (highest display priority).
+  final String? avatarUrl;
+
+  /// Admin-managed official school photo (second priority).
+  final String? officialPhotoUrl;
+
+  /// Used to derive initials when no image URL is available.
   final String? displayName;
 
   /// Radius of the circular avatar. Default 20 (40 px diameter).
@@ -40,14 +47,15 @@ class AppAvatar extends StatelessWidget {
     final bgColor = backgroundColor ?? theme.colorScheme.primaryContainer;
     final fgColor = foregroundColor ?? theme.colorScheme.onPrimaryContainer;
     final initials = _initials(displayName);
+    final resolvedUrl = _resolvePhotoUrl();
 
-    if (photoUrl != null && photoUrl!.isNotEmpty) {
+    if (resolvedUrl != null) {
       return CircleAvatar(
         radius: radius,
         backgroundColor: bgColor,
         child: ClipOval(
           child: Image.network(
-            photoUrl!,
+            resolvedUrl,
             width: radius * 2,
             height: radius * 2,
             fit: BoxFit.cover,
@@ -68,6 +76,15 @@ class AppAvatar extends StatelessWidget {
       bgColor: bgColor,
       fgColor: fgColor,
     );
+  }
+
+  String? _resolvePhotoUrl() {
+    if (avatarUrl != null && avatarUrl!.isNotEmpty) return avatarUrl;
+    if (photoUrl != null && photoUrl!.isNotEmpty) return photoUrl;
+    if (officialPhotoUrl != null && officialPhotoUrl!.isNotEmpty) {
+      return officialPhotoUrl;
+    }
+    return null;
   }
 
   /// Extracts up to 2 uppercase initials from a display name.

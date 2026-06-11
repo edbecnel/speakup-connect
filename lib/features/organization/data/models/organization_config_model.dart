@@ -22,6 +22,7 @@ class OrganizationConfigModel extends OrganizationConfigEntity {
     super.country,
     super.isActive,
     super.requireReminderApproval,
+    super.allowMemberProfilePhotos,
     super.gradeLevels,
   });
 
@@ -55,6 +56,10 @@ class OrganizationConfigModel extends OrganizationConfigEntity {
       isActive: json['isActive'] as bool? ?? true,
       requireReminderApproval: _parseBool(
         json['requireReminderApproval'],
+        defaultValue: false,
+      ),
+      allowMemberProfilePhotos: _parseBool(
+        json['allowMemberProfilePhotos'],
         defaultValue: false,
       ),
       gradeLevels: _parseGradeLevels(json['gradeLevels']),
@@ -105,6 +110,7 @@ class OrganizationConfigModel extends OrganizationConfigEntity {
       'country': country,
       'isActive': isActive,
       'requireReminderApproval': requireReminderApproval,
+      'allowMemberProfilePhotos': allowMemberProfilePhotos,
       if (gradeLevels != null) 'gradeLevels': gradeLevels,
     };
   }

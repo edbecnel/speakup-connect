@@ -105,7 +105,7 @@
 - [ ] Create `app_loading_indicator.dart` — centered CircularProgressIndicator
 - [ ] Create `app_error_widget.dart` — error message + retry button
 - [ ] Create `app_empty_state.dart` — empty list illustration + message
-- [ ] Create `app_avatar.dart` — user/org avatar with fallback initials; support **official photo** (admin) and **personal badge** (member `avatarUrl`) with display priority documented in [DATABASE_DESIGN.md](DATABASE_DESIGN.md)
+- [x] Create `app_avatar.dart` — user/org avatar with fallback initials; **official photo** + **personal badge** (`avatarUrl` → `officialPhotoUrl` → initials) per [DATABASE_DESIGN.md](DATABASE_DESIGN.md)
 - [ ] Write widget tests for all shared widgets
 
 ---
@@ -490,20 +490,24 @@
   - [ ] Hook: new callable or extend `resetOrgMemberPassword` in `functions/src/reset_org_member_password.ts`
 - [ ] **Future (email infrastructure) — interim fallback:** Email member that an admin changed their password and include the new value only if link-based self-service reset is not shipped yet (less secure; avoid long term)
 
-**Member photos (official + personal badge) — Future**
-- [ ] **Official photo (admin-controlled)** — new `officialPhotoUrl` on user profile (and optional sync to `roster/{studentId}`):
-  - [ ] Upload/replace/remove via **Edit Member**, **Member Management**, and **Student Roster** screens
-  - [ ] Who may manage: org admin / system admin and anyone with **`manageClassRoster`**, **`blockUsers`** (Manage Members), or equivalent roster/member-management capabilities
-  - [ ] Students and regular members **cannot** change the official photo (Firestore rules + Storage rules enforce)
-  - [ ] Store in Firebase Storage under org-scoped path (e.g. `organizations/{orgId}/users/{userId}/official/…`); compress on upload
-- [ ] **Personal badge / avatar (member-controlled)** — new `avatarUrl` on user profile:
-  - [ ] **Settings → Profile header:** tap the circular badge (default: initials on colored circle) to pick/upload a personal image (selfie or avatar)
-  - [ ] Members may change their own badge; they **cannot** change `officialPhotoUrl`
-  - [ ] **Display priority for the badge:** `avatarUrl` (if set) → else `officialPhotoUrl` (if school uploaded one) → else initials fallback
-  - [ ] Reuse/extend `app_avatar.dart` across Settings, Home, group member lists, etc.
-- [ ] Firestore Security Rules: `onlySelfAvatarFields()` for member `avatarUrl`; admin-only writes for `officialPhotoUrl`
-- [ ] Firebase Storage rules aligned with profile vs official photo paths
-- [ ] Optional later: bulk official-photo import with roster CSV; photo on group roster cards
+**Member photos (official + personal badge)** *(complete — June 5, 2026)*
+- [x] **Official photo (admin-controlled)** — `officialPhotoUrl` on user profile + `roster/{studentId}`:
+  - [x] Upload/replace/remove via **Edit Member** and **Student Roster** (tap avatar)
+  - [x] Who may manage: org admin / system admin and anyone with **`manageClassRoster`**, **`blockUsers`**
+  - [x] Students and regular members **cannot** change the official photo (rules + callables)
+  - [x] Store in Firebase Storage (`users/{userId}/official/…`, `roster/{studentId}/official/…`)
+- [x] **Personal badge / avatar (member-controlled)** — `avatarUrl` on user profile:
+  - [x] **Settings → Profile header:** tap the circular badge to pick/upload a personal image (when `allowMemberProfilePhotos` is ON)
+  - [x] Org admin toggle: **Organization Settings → Allow personal profile photos** (default OFF)
+  - [x] Members may change their own `avatarUrl` only; never `officialPhotoUrl`; personal upload does not overwrite school record
+  - [x] **Display priority:** `avatarUrl` → `officialPhotoUrl` → initials (`app_avatar.dart`)
+- [x] Cloud Functions: `uploadMemberAvatar` (server-side upload for members — avoids client Storage/App Check 403), `setMemberAvatarUrl`, `setOfficialPhotoUrl` — deployed to `speakup-connect-891dd`
+- [x] Firestore Security Rules: block self-writes to `officialPhotoUrl`; `allowMemberProfilePhotos` org toggle
+- [x] Firebase Storage rules: `avatar/` (self) vs `official/` (admin/roster manager) paths
+- [x] `allowMemberProfilePhotos` cached in `OrgConfigCacheService`; Settings profile circle always tappable (snackbar when disabled)
+- [x] Help guides: member Settings photo + admin official school photo (`assets/help/`, `docs/help/`)
+- [x] On-device smoke test: member personal upload on Android (MONHS pilot)
+- [ ] Optional later: bulk official-photo import with roster CSV; photo on group roster cards; Firebase App Check for client Storage uploads
 
 ### Epic 2.4 — Community Rules
 
@@ -654,30 +658,36 @@
 - [ ] Widget tests: browse status chips; leave vs request-to-leave buttons
 - [ ] On-device: SSLG (`request_required` leave); Drum and Lyre (`voluntary`); removal alert; denied leave shows reason
 
-### Epic 2.7 — Bulletin Board
+### Epic 2.7 — Organization-Wide Announcements *(Bulletin Board)*
 
 **Domain**
-- [ ] Create `BulletinEntity`
-- [ ] Create `BulletinRepository` abstract interface
-- [ ] Create `PostBulletinUseCase`
-- [ ] Create `GetBulletinsUseCase`
+- [x] Create `BulletinEntity` (+ `responseConfig`, `imageUrl`)
+- [x] Create `BulletinRepository` abstract interface
+- [x] Post / watch / update / delete via repository + providers
 
 **Data**
-- [ ] Create `BulletinModel`
-- [ ] Create `BulletinRemoteDataSource`
-- [ ] Create `BulletinRepositoryImpl`
+- [x] Create `BulletinModel`
+- [x] Create `BulletinRepositoryImpl` (+ `BulletinResponseRepository`)
+- [x] Cloud Functions: `createGroupLeaderAnnouncement`, `onBulletinPublished`, `submitBulletinResponse`, `updateBulletin`, `deleteBulletin`, `setBulletinImageUrl`
 
 **Presentation**
-- [ ] Build `BulletinBoardScreen` — paginated list of org-wide bulletins
-- [ ] Build `BulletinDetailScreen` — full bulletin content
-- [ ] Build `PostBulletinScreen` (admin) — title, body, pin toggle, expiry date
-- [ ] Pinned bulletins shown at top
-- [ ] Push notification to all members on new bulletin
-- [ ] Show bulletin count badge on home dashboard
+- [x] `AnnouncementsScreen` — org-wide list; pinned first
+- [x] `AnnouncementDetailScreen` — full content, image, response form
+- [x] `ComposeAnnouncementScreen` — title, body, pin, expiry, image, request-a-response
+- [x] `EditAnnouncementDialog` — edit title/body/expiry/image/response settings
+- [x] `MyAnnouncementsScreen` — author manage + view responses
+- [x] Group leaders: **Post Announcement** from My Groups; approval queue when enabled
+- [x] Alerts integration — attention badges for pending responses
+- [x] Firestore rules + indexes for bulletin responses and author updates
+
+**Home & auth (June 2026)**
+- [x] Home dashboard: **Quick Actions** above **My Groups & Clubs** (collapsed by default)
+- [x] `resolveLoginEmail` — student ID / contact email for members; real email for admin/staff (no synthetic student-email mapping for non-members)
+- [x] In-app + `docs/help` guides updated for sign-in, home, announcements
 
 **Testing**
-- [ ] Unit test: `PostBulletinUseCase`
-- [ ] Widget test: `BulletinBoardScreen`
+- [ ] Unit test: bulletin submit / update flows
+- [ ] Widget test: `AnnouncementsScreen`, `EditAnnouncementDialog`
 
 ### Epic 2.8 — News Board
 

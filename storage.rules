@@ -12,15 +12,45 @@ service firebase.storage {
       return isSignedIn() && request.auth.token.get('role', '') == 'super_admin';
     }
 
-    function isOrgAdmin(orgId) {
-      return isSignedIn()
-          && request.auth.token.get('organizationId', '') == orgId
-          && request.auth.token.get('role', '') == 'admin';
+    function userProfilePath(orgId) {
+      return /databases/(default)/documents/organizations/$(orgId)/users/$(request.auth.uid);
     }
 
+    function userProfile(orgId) {
+      return firestore.get(userProfilePath(orgId)).data;
+    }
+
+    // Profile doc lives under organizations/{orgId}/users/{uid}; path is authoritative
+    // for membership. Do not require organizationId field — legacy profiles may omit it.
+    function hasApprovedProfile(orgId) {
+      return isSignedIn()
+          && firestore.exists(userProfilePath(orgId))
+          && userProfile(orgId).get('approvalStatus', '') == 'approved';
+    }
+
+    // Match Firestore isOrgMember — JWT orgId OR organizationId OR approved profile.
     function isOrgMember(orgId) {
       return isSignedIn()
-          && request.auth.token.get('organizationId', '') == orgId;
+          && (
+            request.auth.token.get('organizationId', '') == orgId
+            || request.auth.token.get('orgId', '') == orgId
+            || hasApprovedProfile(orgId)
+          );
+    }
+
+    function isOrgAdmin(orgId) {
+      return isSignedIn()
+          && (
+            (
+              (request.auth.token.get('organizationId', '') == orgId
+                  || request.auth.token.get('orgId', '') == orgId)
+              && request.auth.token.get('role', '') in ['admin', 'owner']
+            )
+            || (
+              hasApprovedProfile(orgId)
+              && userProfile(orgId).get('role', '') in ['admin', 'super_admin', 'owner']
+            )
+          );
     }
 
     function isAdminOrAbove(orgId) {
@@ -35,9 +65,23 @@ service firebase.storage {
       return request.resource.size <= maxMB * 1024 * 1024;
     }
 
+    function hasClaimedPermission(permission) {
+      return isSignedIn()
+          && permission in request.auth.token.get('permissions', []);
+    }
+
+    function canManageOfficialPhotos(orgId) {
+      return isAdminOrAbove(orgId)
+          || hasClaimedPermission('manageClassRoster')
+          || hasClaimedPermission('blockUsers');
+    }
+
+    function memberProfilePhotosAllowed(orgId) {
+      return firestore.get(/databases/(default)/documents/organizations/$(orgId))
+          .data.get('allowMemberProfilePhotos', false) == true;
+    }
+
     // ── Organization branding assets ──────────────────────────────────────────
-    // Path: organizations/{orgId}/assets/{fileName}
-    // e.g.: organizations/ph-monhs-001/assets/logo.png
     match /organizations/{orgId}/assets/{fileName} {
       allow read:  if isSuperAdmin() || isOrgMember(orgId);
       allow write: if isAdminOrAbove(orgId)
@@ -46,7 +90,6 @@ service firebase.storage {
     }
 
     // ── Report photo attachments ──────────────────────────────────────────────
-    // Path: organizations/{orgId}/reports/{reportId}/{fileName}
     match /organizations/{orgId}/reports/{reportId}/{fileName} {
       allow read:  if isSuperAdmin() || isOrgMember(orgId);
       allow write: if isOrgMember(orgId)
@@ -54,31 +97,42 @@ service firebase.storage {
                    && isUnderSizeLimit(10);
     }
 
-    // ── User avatars ──────────────────────────────────────────────────────────
-    // Path: organizations/{orgId}/users/{userId}/{fileName}
-    match /organizations/{orgId}/users/{userId}/{fileName} {
+    // ── User profile photos ───────────────────────────────────────────────────
+    // Personal badge — member uploads their own avatar (org must allow).
+    match /organizations/{orgId}/users/{userId}/avatar/{fileName} {
       allow read:  if isSuperAdmin() || isOrgMember(orgId);
       allow write: if isOrgMember(orgId)
                    && request.auth.uid == userId
+                   && memberProfilePhotosAllowed(orgId)
+                   && isImage()
+                   && isUnderSizeLimit(5);
+    }
+
+    // Official school photo on a registered member profile.
+    match /organizations/{orgId}/users/{userId}/official/{fileName} {
+      allow read:  if isSuperAdmin() || isOrgMember(orgId);
+      allow write: if canManageOfficialPhotos(orgId)
+                   && isImage()
+                   && isUnderSizeLimit(5);
+    }
+
+    // Official school photo on roster (including not-yet-registered students).
+    match /organizations/{orgId}/roster/{studentId}/official/{fileName} {
+      allow read:  if isSuperAdmin() || isOrgMember(orgId);
+      allow write: if canManageOfficialPhotos(orgId)
                    && isImage()
                    && isUnderSizeLimit(5);
     }
 
     // ── Bulletin / news post attachments ─────────────────────────────────────
-    // Path: organizations/{orgId}/bulletins/{bulletinId}/{fileName}
     match /organizations/{orgId}/bulletins/{bulletinId}/{fileName} {
       allow read:  if isSuperAdmin() || isOrgMember(orgId);
-      // Org members may upload; only the author/admin can attach the URL on the
-      // bulletin document (enforced via setBulletinImageUrl callable / rules).
       allow write: if isOrgMember(orgId)
                    && isImage()
                    && isUnderSizeLimit(10);
     }
 
     // ── Apply-to-join: school ID photo uploads ────────────────────────────────
-    // Path: organizations/{orgId}/applications/{userId}/{fileName}
-    // Written by the applicant at signup BEFORE they have the org claim.
-    // Read restricted to org admins (for review in approval queue).
     match /organizations/{orgId}/applications/{userId}/{fileName} {
       allow read:  if isAdminOrAbove(orgId);
       allow write: if isSignedIn()

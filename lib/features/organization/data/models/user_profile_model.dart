@@ -24,6 +24,8 @@ class UserProfileModel extends UserProfileEntity {
     super.unenrolledAt,
     super.unenrolledBy,
     super.permissions,
+    super.avatarUrl,
+    super.officialPhotoUrl,
     required super.createdAt,
     required super.updatedAt,
   });
@@ -59,6 +61,8 @@ class UserProfileModel extends UserProfileEntity {
       permissions: Set<String>.from(
         (data['permissions'] as List<dynamic>?) ?? [],
       ),
+      avatarUrl: data['avatarUrl'] as String?,
+      officialPhotoUrl: data['officialPhotoUrl'] as String?,
       createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       updatedAt: (data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
     );

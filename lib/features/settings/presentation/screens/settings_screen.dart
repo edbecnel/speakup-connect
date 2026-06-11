@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:speakup_connect/config/app_config.dart';
+import 'package:speakup_connect/core/errors/app_exception.dart';
 import 'package:speakup_connect/core/constants/route_constants.dart';
 import 'package:speakup_connect/core/permissions/providers/permission_provider.dart';
 import 'package:speakup_connect/features/auth/presentation/providers/auth_provider.dart';
@@ -10,7 +11,9 @@ import 'package:speakup_connect/features/groups/presentation/providers/group_pro
 import 'package:speakup_connect/features/organization/presentation/providers/organization_provider.dart';
 import 'package:speakup_connect/features/reminders/presentation/providers/reminder_provider.dart';
 import 'package:speakup_connect/features/organization/presentation/providers/user_profile_provider.dart';
+import 'package:speakup_connect/features/organization/presentation/providers/profile_photo_provider.dart';
 import 'package:speakup_connect/features/organization/presentation/widgets/member_profile_account_section.dart';
+import 'package:speakup_connect/features/organization/presentation/widgets/profile_photo_picker.dart';
 import 'package:speakup_connect/features/settings/presentation/providers/settings_provider.dart';
 import 'package:speakup_connect/shared/widgets/app_button.dart';
 import 'package:speakup_connect/shared/widgets/notification_badge_icon.dart';
@@ -38,6 +41,25 @@ class SettingsScreen extends ConsumerWidget {
 
     final orgName = orgConfigAsync.value?.displayName ?? '—';
     final theme = Theme.of(context);
+    final photoBusy = ref.watch(profilePhotoProvider).isLoading;
+    final allowPersonalPhotos = ref.watch(allowMemberProfilePhotosProvider);
+    final displayName =
+        user?.displayName ?? profile?.fullName ?? 'Anonymous';
+
+    ref.listen(profilePhotoProvider, (prev, next) {
+      if (prev?.isLoading == true && !next.isLoading && next.hasError) {
+        final err = next.error;
+        final message = err is AppException
+            ? err.message
+            : err?.toString() ?? 'Unknown error';
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Could not update photo: $message'),
+            backgroundColor: theme.colorScheme.error,
+          ),
+        );
+      }
+    });
 
     return Scaffold(
       appBar: AppBar(
@@ -51,16 +73,56 @@ class SettingsScreen extends ConsumerWidget {
             padding: const EdgeInsets.all(16),
             child: Row(
               children: [
-                CircleAvatar(
-                  radius: 32,
-                  backgroundColor: theme.colorScheme.primaryContainer,
-                  child: Text(
-                    _initials(user?.displayName),
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      color: theme.colorScheme.onPrimaryContainer,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                ProfilePhotoPicker(
+                  displayName: displayName,
+                  avatarUrl: profile?.avatarUrl,
+                  officialPhotoUrl: profile?.officialPhotoUrl,
+                  isLoading: photoBusy,
+                  showRemove: allowPersonalPhotos &&
+                      profile?.avatarUrl != null &&
+                      profile!.avatarUrl!.isNotEmpty,
+                  onPick: (path) async {
+                    if (!allowPersonalPhotos) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Personal profile photos are not enabled. '
+                              'Ask an administrator to turn on “Allow personal '
+                              'profile photos” under Organization Settings.',
+                            ),
+                          ),
+                        );
+                      }
+                      return;
+                    }
+                    final ok = await ref
+                        .read(profilePhotoProvider.notifier)
+                        .uploadMemberAvatar(path);
+                    if (context.mounted && ok) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Personal profile photo updated'),
+                        ),
+                      );
+                    }
+                  },
+                  onRemove: allowPersonalPhotos
+                      ? () async {
+                          final ok = await ref
+                              .read(profilePhotoProvider.notifier)
+                              .clearMemberAvatar();
+                          if (context.mounted && ok) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                  'Personal photo removed — showing school photo',
+                                ),
+                              ),
+                            );
+                          }
+                        }
+                      : null,
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -68,7 +130,7 @@ class SettingsScreen extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        user?.displayName ?? profile?.fullName ?? 'Anonymous',
+                        displayName,
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
@@ -77,6 +139,18 @@ class SettingsScreen extends ConsumerWidget {
                         'SpeakUp $orgName',
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: theme.colorScheme.primary,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        allowPersonalPhotos
+                            ? 'Tap your photo to change your personal badge'
+                            : (profile?.officialPhotoUrl != null &&
+                                    profile!.officialPhotoUrl!.isNotEmpty
+                                ? 'School photo on file — ask an admin to enable personal uploads'
+                                : 'Tap your photo — personal uploads require admin approval'),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
                         ),
                       ),
                     ],
@@ -326,12 +400,6 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  String _initials(String? name) {
-    if (name == null || name.isEmpty) return '?';
-    final parts = name.trim().split(' ');
-    if (parts.length == 1) return parts[0][0].toUpperCase();
-    return '${parts[0][0]}${parts[parts.length - 1][0]}'.toUpperCase();
-  }
 }
 
 class _SectionHeader extends StatelessWidget {

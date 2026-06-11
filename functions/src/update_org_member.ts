@@ -10,7 +10,7 @@ import {
 
 const db = admin.firestore();
 
-async function assertOrgAdminCaller(
+export async function assertOrgAdminCaller(
   uid: string,
   orgId: string,
   token: Record<string, unknown>,

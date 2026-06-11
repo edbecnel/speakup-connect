@@ -30,8 +30,11 @@ class DatabaseFailure extends Failure {
 
 /// The user does not have permission to perform this operation.
 class PermissionFailure extends Failure {
-  const PermissionFailure()
-      : super('You do not have permission to perform this action.');
+  const PermissionFailure({String? message})
+      : super(
+          message ??
+              'You do not have permission to perform this action.',
+        );
 }
 
 /// The requested resource was not found.

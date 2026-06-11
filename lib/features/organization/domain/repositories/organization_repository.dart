@@ -57,6 +57,14 @@ abstract class OrganizationRepository {
     required bool requireApproval,
   });
 
+  /// Toggles whether members may upload a personal profile photo in Settings.
+  ///
+  /// Does not affect admin-managed [officialPhotoUrl] records on profiles.
+  Future<void> updateMemberProfilePhotos({
+    required String organizationId,
+    required bool allowMemberProfilePhotos,
+  });
+
   /// Updates the grade levels offered by a school-type organization.
   Future<void> updateGradeLevels({
     required String organizationId,

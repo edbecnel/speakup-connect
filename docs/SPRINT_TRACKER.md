@@ -2,6 +2,8 @@
 
 > Last Updated: June 5, 2026  
 > Current Sprint: **Sprint 13** (Group Membership Requests) — design complete; implementation not started  
+> Last completed: **Sprint 14** (Profile Photos) — June 5, 2026  
+> Previous: **Sprint 13** (Group Membership Requests) — design complete; implementation not started  
 > Sprint Duration: 2 weeks
 
 > **Development Velocity Note:** Development has significantly outpaced the original planned schedule. As of May 23, 2026 (day 5 of the project), the codebase covers work originally scoped for Sprints 1–6. Sprint numbering below reflects original plan order but completion dates reflect actual delivery dates.
@@ -38,6 +40,33 @@
 - [ ] Drum and Lyre: open join requests; `voluntary` leave
 - [ ] Admin removes member → student receives alert
 - [ ] Denied leave request → student alert shows reason
+
+---
+
+### Delivered June 5, 2026 — Profile photos (Sprint 14)
+- [x] `avatarUrl` / `officialPhotoUrl` on user profile; `officialPhotoUrl` on roster
+- [x] Admin official photo: **Edit Member** + **Student Roster** (tap avatar)
+- [x] Member personal badge: **Settings** profile circle (gallery/camera/remove)
+- [x] `allowMemberProfilePhotos` org toggle (default OFF); cached in offline org config
+- [x] Cloud Functions: `uploadMemberAvatar` (server upload — avoids client Storage/App Check 403), `setMemberAvatarUrl`, `setOfficialPhotoUrl`
+- [x] Storage + Firestore rules; `onMemberApproved` syncs JWT claims for membership
+- [x] Deployed to `speakup-connect-891dd`; member upload smoke-tested on Android
+
+---
+
+### Delivered June 5, 2026 — Announcements parity & login fix
+- **Commits:** `8c894ed`, `abc351d`
+- [x] Announcements: optional image, request-a-response, edit/delete, `submitBulletinResponse` / `updateBulletin` / `setBulletinImageUrl` deployed
+- [x] `resolveLoginEmail` — admin/staff sign in with real email; students with ID or contact email
+- [x] Home: Quick Actions first; **My Groups & Clubs** collapsed by default
+- [x] Help guides synced (`assets/help/`, `docs/help/`)
+
+---
+
+### Sprint 14 — Profile Photos *(Epic 2.3 — Member photos)* — ✅ Complete
+- **Goal:** Members upload a personal profile photo in Settings; admins upload each student’s official school photo (roster + member edit).
+- **Source epic:** [MASTER_TASK_LIST.md → Epic 2.3 Member photos](MASTER_TASK_LIST.md)
+- See **Delivered June 5, 2026 — Profile photos** above for scope checklist.
 
 ---
 

@@ -29,6 +29,14 @@ To change your password yourself while signed in, use **Settings → Account →
 
 Open **Settings** from the bottom navigation for:
 
+### Profile photo
+
+Your school may keep an **official photo** on file (uploaded by staff). That record is permanent and is **not** something you can change or delete.
+
+Tap the **circular badge** at the top of Settings to add or change **your own** badge (gallery or camera) when your organization has **enabled personal profile photos**. Your personal photo is shown in the app instead of the school photo while it is set. Use **Remove photo** to clear only your personal badge — the official school photo on record stays unchanged.
+
+If personal uploads are not enabled yet, tapping the badge shows a short message — ask an administrator to turn on **Allow personal profile photos** under **Organization Settings**.
+
 - **Your account** — username/student ID and contact email (members can update contact email)
 - **Change Password** — enter your current password and a new password twice (use the eye icon to show or hide each field; minimum 8 characters for the new password)
 - **My Groups & Clubs** — full list of your group memberships

@@ -33,9 +33,9 @@ service cloud.firestore {
     }
 
     function isOrgMemberByProfile(orgId) {
-      let p = get(/databases/$(database)/documents/organizations/$(orgId)/users/$(request.auth.uid)).data;
-      return p.get('organizationId', '') == orgId
-          && p.get('approvalStatus', '') == 'approved';
+      return exists(/databases/$(database)/documents/organizations/$(orgId)/users/$(request.auth.uid))
+          && get(/databases/$(database)/documents/organizations/$(orgId)/users/$(request.auth.uid)).data
+              .get('approvalStatus', '') == 'approved';
     }
 
     // Org Admin — full access within their own org
@@ -63,6 +63,7 @@ service cloud.firestore {
       return isSignedIn()
           && (
             request.auth.token.get('organizationId', '') == orgId
+            || request.auth.token.get('orgId', '') == orgId
             || isOrgMemberByProfile(orgId)
           );
     }
@@ -187,6 +188,16 @@ service cloud.firestore {
           .hasOnly(['requireReminderApproval', 'updatedAt']);
     }
 
+    function onlyMemberProfilePhotosFields() {
+      return request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['allowMemberProfilePhotos', 'updatedAt']);
+    }
+
+    function memberProfilePhotosAllowed(orgId) {
+      return get(/databases/$(database)/documents/organizations/$(orgId)).data
+          .get('allowMemberProfilePhotos', false) == true;
+    }
+
     // Join-application review — approvalStatus and related audit fields only.
     function onlyJoinApprovalFields() {
       return request.resource.data.diff(resource.data).affectedKeys()
@@ -267,6 +278,12 @@ service cloud.firestore {
           .hasOnly(['email', 'updatedAt']);
     }
 
+    // Member updates personal profile badge only (prefer callable).
+    function onlySelfAvatarFields() {
+      return request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['avatarUrl', 'updatedAt']);
+    }
+
     // ── Organizations ─────────────────────────────────────────────────────────
 
     match /organizations/{orgId} {
@@ -289,6 +306,9 @@ service cloud.firestore {
                     || ((isAdminOrAbove(orgId)
                          || hasClaimedPermission('manageOrganizationSettings'))
                         && onlyReminderApprovalFields())
+                    || ((isAdminOrAbove(orgId)
+                         || hasClaimedPermission('manageOrganizationSettings'))
+                        && onlyMemberProfilePhotosFields())
                     || ((isAdminOrAbove(orgId)
                          || hasClaimedPermission('manageOrganizationSettings'))
                         && onlyGradeLevelsFields())
@@ -390,10 +410,18 @@ service cloud.firestore {
                       || (isSignedIn()
                           && request.auth.uid == userId
                           && onlySelfContactEmailFields())
+                      || (isSignedIn()
+                          && request.auth.uid == userId
+                          && onlySelfAvatarFields()
+                          && memberProfilePhotosAllowed(orgId))
                       || (isOrgMember(orgId)
                           && request.auth.uid == userId
                           && !request.resource.data.diff(resource.data)
-                              .affectedKeys().hasAny(['permissions', 'role']));
+                              .affectedKeys().hasAny([
+                                'permissions',
+                                'role',
+                                'officialPhotoUrl',
+                              ]));
 
         allow delete: if isAdminOrAbove(orgId);
 

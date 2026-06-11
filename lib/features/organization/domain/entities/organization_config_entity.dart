@@ -24,6 +24,7 @@ class OrganizationConfigEntity {
     this.country = 'PH',
     this.isActive = true,
     this.requireReminderApproval = false,
+    this.allowMemberProfilePhotos = false,
     this.gradeLevels,
   });
 
@@ -68,6 +69,13 @@ class OrganizationConfigEntity {
   /// must submit reminders for review — they are saved as `pending` instead of
   /// being published directly. Approvers act on them in the Approval Queue.
   final bool requireReminderApproval;
+
+  /// When true, members may upload a personal profile badge in Settings.
+  ///
+  /// Does not affect [officialPhotoUrl] on their profile — the school photo
+  /// remains an admin-only permanent record. Personal [avatarUrl] is stored
+  /// separately and only affects what the member sees in the app UI.
+  final bool allowMemberProfilePhotos;
 
   /// Grade levels offered by this school (e.g. [7, 8, 9, 10, 11, 12]).
   ///

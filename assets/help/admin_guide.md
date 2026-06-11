@@ -40,6 +40,22 @@ Users with report-triage permissions can open the **Admin Dashboard**, update re
 
 **Org admins** can **edit member profiles** (name, student ID, email, grade) and **reset passwords** from **Member Management**.
 
+### Official school photos
+
+Org admins and staff with **Student Roster** or **Member Management** access can upload each student’s **official school photo**. This is a **permanent faculty record** — students cannot change, delete, or overwrite it.
+
+- **Settings → Member Management** → edit a member → **Official school photo**
+- **Settings → Student Roster** (schools) → tap a student’s **avatar** on their row
+
+When a student later adds a personal badge (if allowed), it is stored **separately** and only affects what they see in the app. The official school photo remains on file for admins.
+
+### Allow personal profile photos
+
+**Settings → Administration → Organization Settings** → **Allow personal profile photos**
+
+- **OFF (default)** — students see the official school photo or initials; tapping the profile circle in Settings shows a message that uploads are disabled
+- **ON** — students may add a personal photo in **Settings** (gallery or camera); it does not replace the official school record on file
+
 **Group leaders** (roster role Leader) may manage their group's roster, post **school-wide announcements** on behalf of their club, and send **group alerts** from **My Groups & Clubs** without org-wide broadcast permission.
 
 After adding a member to a group, they should see it under **My Groups & Clubs** within a few seconds.

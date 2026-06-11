@@ -114,6 +114,21 @@ abstract class AppConstants {
   static String orgLogoStoragePath(String orgId) =>
       'organizations/$orgId/assets/logo';
 
+  /// Member personal badge: `…/users/{userId}/avatar/{fileName}`.
+  static String userAvatarStoragePath(String orgId, String userId) =>
+      'organizations/$orgId/users/$userId/avatar';
+
+  /// Admin official school photo on a user profile.
+  static String userOfficialPhotoStoragePath(String orgId, String userId) =>
+      'organizations/$orgId/users/$userId/official';
+
+  /// Official photo for roster-only students (not yet registered).
+  static String rosterOfficialPhotoStoragePath(
+    String orgId,
+    String studentId,
+  ) =>
+      'organizations/$orgId/roster/$studentId/official';
+
   // --- Pagination ---
   static const int defaultPageSize = 20;
 

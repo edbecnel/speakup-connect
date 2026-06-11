@@ -11,6 +11,7 @@ class RosterEntryModel extends RosterEntryEntity {
     super.isRegistered,
     super.registeredUserId,
     super.importedAt,
+    super.officialPhotoUrl,
   });
 
   factory RosterEntryModel.fromFirestore(
@@ -26,6 +27,7 @@ class RosterEntryModel extends RosterEntryEntity {
       isRegistered: data['isRegistered'] as bool? ?? false,
       registeredUserId: data['registeredUserId'] as String?,
       importedAt: (data['importedAt'] as Timestamp?)?.toDate(),
+      officialPhotoUrl: data['officialPhotoUrl'] as String?,
     );
   }
 }

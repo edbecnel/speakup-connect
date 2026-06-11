@@ -271,9 +271,10 @@ This is the core document of the platform.
 **Field Notes:**
 - `userId` is set as the Firestore document ID
 - `studentId` matches the value in the `roster` collection for approval verification
-- **`officialPhotoUrl`** — authoritative school/org photo for the member (student, faculty, etc.). Set only by org admin or holders of roster/member-management capabilities (`manageClassRoster`, Manage Members / `blockUsers`, etc.). Synced to roster when `studentId` is present. Not editable by the member.
-- **`avatarUrl`** — personal display image chosen by the member in **Settings** (tap profile badge). Used in the UI when set; otherwise fall back to `officialPhotoUrl`, then initials. Members may update or clear their own `avatarUrl` only.
-- **Badge display order:** `avatarUrl` → `officialPhotoUrl` → generated initials circle (current default).
+- **`officialPhotoUrl`** — permanent school/org photo for the member. Set only by org admin or roster/member managers. Synced to roster when `studentId` is present. **Never** editable or deletable by the member; student personal uploads do not touch this field.
+- **`avatarUrl`** — optional personal badge chosen by the member in **Settings** when the org has `allowMemberProfilePhotos: true`. Stored separately from `officialPhotoUrl`; clearing or changing `avatarUrl` does not affect the official school record.
+- **Badge display order (member-facing UI):** `avatarUrl` → `officialPhotoUrl` → initials. Admins always retain access to `officialPhotoUrl` on roster and member edit screens.
+- **Org flag `allowMemberProfilePhotos`** (on `organizations/{orgId}`) — default `false`. Org admin must enable before members can upload `avatarUrl`. Enforced in Firestore rules and `uploadMemberAvatar` / `setMemberAvatarUrl` callables. Member uploads use **`uploadMemberAvatar`** (image sent to Cloud Function; Admin SDK writes Storage) so devices without App Check still work.
 - `fcmTokens` is an array to support multiple devices per user
 - `preferredLanguage` overrides the org-level `defaultLanguage` for this user
 - `approvalStatus` is only relevant when the org has `signupRequiresApproval: true`

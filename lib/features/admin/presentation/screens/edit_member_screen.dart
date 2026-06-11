@@ -7,6 +7,8 @@ import 'package:speakup_connect/features/organization/presentation/providers/org
 import 'package:speakup_connect/features/organization/presentation/providers/roster_provider.dart';
 import 'package:speakup_connect/features/organization/presentation/providers/user_profile_provider.dart';
 import 'package:speakup_connect/features/admin/presentation/widgets/reset_member_password_dialog.dart';
+import 'package:speakup_connect/features/organization/presentation/widgets/official_photo_section.dart';
+import 'package:speakup_connect/shared/widgets/app_avatar.dart';
 import 'package:speakup_connect/shared/widgets/app_button.dart';
 import 'package:speakup_connect/shared/widgets/app_loading_indicator.dart';
 import 'package:speakup_connect/shared/widgets/app_text_field.dart';
@@ -114,6 +116,41 @@ class _EditMemberScreenState extends ConsumerState<EditMemberScreen> {
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
+                const SizedBox(height: 20),
+                OfficialPhotoSection(
+                  displayName: profile.fullName,
+                  officialPhotoUrl: profile.officialPhotoUrl,
+                  studentId: profile.studentId,
+                  userId: profile.userId,
+                ),
+                if (profile.avatarUrl != null &&
+                    profile.avatarUrl!.isNotEmpty) ...[
+                  const SizedBox(height: 20),
+                  Text(
+                    'Student personal badge',
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Optional photo the student chose in Settings. This does '
+                    'not replace the official school photo above.',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Center(
+                    child: AppAvatar(
+                      displayName: profile.fullName,
+                      avatarUrl: profile.avatarUrl,
+                      radius: 40,
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 24),
+                const Divider(),
                 const SizedBox(height: 20),
                 AppTextField(
                   controller: _nameController,

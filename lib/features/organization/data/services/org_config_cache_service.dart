@@ -24,6 +24,8 @@ class OrgConfigCacheService {
   static const String _keySecondaryColor = 'org_secondary_color';
   static const String _keyRequireReminderApproval =
       'org_require_reminder_approval';
+  static const String _keyAllowMemberProfilePhotos =
+      'org_allow_member_profile_photos';
 
   /// Saves the branding fields from [config] to local storage.
   static Future<void> save(OrganizationConfigEntity config) async {
@@ -35,6 +37,10 @@ class OrgConfigCacheService {
     await prefs.setBool(
       _keyRequireReminderApproval,
       config.requireReminderApproval,
+    );
+    await prefs.setBool(
+      _keyAllowMemberProfilePhotos,
+      config.allowMemberProfilePhotos,
     );
   }
 
@@ -54,6 +60,8 @@ class OrgConfigCacheService {
       ),
       requireReminderApproval:
           prefs.getBool(_keyRequireReminderApproval) ?? false,
+      allowMemberProfilePhotos:
+          prefs.getBool(_keyAllowMemberProfilePhotos) ?? false,
     );
   }
 
@@ -75,9 +83,11 @@ class CachedOrgBranding {
     required this.displayName,
     required this.colors,
     this.requireReminderApproval = false,
+    this.allowMemberProfilePhotos = false,
   });
 
   final String displayName;
   final OrgThemeColors colors;
   final bool requireReminderApproval;
+  final bool allowMemberProfilePhotos;
 }

@@ -169,6 +169,8 @@ class _AdminBrandingScreenState extends ConsumerState<AdminBrandingScreen> {
               _SetupCategoriesCard(),
               const SizedBox(height: 32),
               const _ReminderApprovalCard(),
+              const SizedBox(height: 32),
+              const _MemberProfilePhotosCard(),
             ],
           ),
         ),
@@ -750,6 +752,126 @@ class _OrganizationTypeCardState extends ConsumerState<_OrganizationTypeCard> {
 }
 
 // ── Setup: reminder approval workflow toggle ────────────────────────────────
+
+class _MemberProfilePhotosCard extends ConsumerStatefulWidget {
+  const _MemberProfilePhotosCard();
+
+  @override
+  ConsumerState<_MemberProfilePhotosCard> createState() =>
+      _MemberProfilePhotosCardState();
+}
+
+class _MemberProfilePhotosCardState
+    extends ConsumerState<_MemberProfilePhotosCard> {
+  bool _saving = false;
+  bool? _localOverride;
+
+  Future<void> _toggle(bool value) async {
+    setState(() {
+      _saving = true;
+      _localOverride = value;
+    });
+    try {
+      await ref.read(organizationRepositoryProvider).updateMemberProfilePhotos(
+            organizationId: AppConfig.defaultOrganizationId,
+            allowMemberProfilePhotos: value,
+          );
+      final config = await ref
+          .read(organizationConfigProvider.notifier)
+          .refreshFromServer();
+      if (config.allowMemberProfilePhotos != value) {
+        throw StateError('Profile photo setting did not save.');
+      }
+      if (mounted) {
+        setState(() => _localOverride = null);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              value
+                  ? 'Members can now upload personal profile photos'
+                  : 'Personal profile photos are disabled for members',
+            ),
+            backgroundColor: Colors.green.shade700,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _localOverride = null);
+        final message = e is PermissionException
+            ? 'You do not have permission to change this setting.'
+            : 'Update failed: $e';
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(message),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final orgAsync = ref.watch(organizationConfigProvider);
+    final remoteValue =
+        orgAsync.asData?.value.allowMemberProfilePhotos ?? false;
+
+    ref.listen(organizationConfigProvider, (prev, next) {
+      final nextValue = next.asData?.value.allowMemberProfilePhotos;
+      if (!_saving &&
+          mounted &&
+          _localOverride != null &&
+          nextValue == _localOverride) {
+        setState(() => _localOverride = null);
+      }
+    });
+
+    final allowed = _localOverride ?? remoteValue;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _SectionHeader(
+          icon: Icons.account_circle_outlined,
+          title: 'Member Profile Photos',
+          subtitle:
+              'When enabled, students may upload a personal badge in Settings. '
+              'Official school photos uploaded by staff remain a separate '
+              'permanent record and are never overwritten.',
+        ),
+        const SizedBox(height: 4),
+        SwitchListTile(
+          contentPadding: EdgeInsets.zero,
+          title: const Text('Allow personal profile photos'),
+          subtitle: Text(
+            allowed
+                ? 'Currently ON — members can add a personal badge in Settings'
+                : 'Currently OFF — only official school photos are shown',
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: allowed
+                  ? theme.colorScheme.primary
+                  : theme.colorScheme.onSurfaceVariant,
+              fontWeight: allowed ? FontWeight.w600 : FontWeight.normal,
+            ),
+          ),
+          value: allowed,
+          onChanged: _saving ? null : _toggle,
+          secondary: _saving
+              ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : null,
+        ),
+      ],
+    );
+  }
+}
 
 class _ReminderApprovalCard extends ConsumerStatefulWidget {
   const _ReminderApprovalCard();

@@ -210,23 +210,28 @@ export const refreshMyPermissions = onCall(async (request) => {
   }
 
   const userId = request.auth.uid;
-  const orgId = (request.auth.token as Record<string, unknown>)['orgId'] as
-    | string
-    | undefined;
+  const token = request.auth.token as Record<string, unknown>;
+  const bodyOrgId = (request.data as { orgId?: string } | undefined)?.orgId;
+  let orgId = (token['orgId'] as string | undefined)
+    ?? (token['organizationId'] as string | undefined)
+    ?? bodyOrgId?.trim();
 
-  if (!orgId) {
+  const profileSnap = orgId
+    ? await db
+        .collection('organizations').doc(orgId)
+        .collection('users').doc(userId)
+        .get()
+    : null;
+
+  if (!orgId || !profileSnap?.exists) {
     throw new HttpsError(
       'failed-precondition',
-      'No orgId claim found. Join an organization before refreshing permissions.',
+      'No organization membership found. Sign out and sign in again, or contact support.',
     );
   }
 
   const { permissions, tagScopes } = await resolveUserPermissions(orgId, userId);
 
-  const profileSnap = await db
-    .collection('organizations').doc(orgId)
-    .collection('users').doc(userId)
-    .get();
   const profile = profileSnap.data() ?? {};
   const profileRole = (profile['role'] as string | undefined) ?? 'user';
   const profileOrgId =
@@ -1669,6 +1674,41 @@ export const onMemberApproved = onDocumentUpdated(
     if (after['approvalStatus'] !== 'approved') return;
 
     const { orgId, userId } = event.params;
+
+    // Ensure JWT claims include org membership for Storage rules and RBAC.
+    try {
+      const { permissions, tagScopes } = await resolveUserPermissions(
+        orgId,
+        userId,
+      );
+      const profileRole = (after['role'] as string | undefined) ?? 'user';
+      const profileOrgId =
+        (after['organizationId'] as string | undefined) ?? orgId;
+      let existingClaims: Record<string, unknown> = {};
+      try {
+        const userRecord = await admin.auth().getUser(userId);
+        existingClaims =
+          (userRecord.customClaims as Record<string, unknown>) ?? {};
+      } catch (err) {
+        logger.warn('onMemberApproved: user not in Auth', { userId, err });
+      }
+      await admin.auth().setCustomUserClaims(userId, {
+        ...existingClaims,
+        permissions,
+        tagScopes,
+        orgId,
+        organizationId: profileOrgId,
+        role: profileRole,
+      });
+      logger.info('onMemberApproved: synced custom claims', { orgId, userId });
+    } catch (err) {
+      logger.error('onMemberApproved: failed to sync claims', {
+        orgId,
+        userId,
+        err,
+      });
+    }
+
     const count = await backfillMissedBroadcasts(orgId, userId);
     if (count > 0) {
       logger.info('onMemberApproved: backfilled broadcasts', {
@@ -2117,6 +2157,11 @@ export {
 
 export { resolveLoginEmail } from './resolve_login';
 export { updateOrgMember } from './update_org_member';
+export {
+  uploadMemberAvatar,
+  setMemberAvatarUrl,
+  setOfficialPhotoUrl,
+} from './profile_photos';
 export { resetOrgMemberPassword } from './reset_org_member_password';
 export {
   createGroupLeaderAnnouncement,

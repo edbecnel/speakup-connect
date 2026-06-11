@@ -47,6 +47,16 @@ Open **Settings** (Profile tab). Under your name you will see:
 
 You cannot change your student ID from the app; ask an administrator if it is wrong.
 
+### Profile photo
+
+The school may keep an **official ID photo** for you (uploaded by staff). That image is a permanent record — you cannot change or delete it.
+
+Tap the **circle** at the top of **Settings** to upload **your own** badge when the school has turned on **Allow personal profile photos** under **Organization Settings**. Your badge is stored separately and does not replace the official school photo. **Remove photo** clears only your personal badge.
+
+If uploads are not enabled yet, tapping the circle explains what to ask your administrator.
+
+If personal uploads are disabled, you see the school photo (when on file) or your initials. Contact an administrator if the official photo is wrong.
+
 ### Pending approval
 
 If you applied to join but are not approved yet, you will see a **pending approval** screen. Wait for an administrator to approve your application. You cannot use member features until approved.

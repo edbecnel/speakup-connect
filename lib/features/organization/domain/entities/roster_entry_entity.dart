@@ -12,6 +12,7 @@ class RosterEntryEntity {
     this.isRegistered = false,
     this.registeredUserId,
     this.importedAt,
+    this.officialPhotoUrl,
   });
 
   final String studentId;
@@ -22,6 +23,9 @@ class RosterEntryEntity {
   final bool isRegistered;
   final String? registeredUserId;
   final DateTime? importedAt;
+
+  /// Admin-managed school photo for this roster row.
+  final String? officialPhotoUrl;
 
   int? get gradeLevel => parseGradeLevel(grade);
 
@@ -40,6 +44,7 @@ class RosterEntryEntity {
           : null,
       isRegistered: profile.isApproved,
       registeredUserId: profile.userId,
+      officialPhotoUrl: profile.officialPhotoUrl,
     );
   }
 
@@ -57,6 +62,7 @@ class RosterEntryEntity {
       isRegistered: isRegistered || profile.isApproved,
       registeredUserId: registeredUserId ?? profile.userId,
       importedAt: importedAt,
+      officialPhotoUrl: officialPhotoUrl ?? profile.officialPhotoUrl,
     );
   }
 }

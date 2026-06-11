@@ -8,6 +8,8 @@ import 'package:speakup_connect/features/organization/domain/entities/roster_ent
 import 'package:speakup_connect/features/organization/presentation/providers/organization_provider.dart';
 import 'package:speakup_connect/features/organization/presentation/providers/roster_provider.dart';
 import 'package:speakup_connect/features/organization/presentation/providers/user_profile_provider.dart';
+import 'package:speakup_connect/features/organization/presentation/widgets/official_photo_section.dart';
+import 'package:speakup_connect/shared/widgets/app_avatar.dart';
 
 /// Sentinel for filtering roster rows without a grade.
 const _noGradeFilter = -1;
@@ -261,6 +263,9 @@ class _RosterManagementScreenState
             }
           }),
           onAssignGrade: () => _promptAssignGrade(entry, filtered),
+          onPhotoTap: _canManage
+              ? () => _showOfficialPhotoDialog(entry)
+              : null,
         );
       },
     );
@@ -456,6 +461,31 @@ class _RosterManagementScreenState
     final shown = names.take(max).join('\n');
     return '$shown\n…and ${names.length - max} more';
   }
+
+  Future<void> _showOfficialPhotoDialog(RosterEntryEntity entry) async {
+    final name =
+        entry.fullName.isNotEmpty ? entry.fullName : entry.studentId;
+    await showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('Official photo — $name'),
+        content: SingleChildScrollView(
+          child: OfficialPhotoSection(
+            displayName: name,
+            officialPhotoUrl: entry.officialPhotoUrl,
+            studentId: entry.studentId,
+            userId: entry.registeredUserId,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Done'),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _RosterTile extends StatelessWidget {
@@ -465,6 +495,7 @@ class _RosterTile extends StatelessWidget {
     required this.busy,
     required this.onSelected,
     required this.onAssignGrade,
+    this.onPhotoTap,
   });
 
   final RosterEntryEntity entry;
@@ -472,6 +503,7 @@ class _RosterTile extends StatelessWidget {
   final bool busy;
   final ValueChanged<bool> onSelected;
   final VoidCallback onAssignGrade;
+  final VoidCallback? onPhotoTap;
 
   @override
   Widget build(BuildContext context) {
@@ -480,12 +512,29 @@ class _RosterTile extends StatelessWidget {
         entry.gradeLevel != null ? 'Grade ${entry.gradeLevel}' : 'No grade';
     final statusLabel = entry.isRegistered ? 'Registered' : 'Not registered';
 
+    final displayName =
+        entry.fullName.isNotEmpty ? entry.fullName : entry.studentId;
+
     return Card(
       margin: EdgeInsets.zero,
       child: ListTile(
-        leading: Checkbox(
-          value: selected,
-          onChanged: busy ? null : (v) => onSelected(v ?? false),
+        leading: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Checkbox(
+              value: selected,
+              onChanged: busy ? null : (v) => onSelected(v ?? false),
+            ),
+            InkWell(
+              onTap: busy ? null : onPhotoTap,
+              customBorder: const CircleBorder(),
+              child: AppAvatar(
+                displayName: displayName,
+                officialPhotoUrl: entry.officialPhotoUrl,
+                radius: 20,
+              ),
+            ),
+          ],
         ),
         title: Text(
           entry.fullName.isNotEmpty ? entry.fullName : entry.studentId,

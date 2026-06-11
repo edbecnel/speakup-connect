@@ -71,10 +71,10 @@ class DatabaseException extends AppException {
 }
 
 class PermissionException extends AppException {
-  const PermissionException() : super(message: 'Permission denied');
+  const PermissionException({super.message = 'Permission denied'});
 
   @override
-  Failure toFailure() => const PermissionFailure();
+  Failure toFailure() => PermissionFailure(message: message);
 }
 
 class NotFoundException extends AppException {

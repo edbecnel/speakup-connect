@@ -42,6 +42,8 @@ class UserProfileEntity {
     this.unenrolledAt,
     this.unenrolledBy,
     this.permissions = const {},
+    this.avatarUrl,
+    this.officialPhotoUrl,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -104,8 +106,26 @@ class UserProfileEntity {
   /// field (they have all permissions implicitly).
   final Set<String> permissions;
 
+  /// Member-chosen personal badge (Settings). Stored separately from
+  /// [officialPhotoUrl]; never overwrites the school record. Only writable
+  /// when the org enables [OrganizationConfigEntity.allowMemberProfilePhotos].
+  final String? avatarUrl;
+
+  /// Permanent school/org official photo (admin-managed only). Faculty use this
+  /// as the authoritative student record. Members cannot change or delete it.
+  final String? officialPhotoUrl;
+
   final DateTime createdAt;
   final DateTime updatedAt;
+
+  /// Photo shown in avatars: personal badge, then official school photo.
+  String? get displayPhotoUrl {
+    if (avatarUrl != null && avatarUrl!.isNotEmpty) return avatarUrl;
+    if (officialPhotoUrl != null && officialPhotoUrl!.isNotEmpty) {
+      return officialPhotoUrl;
+    }
+    return null;
+  }
 
   bool get isPending => approvalStatus == ApprovalStatus.pending;
   bool get isApproved => approvalStatus == ApprovalStatus.approved;

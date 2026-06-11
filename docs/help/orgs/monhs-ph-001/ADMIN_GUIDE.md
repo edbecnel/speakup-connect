@@ -63,8 +63,22 @@ From **Member Management**, tap a member or choose **Edit profile…**:
 | **Student ID (username)** | Sign-in username; must be unique |
 | **Contact email** | Optional; member can also edit their own in Settings |
 | **Grade** | Synced to roster when grades are enabled |
+| **Official school photo** | Tap the photo circle to upload or replace the student’s ID photo |
 
 Members cannot edit their own student ID from the app.
+
+### Official school photos
+
+Org admins can upload each student’s **official school ID photo** on **Edit member profile** (photo at top of screen). Staff with roster access can also tap a student’s **avatar** on **Student Roster** to upload or replace the photo.
+
+This is the **permanent school record** for faculty — students cannot change or overwrite it. If a student adds a personal badge later, it is stored separately (see below).
+
+### Allow personal profile photos
+
+**Settings → Administration → Organization Settings** → **Allow personal profile photos**
+
+- **OFF (default)** — students see the official school photo or initials; tapping the profile circle in Settings shows that uploads are disabled
+- **ON** — students may add a personal photo in **Settings** (gallery or camera); the official school photo remains on file for admins
 
 ### Reset member password
 

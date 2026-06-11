@@ -165,6 +165,51 @@ class OrganizationRepositoryImpl implements OrganizationRepository {
   }
 
   @override
+  Future<void> updateMemberProfilePhotos({
+    required String organizationId,
+    required bool allowMemberProfilePhotos,
+  }) async {
+    try {
+      final docRef = _orgDoc(organizationId);
+      await docRef.update({
+        'allowMemberProfilePhotos': allowMemberProfilePhotos,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+
+      DocumentSnapshot<Map<String, dynamic>> verifySnap;
+      try {
+        verifySnap = await docRef.get(const GetOptions(source: Source.server));
+      } on FirebaseException {
+        verifySnap = await docRef.get();
+      }
+
+      if (!verifySnap.exists || verifySnap.data() == null) {
+        throw const DatabaseException(
+          message: 'Organization document not found after update.',
+        );
+      }
+
+      final saved = OrganizationConfigModel.fromJson(
+        organizationId,
+        verifySnap.data()!,
+      ).allowMemberProfilePhotos;
+      if (saved != allowMemberProfilePhotos) {
+        throw const PermissionException();
+      }
+    } on PermissionException {
+      rethrow;
+    } on FirebaseException catch (e) {
+      if (e.code == 'permission-denied') {
+        throw const PermissionException();
+      }
+      throw DatabaseException(
+        message: e.message ?? 'Failed to update profile photo setting',
+        code: e.code,
+      );
+    }
+  }
+
+  @override
   Future<void> updateGradeLevels({
     required String organizationId,
     required List<int> gradeLevels,
