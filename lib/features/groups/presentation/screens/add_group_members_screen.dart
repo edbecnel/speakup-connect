@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:speakup_connect/core/constants/route_constants.dart';
 import 'package:speakup_connect/features/groups/domain/entities/group_member_entity.dart';
 import 'package:speakup_connect/features/groups/domain/entities/group_position_role.dart';
 import 'package:speakup_connect/features/groups/presentation/providers/group_provider.dart';
@@ -44,6 +45,14 @@ class _AddGroupMembersScreenState extends ConsumerState<AddGroupMembersScreen> {
     });
   }
 
+  void _leaveScreen() {
+    if (context.canPop()) {
+      context.pop();
+    } else {
+      context.go(Routes.groupMembersPath(widget.groupId));
+    }
+  }
+
   void _toggleUser(UserProfileEntity user, bool selected) {
     FocusScope.of(context).unfocus();
     setState(() {
@@ -85,9 +94,18 @@ class _AddGroupMembersScreenState extends ConsumerState<AddGroupMembersScreen> {
 
     final hasSelection = _selectedIds.isNotEmpty;
 
-    return Scaffold(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _leaveScreen();
+      },
+      child: Scaffold(
       appBar: AppBar(
-        leading: BackButton(onPressed: () => context.pop()),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          tooltip: 'Back',
+          onPressed: _leaveScreen,
+        ),
         title: const Text('Add Members'),
       ),
       body: usersAsync.when(
@@ -220,6 +238,7 @@ class _AddGroupMembersScreenState extends ConsumerState<AddGroupMembersScreen> {
           );
         },
       ),
+      ),
     );
   }
 
@@ -248,7 +267,7 @@ class _AddGroupMembersScreenState extends ConsumerState<AddGroupMembersScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(message)),
       );
-      context.pop();
+      _leaveScreen();
     }
   }
 }

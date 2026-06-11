@@ -156,4 +156,64 @@ class RosterRepositoryImpl implements RosterRepository {
       );
     }
   }
+
+  @override
+  Future<void> resetOrgMemberPassword({
+    required String orgId,
+    required String userId,
+    required String newPassword,
+  }) async {
+    try {
+      await FirebaseFunctions.instance
+          .httpsCallable('resetOrgMemberPassword')
+          .call<Map<String, dynamic>>({
+        'orgId': orgId,
+        'userId': userId,
+        'newPassword': newPassword,
+      });
+    } on FirebaseFunctionsException catch (e) {
+      throw DatabaseException(
+        message: e.message ?? 'Failed to reset password',
+        code: e.code,
+      );
+    }
+  }
+
+  @override
+  Future<void> updateOrgMember({
+    required String orgId,
+    required String userId,
+    required String fullName,
+    String? studentId,
+    String? email,
+    int? gradeLevel,
+    bool clearEmail = false,
+    bool clearStudentId = false,
+    bool clearGrade = false,
+  }) async {
+    try {
+      final updates = <String, dynamic>{
+        'fullName': fullName.trim(),
+        if (clearStudentId) 'studentId': null,
+        if (!clearStudentId && studentId != null) 'studentId': studentId.trim(),
+        if (clearEmail) 'email': null,
+        if (!clearEmail && email != null) 'email': email.trim(),
+        if (clearGrade) 'gradeLevel': null,
+        if (!clearGrade && gradeLevel != null) 'gradeLevel': gradeLevel,
+      };
+
+      await FirebaseFunctions.instance
+          .httpsCallable('updateOrgMember')
+          .call<Map<String, dynamic>>({
+        'orgId': orgId,
+        'userId': userId,
+        'updates': updates,
+      });
+    } on FirebaseFunctionsException catch (e) {
+      throw DatabaseException(
+        message: e.message ?? 'Failed to update member',
+        code: e.code,
+      );
+    }
+  }
 }

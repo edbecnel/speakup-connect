@@ -1,14 +1,15 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:speakup_connect/core/auth/student_auth_credentials.dart';
 import 'package:speakup_connect/core/errors/app_exception.dart';
+import 'package:speakup_connect/features/auth/data/datasources/auth_remote_datasource.dart';
 import 'package:speakup_connect/features/auth/domain/entities/user_entity.dart';
 import 'package:speakup_connect/features/auth/domain/repositories/auth_repository.dart';
 
 /// Firebase Authentication implementation of [AuthRepository].
 class AuthRepositoryImpl implements AuthRepository {
-  AuthRepositoryImpl(this._firebaseAuth);
+  AuthRepositoryImpl(this._firebaseAuth, this._remoteDataSource);
 
   final FirebaseAuth _firebaseAuth;
+  final AuthRemoteDataSource _remoteDataSource;
 
   @override
   Stream<UserEntity?> get authStateChanges {
@@ -40,19 +41,21 @@ class AuthRepositoryImpl implements AuthRepository {
     required String password,
     String? organizationId,
   }) async {
-    final resolved = resolveLoginCredentials(
+    final email = await _remoteDataSource.resolveLoginEmail(
       identifier: identifier,
-      password: password,
       organizationId: organizationId,
     );
     try {
       final credential = await _firebaseAuth.signInWithEmailAndPassword(
-        email: resolved.email,
-        password: resolved.password,
+        email: email,
+        password: password,
       );
       return _mapUser(credential.user!);
     } on FirebaseAuthException catch (e) {
-      throw AuthException(message: e.message ?? 'Sign in failed', code: e.code);
+      throw AuthException(
+        message: e.message ?? 'Sign in failed',
+        code: e.code,
+      );
     } catch (e) {
       throw AuthException(message: e.toString());
     }
@@ -69,7 +72,6 @@ class AuthRepositoryImpl implements AuthRepository {
         email: email.trim(),
         password: password,
       );
-      // Update the display name in Firebase Auth
       await credential.user!.updateDisplayName(displayName.trim());
       await credential.user!.reload();
       return _mapUser(_firebaseAuth.currentUser!);
@@ -86,7 +88,10 @@ class AuthRepositoryImpl implements AuthRepository {
       final credential = await _firebaseAuth.signInAnonymously();
       return _mapUser(credential.user!);
     } on FirebaseAuthException catch (e) {
-      throw AuthException(message: e.message ?? 'Anonymous sign-in failed', code: e.code);
+      throw AuthException(
+        message: e.message ?? 'Anonymous sign-in failed',
+        code: e.code,
+      );
     } catch (e) {
       throw AuthException(message: e.toString());
     }
@@ -103,10 +108,16 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<void> sendPasswordResetEmail(String email) async {
+    final resolved = await _remoteDataSource.resolveLoginEmail(
+      identifier: email,
+    );
     try {
-      await _firebaseAuth.sendPasswordResetEmail(email: email.trim());
+      await _firebaseAuth.sendPasswordResetEmail(email: resolved);
     } on FirebaseAuthException catch (e) {
-      throw AuthException(message: e.message ?? 'Failed to send reset email', code: e.code);
+      throw AuthException(
+        message: e.message ?? 'Failed to send reset email',
+        code: e.code,
+      );
     }
   }
 

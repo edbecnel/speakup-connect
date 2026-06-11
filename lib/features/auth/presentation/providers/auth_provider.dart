@@ -1,6 +1,8 @@
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:speakup_connect/core/errors/app_exception.dart';
+import 'package:speakup_connect/features/auth/data/datasources/auth_remote_datasource.dart';
 import 'package:speakup_connect/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:speakup_connect/features/auth/domain/entities/user_entity.dart';
 import 'package:speakup_connect/features/auth/domain/repositories/auth_repository.dart';
@@ -11,7 +13,10 @@ part 'auth_provider.g.dart';
 
 @riverpod
 AuthRepository authRepository(Ref ref) {
-  return AuthRepositoryImpl(FirebaseAuth.instance);
+  return AuthRepositoryImpl(
+    FirebaseAuth.instance,
+    AuthRemoteDataSource(FirebaseFunctions.instance),
+  );
 }
 
 // --- Auth State Stream ---
@@ -37,14 +42,15 @@ class AuthNotifier extends _$AuthNotifier {
   @override
   AsyncValue<void> build() => const AsyncData(null);
 
-  Future<void> signInWithEmail({
-    required String email,
+  /// Signs in with an email address or school-issued student ID (username).
+  Future<void> signInWithIdentifier({
+    required String identifier,
     required String password,
   }) async {
     state = const AsyncLoading();
     try {
       await ref.read(authRepositoryProvider).signInWithIdentifier(
-            identifier: email,
+            identifier: identifier,
             password: password,
           );
       state = const AsyncData(null);
@@ -54,6 +60,12 @@ class AuthNotifier extends _$AuthNotifier {
       state = AsyncError(e, StackTrace.current);
     }
   }
+
+  Future<void> signInWithEmail({
+    required String email,
+    required String password,
+  }) =>
+      signInWithIdentifier(identifier: email, password: password);
 
   Future<void> signUpWithEmail({
     required String email,

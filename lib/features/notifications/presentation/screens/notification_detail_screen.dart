@@ -36,11 +36,13 @@ class _NotificationDetailScreenState
     final icon = switch (n.type) {
       'reminder' => Icons.campaign_outlined,
       'status_update' => Icons.assignment_turned_in_outlined,
+      'group_membership' => Icons.groups_outlined,
       _ => Icons.notifications_outlined,
     };
     final typeLabel = switch (n.type) {
       'reminder' => 'Reminder',
       'status_update' => 'Status update',
+      'group_membership' => 'Group update',
       _ => 'Alert',
     };
 

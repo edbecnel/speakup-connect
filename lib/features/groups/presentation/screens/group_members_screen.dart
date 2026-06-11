@@ -4,7 +4,9 @@ import 'package:go_router/go_router.dart';
 import 'package:speakup_connect/core/constants/route_constants.dart';
 import 'package:speakup_connect/features/groups/domain/entities/group_entity.dart';
 import 'package:speakup_connect/features/groups/domain/entities/group_member_entity.dart';
+import 'package:speakup_connect/features/groups/presentation/providers/group_membership_provider.dart';
 import 'package:speakup_connect/features/groups/presentation/providers/group_provider.dart';
+import 'package:speakup_connect/features/groups/presentation/widgets/group_membership_policy_sheet.dart';
 import 'package:speakup_connect/shared/widgets/app_error_widget.dart';
 import 'package:speakup_connect/shared/widgets/app_loading_indicator.dart';
 
@@ -20,7 +22,13 @@ class GroupMembersScreen extends ConsumerWidget {
     final membersAsync = ref.watch(groupMembersProvider(groupId));
     final canManageRoster = ref.watch(canManageGroupRosterProvider(groupId));
     final canEditPositions = ref.watch(canManageGroupsProvider);
+    final canEditPolicies =
+        ref.watch(canEditGroupMembershipPoliciesProvider(groupId));
     final actionState = ref.watch(groupMemberActionsProvider);
+    final group = groupAsync.asData?.value;
+    final pendingCount = group == null
+        ? 0
+        : group.pendingJoinRequestCount + group.pendingLeaveRequestCount;
 
     return Scaffold(
       appBar: AppBar(
@@ -31,6 +39,31 @@ class GroupMembersScreen extends ConsumerWidget {
           error: (_, __) => const Text('Group Members'),
         ),
         actions: [
+          if (canManageRoster)
+            IconButton(
+              tooltip: pendingCount > 0
+                  ? 'Membership requests ($pendingCount)'
+                  : 'Membership requests',
+              onPressed: () => context.push(
+                Routes.groupMembershipRequestsPath(groupId),
+              ),
+              icon: pendingCount > 0
+                  ? Badge(
+                      label: Text('$pendingCount'),
+                      child: const Icon(Icons.inbox_outlined),
+                    )
+                  : const Icon(Icons.inbox_outlined),
+            ),
+          if (canEditPolicies && group != null)
+            IconButton(
+              tooltip: 'Membership settings',
+              onPressed: () => showGroupMembershipPolicySheet(
+                context: context,
+                ref: ref,
+                group: group,
+              ),
+              icon: const Icon(Icons.settings_outlined),
+            ),
           if (canEditPositions)
             IconButton(
               tooltip: 'Edit club positions',

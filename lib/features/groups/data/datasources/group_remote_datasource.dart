@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:speakup_connect/core/constants/app_constants.dart';
@@ -7,6 +9,7 @@ import 'package:speakup_connect/features/groups/data/models/user_group_membershi
 import 'package:speakup_connect/features/groups/data/models/group_model.dart';
 import 'package:speakup_connect/features/groups/data/models/group_position_role_codec.dart';
 import 'package:speakup_connect/features/groups/domain/entities/group_member_entity.dart';
+import 'package:speakup_connect/features/groups/domain/entities/group_membership_policy.dart';
 import 'package:speakup_connect/features/groups/domain/entities/group_position_role.dart';
 import 'package:uuid/uuid.dart';
 
@@ -72,6 +75,9 @@ class GroupRemoteDataSource {
     String? description,
     String? avatarUrl,
     List<GroupPositionRole> positionRoles = const [],
+    bool allowJoinRequests = false,
+    String? joinRequestHint,
+    MemberLeavePolicy memberLeavePolicy = MemberLeavePolicy.requestRequired,
   }) async {
     try {
       final groupId = const Uuid().v4();
@@ -83,13 +89,22 @@ class GroupRemoteDataSource {
         avatarUrl: avatarUrl,
         positionRoles: positionRoles,
         isActive: true,
+        allowJoinRequests: allowJoinRequests,
+        joinRequestHint: joinRequestHint,
+        memberLeavePolicy: memberLeavePolicy,
         memberCount: 0,
         createdBy: createdBy,
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
       );
 
-      await _groupDoc(organizationId, groupId).set(model.toCreateJson());
+      await _groupDoc(organizationId, groupId).set(
+        model.toCreateJson(
+          allowJoinRequests: allowJoinRequests,
+          joinRequestHint: joinRequestHint,
+          memberLeavePolicy: memberLeavePolicy,
+        ),
+      );
       return model;
     } on FirebaseException catch (e) {
       throw _mapFirebaseException(e, 'Failed to create group');
@@ -235,16 +250,69 @@ class GroupRemoteDataSource {
       final docs = await Future.wait(
         groupIds.map((id) => _groupDoc(organizationId, id).get()),
       );
-      final groups = docs
-          .where((doc) => doc.exists && doc.data() != null)
-          .map((doc) => GroupModel.fromFirestore(doc.data()!, doc.id))
-          .where((group) => group.isActive)
-          .toList();
-      groups.sort((a, b) => a.name.compareTo(b.name));
-      return groups;
+      return _activeGroupsFromDocs(docs);
     } on FirebaseException catch (e) {
       throw _mapFirebaseException(e, 'Failed to load groups');
     }
+  }
+
+  /// Live updates for group docs — drives pending request badges on My Groups.
+  Stream<List<GroupModel>> watchGroupsByIds({
+    required String organizationId,
+    required List<String> groupIds,
+  }) {
+    if (groupIds.isEmpty) return Stream.value(const <GroupModel>[]);
+
+    final uniqueIds = groupIds.toSet().toList(growable: false);
+    final cache = <String, GroupModel>{};
+    final subs = <StreamSubscription<DocumentSnapshot<Map<String, dynamic>>>>[];
+
+    late final StreamController<List<GroupModel>> controller;
+    controller = StreamController<List<GroupModel>>(
+      onListen: () {
+        for (final id in uniqueIds) {
+          subs.add(
+            _groupDoc(organizationId, id).snapshots().listen(
+              (snap) {
+                if (snap.exists && snap.data() != null) {
+                  cache[id] = GroupModel.fromFirestore(snap.data()!, snap.id);
+                } else {
+                  cache.remove(id);
+                }
+                if (!controller.isClosed) {
+                  controller.add(_activeGroupsFromModels(cache.values));
+                }
+              },
+              onError: (Object e, StackTrace st) {
+                if (!controller.isClosed) controller.addError(e, st);
+              },
+            ),
+          );
+        }
+      },
+      onCancel: () async {
+        for (final sub in subs) {
+          await sub.cancel();
+        }
+      },
+    );
+    return controller.stream;
+  }
+
+  List<GroupModel> _activeGroupsFromDocs(
+    Iterable<DocumentSnapshot<Map<String, dynamic>>> docs,
+  ) {
+    return _activeGroupsFromModels(
+      docs
+          .where((doc) => doc.exists && doc.data() != null)
+          .map((doc) => GroupModel.fromFirestore(doc.data()!, doc.id)),
+    );
+  }
+
+  List<GroupModel> _activeGroupsFromModels(Iterable<GroupModel> groups) {
+    final list = groups.where((group) => group.isActive).toList();
+    list.sort((a, b) => a.name.compareTo(b.name));
+    return list;
   }
 
   Stream<List<GroupMemberModel>> watchGroupMembers({
@@ -270,6 +338,54 @@ class GroupRemoteDataSource {
               return a.displayName.compareTo(b.displayName);
             }),
         );
+  }
+
+  /// Live roster row for one user — authoritative for [groupRole] on My Groups.
+  Stream<GroupMemberModel?> watchMyGroupMember({
+    required String organizationId,
+    required String groupId,
+    required String userId,
+  }) {
+    return _membersRef(organizationId, groupId).doc(userId).snapshots().map(
+      (snap) {
+        if (!snap.exists || snap.data() == null) return null;
+        return GroupMemberModel.fromFirestore(
+          snap.data()!,
+          snap.id,
+          groupId: groupId,
+          organizationId: organizationId,
+        );
+      },
+    );
+  }
+
+  Future<void> updateGroupMembershipPolicies({
+    required String organizationId,
+    required String groupId,
+    required bool allowJoinRequests,
+    required MemberLeavePolicy memberLeavePolicy,
+    String? joinRequestHint,
+  }) async {
+    try {
+      final model = GroupModel(
+        groupId: groupId,
+        organizationId: organizationId,
+        name: '',
+        isActive: true,
+        allowJoinRequests: allowJoinRequests,
+        joinRequestHint: joinRequestHint,
+        memberLeavePolicy: memberLeavePolicy,
+        memberCount: 0,
+        createdBy: '',
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+      await _groupDoc(organizationId, groupId).update(
+        model.toMembershipPolicyJson(),
+      );
+    } on FirebaseException catch (e) {
+      throw _mapFirebaseException(e, 'Failed to update group policies');
+    }
   }
 
   Future<void> updateGroupPositionRoles({

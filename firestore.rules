@@ -146,7 +146,16 @@ service cloud.firestore {
     function onlyGroupLeaderGroupUpdate() {
       let keys = request.resource.data.diff(resource.data).affectedKeys();
       return keys.hasOnly(['updatedAt'])
-          || keys.hasOnly(['memberCount', 'updatedAt']);
+          || keys.hasOnly(['memberCount', 'updatedAt'])
+          || keys.hasOnly(['allowJoinRequests', 'updatedAt'])
+          || keys.hasOnly(['joinRequestHint', 'updatedAt'])
+          || keys.hasOnly(['memberLeavePolicy', 'updatedAt'])
+          || keys.hasOnly(['pendingJoinRequestCount', 'updatedAt'])
+          || keys.hasOnly(['pendingLeaveRequestCount', 'updatedAt'])
+          || keys.hasOnly(['allowJoinRequests', 'joinRequestHint', 'updatedAt'])
+          || keys.hasOnly(['allowJoinRequests', 'memberLeavePolicy', 'updatedAt'])
+          || keys.hasOnly(['joinRequestHint', 'memberLeavePolicy', 'updatedAt'])
+          || keys.hasOnly(['allowJoinRequests', 'joinRequestHint', 'memberLeavePolicy', 'updatedAt']);
     }
 
     // Group leaders may create reminders targeted only at a group they lead.
@@ -250,6 +259,12 @@ service cloud.firestore {
             'unenrolledBy',
             'updatedAt',
           ]);
+    }
+
+    // Member updates their own contact email (not Firebase Auth login email).
+    function onlySelfContactEmailFields() {
+      return request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['email', 'updatedAt']);
     }
 
     // ── Organizations ─────────────────────────────────────────────────────────
@@ -372,6 +387,9 @@ service cloud.firestore {
                           && onlyReEnrollFields())
                       || (hasPermission(orgId, 'manageClassRoster')
                           && onlyGradeLevelFields())
+                      || (isSignedIn()
+                          && request.auth.uid == userId
+                          && onlySelfContactEmailFields())
                       || (isOrgMember(orgId)
                           && request.auth.uid == userId
                           && !request.resource.data.diff(resource.data)
@@ -480,6 +498,26 @@ service cloud.firestore {
           allow write: if isAdminOrAbove(orgId)
                        || hasClaimedPermission('manageGroupRoster')
                        || isGroupLeader(orgId, groupId);
+        }
+
+        match /joinRequests/{requestUserId} {
+          allow read: if isSuperAdmin() || isOrgMember(orgId) && (
+            request.auth.uid == requestUserId
+            || isAdminOrAbove(orgId)
+            || hasClaimedPermission('manageGroupRoster')
+            || isGroupLeader(orgId, groupId)
+          );
+          allow write: if false;
+        }
+
+        match /leaveRequests/{requestUserId} {
+          allow read: if isSuperAdmin() || isOrgMember(orgId) && (
+            request.auth.uid == requestUserId
+            || isAdminOrAbove(orgId)
+            || hasClaimedPermission('manageGroupRoster')
+            || isGroupLeader(orgId, groupId)
+          );
+          allow write: if false;
         }
       }
 

@@ -5,10 +5,12 @@ import 'package:speakup_connect/config/app_config.dart';
 import 'package:speakup_connect/core/constants/route_constants.dart';
 import 'package:speakup_connect/core/permissions/providers/permission_provider.dart';
 import 'package:speakup_connect/features/auth/presentation/providers/auth_provider.dart';
+import 'package:speakup_connect/features/groups/presentation/providers/group_membership_provider.dart';
 import 'package:speakup_connect/features/groups/presentation/providers/group_provider.dart';
 import 'package:speakup_connect/features/organization/presentation/providers/organization_provider.dart';
 import 'package:speakup_connect/features/reminders/presentation/providers/reminder_provider.dart';
 import 'package:speakup_connect/features/organization/presentation/providers/user_profile_provider.dart';
+import 'package:speakup_connect/features/organization/presentation/widgets/member_profile_account_section.dart';
 import 'package:speakup_connect/features/settings/presentation/providers/settings_provider.dart';
 import 'package:speakup_connect/shared/widgets/app_button.dart';
 import 'package:speakup_connect/shared/widgets/notification_badge_icon.dart';
@@ -26,6 +28,8 @@ class SettingsScreen extends ConsumerWidget {
     final profile = profileAsync.value;
     final pendingJoinCount = ref.watch(pendingMemberApplicationCountProvider);
     final pendingReminderCount = ref.watch(pendingReminderCountProvider);
+    final pendingGroupRequestsCount =
+        ref.watch(myReviewablePendingMembershipCountProvider);
     final supportsGrades = ref.watch(orgSupportsStudentGradesProvider);
     final canTriageReports = ref.watch(canAccessAdminReportsProvider);
     final canManageGroups = ref.watch(canManageGroupsProvider);
@@ -64,18 +68,11 @@ class SettingsScreen extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        user?.displayName ?? 'Anonymous',
+                        user?.displayName ?? profile?.fullName ?? 'Anonymous',
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-                      if (user?.email != null)
-                        Text(
-                          user!.email!,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                        ),
                       Text(
                         'SpeakUp $orgName',
                         style: theme.textTheme.bodySmall?.copyWith(
@@ -89,16 +86,32 @@ class SettingsScreen extends ConsumerWidget {
             ),
           ),
 
+          const MemberProfileAccountSection(),
+
           const Divider(),
 
           // --- My groups ---
           const _SectionHeader(title: 'Groups & Clubs'),
           ListTile(
-            leading: const Icon(Icons.groups_outlined),
+            leading: NotificationBadgeIcon(
+              icon: Icons.groups_outlined,
+              unreadCount: pendingGroupRequestsCount,
+            ),
             title: const Text('My Groups & Clubs'),
-            subtitle: const Text('Clubs and organizations you belong to'),
+            subtitle: Text(
+              pendingGroupRequestsCount > 0
+                  ? '$pendingGroupRequestsCount pending membership request(s)'
+                  : 'Clubs and organizations you belong to',
+            ),
             trailing: const Icon(Icons.chevron_right_rounded),
             onTap: () => context.push(Routes.myGroups),
+          ),
+          ListTile(
+            leading: const Icon(Icons.search_rounded),
+            title: const Text('Browse Groups & Clubs'),
+            subtitle: const Text('Discover clubs and request to join'),
+            trailing: const Icon(Icons.chevron_right_rounded),
+            onTap: () => context.push(Routes.browseGroups),
           ),
           if (canComposeAlerts)
             ListTile(

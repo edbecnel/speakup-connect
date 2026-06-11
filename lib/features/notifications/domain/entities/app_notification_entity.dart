@@ -41,6 +41,18 @@ class AppNotificationEntity {
 
   String? get reminderId => data['reminderId'] as String?;
 
+  /// Group membership event from Cloud Functions, e.g. `leave_approved`.
+  String? get groupMembershipEvent => data['event'] as String?;
+
+  /// True when tapping should open the leader/admin membership review queue.
+  bool get opensGroupMembershipRequests =>
+      type == 'group_membership' &&
+      groupMembershipEvent == 'membership_review';
+
+  /// Informational group alerts (left, removed, join outcome) — view only.
+  bool get isInformationalGroupMembership =>
+      type == 'group_membership' && !opensGroupMembershipRequests;
+
   bool get responseRequired => data['responseRequired'] == true;
 
   /// True when this item should appear in the alerts badge count.

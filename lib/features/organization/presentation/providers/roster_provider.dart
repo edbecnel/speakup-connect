@@ -88,3 +88,73 @@ final provisionStudentProvider =
     NotifierProvider<ProvisionStudentNotifier, AsyncValue<void>>(
   ProvisionStudentNotifier.new,
 );
+
+class UpdateOrgMemberNotifier extends Notifier<AsyncValue<void>> {
+  @override
+  AsyncValue<void> build() => const AsyncValue.data(null);
+
+  Future<bool> update({
+    required String userId,
+    required String fullName,
+    String? studentId,
+    String? email,
+    int? gradeLevel,
+    bool clearEmail = false,
+    bool clearStudentId = false,
+    bool clearGrade = false,
+  }) async {
+    state = const AsyncValue.loading();
+    try {
+      await ref.read(rosterRepositoryProvider).updateOrgMember(
+            orgId: AppConfig.defaultOrganizationId,
+            userId: userId,
+            fullName: fullName,
+            studentId: studentId,
+            email: email,
+            gradeLevel: gradeLevel,
+            clearEmail: clearEmail,
+            clearStudentId: clearStudentId,
+            clearGrade: clearGrade,
+          );
+      state = const AsyncValue.data(null);
+      return true;
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+      return false;
+    }
+  }
+}
+
+final updateOrgMemberProvider =
+    NotifierProvider<UpdateOrgMemberNotifier, AsyncValue<void>>(
+  UpdateOrgMemberNotifier.new,
+);
+
+class ResetOrgMemberPasswordNotifier extends Notifier<AsyncValue<void>> {
+  @override
+  AsyncValue<void> build() => const AsyncValue.data(null);
+
+  Future<bool> reset({
+    required String userId,
+    required String newPassword,
+  }) async {
+    state = const AsyncValue.loading();
+    try {
+      await ref.read(rosterRepositoryProvider).resetOrgMemberPassword(
+            orgId: AppConfig.defaultOrganizationId,
+            userId: userId,
+            newPassword: newPassword,
+          );
+      state = const AsyncValue.data(null);
+      return true;
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+      return false;
+    }
+  }
+}
+
+final resetOrgMemberPasswordProvider =
+    NotifierProvider<ResetOrgMemberPasswordNotifier, AsyncValue<void>>(
+  ResetOrgMemberPasswordNotifier.new,
+);

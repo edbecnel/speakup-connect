@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:speakup_connect/core/constants/route_constants.dart';
 import 'package:speakup_connect/core/permissions/app_permission.dart';
 import 'package:speakup_connect/core/permissions/providers/permission_provider.dart';
 import 'package:speakup_connect/features/auth/presentation/providers/auth_provider.dart';
 import 'package:speakup_connect/features/organization/domain/entities/enrolled_member.dart';
 import 'package:speakup_connect/features/organization/domain/entities/user_profile_entity.dart';
 import 'package:speakup_connect/features/organization/presentation/providers/organization_provider.dart';
+import 'package:speakup_connect/features/admin/presentation/widgets/reset_member_password_dialog.dart';
 import 'package:speakup_connect/features/organization/presentation/providers/user_profile_provider.dart';
 
 /// Grade filter sentinel for members without a resolved grade level.
@@ -42,6 +44,7 @@ class _EnrolledUsersScreenState extends ConsumerState<EnrolledUsersScreen> {
     final canManage =
         ref.watch(hasPermissionProvider(AppPermission.blockUsers)) ||
             (profile?.isAdmin ?? false);
+    final canEditProfiles = profile?.isAdmin ?? false;
     final membersAsync = ref.watch(managedUsersProvider);
     final members = ref.watch(managedMembersProvider);
     final filtered = _filterMembers(members);
@@ -204,6 +207,7 @@ class _EnrolledUsersScreenState extends ConsumerState<EnrolledUsersScreen> {
                     currentUser?.uid,
                     busy,
                     supportsGrades,
+                    canEditProfiles,
                   ),
                 ),
               ],
@@ -242,6 +246,7 @@ class _EnrolledUsersScreenState extends ConsumerState<EnrolledUsersScreen> {
     String? currentUid,
     bool busy,
     bool supportsGrades,
+    bool canEditProfiles,
   ) {
     if (membersAsync.isLoading && !membersAsync.hasValue) {
       return const Center(child: CircularProgressIndicator());
@@ -285,8 +290,24 @@ class _EnrolledUsersScreenState extends ConsumerState<EnrolledUsersScreen> {
               ? () => _confirmAssignGrade([member])
               : null,
           onReEnroll: () => _confirmReEnroll([member]),
+          onEdit: canEditProfiles
+              ? () => context.push(Routes.editMemberPath(member.userId))
+              : null,
+          onResetPassword: canEditProfiles && selectable
+              ? () => _confirmResetPassword(member)
+              : null,
         );
       },
+    );
+  }
+
+  Future<void> _confirmResetPassword(EnrolledMember member) async {
+    await showResetMemberPasswordDialog(
+      context: context,
+      ref: ref,
+      userId: member.userId,
+      memberName: member.user.fullName,
+      studentId: member.user.studentId,
     );
   }
 
@@ -777,6 +798,8 @@ class _MemberTile extends StatelessWidget {
     required this.onUnenroll,
     this.onAssignGrade,
     required this.onReEnroll,
+    this.onEdit,
+    this.onResetPassword,
   });
 
   final EnrolledMember member;
@@ -789,6 +812,8 @@ class _MemberTile extends StatelessWidget {
   final VoidCallback onUnenroll;
   final VoidCallback? onAssignGrade;
   final VoidCallback onReEnroll;
+  final VoidCallback? onEdit;
+  final VoidCallback? onResetPassword;
 
   @override
   Widget build(BuildContext context) {
@@ -801,6 +826,7 @@ class _MemberTile extends StatelessWidget {
     return Card(
       margin: EdgeInsets.zero,
       child: ListTile(
+        onTap: selectable && !busy && onEdit != null ? onEdit : null,
         leading: selectable
             ? Checkbox(
                 value: selected,
@@ -850,6 +876,10 @@ class _MemberTile extends StatelessWidget {
                 enabled: !busy,
                 onSelected: (action) {
                   switch (action) {
+                    case 'edit':
+                      onEdit?.call();
+                    case 'resetPassword':
+                      onResetPassword?.call();
                     case 'grade':
                       onAssignGrade?.call();
                     case 'unenroll':
@@ -864,14 +894,34 @@ class _MemberTile extends StatelessWidget {
                 },
                 itemBuilder: (ctx) {
                   if (user.isUnenrolled) {
-                    return const [
-                      PopupMenuItem(
+                    return [
+                      if (onEdit != null)
+                        const PopupMenuItem(
+                          value: 'edit',
+                          child: Text('Edit profile…'),
+                        ),
+                      if (onResetPassword != null)
+                        const PopupMenuItem(
+                          value: 'resetPassword',
+                          child: Text('Reset password…'),
+                        ),
+                      const PopupMenuItem(
                         value: 'reEnroll',
                         child: Text('Re-enroll…'),
                       ),
                     ];
                   }
                   return [
+                    if (onEdit != null)
+                      const PopupMenuItem(
+                        value: 'edit',
+                        child: Text('Edit profile…'),
+                      ),
+                    if (onResetPassword != null)
+                      const PopupMenuItem(
+                        value: 'resetPassword',
+                        child: Text('Reset password…'),
+                      ),
                     if (!user.isBlocked) ...[
                       if (onAssignGrade != null)
                         const PopupMenuItem(

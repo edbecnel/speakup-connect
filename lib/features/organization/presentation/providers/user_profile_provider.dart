@@ -39,6 +39,15 @@ final userProfileProvider = StreamProvider<UserProfileEntity?>((ref) {
       .watchUserProfile(orgId: orgId, userId: user.uid);
 });
 
+/// Watches any org member profile by Firebase UID (admin edit screens).
+final userProfileByIdProvider = StreamProvider.autoDispose
+    .family<UserProfileEntity?, String>((ref, userId) {
+  return ref.watch(userProfileRepositoryProvider).watchUserProfile(
+        orgId: AppConfig.defaultOrganizationId,
+        userId: userId,
+      );
+});
+
 // --- Join Application Notifier ---
 
 /// State for the apply-to-join form submission.
@@ -471,4 +480,32 @@ class UserManagementActionNotifier extends Notifier<AsyncValue<int?>> {
 final userManagementActionProvider =
     NotifierProvider<UserManagementActionNotifier, AsyncValue<int?>>(
   UserManagementActionNotifier.new,
+);
+
+class UpdateMemberContactEmailNotifier extends Notifier<AsyncValue<void>> {
+  @override
+  AsyncValue<void> build() => const AsyncValue.data(null);
+
+  Future<bool> update({String? email}) async {
+    final user = ref.read(currentUserProvider);
+    if (user == null) return false;
+    state = const AsyncValue.loading();
+    try {
+      await ref.read(userProfileRepositoryProvider).updateContactEmail(
+            orgId: AppConfig.defaultOrganizationId,
+            userId: user.uid,
+            email: email,
+          );
+      state = const AsyncValue.data(null);
+      return true;
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+      return false;
+    }
+  }
+}
+
+final updateMemberContactEmailProvider =
+    NotifierProvider<UpdateMemberContactEmailNotifier, AsyncValue<void>>(
+  UpdateMemberContactEmailNotifier.new,
 );

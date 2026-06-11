@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:speakup_connect/core/auth/student_auth_credentials.dart';
 import 'package:speakup_connect/core/constants/app_constants.dart';
 import 'package:speakup_connect/core/errors/app_exception.dart';
 import 'package:speakup_connect/features/organization/data/models/user_profile_model.dart';
@@ -348,6 +349,49 @@ class UserProfileRepositoryImpl implements UserProfileRepository {
     } on FirebaseException catch (e) {
       throw DatabaseException(
         message: e.message ?? 'Failed to update member grade',
+        code: e.code,
+      );
+    }
+  }
+
+  @override
+  Future<void> updateContactEmail({
+    required String orgId,
+    required String userId,
+    String? email,
+  }) async {
+    final trimmed = email?.trim();
+    final update = <String, dynamic>{
+      'updatedAt': FieldValue.serverTimestamp(),
+    };
+    if (trimmed == null || trimmed.isEmpty) {
+      update['email'] = FieldValue.delete();
+    } else {
+      update['email'] = normalizeContactEmail(trimmed);
+    }
+
+    try {
+      await _usersRef(orgId).doc(userId).update(update);
+
+      final profileDoc = await _usersRef(orgId).doc(userId).get();
+      final studentId = profileDoc.data()?['studentId'] as String?;
+      if (studentId != null && studentId.isNotEmpty) {
+        final rosterUpdate = <String, dynamic>{
+          'updatedAt': FieldValue.serverTimestamp(),
+        };
+        if (trimmed == null || trimmed.isEmpty) {
+          rosterUpdate['email'] = FieldValue.delete();
+        } else {
+          rosterUpdate['email'] = normalizeContactEmail(trimmed);
+        }
+        await _rosterRef(orgId).doc(studentId).set(
+              rosterUpdate,
+              SetOptions(merge: true),
+            );
+      }
+    } on FirebaseException catch (e) {
+      throw DatabaseException(
+        message: e.message ?? 'Failed to update email',
         code: e.code,
       );
     }

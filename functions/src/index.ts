@@ -5,6 +5,7 @@ import { logger } from 'firebase-functions';
 import * as admin from 'firebase-admin';
 import {
   assertStudentPasswordLength,
+  normalizeContactEmail,
   studentAuthEmail,
 } from './student_auth';
 
@@ -1836,7 +1837,7 @@ export const provisionStudent = onCall(async (request) => {
     updatedAt: now,
   };
   if (trimmedContactEmail) {
-    profileData['email'] = trimmedContactEmail;
+    profileData['email'] = normalizeContactEmail(trimmedContactEmail);
   }
 
   const rosterData: Record<string, unknown> = {
@@ -1850,7 +1851,7 @@ export const provisionStudent = onCall(async (request) => {
     updatedAt: now,
   };
   if (trimmedContactEmail) {
-    rosterData['email'] = trimmedContactEmail;
+    rosterData['email'] = normalizeContactEmail(trimmedContactEmail);
   }
 
   const batch = db.batch();
@@ -2102,3 +2103,18 @@ export const syncMyGroupMemberships = onCall(async (request) => {
   logger.info('syncMyGroupMemberships completed', { orgId, uid, synced });
   return { ok: true, synced };
 });
+
+export {
+  submitGroupJoinRequest,
+  withdrawGroupJoinRequest,
+  reviewGroupJoinRequest,
+  voluntaryLeaveGroup,
+  submitGroupLeaveRequest,
+  withdrawGroupLeaveRequest,
+  reviewGroupLeaveRequest,
+  removeGroupMemberWithNotification,
+} from './group_membership';
+
+export { resolveLoginEmail } from './resolve_login';
+export { updateOrgMember } from './update_org_member';
+export { resetOrgMemberPassword } from './reset_org_member_password';

@@ -31,6 +31,26 @@ abstract class RosterRepository {
     required int gradeLevel,
     String? email,
   });
+
+  /// Admin sets a new login password for a member.
+  Future<void> resetOrgMemberPassword({
+    required String orgId,
+    required String userId,
+    required String newPassword,
+  });
+
+  /// Admin updates member profile fields (name, student ID, email, grade).
+  Future<void> updateOrgMember({
+    required String orgId,
+    required String userId,
+    required String fullName,
+    String? studentId,
+    String? email,
+    int? gradeLevel,
+    bool clearEmail = false,
+    bool clearStudentId = false,
+    bool clearGrade = false,
+  });
 }
 
 /// Result of [RosterRepository.provisionStudent].

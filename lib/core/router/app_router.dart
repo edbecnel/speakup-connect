@@ -9,6 +9,7 @@ import 'package:speakup_connect/features/admin/presentation/screens/admin_report
 import 'package:speakup_connect/features/admin/presentation/screens/enrolled_users_screen.dart';
 import 'package:speakup_connect/features/admin/presentation/screens/member_approval_queue_screen.dart';
 import 'package:speakup_connect/features/admin/presentation/screens/add_student_screen.dart';
+import 'package:speakup_connect/features/admin/presentation/screens/edit_member_screen.dart';
 import 'package:speakup_connect/features/admin/presentation/screens/roster_management_screen.dart';
 import 'package:speakup_connect/features/admin/presentation/screens/school_grades_settings_screen.dart';
 import 'package:speakup_connect/features/auth/presentation/providers/auth_provider.dart';
@@ -24,6 +25,9 @@ import 'package:speakup_connect/features/groups/presentation/screens/add_group_m
 import 'package:speakup_connect/features/groups/presentation/screens/create_group_screen.dart';
 import 'package:speakup_connect/features/groups/presentation/screens/edit_group_position_roles_screen.dart';
 import 'package:speakup_connect/features/groups/presentation/screens/group_members_screen.dart';
+import 'package:speakup_connect/features/groups/presentation/providers/group_membership_provider.dart';
+import 'package:speakup_connect/features/groups/presentation/screens/browse_groups_screen.dart';
+import 'package:speakup_connect/features/groups/presentation/screens/group_membership_requests_screen.dart';
 import 'package:speakup_connect/features/groups/presentation/screens/groups_list_screen.dart';
 import 'package:speakup_connect/features/groups/presentation/screens/my_groups_screen.dart';
 import 'package:speakup_connect/features/help/presentation/screens/help_article_screen.dart';
@@ -263,6 +267,14 @@ GoRouter appRouter(Ref ref) {
         builder: (context, state) => const EnrolledUsersScreen(),
       ),
       GoRoute(
+        path: Routes.editMember,
+        name: 'editMember',
+        builder: (context, state) {
+          final userId = state.pathParameters['userId']!;
+          return EditMemberScreen(userId: userId);
+        },
+      ),
+      GoRoute(
         path: Routes.rosterManagement,
         name: 'rosterManagement',
         builder: (context, state) => const RosterManagementScreen(),
@@ -288,6 +300,27 @@ GoRouter appRouter(Ref ref) {
         builder: (context, state) => const MyGroupsScreen(),
       ),
       GoRoute(
+        path: Routes.browseGroups,
+        name: 'browseGroups',
+        builder: (context, state) => const BrowseGroupsScreen(),
+      ),
+      GoRoute(
+        path: Routes.groupMembershipRequests,
+        name: 'groupMembershipRequests',
+        redirect: (context, state) {
+          final groupId = state.pathParameters['groupId'];
+          if (groupId == null) return Routes.groupsList;
+          final canReview =
+              ref.read(canReviewGroupMembershipRequestsProvider(groupId));
+          if (!canReview) return Routes.groupMembersPath(groupId);
+          return null;
+        },
+        builder: (context, state) {
+          final groupId = state.pathParameters['groupId']!;
+          return GroupMembershipRequestsScreen(groupId: groupId);
+        },
+      ),
+      GoRoute(
         path: Routes.createGroup,
         name: 'createGroup',
         redirect: (context, state) {
@@ -303,21 +336,24 @@ GoRouter appRouter(Ref ref) {
           final groupId = state.pathParameters['groupId']!;
           return GroupMembersScreen(groupId: groupId);
         },
-      ),
-      GoRoute(
-        path: Routes.addGroupMembers,
-        name: 'addGroupMembers',
-        redirect: (context, state) {
-          final groupId = state.pathParameters['groupId'];
-          if (groupId == null) return Routes.groupsList;
-          final canManage = ref.read(canManageGroupRosterProvider(groupId));
-          if (!canManage) return Routes.groupMembersPath(groupId);
-          return null;
-        },
-        builder: (context, state) {
-          final groupId = state.pathParameters['groupId']!;
-          return AddGroupMembersScreen(groupId: groupId);
-        },
+        routes: [
+          GoRoute(
+            path: 'add',
+            name: 'addGroupMembers',
+            redirect: (context, state) {
+              final groupId = state.pathParameters['groupId'];
+              if (groupId == null) return Routes.groupsList;
+              final canManage =
+                  ref.read(canManageGroupRosterProvider(groupId));
+              if (!canManage) return Routes.groupMembersPath(groupId);
+              return null;
+            },
+            builder: (context, state) {
+              final groupId = state.pathParameters['groupId']!;
+              return AddGroupMembersScreen(groupId: groupId);
+            },
+          ),
+        ],
       ),
       GoRoute(
         path: Routes.editGroupPositionRoles,

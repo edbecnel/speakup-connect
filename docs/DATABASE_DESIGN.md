@@ -247,6 +247,8 @@ This is the core document of the platform.
   "fullName": "string",
   "studentId": "string | null (school/org-issued ID number)",
   "email": "string | null",
+  "officialPhotoUrl": "string | null (Firebase Storage URL — admin/roster-managed school photo; members cannot change)",
+  "avatarUrl": "string | null (Firebase Storage URL — member-chosen badge image in Settings; optional override of official photo for display)",
   "preferredLanguage": "string (language code, e.g. 'en'; overrides org default)",
   "role": "user | admin | super_admin",
   "customRoles": ["string (roleIds granted by admin)"],
@@ -269,6 +271,9 @@ This is the core document of the platform.
 **Field Notes:**
 - `userId` is set as the Firestore document ID
 - `studentId` matches the value in the `roster` collection for approval verification
+- **`officialPhotoUrl`** — authoritative school/org photo for the member (student, faculty, etc.). Set only by org admin or holders of roster/member-management capabilities (`manageClassRoster`, Manage Members / `blockUsers`, etc.). Synced to roster when `studentId` is present. Not editable by the member.
+- **`avatarUrl`** — personal display image chosen by the member in **Settings** (tap profile badge). Used in the UI when set; otherwise fall back to `officialPhotoUrl`, then initials. Members may update or clear their own `avatarUrl` only.
+- **Badge display order:** `avatarUrl` → `officialPhotoUrl` → generated initials circle (current default).
 - `fcmTokens` is an array to support multiple devices per user
 - `preferredLanguage` overrides the org-level `defaultLanguage` for this user
 - `approvalStatus` is only relevant when the org has `signupRequiresApproval: true`
@@ -305,6 +310,7 @@ Pre-loaded registry of valid student names and IDs used for apply-to-join signup
   "studentId": "string (school/org-issued ID, used as document ID)",
   "fullName": "string",
   "email": "string | null (optional, may be pre-filled at import)",
+  "officialPhotoUrl": "string | null (optional, admin-managed; may mirror profile when registered)",
   "grade": "string | null (optional)",
   "section": "string | null (optional)",
   "isRegistered": "boolean (true once a user account has been created with this ID)",

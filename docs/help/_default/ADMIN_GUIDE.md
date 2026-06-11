@@ -19,7 +19,7 @@ Common areas:
 | Groups & Clubs *(Administration)* | Create groups and manage all org rosters |
 | Join Applications | Approve new member sign-ups |
 | Reminder Approvals | Approve pending group/org alerts (when enabled) |
-| Member Management | Block, unenroll, or restore members |
+| Member Management | Block, unenroll, edit profiles, reset passwords, restore members |
 | Roles | Assign staff capabilities |
 
 School-type organizations may also show **Student Roster** and **School Grades**.
@@ -36,7 +36,9 @@ Users with report-triage permissions can open the **Admin Dashboard**, update re
 
 **Members** see their own groups under **Home** or **Settings → My Groups & Clubs** (read-only).
 
-**Staff with `manageGroupRoster`** (or org admins) use **Settings → Administration → Groups & Clubs** to create groups, add members, and assign leader/member roles. Some organizations also support **custom club positions** (offices such as President or Secretary).
+**Staff with `manageGroupRoster`** (or org admins) use **Settings → Administration → Groups & Clubs** to create groups, add members, review **join/leave requests**, configure join/leave policies, and assign leader/member roles. Some organizations also support **custom club positions** (offices such as President or Secretary).
+
+**Org admins** can **edit member profiles** (name, student ID, email, grade) and **reset passwords** from **Member Management**.
 
 **Group leaders** (roster role Leader) may manage their group's roster and send **group alerts** from **My Groups & Clubs** without org-wide broadcast permission.
 

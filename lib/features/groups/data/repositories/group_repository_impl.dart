@@ -1,3 +1,4 @@
+import 'package:speakup_connect/features/groups/data/datasources/group_membership_remote_datasource.dart';
 import 'package:speakup_connect/features/groups/data/datasources/group_remote_datasource.dart';
 
 import 'package:speakup_connect/features/groups/data/models/group_member_model.dart';
@@ -7,9 +8,10 @@ import 'package:speakup_connect/features/groups/data/models/group_model.dart';
 import 'package:speakup_connect/features/groups/data/models/user_group_membership_index_model.dart';
 
 import 'package:speakup_connect/features/groups/domain/entities/group_entity.dart';
-
+import 'package:speakup_connect/features/groups/domain/entities/group_join_request_entity.dart';
+import 'package:speakup_connect/features/groups/domain/entities/group_leave_request_entity.dart';
 import 'package:speakup_connect/features/groups/domain/entities/group_member_entity.dart';
-
+import 'package:speakup_connect/features/groups/domain/entities/group_membership_policy.dart';
 import 'package:speakup_connect/features/groups/domain/entities/group_position_role.dart';
 
 import 'package:speakup_connect/features/groups/domain/entities/my_group_membership.dart';
@@ -19,12 +21,13 @@ import 'package:speakup_connect/features/groups/domain/repositories/group_reposi
 
 
 class GroupRepositoryImpl implements GroupRepository {
-
-  GroupRepositoryImpl(this._remoteDataSource);
-
-
+  GroupRepositoryImpl(
+    this._remoteDataSource,
+    this._membershipDataSource,
+  );
 
   final GroupRemoteDataSource _remoteDataSource;
+  final GroupMembershipRemoteDataSource _membershipDataSource;
 
 
 
@@ -43,25 +46,38 @@ class GroupRepositoryImpl implements GroupRepository {
     String? avatarUrl,
 
     List<GroupPositionRole> positionRoles = const [],
-
+    bool allowJoinRequests = false,
+    String? joinRequestHint,
+    MemberLeavePolicy memberLeavePolicy = MemberLeavePolicy.requestRequired,
   }) {
-
     return _remoteDataSource.createGroup(
-
       organizationId: organizationId,
-
       name: name,
-
       createdBy: createdBy,
-
       description: description,
-
       avatarUrl: avatarUrl,
-
       positionRoles: positionRoles,
-
+      allowJoinRequests: allowJoinRequests,
+      joinRequestHint: joinRequestHint,
+      memberLeavePolicy: memberLeavePolicy,
     );
+  }
 
+  @override
+  Future<void> updateGroupMembershipPolicies({
+    required String organizationId,
+    required String groupId,
+    required bool allowJoinRequests,
+    required MemberLeavePolicy memberLeavePolicy,
+    String? joinRequestHint,
+  }) {
+    return _remoteDataSource.updateGroupMembershipPolicies(
+      organizationId: organizationId,
+      groupId: groupId,
+      allowJoinRequests: allowJoinRequests,
+      memberLeavePolicy: memberLeavePolicy,
+      joinRequestHint: joinRequestHint,
+    );
   }
 
 
@@ -142,19 +158,45 @@ class GroupRepositoryImpl implements GroupRepository {
 
     return _watchIndexWithRepair(organizationId: organizationId, userId: userId)
 
-        .asyncMap(
+        .asyncExpand((indexRows) {
 
-          (indexRows) => _myGroupMembershipsFromIndex(
+      if (indexRows.isEmpty) {
+
+        return Stream.value(const <MyGroupMembership>[]);
+
+      }
+
+      final groupIds =
+
+          indexRows.map((r) => r.groupId).toSet().toList(growable: false);
+
+      return _remoteDataSource
+
+          .watchGroupsByIds(
 
             organizationId: organizationId,
 
-            userId: userId,
+            groupIds: groupIds,
 
-            indexRows: indexRows,
+          )
 
-          ),
+          .map(
 
-        );
+            (groups) => _myGroupMembershipsFromIndex(
+
+              organizationId: organizationId,
+
+              userId: userId,
+
+              indexRows: indexRows,
+
+              groups: groups,
+
+            ),
+
+          );
+
+    });
 
   }
 
@@ -264,7 +306,7 @@ class GroupRepositoryImpl implements GroupRepository {
 
 
 
-  Future<List<MyGroupMembership>> _myGroupMembershipsFromIndex({
+  List<MyGroupMembership> _myGroupMembershipsFromIndex({
 
     required String organizationId,
 
@@ -272,23 +314,11 @@ class GroupRepositoryImpl implements GroupRepository {
 
     required List<UserGroupMembershipIndexModel> indexRows,
 
-  }) async {
+    required List<GroupModel> groups,
+
+  }) {
 
     if (indexRows.isEmpty) return const <MyGroupMembership>[];
-
-
-
-    final groupIds =
-
-        indexRows.map((r) => r.groupId).toSet().toList(growable: false);
-
-    final groups = await _remoteDataSource.getGroupsByIds(
-
-      organizationId: organizationId,
-
-      groupIds: groupIds,
-
-    );
 
     final groupsById = {for (final g in groups) g.groupId: g};
 
@@ -395,6 +425,32 @@ class GroupRepositoryImpl implements GroupRepository {
       organizationId: organizationId,
 
       groupId: groupId,
+
+    );
+
+  }
+
+
+
+  @override
+
+  Stream<GroupMemberEntity?> watchMyGroupMember({
+
+    required String organizationId,
+
+    required String groupId,
+
+    required String userId,
+
+  }) {
+
+    return _remoteDataSource.watchMyGroupMember(
+
+      organizationId: organizationId,
+
+      groupId: groupId,
+
+      userId: userId,
 
     );
 
@@ -539,13 +595,151 @@ class GroupRepositoryImpl implements GroupRepository {
   }) {
 
     return _remoteDataSource.backfillGroupMembershipIndexes(
-
       organizationId: organizationId,
-
     );
-
   }
 
+  @override
+  Stream<List<GroupJoinRequestEntity>> watchPendingJoinRequests({
+    required String organizationId,
+    required String groupId,
+  }) =>
+      _membershipDataSource.watchPendingJoinRequests(
+        organizationId: organizationId,
+        groupId: groupId,
+      );
+
+  @override
+  Stream<List<GroupLeaveRequestEntity>> watchPendingLeaveRequests({
+    required String organizationId,
+    required String groupId,
+  }) =>
+      _membershipDataSource.watchPendingLeaveRequests(
+        organizationId: organizationId,
+        groupId: groupId,
+      );
+
+  @override
+  Stream<GroupJoinRequestEntity?> watchMyJoinRequest({
+    required String organizationId,
+    required String groupId,
+    required String userId,
+  }) =>
+      _membershipDataSource.watchMyJoinRequest(
+        organizationId: organizationId,
+        groupId: groupId,
+        userId: userId,
+      );
+
+  @override
+  Stream<GroupLeaveRequestEntity?> watchMyLeaveRequest({
+    required String organizationId,
+    required String groupId,
+    required String userId,
+  }) =>
+      _membershipDataSource.watchMyLeaveRequest(
+        organizationId: organizationId,
+        groupId: groupId,
+        userId: userId,
+      );
+
+  @override
+  Future<void> submitJoinRequest({
+    required String organizationId,
+    required String groupId,
+    String? message,
+  }) =>
+      _membershipDataSource.submitJoinRequest(
+        organizationId: organizationId,
+        groupId: groupId,
+        message: message,
+      );
+
+  @override
+  Future<void> withdrawJoinRequest({
+    required String organizationId,
+    required String groupId,
+  }) =>
+      _membershipDataSource.withdrawJoinRequest(
+        organizationId: organizationId,
+        groupId: groupId,
+      );
+
+  @override
+  Future<void> reviewJoinRequest({
+    required String organizationId,
+    required String groupId,
+    required String userId,
+    required bool approve,
+    String? rejectionReason,
+  }) =>
+      _membershipDataSource.reviewJoinRequest(
+        organizationId: organizationId,
+        groupId: groupId,
+        userId: userId,
+        approve: approve,
+        rejectionReason: rejectionReason,
+      );
+
+  @override
+  Future<void> voluntaryLeave({
+    required String organizationId,
+    required String groupId,
+  }) =>
+      _membershipDataSource.voluntaryLeave(
+        organizationId: organizationId,
+        groupId: groupId,
+      );
+
+  @override
+  Future<void> submitLeaveRequest({
+    required String organizationId,
+    required String groupId,
+    required String reason,
+  }) =>
+      _membershipDataSource.submitLeaveRequest(
+        organizationId: organizationId,
+        groupId: groupId,
+        reason: reason,
+      );
+
+  @override
+  Future<void> withdrawLeaveRequest({
+    required String organizationId,
+    required String groupId,
+  }) =>
+      _membershipDataSource.withdrawLeaveRequest(
+        organizationId: organizationId,
+        groupId: groupId,
+      );
+
+  @override
+  Future<void> reviewLeaveRequest({
+    required String organizationId,
+    required String groupId,
+    required String userId,
+    required bool approve,
+    String? rejectionReason,
+  }) =>
+      _membershipDataSource.reviewLeaveRequest(
+        organizationId: organizationId,
+        groupId: groupId,
+        userId: userId,
+        approve: approve,
+        rejectionReason: rejectionReason,
+      );
+
+  @override
+  Future<void> removeMemberWithNotification({
+    required String organizationId,
+    required String groupId,
+    required String userId,
+  }) =>
+      _membershipDataSource.removeMemberWithNotification(
+        organizationId: organizationId,
+        groupId: groupId,
+        userId: userId,
+      );
 }
 
 

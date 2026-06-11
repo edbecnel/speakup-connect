@@ -221,7 +221,7 @@ class _NotificationRow extends ConsumerWidget {
       busy: busy,
       needsAttention: attention.needsAttention,
       responsePending: attention.responsePending,
-      onTap: () => _openNotificationDetail(context, notification),
+      onTap: () => _openNotificationDetail(context, ref, notification),
       onEdit: reminderId != null && canManage
           ? () => _editBroadcast(context, ref, reminderId)
           : null,
@@ -295,8 +295,20 @@ class _NotificationRow extends ConsumerWidget {
 
   void _openNotificationDetail(
     BuildContext context,
+    WidgetRef ref,
     AppNotificationEntity notification,
   ) {
+    if (notification.opensGroupMembershipRequests) {
+      final groupId = notification.data['groupId'] as String?;
+      if (groupId != null && groupId.isNotEmpty) {
+        if (!notification.read && !notification.id.startsWith('broadcast-')) {
+          ref.read(notificationActionsProvider.notifier).markRead(notification.id);
+        }
+        context.push(Routes.groupMembershipRequestsPath(groupId));
+        return;
+      }
+    }
+
     final Widget screen;
     if (notification.type == 'reminder' &&
         reminderIdFromNotificationData(notification.data) != null) {
@@ -455,6 +467,7 @@ class _NotificationTile extends ConsumerWidget {
     final icon = switch (notification.type) {
       'reminder' => Icons.campaign_outlined,
       'status_update' => Icons.assignment_turned_in_outlined,
+      'group_membership' => Icons.groups_outlined,
       _ => Icons.notifications_outlined,
     };
 

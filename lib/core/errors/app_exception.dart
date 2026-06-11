@@ -36,7 +36,9 @@ class AuthException extends AppException {
   static String? _mapFirebaseAuthCodeToMessage(String? code) {
     switch (code) {
       case 'user-not-found':
-        return 'No account found with this email address.';
+      case 'invalid-credential':
+      case 'invalid-login-credentials':
+        return 'Invalid email, student ID, or password.';
       case 'wrong-password':
         return 'Incorrect password. Please try again.';
       case 'email-already-in-use':

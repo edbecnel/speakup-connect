@@ -102,4 +102,11 @@ abstract class UserProfileRepository {
     required List<String> targetUserIds,
     required String actorId,
   });
+
+  /// Updates the signed-in member's contact email (profile + roster sync).
+  Future<void> updateContactEmail({
+    required String orgId,
+    required String userId,
+    String? email,
+  });
 }

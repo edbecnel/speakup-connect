@@ -1,3 +1,4 @@
+import 'package:speakup_connect/features/groups/domain/entities/group_membership_policy.dart';
 import 'package:speakup_connect/features/groups/domain/entities/group_position_role.dart';
 
 /// Domain entity for an extracurricular group or club.
@@ -17,6 +18,11 @@ class GroupEntity {
     this.description,
     this.avatarUrl,
     this.positionRoles = const [],
+    this.allowJoinRequests = false,
+    this.joinRequestHint,
+    this.memberLeavePolicy = MemberLeavePolicy.requestRequired,
+    this.pendingJoinRequestCount = 0,
+    this.pendingLeaveRequestCount = 0,
   });
 
   final String groupId;
@@ -28,6 +34,21 @@ class GroupEntity {
 
   /// Optional club offices (President, Secretary, etc.) defined by the admin.
   final List<GroupPositionRole> positionRoles;
+
+  /// When true, approved members may request to join this group.
+  final bool allowJoinRequests;
+
+  /// Optional helper text when [allowJoinRequests] is enabled.
+  final String? joinRequestHint;
+
+  /// Whether members may leave on their own or must request approval.
+  final MemberLeavePolicy memberLeavePolicy;
+
+  /// Denormalized pending join requests (for leader/admin badges).
+  final int pendingJoinRequestCount;
+
+  /// Denormalized pending leave requests (for leader/admin badges).
+  final int pendingLeaveRequestCount;
 
   /// Denormalized count of documents in the `members` subcollection.
   final int memberCount;

@@ -313,7 +313,14 @@ class _GroupCard extends StatelessWidget {
                       ),
                     const SizedBox(height: 6),
                     Text(
-                      '${group.memberCount} member${group.memberCount == 1 ? '' : 's'}',
+                      [
+                        '${group.memberCount} member${group.memberCount == 1 ? '' : 's'}',
+                        if (group.allowJoinRequests) 'open to join',
+                        if (group.pendingJoinRequestCount +
+                                group.pendingLeaveRequestCount >
+                            0)
+                          '${group.pendingJoinRequestCount + group.pendingLeaveRequestCount} pending',
+                      ].join(' · '),
                       style: theme.textTheme.labelSmall?.copyWith(
                         color: theme.colorScheme.primary,
                         fontWeight: FontWeight.w600,

@@ -9,20 +9,39 @@ Welcome to SpeakUp MONHS. This guide covers everyday use for students, staff, an
 
 ## Signing in
 
-### Email and password
-
-If you registered with an email address, sign in with that email and your password.
+You can sign in with **either** your school-issued **student ID** or your **contact email** (if one is on file), plus your password.
 
 ### Student ID login
 
-If your school admin provisioned your account, you may sign in with your **school-issued student ID** instead of an email:
+If your school admin provisioned your account:
 
 1. Open the app and go to **Sign In**
-2. Enter your **student ID** in the username field (not your email)
-3. Enter your **student ID again** as the password (initial default)
+2. Enter your **student ID** in the **Email or student ID** field
+3. Enter your password (initial default is often the same as your student ID until an admin resets it)
 4. Tap **Sign In**
 
-> Your admin may ask you to change your password later when that feature is available.
+### Email login
+
+If a **contact email** is saved on your profile (you or an admin added it):
+
+1. Enter that **email address** in the **Email or student ID** field
+2. Enter your password
+3. Tap **Sign In**
+
+The app maps your contact email to your school account automatically — you do not use a separate email password unless your admin set one up that way.
+
+### After an admin resets your password
+
+Use the **new password** your administrator gave you. Sign in with **either** your student ID **or** your contact email — both work with the same password.
+
+### Viewing your username and email
+
+Open **Settings** (Profile tab). Under your name you will see:
+
+- **Username / student ID** — what you use to sign in
+- **Contact email** — optional; tap **Add email** or **Change email** to update it yourself
+
+You cannot change your student ID from the app; ask an administrator if it is wrong.
 
 ### Pending approval
 
@@ -95,7 +114,20 @@ After you respond (or if no response is required), you can dismiss alerts you no
 
 Open **Settings** from the bottom navigation (labeled Profile).
 
+### Your account
+
+Below your name and organization:
+
+- **Username / student ID** — your sign-in username
+- **Contact email** — used for notifications and sign-in (optional)
+- **Add email** / **Change email** — update your contact email yourself
+
+Your student ID is assigned by the school and cannot be changed here.
+
+### Other settings
+
 - **My Groups & Clubs** — full list of groups you belong to, with your role and club position
+- **Browse Groups & Clubs** — discover open clubs and request to join
 - **Theme** — light, dark, or system default
 - **Help Center** — this guide and other help for your role
 - **About** — app version and organization name
@@ -105,7 +137,18 @@ Open **Settings** from the bottom navigation (labeled Profile).
 
 ## Groups and clubs
 
-Your administrator adds you to group rosters (clubs, SSLG, SPJ cohort, Drum and Lyre, etc.). You cannot join a group yourself from the app — wait for an admin or adviser to add you.
+### Joining a group
+
+Many clubs accept **join requests** from members:
+
+1. **Settings → Browse Groups & Clubs** (or **My Groups & Clubs → Browse**)
+2. Search or scroll to find a club
+3. Tap **Request to join** and add an optional message
+4. Wait for a **leader** or **administrator** to approve
+
+You will get an **Alerts** notification when your request is approved or declined.
+
+Administrators can also add you directly to a roster without a request.
 
 ### Viewing your groups
 
@@ -142,15 +185,29 @@ You can be a **Leader** with any club position, or a **Member** without leadersh
 1. Go to **Home → My Groups & Clubs** (or **Settings → My Groups & Clubs**)
 2. Find your club — the subtitle shows **Leader** or **Member**, your position, and member count
 3. Use the buttons on the card:
-   - **View Members** — see the full roster (everyone can do this)
-   - **Manage Members** — add people to the club *(leaders only)*
+   - **Manage Members** — see the full roster (everyone can do this)
+   - **Add Members** — add people to the club *(leaders only)*
+   - **Requests** — review join and leave requests *(leaders only; badge when pending)*
    - **Send Alert** — message everyone in the club *(leaders only)*
+   - **Settings** — join/leave policies for the club *(leaders only)*
+   - **Leave group** or **Request to leave** — see [Leaving a group](#leaving-a-group) below
 
 If a group is missing after your adviser adds you, open **My Groups & Clubs** once — the list syncs from the school roster.
 
+#### Leaving a group
+
+Depends on the club’s policy (set by a leader or admin):
+
+| Policy | What you do |
+|--------|-------------|
+| **Voluntary leave** | Tap **Leave group** and confirm |
+| **Request required** | Tap **Request to leave**, explain why (at least 20 characters), and wait for leader approval |
+
+You cannot leave if you are the **only leader** — ask an admin to assign another leader first.
+
 #### View the member list
 
-1. Tap **View Members** (or open a group from the list)
+1. Tap **Manage Members** on the group card, or open a group from the list
 2. Members are sorted by club position, then name
 3. Each row shows **Leader** or **Member** and their **club position** when assigned
 
@@ -160,7 +217,7 @@ From this screen, leaders also see an **Add Members** button at the bottom.
 
 **Requires:** **Leader** on this group
 
-1. Tap **Manage Members** on the group card, or **Add Members** on the roster screen
+1. Tap **Add Members** on the group card, or **Add Members** on the roster screen
 2. **Search** by name, email, or student ID
 3. Tap a person in the list to select them (or use checkboxes for several at once)
 4. Choose **Group role**:
@@ -175,7 +232,7 @@ Only **approved** school members who are **not already** on the roster appear in
 
 **Requires:** **Leader** on this group
 
-1. Open **View Members**
+1. Open **Manage Members**
 2. Tap the **⋮** menu on a member’s row
 3. Choose an action:
    - **Make leader** / **Make member** — change who can manage the club
@@ -183,6 +240,16 @@ Only **approved** school members who are **not already** on the roster appear in
    - **Remove from group** — take them off this club’s roster (they stay in the school; they only leave this group)
 
 You **cannot** create new position titles (e.g. add “Auditor”) — only a school administrator can edit the club’s position list. Ask your adviser if a new office is needed.
+
+#### Review join and leave requests
+
+**Requires:** **Leader** on this group (org admins can use **Administration → Groups & Clubs** for any group)
+
+1. Tap **Requests** on the group card (badge shows pending count)
+2. Use the **Join** and **Leave** tabs
+3. **Approve** or **Reject** each request (denying a leave request requires a reason shown to the member)
+
+Members receive **Alerts** when requests are approved, denied, or when they are removed from a group.
 
 #### Send a group alert
 
@@ -233,10 +300,27 @@ Even as a leader, you still get alerts sent **to** your groups like any other me
 #### Quick checklist for new SSLG/club officers
 
 1. Confirm you show as **Leader** under **My Groups & Clubs**
-2. **View Members** — verify the roster looks correct
-3. **Manage Members** — add missing members or fix roles/positions
+2. **Manage Members** — verify the roster looks correct
+3. **Add Members** — add missing members or use **Requests** to approve join requests
 4. **Send Alert** — test a message to your group (or submit for approval if required)
 5. **Sent Group Alerts** — confirm delivery and open **View responses** if you asked for replies
+
+---
+
+## Group alerts in your feed
+
+Membership updates appear in **Alerts**:
+
+| Alert | Meaning |
+|-------|---------|
+| Added to group | Your join request was approved |
+| Join request declined | Your request was rejected (reason may be included) |
+| Left group | You left or your leave request was approved |
+| Leave request denied | A leader denied your leave request (reason shown) |
+| Removed from group | An admin or leader removed you from the roster |
+| Join / leave request *(leaders)* | Someone wants to join or leave — tap to open **Requests** |
+
+Informational alerts (e.g. **Left group**) clear their unread dot when you open and read them. Request alerts for leaders open the review queue.
 
 ---
 

@@ -45,7 +45,7 @@ abstract class Validators {
     return null;
   }
 
-  /// Email address or school-issued student ID.
+  /// Email address or school-issued student ID (username).
   static String? loginIdentifier(String? value) {
     if (value == null || value.trim().isEmpty) {
       return 'Email or student ID is required';

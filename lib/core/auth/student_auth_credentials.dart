@@ -3,6 +3,9 @@ import 'package:speakup_connect/config/app_config.dart';
 /// Internal domain for Firebase Auth accounts provisioned from student IDs.
 const String kStudentAuthEmailDomain = 'students.speakupconnect.app';
 
+/// Normalizes contact email for storage and case-insensitive login lookup.
+String normalizeContactEmail(String email) => email.trim().toLowerCase();
+
 /// Normalizes a school-issued ID for use in a synthetic auth email local-part.
 String normalizeStudentIdForAuth(String studentId) {
   return studentId.trim().toLowerCase().replaceAll(RegExp(r'[^a-z0-9-]'), '');

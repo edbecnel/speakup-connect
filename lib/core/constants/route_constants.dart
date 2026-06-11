@@ -41,12 +41,17 @@ abstract class Routes {
   static const String adminSettings = '/admin/settings';
   static const String memberApprovals = '/join-applications';
   static const String enrolledUsers = '/enrolled-users';
+  static const String editMember = '/enrolled-users/:userId/edit';
+  static String editMemberPath(String userId) => '/enrolled-users/$userId/edit';
   static const String rosterManagement = '/roster';
   static const String addStudent = '/roster/add';
   static const String schoolGradesSettings = '/school-grades';
   static const String groupsList = '/groups';
   static const String myGroups = '/my-groups';
+  static const String browseGroups = '/groups/browse';
   static const String createGroup = '/groups/new';
+  static const String groupMembershipRequests =
+      '/groups/:groupId/membership-requests';
   static const String groupMembers = '/groups/:groupId/members';
   static const String addGroupMembers = '/groups/:groupId/members/add';
   static const String editGroupPositionRoles = '/groups/:groupId/roles';
@@ -88,6 +93,10 @@ abstract class Routes {
   /// Builds the club positions editor path for a concrete [groupId].
   static String editGroupPositionRolesPath(String groupId) =>
       '/groups/$groupId/roles';
+
+  /// Builds the membership requests review path for a concrete [groupId].
+  static String groupMembershipRequestsPath(String groupId) =>
+      '/groups/$groupId/membership-requests';
 
   /// Builds the help article path for a concrete [articleId] (`member`, `admin`).
   static String helpArticlePath(String articleId) => '/help/$articleId';

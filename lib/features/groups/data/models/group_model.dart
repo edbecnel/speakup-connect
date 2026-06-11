@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:speakup_connect/features/groups/data/models/group_position_role_codec.dart';
 import 'package:speakup_connect/features/groups/domain/entities/group_entity.dart';
+import 'package:speakup_connect/features/groups/domain/entities/group_membership_policy.dart';
 
 /// Firestore data model for a group document.
 ///
@@ -18,6 +19,11 @@ class GroupModel extends GroupEntity {
     super.description,
     super.avatarUrl,
     super.positionRoles = const [],
+    super.allowJoinRequests = false,
+    super.joinRequestHint,
+    super.memberLeavePolicy = MemberLeavePolicy.requestRequired,
+    super.pendingJoinRequestCount = 0,
+    super.pendingLeaveRequestCount = 0,
   });
 
   factory GroupModel.fromFirestore(
@@ -39,10 +45,23 @@ class GroupModel extends GroupEntity {
       updatedAt: toDate(data['updatedAt']) ?? DateTime.now(),
       positionRoles:
           GroupPositionRoleCodec.fromList(data['positionRoles']),
+      allowJoinRequests: data['allowJoinRequests'] as bool? ?? false,
+      joinRequestHint: data['joinRequestHint'] as String?,
+      memberLeavePolicy: MemberLeavePolicy.fromValue(
+        data['memberLeavePolicy'] as String?,
+      ),
+      pendingJoinRequestCount:
+          (data['pendingJoinRequestCount'] as num?)?.toInt() ?? 0,
+      pendingLeaveRequestCount:
+          (data['pendingLeaveRequestCount'] as num?)?.toInt() ?? 0,
     );
   }
 
-  Map<String, dynamic> toCreateJson() {
+  Map<String, dynamic> toCreateJson({
+    bool allowJoinRequests = false,
+    String? joinRequestHint,
+    MemberLeavePolicy memberLeavePolicy = MemberLeavePolicy.requestRequired,
+  }) {
     return {
       'groupId': groupId,
       'organizationId': organizationId,
@@ -52,10 +71,28 @@ class GroupModel extends GroupEntity {
       if (positionRoles.isNotEmpty)
         'positionRoles': GroupPositionRoleCodec.toList(positionRoles),
       'isActive': isActive,
+      'allowJoinRequests': allowJoinRequests,
+      if (joinRequestHint != null && joinRequestHint.trim().isNotEmpty)
+        'joinRequestHint': joinRequestHint.trim(),
+      'memberLeavePolicy': memberLeavePolicy.value,
       'memberCount': memberCount,
+      'pendingJoinRequestCount': 0,
+      'pendingLeaveRequestCount': 0,
       'createdBy': createdBy,
       'createdAt': FieldValue.serverTimestamp(),
       'updatedAt': FieldValue.serverTimestamp(),
+    };
+  }
+
+  Map<String, dynamic> toMembershipPolicyJson() {
+    return {
+      'allowJoinRequests': allowJoinRequests,
+      'memberLeavePolicy': memberLeavePolicy.value,
+      'updatedAt': FieldValue.serverTimestamp(),
+      if (joinRequestHint != null && joinRequestHint!.trim().isNotEmpty)
+        'joinRequestHint': joinRequestHint!.trim()
+      else
+        'joinRequestHint': FieldValue.delete(),
     };
   }
 }

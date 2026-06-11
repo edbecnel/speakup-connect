@@ -33,7 +33,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
   final _registerFormKey = GlobalKey<FormState>();
 
   // Login fields
-  final _loginEmailController = TextEditingController();
+  final _loginIdentifierController = TextEditingController();
   final _loginPasswordController = TextEditingController();
   bool _loginPasswordVisible = false;
 
@@ -55,7 +55,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
   @override
   void dispose() {
     _tabController.dispose();
-    _loginEmailController.dispose();
+    _loginIdentifierController.dispose();
     _loginPasswordController.dispose();
     _registerNameController.dispose();
     _registerEmailController.dispose();
@@ -66,8 +66,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
 
   Future<void> _onLogin() async {
     if (!_loginFormKey.currentState!.validate()) return;
-    await ref.read(authProvider.notifier).signInWithEmail(
-          email: _loginEmailController.text,
+    await ref.read(authProvider.notifier).signInWithIdentifier(
+          identifier: _loginIdentifierController.text,
           password: _loginPasswordController.text,
         );
   }
@@ -148,7 +148,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                   children: [
                     _LoginForm(
                       formKey: _loginFormKey,
-                      emailController: _loginEmailController,
+                      identifierController: _loginIdentifierController,
                       passwordController: _loginPasswordController,
                       passwordVisible: _loginPasswordVisible,
                       onTogglePassword: () => setState(
@@ -229,7 +229,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
 class _LoginForm extends StatelessWidget {
   const _LoginForm({
     required this.formKey,
-    required this.emailController,
+    required this.identifierController,
     required this.passwordController,
     required this.passwordVisible,
     required this.onTogglePassword,
@@ -239,7 +239,7 @@ class _LoginForm extends StatelessWidget {
   });
 
   final GlobalKey<FormState> formKey;
-  final TextEditingController emailController;
+  final TextEditingController identifierController;
   final TextEditingController passwordController;
   final bool passwordVisible;
   final VoidCallback onTogglePassword;
@@ -255,11 +255,11 @@ class _LoginForm extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           AppTextField(
-            controller: emailController,
-            label: 'Email / School ID',
-            hint: 'Email or student ID',
-            prefixIcon: Icons.email_outlined,
-            keyboardType: TextInputType.emailAddress,
+            controller: identifierController,
+            label: 'Email or student ID',
+            hint: 'you@school.edu or student ID',
+            prefixIcon: Icons.person_outline_rounded,
+            keyboardType: TextInputType.text,
             textInputAction: TextInputAction.next,
             validator: Validators.loginIdentifier,
           ),
@@ -350,8 +350,8 @@ class _RegisterForm extends StatelessWidget {
           const SizedBox(height: 12),
           AppTextField(
             controller: emailController,
-            label: 'Email / School ID',
-            hint: 'Email or student ID',
+            label: 'Email',
+            hint: 'you@school.edu',
             prefixIcon: Icons.email_outlined,
             keyboardType: TextInputType.emailAddress,
             textInputAction: TextInputAction.next,

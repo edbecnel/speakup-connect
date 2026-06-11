@@ -1,5 +1,8 @@
 import 'package:speakup_connect/features/groups/domain/entities/group_entity.dart';
+import 'package:speakup_connect/features/groups/domain/entities/group_join_request_entity.dart';
+import 'package:speakup_connect/features/groups/domain/entities/group_leave_request_entity.dart';
 import 'package:speakup_connect/features/groups/domain/entities/group_member_entity.dart';
+import 'package:speakup_connect/features/groups/domain/entities/group_membership_policy.dart';
 import 'package:speakup_connect/features/groups/domain/entities/group_position_role.dart';
 import 'package:speakup_connect/features/groups/domain/entities/my_group_membership.dart';
 
@@ -13,6 +16,17 @@ abstract class GroupRepository {
     String? description,
     String? avatarUrl,
     List<GroupPositionRole> positionRoles = const [],
+    bool allowJoinRequests = false,
+    String? joinRequestHint,
+    MemberLeavePolicy memberLeavePolicy = MemberLeavePolicy.requestRequired,
+  });
+
+  Future<void> updateGroupMembershipPolicies({
+    required String organizationId,
+    required String groupId,
+    required bool allowJoinRequests,
+    required MemberLeavePolicy memberLeavePolicy,
+    String? joinRequestHint,
   });
 
   /// Replaces the group's customizable position roles (club offices).
@@ -47,6 +61,13 @@ abstract class GroupRepository {
   Stream<List<GroupMemberEntity>> watchGroupMembers({
     required String organizationId,
     required String groupId,
+  });
+
+  /// Live roster row for the signed-in user in one group.
+  Stream<GroupMemberEntity?> watchMyGroupMember({
+    required String organizationId,
+    required String groupId,
+    required String userId,
   });
 
   /// Adds [userId] to the group roster and increments [memberCount].
@@ -85,5 +106,76 @@ abstract class GroupRepository {
   /// Repairs per-user groupMemberships indexes from roster data (admin only).
   Future<int> backfillGroupMembershipIndexes({
     required String organizationId,
+  });
+
+  Stream<List<GroupJoinRequestEntity>> watchPendingJoinRequests({
+    required String organizationId,
+    required String groupId,
+  });
+
+  Stream<List<GroupLeaveRequestEntity>> watchPendingLeaveRequests({
+    required String organizationId,
+    required String groupId,
+  });
+
+  Stream<GroupJoinRequestEntity?> watchMyJoinRequest({
+    required String organizationId,
+    required String groupId,
+    required String userId,
+  });
+
+  Stream<GroupLeaveRequestEntity?> watchMyLeaveRequest({
+    required String organizationId,
+    required String groupId,
+    required String userId,
+  });
+
+  Future<void> submitJoinRequest({
+    required String organizationId,
+    required String groupId,
+    String? message,
+  });
+
+  Future<void> withdrawJoinRequest({
+    required String organizationId,
+    required String groupId,
+  });
+
+  Future<void> reviewJoinRequest({
+    required String organizationId,
+    required String groupId,
+    required String userId,
+    required bool approve,
+    String? rejectionReason,
+  });
+
+  Future<void> voluntaryLeave({
+    required String organizationId,
+    required String groupId,
+  });
+
+  Future<void> submitLeaveRequest({
+    required String organizationId,
+    required String groupId,
+    required String reason,
+  });
+
+  Future<void> withdrawLeaveRequest({
+    required String organizationId,
+    required String groupId,
+  });
+
+  Future<void> reviewLeaveRequest({
+    required String organizationId,
+    required String groupId,
+    required String userId,
+    required bool approve,
+    String? rejectionReason,
+  });
+
+  Future<void> removeMemberWithNotification({
+    required String organizationId,
+    required String groupId,
+    required String userId,
   });
 }

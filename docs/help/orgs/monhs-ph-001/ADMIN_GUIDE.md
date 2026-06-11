@@ -44,10 +44,42 @@ Approved members can sign in and use the app. Rejected applicants see the reject
 
 **Settings → Member Management**
 
-- View all enrolled members
+- View all enrolled members (filter by status, grade, search)
+- Tap a member row or **⋮ → Edit profile…** to open the edit screen
 - **Block** — temporarily or permanently restrict access
 - **Unenroll** — remove from the organization
 - **Unblock / Re-enroll** — restore access when appropriate
+- **Assign grade** — set grade level (when school grades are enabled)
+
+### Edit member profile
+
+**Requires:** Org admin
+
+From **Member Management**, tap a member or choose **Edit profile…**:
+
+| Field | Notes |
+|-------|--------|
+| **Full name** | Display / roster name |
+| **Student ID (username)** | Sign-in username; must be unique |
+| **Contact email** | Optional; member can also edit their own in Settings |
+| **Grade** | Synced to roster when grades are enabled |
+
+Members cannot edit their own student ID from the app.
+
+### Reset member password
+
+**Requires:** Org admin
+
+From **Edit profile** or **Member Management → ⋮ → Reset password…**:
+
+1. Enter a new password (or use shortcuts):
+   - **Use username / student ID** — sets password to their student ID
+   - **Generate 8-digit password** — random numeric password
+2. Tap **Continue**, then confirm **Reset password**
+
+Tell the member the new password securely. They sign in with **either** their student ID **or** contact email plus the new password.
+
+> Email notification of password resets is planned for a future release.
 
 Blocked users see an explanation screen and cannot use member features.
 
@@ -70,7 +102,7 @@ Blocked users see an explanation screen and cannot use member features.
 3. **Email** — optional; if omitted, a synthetic login is created
 4. **Grade** — required for schools
 
-The student signs in with **student ID as both username and password** (see Member Guide).
+The student signs in with **student ID or contact email** and the password you set (initial default is often the student ID until reset). See the Member Guide.
 
 ### Bulk import
 
@@ -86,8 +118,9 @@ Students and staff view their own memberships under:
 
 - **Home → My Groups & Clubs**
 - **Settings → My Groups & Clubs**
+- **Settings → Browse Groups & Clubs** — discover clubs and **request to join** when allowed
 
-They see group name, Leader/Member role, and club position. They do **not** manage rosters from these screens.
+They see group name, Leader/Member role, and club position. Members can **request to join** open clubs or **leave** / **request to leave** depending on each group’s policy.
 
 After you add someone to a group, tell them to check **My Groups & Clubs** or pull to refresh on **Home**.
 
@@ -138,13 +171,22 @@ Members are sorted by position order, then name. SSLG seed includes default offi
 ### Manage roster
 
 - **Add Members** — search approved org members, set Leader/Member and optional position
-- **⋮ menu** on a member — change leader status, assign position, or remove
+- **⋮ menu** on a member — change leader status, assign position, or remove (removed members get an **Alerts** notification)
+- **Requests** — review **join** and **leave** requests (same screen group leaders use)
+- **Settings** (badge icon on roster, or **Settings** on **My Groups** for leaders) — configure:
+  - **Allow join requests** — members can browse and request to join
+  - **Join request hint** — message shown on the join form
+  - **Leave policy** — voluntary leave vs approval required (leave requests need a reason; denials require admin/leader reason)
+
+Org admins can open any group under **Groups & Clubs** and use **Requests** even if not on the roster.
 
 ### Group leaders (student officers)
 
 Members with **Leader** on a group roster (e.g. SSLG officers) can, for groups they lead:
 
-- **View Members** and **Manage Members** (add members, change roles/positions)
+- **Manage Members** and **Add Members** (add members, change roles/positions)
+- **Requests** — approve/deny join and leave requests (badge when pending)
+- **Settings** — edit join/leave policies when enabled for leaders
 - **Send Alert** — group-targeted reminder from **My Groups & Clubs**
 - **Sent Group Alerts** — review broadcasts they sent and **View responses**
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:speakup_connect/core/constants/route_constants.dart';
+import 'package:speakup_connect/features/groups/domain/entities/group_membership_policy.dart';
 import 'package:speakup_connect/features/groups/domain/entities/group_position_role.dart';
 import 'package:speakup_connect/features/groups/presentation/providers/group_provider.dart';
 import 'package:speakup_connect/features/groups/presentation/widgets/group_position_roles_editor.dart';
@@ -21,6 +22,8 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
   final _nameController = TextEditingController();
   final _descriptionController = TextEditingController();
   bool _definePositions = false;
+  bool _allowJoinRequests = false;
+  MemberLeavePolicy _leavePolicy = MemberLeavePolicy.requestRequired;
   List<GroupPositionRole> _positionRoles = const [];
 
   @override
@@ -37,6 +40,8 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
           name: _nameController.text,
           description: _descriptionController.text,
           positionRoles: _definePositions ? _positionRoles : const [],
+          allowJoinRequests: _allowJoinRequests,
+          memberLeavePolicy: _leavePolicy,
         );
 
     if (!mounted) return;
@@ -130,6 +135,36 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
                     setState(() => _positionRoles = roles),
               ),
             ],
+            const SizedBox(height: 16),
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              title: const Text('Allow join requests'),
+              subtitle: const Text(
+                'Let students request to join (off for elected groups like SSLG)',
+              ),
+              value: _allowJoinRequests,
+              onChanged: isLoading
+                  ? null
+                  : (v) => setState(() => _allowJoinRequests = v),
+            ),
+            const SizedBox(height: 8),
+            Text('Member leave policy', style: Theme.of(context).textTheme.titleSmall),
+            RadioListTile<MemberLeavePolicy>(
+              title: const Text('Leave anytime'),
+              value: MemberLeavePolicy.voluntary,
+              groupValue: _leavePolicy,
+              onChanged: isLoading
+                  ? null
+                  : (v) => setState(() => _leavePolicy = v!),
+            ),
+            RadioListTile<MemberLeavePolicy>(
+              title: const Text('Must request to leave'),
+              value: MemberLeavePolicy.requestRequired,
+              groupValue: _leavePolicy,
+              onChanged: isLoading
+                  ? null
+                  : (v) => setState(() => _leavePolicy = v!),
+            ),
             const SizedBox(height: 24),
             AppButton.primary(
               label: 'Create Group',

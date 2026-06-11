@@ -5,10 +5,12 @@ import 'package:speakup_connect/core/constants/app_constants.dart';
 import 'package:speakup_connect/core/permissions/app_permission.dart';
 import 'package:speakup_connect/core/permissions/providers/permission_provider.dart';
 import 'package:speakup_connect/features/auth/presentation/providers/auth_provider.dart';
+import 'package:speakup_connect/features/groups/data/datasources/group_membership_remote_datasource.dart';
 import 'package:speakup_connect/features/groups/data/datasources/group_remote_datasource.dart';
 import 'package:speakup_connect/features/groups/data/repositories/group_repository_impl.dart';
 import 'package:speakup_connect/features/groups/domain/entities/group_entity.dart';
 import 'package:speakup_connect/features/groups/domain/entities/group_member_entity.dart';
+import 'package:speakup_connect/features/groups/domain/entities/group_membership_policy.dart';
 import 'package:speakup_connect/features/groups/domain/entities/my_group_membership.dart';
 import 'package:speakup_connect/features/groups/domain/entities/group_position_role.dart';
 import 'package:speakup_connect/features/groups/domain/repositories/group_repository.dart';
@@ -26,8 +28,16 @@ final groupRemoteDataSourceProvider = Provider<GroupRemoteDataSource>((ref) {
   return GroupRemoteDataSource(FirebaseFirestore.instance);
 });
 
+final groupMembershipRemoteDataSourceProvider =
+    Provider<GroupMembershipRemoteDataSource>((ref) {
+  return GroupMembershipRemoteDataSource(FirebaseFirestore.instance);
+});
+
 final groupRepositoryProvider = Provider<GroupRepository>((ref) {
-  return GroupRepositoryImpl(ref.watch(groupRemoteDataSourceProvider));
+  return GroupRepositoryImpl(
+    ref.watch(groupRemoteDataSourceProvider),
+    ref.watch(groupMembershipRemoteDataSourceProvider),
+  );
 });
 
 final createGroupUseCaseProvider = Provider<CreateGroupUseCase>((ref) {
@@ -139,32 +149,41 @@ final canManageGroupsProvider = Provider<bool>((ref) {
   return ref.watch(hasPermissionProvider(AppPermission.manageGroupRoster));
 });
 
-/// Current user's membership in a specific group, if any.
-final myGroupMembershipInGroupProvider =
-    Provider.autoDispose.family<GroupMemberEntity?, String>((ref, groupId) {
+/// Live roster row for the signed-in user in [groupId] (authoritative groupRole).
+final myGroupMembershipInGroupProvider = StreamProvider.autoDispose
+    .family<GroupMemberEntity?, String>((ref, groupId) {
   final user = ref.watch(currentUserProvider);
-  if (user == null) return null;
-  final members = ref.watch(groupMembersProvider(groupId)).asData?.value;
-  if (members == null) return null;
-  for (final member in members) {
-    if (member.userId == user.uid) return member;
-  }
-  return null;
+  if (user == null) return const Stream.empty();
+  return ref.watch(groupRepositoryProvider).watchMyGroupMember(
+        organizationId: AppConfig.defaultOrganizationId,
+        groupId: groupId,
+        userId: user.uid,
+      );
 });
 
 /// True when the user may manage roster for [groupId] (admin, RBAC, or leader).
 final canManageGroupRosterProvider =
     Provider.autoDispose.family<bool, String>((ref, groupId) {
   if (ref.watch(canManageGroupsProvider)) return true;
-  return ref.watch(myGroupMembershipInGroupProvider(groupId))?.isLeader ??
+  return ref
+          .watch(myGroupMembershipInGroupProvider(groupId))
+          .asData
+          ?.value
+          ?.isLeader ??
       false;
 });
 
-/// Groups the signed-in user leads (from My Groups memberships).
+/// Groups the signed-in user leads (live roster `groupRole == leader`).
 final ledGroupMembershipsProvider = Provider.autoDispose<List<MyGroupMembership>>((ref) {
   final memberships =
       ref.watch(myGroupMembershipsProvider).asData?.value ?? const [];
-  return memberships.where((m) => m.membership.isLeader).toList();
+  return memberships.where((m) {
+    final roster = ref
+        .watch(myGroupMembershipInGroupProvider(m.group.groupId))
+        .asData
+        ?.value;
+    return roster?.isLeader ?? false;
+  }).toList();
 });
 
 /// True when the user leads at least one group.
@@ -199,7 +218,11 @@ final canBroadcastToGroupProvider =
       .watch(ledGroupMembershipsProvider)
       .any((m) => m.group.groupId == groupId);
   if (leadsGroup) return true;
-  return ref.watch(myGroupMembershipInGroupProvider(groupId))?.isLeader ??
+  return ref
+          .watch(myGroupMembershipInGroupProvider(groupId))
+          .asData
+          ?.value
+          ?.isLeader ??
       false;
 });
 
@@ -213,6 +236,9 @@ class CreateGroupNotifier extends Notifier<AsyncValue<GroupEntity?>> {
     required String name,
     String? description,
     List<GroupPositionRole> positionRoles = const [],
+    bool allowJoinRequests = false,
+    String? joinRequestHint,
+    MemberLeavePolicy memberLeavePolicy = MemberLeavePolicy.requestRequired,
   }) async {
     final user = ref.read(currentUserProvider);
     if (user == null) return null;
@@ -228,6 +254,9 @@ class CreateGroupNotifier extends Notifier<AsyncValue<GroupEntity?>> {
               return trimmed == null || trimmed.isEmpty ? null : trimmed;
             }(),
             positionRoles: positionRoles,
+            allowJoinRequests: allowJoinRequests,
+            joinRequestHint: joinRequestHint,
+            memberLeavePolicy: memberLeavePolicy,
           );
       state = AsyncData(group);
       return group;
@@ -339,7 +368,7 @@ class GroupMemberActionsNotifier extends Notifier<AsyncValue<void>> {
   }) async {
     state = const AsyncLoading();
     try {
-      await ref.read(groupRepositoryProvider).removeGroupMember(
+      await ref.read(groupRepositoryProvider).removeMemberWithNotification(
             organizationId: AppConfig.defaultOrganizationId,
             groupId: groupId,
             userId: userId,

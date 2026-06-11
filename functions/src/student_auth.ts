@@ -22,3 +22,8 @@ export function assertStudentPasswordLength(studentId: string): void {
     );
   }
 }
+
+/** Normalizes a contact email for storage and lookup (case-insensitive). */
+export function normalizeContactEmail(email: string): string {
+  return email.trim().toLowerCase();
+}

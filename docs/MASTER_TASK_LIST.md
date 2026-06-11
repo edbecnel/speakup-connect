@@ -105,7 +105,7 @@
 - [ ] Create `app_loading_indicator.dart` — centered CircularProgressIndicator
 - [ ] Create `app_error_widget.dart` — error message + retry button
 - [ ] Create `app_empty_state.dart` — empty list illustration + message
-- [ ] Create `app_avatar.dart` — user/org avatar with fallback initials
+- [ ] Create `app_avatar.dart` — user/org avatar with fallback initials; support **official photo** (admin) and **personal badge** (member `avatarUrl`) with display priority documented in [DATABASE_DESIGN.md](DATABASE_DESIGN.md)
 - [ ] Write widget tests for all shared widgets
 
 ---
@@ -482,6 +482,28 @@
 - [ ] Bulk write roster entries to Firestore `roster` subcollection
 - [ ] Admin: view, search, and remove roster entries
 - [ ] Mark roster entry `isRegistered: true` when user completes signup
+- [x] Admin: reset member password (`resetOrgMemberPassword` Cloud Function + in-app dialog)
+- [ ] **Future (blocked on email infrastructure) — password reset via email link (preferred):**
+  - [ ] When admin requests a member password reset and `profile.email` is set, email a secure, time-limited reset link (Firebase Auth action link or signed custom token)
+  - [ ] Link target: web reset-password page **or** app deep link (`/reset-password?token=…`) that lands on an in-app screen to enter and confirm a new password
+  - [ ] Invalidate link after use or expiry; audit `passwordResetAt` / `passwordResetBy` on profile
+  - [ ] Hook: new callable or extend `resetOrgMemberPassword` in `functions/src/reset_org_member_password.ts`
+- [ ] **Future (email infrastructure) — interim fallback:** Email member that an admin changed their password and include the new value only if link-based self-service reset is not shipped yet (less secure; avoid long term)
+
+**Member photos (official + personal badge) — Future**
+- [ ] **Official photo (admin-controlled)** — new `officialPhotoUrl` on user profile (and optional sync to `roster/{studentId}`):
+  - [ ] Upload/replace/remove via **Edit Member**, **Member Management**, and **Student Roster** screens
+  - [ ] Who may manage: org admin / system admin and anyone with **`manageClassRoster`**, **`blockUsers`** (Manage Members), or equivalent roster/member-management capabilities
+  - [ ] Students and regular members **cannot** change the official photo (Firestore rules + Storage rules enforce)
+  - [ ] Store in Firebase Storage under org-scoped path (e.g. `organizations/{orgId}/users/{userId}/official/…`); compress on upload
+- [ ] **Personal badge / avatar (member-controlled)** — new `avatarUrl` on user profile:
+  - [ ] **Settings → Profile header:** tap the circular badge (default: initials on colored circle) to pick/upload a personal image (selfie or avatar)
+  - [ ] Members may change their own badge; they **cannot** change `officialPhotoUrl`
+  - [ ] **Display priority for the badge:** `avatarUrl` (if set) → else `officialPhotoUrl` (if school uploaded one) → else initials fallback
+  - [ ] Reuse/extend `app_avatar.dart` across Settings, Home, group member lists, etc.
+- [ ] Firestore Security Rules: `onlySelfAvatarFields()` for member `avatarUrl`; admin-only writes for `officialPhotoUrl`
+- [ ] Firebase Storage rules aligned with profile vs official photo paths
+- [ ] Optional later: bulk official-photo import with roster CSV; photo on group roster cards
 
 ### Epic 2.4 — Community Rules
 

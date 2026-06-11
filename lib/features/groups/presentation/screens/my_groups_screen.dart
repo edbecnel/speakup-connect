@@ -2,13 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:speakup_connect/core/constants/route_constants.dart';
+import 'package:speakup_connect/features/groups/domain/entities/group_membership_policy.dart';
 import 'package:speakup_connect/features/groups/domain/entities/my_group_membership.dart';
+import 'package:speakup_connect/features/groups/presentation/providers/group_membership_provider.dart';
 import 'package:speakup_connect/features/groups/presentation/providers/group_provider.dart';
+import 'package:speakup_connect/features/groups/presentation/widgets/group_membership_policy_sheet.dart';
 import 'package:speakup_connect/shared/widgets/app_button.dart';
 import 'package:speakup_connect/shared/widgets/app_error_widget.dart';
 import 'package:speakup_connect/shared/widgets/app_loading_indicator.dart';
+import 'package:speakup_connect/shared/widgets/app_text_field.dart';
 
-/// Read-only list of groups and clubs the signed-in user belongs to.
+/// Groups and clubs the signed-in user belongs to, with leader/member actions.
 class MyGroupsScreen extends ConsumerWidget {
   const MyGroupsScreen({super.key});
 
@@ -20,13 +24,21 @@ class MyGroupsScreen extends ConsumerWidget {
       appBar: AppBar(
         leading: BackButton(onPressed: () => context.pop()),
         title: const Text('My Groups & Clubs'),
+        actions: [
+          TextButton(
+            onPressed: () => context.push(Routes.browseGroups),
+            child: const Text('Browse'),
+          ),
+        ],
       ),
       body: membershipsAsync.when(
         loading: () => const AppLoadingIndicator(),
         error: (e, _) => AppErrorWidget(message: e.toString()),
         data: (memberships) {
           if (memberships.isEmpty) {
-            return _EmptyMyGroups();
+            return _EmptyMyGroups(
+              onBrowse: () => context.push(Routes.browseGroups),
+            );
           }
 
           return ListView.separated(
@@ -42,6 +54,10 @@ class MyGroupsScreen extends ConsumerWidget {
 }
 
 class _EmptyMyGroups extends StatelessWidget {
+  const _EmptyMyGroups({required this.onBrowse});
+
+  final VoidCallback onBrowse;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -64,12 +80,17 @@ class _EmptyMyGroups extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'When an administrator adds you to a club, program, or '
-              'organization, it will appear here.',
+              'When an administrator adds you to a club, it will appear here. '
+              'You can also browse open groups and request to join.',
               textAlign: TextAlign.center,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
+            ),
+            const SizedBox(height: 16),
+            AppButton.primary(
+              label: 'Browse Groups & Clubs',
+              onPressed: onBrowse,
             ),
           ],
         ),
@@ -78,22 +99,106 @@ class _EmptyMyGroups extends StatelessWidget {
   }
 }
 
-class _MyGroupCard extends StatelessWidget {
+class _MyGroupCard extends ConsumerWidget {
   const _MyGroupCard({required this.entry});
 
   final MyGroupMembership entry;
 
+  Future<void> _leaveVoluntarily(BuildContext context, WidgetRef ref) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Leave group?'),
+        content: const Text(
+          'You will stop receiving alerts for this group.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Leave'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+
+    final ok = await ref
+        .read(groupMembershipActionsProvider.notifier)
+        .voluntaryLeave(groupId: entry.group.groupId);
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(ok ? 'You left the group' : 'Could not leave')),
+      );
+    }
+  }
+
+  Future<void> _requestLeave(BuildContext context, WidgetRef ref) async {
+    final reason = await showDialog<String>(
+      context: context,
+      builder: (_) => const _LeaveRequestDialog(),
+    );
+    if (reason == null) return;
+    if (reason.length < 20) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Please enter at least 20 characters'),
+          ),
+        );
+      }
+      return;
+    }
+
+    final ok = await ref
+        .read(groupMembershipActionsProvider.notifier)
+        .submitLeaveRequest(
+          groupId: entry.group.groupId,
+          reason: reason,
+        );
+    if (context.mounted) {
+      final error = ref.read(groupMembershipActionsProvider.notifier).lastErrorMessage;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            ok
+                ? 'Leave request submitted'
+                : (error ?? 'Could not submit request'),
+          ),
+        ),
+      );
+    }
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final group = entry.group;
     final member = entry.membership;
+    final rosterMember = ref
+        .watch(myGroupMembershipInGroupProvider(group.groupId))
+        .asData
+        ?.value;
     final position = entry.positionLabel();
+    final isBusy = ref.watch(groupMembershipActionsProvider).isLoading;
+    final canManageRoster =
+        ref.watch(canManageGroupRosterProvider(group.groupId));
+    final canEditPolicies =
+        ref.watch(canEditGroupMembershipPoliciesProvider(group.groupId));
+    final leaveReq =
+        ref.watch(myLeaveRequestForGroupProvider(group.groupId)).asData?.value;
+    final leavePending = leaveReq?.status.isPending == true;
+    final pendingCount =
+        group.pendingJoinRequestCount + group.pendingLeaveRequestCount;
 
     final subtitleParts = <String>[
-      member.groupRole.label,
+      (rosterMember ?? member).groupRole.label,
       if (position != null) position,
       if (group.memberCount > 0) '${group.memberCount} members',
+      if (leavePending) 'Leave pending',
     ];
 
     return Card(
@@ -106,12 +211,12 @@ class _MyGroupCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 CircleAvatar(
-                  backgroundColor: member.isLeader
+                  backgroundColor: canManageRoster
                       ? theme.colorScheme.secondaryContainer
                       : theme.colorScheme.primaryContainer,
                   child: Icon(
                     Icons.groups_rounded,
-                    color: member.isLeader
+                    color: canManageRoster
                         ? theme.colorScheme.onSecondaryContainer
                         : theme.colorScheme.onPrimaryContainer,
                   ),
@@ -137,6 +242,11 @@ class _MyGroupCard extends StatelessWidget {
                     ],
                   ),
                 ),
+                if (canManageRoster && pendingCount > 0)
+                  Badge(
+                    label: Text('$pendingCount'),
+                    child: const Icon(Icons.inbox_outlined),
+                  ),
               ],
             ),
             if (group.description != null &&
@@ -153,17 +263,26 @@ class _MyGroupCard extends StatelessWidget {
               runSpacing: 8,
               children: [
                 AppButton.secondary(
-                  label: 'View Members',
+                  label: 'Manage Members',
                   icon: Icons.people_outline,
                   onPressed: () =>
                       context.push(Routes.groupMembersPath(group.groupId)),
                 ),
-                if (member.isLeader) ...[
+                if (canManageRoster) ...[
                   AppButton.secondary(
-                    label: 'Manage Members',
+                    label: 'Add Members',
                     icon: Icons.person_add_outlined,
                     onPressed: () => context
                         .push(Routes.addGroupMembersPath(group.groupId)),
+                  ),
+                  AppButton.secondary(
+                    label: pendingCount > 0
+                        ? 'Requests ($pendingCount)'
+                        : 'Requests',
+                    icon: Icons.inbox_outlined,
+                    onPressed: () => context.push(
+                      Routes.groupMembershipRequestsPath(group.groupId),
+                    ),
                   ),
                   AppButton.primary(
                     label: 'Send Alert',
@@ -172,12 +291,84 @@ class _MyGroupCard extends StatelessWidget {
                       Routes.composeReminderForGroupPath(group.groupId),
                     ),
                   ),
+                  if (canEditPolicies)
+                    AppButton.secondary(
+                      label: 'Settings',
+                      icon: Icons.settings_outlined,
+                      onPressed: () => showGroupMembershipPolicySheet(
+                        context: context,
+                        ref: ref,
+                        group: group,
+                      ),
+                    ),
                 ],
+                if (!leavePending &&
+                    group.memberLeavePolicy == MemberLeavePolicy.voluntary)
+                  AppButton.secondary(
+                    label: 'Leave group',
+                    icon: Icons.logout,
+                    isLoading: isBusy,
+                    onPressed: isBusy
+                        ? null
+                        : () => _leaveVoluntarily(context, ref),
+                  ),
+                if (!leavePending &&
+                    group.memberLeavePolicy == MemberLeavePolicy.requestRequired)
+                  AppButton.secondary(
+                    label: 'Request to leave',
+                    icon: Icons.exit_to_app,
+                    isLoading: isBusy,
+                    onPressed:
+                        isBusy ? null : () => _requestLeave(context, ref),
+                  ),
               ],
             ),
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Dialog that owns its [TextEditingController] so disposal happens after the
+/// route is torn down (avoids `_dependents.isEmpty` assertion on pop).
+class _LeaveRequestDialog extends StatefulWidget {
+  const _LeaveRequestDialog();
+
+  @override
+  State<_LeaveRequestDialog> createState() => _LeaveRequestDialogState();
+}
+
+class _LeaveRequestDialogState extends State<_LeaveRequestDialog> {
+  final _controller = TextEditingController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Request to leave'),
+      content: AppTextField(
+        controller: _controller,
+        label: 'Why do you want to leave?',
+        hint: 'At least 20 characters',
+        maxLines: 4,
+        maxLength: 500,
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.pop(context, _controller.text.trim()),
+          child: const Text('Submit'),
+        ),
+      ],
     );
   }
 }

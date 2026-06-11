@@ -83,6 +83,7 @@ This roadmap tracks the evolution from MVP pilot to a full multi-tenant SaaS pla
 - [x] Admin-defined groups and organizations (e.g., Journalism Club, Chess Club, Drum & Lyre Corps)
 - [x] Group member list management (admin/leader adds/removes members, club positions)
 - [~] Group roles: leader, member — leaders send **group alerts**, manage roster; news/chat not yet built
+- [ ] **Member photos:** admin-managed official school photo on user/roster record; member-chosen personal badge in Settings (defaults to official photo when present) — see [MASTER_TASK_LIST.md → Epic 2.3 Member photos](MASTER_TASK_LIST.md)
 - [x] Groups visible on home dashboard and Settings (**My Groups & Clubs**)
 - [ ] **Group membership requests** — join: per-group opt-in (`allowJoinRequests`, default closed); leave: `voluntary` or `request_required` (default); removal and denied-leave alerts ([GROUP_JOIN_REQUESTS.md](GROUP_JOIN_REQUESTS.md))
 
@@ -145,6 +146,8 @@ This roadmap tracks the evolution from MVP pilot to a full multi-tenant SaaS pla
 - [ ] iOS App Store deployment
 - [ ] Web app deployment (Flutter Web)
 - [ ] Email notification delivery (in addition to push)
+  - [ ] **Member password-reset link (preferred)** — when an org admin triggers a reset for a member with a contact email on file, send an email with a secure, time-limited link. The link opens either (a) a web reset-password page or (b) a deep link into the app login/reset flow where the member enters and confirms their new password (do not email plaintext passwords)
+  - [ ] **Admin-set password email (interim fallback)** — optional notification after `resetOrgMemberPassword` if link-based reset is not yet available; include only if product policy allows emailing admin-chosen passwords
 - [ ] Firestore Security Rules comprehensive audit
 - [ ] GDPR/DPA compliance tooling
 - [ ] Data retention automation

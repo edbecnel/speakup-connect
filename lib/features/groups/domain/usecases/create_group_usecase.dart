@@ -1,4 +1,5 @@
 import 'package:speakup_connect/features/groups/domain/entities/group_entity.dart';
+import 'package:speakup_connect/features/groups/domain/entities/group_membership_policy.dart';
 import 'package:speakup_connect/features/groups/domain/entities/group_position_role.dart';
 import 'package:speakup_connect/features/groups/domain/repositories/group_repository.dart';
 
@@ -14,6 +15,9 @@ class CreateGroupUseCase {
     String? description,
     String? avatarUrl,
     List<GroupPositionRole> positionRoles = const [],
+    bool allowJoinRequests = false,
+    String? joinRequestHint,
+    MemberLeavePolicy memberLeavePolicy = MemberLeavePolicy.requestRequired,
   }) {
     return _repository.createGroup(
       organizationId: organizationId,
@@ -22,6 +26,9 @@ class CreateGroupUseCase {
       description: description,
       avatarUrl: avatarUrl,
       positionRoles: positionRoles,
+      allowJoinRequests: allowJoinRequests,
+      joinRequestHint: joinRequestHint,
+      memberLeavePolicy: memberLeavePolicy,
     );
   }
 }
