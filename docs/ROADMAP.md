@@ -116,9 +116,10 @@ This roadmap tracks the evolution from MVP pilot to a full multi-tenant SaaS pla
 - [ ] Rate limiting (max 5 reports per user per day)
 
 **Localization**
-- [ ] Multi-language support: all UI string keys indexed to language database
-- [ ] Language selector dropdown on home/main page
-- [ ] English (default) + Filipino as first supported languages
+- [ ] Multi-language support: Flutter gen-l10n + ARB bundles (see [INTERNATIONALIZATION.md](INTERNATIONALIZATION.md))
+- [ ] **US English (`en_US`)** home language; **Tagalog (`fil`)** second language; **Cebuano (`ceb`)** regional (MONHS)
+- [ ] **Translation Helper** tool — list + in-context views, **AI model API** initial draft (server-side API token), human approval, ARB export
+- [ ] Language selector in Settings (+ optional Home)
 - [ ] Admin can set org default language
 - [ ] Language database: Firestore-backed or bundled JSON per language
 

@@ -15,6 +15,20 @@
 
 ---
 
+## High-Priority Backlog
+
+> **Next product pillars** after current pilot hardening. Architecture docs where noted.
+
+| # | Initiative | Epic | Architecture |
+|---|------------|------|----------------|
+| 1 | **Multi-language support** (US English home + Cebuano + **Tagalog 2nd**) | [2.5](#epic-25--multi-language-support) | [INTERNATIONALIZATION.md](INTERNATIONALIZATION.md) |
+| 2 | **Peer-to-peer and group messaging** | [2.10](#epic-210--peer-to-peer-messaging), [2.11](#epic-211--group-messaging) | TBD — `DATABASE_DESIGN.md` § directMessages / messages |
+| 3 | **Parent accounts and login** | [2.13](#epic-213--parent-accounts) | TBD |
+
+Suggested implementation order: **i18n → messaging → parents** (messaging is independent; parents may link to student profiles and alerts).
+
+---
+
 ## Phase 1 — Foundation & MVP
 
 ### Epic 1.1 — Project Documentation
@@ -526,25 +540,56 @@
 
 ### Epic 2.5 — Multi-Language Support
 
-**Data Layer**
-- [ ] Create `languages` top-level Firestore collection
-- [ ] Seed `en` (English) language document and string entries
-- [ ] Seed `fil` (Filipino) language document and string entries
-- [ ] Define string key conventions (e.g., `home.welcomeMessage`, `auth.loginButton`)
-- [ ] Implement all English UI strings via string keys (no hardcoded text)
+> **Architecture:** [INTERNATIONALIZATION.md](INTERNATIONALIZATION.md) — US English (`en_US`) home language; **`ceb`** first regional add-on; **`fil` (Tagalog)** second platform language; **Translation Helper** for scale.
+
+**Infrastructure**
+- [ ] Add `flutter_localizations`; configure `l10n.yaml` and `flutter: generate: true`
+- [ ] Create `lib/l10n/app_en.arb` (US English template), `app_ceb.arb`, `app_fil.arb`
+- [ ] Implement `localeProvider` + `locale_resolution.dart` (user → org → device → `en_US`)
+- [ ] Wire `MaterialApp` `localizationsDelegates`, `supportedLocales`, `locale`
+- [ ] `LocaleCacheService` (SharedPreferences) for cold-start language
+- [ ] `context.l10n` extension for generated `AppLocalizations`
+
+**String migration**
+- [ ] Define key conventions (see INTERNATIONALIZATION.md §6)
+- [ ] Extract hardcoded strings: auth, splash, home, settings (phase 1) into `app_en.arb`
+- [ ] Extract remaining features (reports, admin, groups, announcements, …)
+- [ ] Migrate `validators.dart` messages to l10n keys
+- [ ] CI: fail if `app_ceb.arb` or `app_fil.arb` missing keys from `app_en.arb`
+
+**Translation Helper tool** (see INTERNATIONALIZATION.md §12)
+- [ ] MVP: web or admin UI — import `app_en.arb`, list all keys with US English source
+- [ ] Per-target-language editor with status: `missing` \| `ai_draft` \| `in_review` \| `approved`
+- [ ] Export approved strings to `app_ceb.arb` / `app_fil.arb` (and future ARB files)
+- [ ] `draftTranslation` + `batchDraftTranslations` Cloud Functions — AI first draft via **model API**; **human approval required** before export
+- [ ] Store **`TRANSLATION_AI_API_KEY`** in Firebase Secret Manager (`functions:secrets:set`); never in app or git
+- [ ] Env/params: `TRANSLATION_AI_PROVIDER`, `TRANSLATION_AI_MODEL`; provider HTTP client in `functions/src/translation_ai.ts`
+- [ ] Prompt template: preserve ICU placeholders; post-validate `{name}` / plurals; `ai_draft_failed` on mismatch
+- [ ] Super-admin auth gate on translation callables; rate limits + batch chunking
+- [ ] Translation Helper: **Translate missing (AI)** + per-row re-draft; no direct browser → provider calls
+- [ ] Filter/search by feature, missing keys, review status
+- [ ] Phase 2: in-context preview (screenshots or Flutter web shell with callouts)
+- [ ] Phase 2: Firestore-backed workflow (`languages/{code}/strings` + export job)
+
+**Cebuano (Bisaya) — 1st add-on**
+- [ ] Translate phase-1 keys via Translation Helper → `app_ceb.arb` (native speaker review)
+- [ ] Cebuano help: `assets/help/.../member_guide_ceb.md` (+ MONHS org copy)
+- [ ] Widget tests with `Locale('ceb')` on auth + home (layout smoke)
+
+**Tagalog — 2nd language**
+- [ ] Translate phase-1 keys via Translation Helper → `app_fil.arb` (native speaker review)
+- [ ] Tagalog help: `assets/help/.../member_guide_fil.md`
+- [ ] Widget tests with `Locale('fil')` on auth + home (layout smoke)
 
 **Presentation**
-- [ ] Language selector dropdown on home/main page
-- [ ] Language selector in Settings screen
-- [ ] Write selected language to `users/{id}.preferredLanguage` in Firestore
-- [ ] Persist language selection locally (SharedPreferences)
-- [ ] Build `LanguageProvider` (Riverpod) — loads and serves string values
-- [ ] Fallback to `en` when a key is missing in selected language
-- [ ] Admin: set org default language in org config
+- [ ] Language selector in Settings (English / Bisaya-Cebuano / Tagalog)
+- [ ] Optional compact language control on Home dashboard
+- [ ] Sync `preferredLanguage` to `users/{uid}` on change
+- [ ] Admin: org `defaultLanguage` + `supportedLanguages` in branding settings
 
-**Asset Bundling**
-- [ ] Bundle English + Filipino strings as JSON assets for offline use
-- [ ] Implement hot-reload of language strings from Firestore (without app update)
+**Firestore overlay (phase 2 — optional)**
+- [ ] Seed `languages/en`, `languages/ceb`, `languages/fil` metadata in Firestore
+- [ ] Super-admin / Translation Helper hot-reload overlay on bundled ARB
 
 ### Epic 2.6 — Groups & Clubs
 
@@ -814,6 +859,8 @@ Optional expiration, notification history, broadcast management, full-screen det
 
 ### Epic 2.10 — Peer-to-Peer Messaging
 
+> **Priority:** High — see [High-Priority Backlog](#high-priority-backlog). Group chat: [Epic 2.11](#epic-211--group-messaging).
+
 **Domain**
 - [ ] Create `DirectMessageThreadEntity`
 - [ ] Create `MessageEntity`
@@ -844,6 +891,8 @@ Optional expiration, notification history, broadcast management, full-screen det
 
 ### Epic 2.11 — Group Messaging
 
+> **Priority:** High — see [High-Priority Backlog](#high-priority-backlog). Ship after or parallel to Epic 2.10; shared inbox UX recommended.
+
 **Domain**
 - [ ] Create `GroupMessageThreadEntity`
 - [ ] Create `GroupMessageRepository` abstract interface
@@ -864,6 +913,41 @@ Optional expiration, notification history, broadcast management, full-screen det
 **Testing**
 - [ ] Unit test: `SendGroupMessageUseCase`
 - [ ] Widget test: `GroupChatScreen`
+
+### Epic 2.13 — Parent Accounts
+
+> **Priority:** High — see [High-Priority Backlog](#high-priority-backlog). Architecture doc TBD (links student roster, alerts, consent). Depends partly on org join flow ([Epic 2.3](MASTER_TASK_LIST.md#epic-23--organization-finder--apply-to-join-flow)).
+
+**Product**
+- [ ] Define parent role vs member/student (RBAC: `parent` system role or scoped capability)
+- [ ] Parent sign-up / login flow (email + password; not student-ID synthetic auth)
+- [ ] Link parent account to one or more students (`parentLinks` or `students/{id}/guardians`)
+- [ ] Admin: invite parent, approve link requests, unlink
+- [ ] Parent dashboard: linked students, school alerts/announcements visibility (read-only scope TBD)
+- [ ] Optional: parent receives copies of student reminder/alert types (org policy flag)
+- [ ] Consent / terms acknowledgment for parent accounts ([SECURITY_AND_PRIVACY.md](SECURITY_AND_PRIVACY.md))
+- [ ] Firestore rules: parent reads only linked student data permitted by policy
+
+**Data**
+- [ ] Schema: `organizations/{orgId}/parentLinks/{linkId}` or nested on student profile
+- [ ] Fields: `parentUserId`, `studentUserId`, `studentId`, `relationship`, `status`, `approvedBy`
+- [ ] Cloud Function: `linkParentToStudent`, `approveParentLink`
+
+**Presentation**
+- [ ] `ParentRegisterScreen` / link-existing-account flow
+- [ ] `ParentHomeScreen` or parent mode on Home when role is parent
+- [ ] Admin: **Parent links** management on member edit / roster
+- [ ] Settings: manage linked children
+
+**Notifications**
+- [ ] Push + in-app when parent link approved
+- [ ] Parent notification preferences (separate from student)
+
+**Documentation**
+- [ ] Help guides: parent login and linking (`assets/help/` + `docs/help/`)
+- [ ] Architecture doc `PARENT_ACCOUNTS.md` before implementation
+
+---
 
 ### Epic 2.12 — Role-Based Permissions
 
@@ -962,10 +1046,12 @@ Optional expiration, notification history, broadcast management, full-screen det
 
 ### Epic 3.4 — Advanced Language Support
 
-- [ ] Community-contributed language translation workflow
-- [ ] Admin-side language string editor
-- [ ] Language completion dashboard (per-language % complete)
-- [ ] Add additional language packs (Spanish, Cebuano, etc.)
+> Builds on [Translation Helper](INTERNATIONALIZATION.md#12-translation-helper-tool) (Epic 2.5). Cebuano + Tagalog ship in 2.5.
+
+- [ ] Translation Helper: in-context preview + completion dashboard (% approved per locale)
+- [ ] Community / contractor interpreter accounts (language-scoped)
+- [ ] Additional language packs via same pipeline (Hiligaynon, Ilocano, Spanish, …)
+- [ ] Org-level language enablement (subset of platform languages)
 
 ### Epic 3.5 — Advanced Messaging
 

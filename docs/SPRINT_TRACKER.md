@@ -1,10 +1,21 @@
 # Sprint Tracker — SpeakUp Connect
 
-> Last Updated: June 5, 2026  
+> Last Updated: June 11, 2026  
 > Current Sprint: **Sprint 13** (Group Membership Requests) — design complete; implementation not started  
 > Last completed: **Sprint 14** (Profile Photos) — June 5, 2026  
-> Previous: **Sprint 13** (Group Membership Requests) — design complete; implementation not started  
 > Sprint Duration: 2 weeks
+
+---
+
+## High-Priority Backlog (queued)
+
+| Order | Initiative | Design doc | Epic |
+|-------|------------|------------|------|
+| 1 | Multi-language — US English home + Cebuano + **Tagalog (2nd)** + Translation Helper | [INTERNATIONALIZATION.md](INTERNATIONALIZATION.md) | 2.5 |
+| 2 | Peer-to-peer + group messaging | TBD | 2.10, 2.11 |
+| 3 | Parent accounts and login | TBD | 2.13 |
+
+Suggested next sprint after Sprint 13 closure: **Sprint 15 — i18n foundation** (gen-l10n, locale provider, auth/home/settings extraction, Cebuano pass).
 
 > **Development Velocity Note:** Development has significantly outpaced the original planned schedule. As of May 23, 2026 (day 5 of the project), the codebase covers work originally scoped for Sprints 1–6. Sprint numbering below reflects original plan order but completion dates reflect actual delivery dates.
 

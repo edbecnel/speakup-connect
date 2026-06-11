@@ -60,7 +60,7 @@ Firestore Root
         └── audit_log/       # Immutable admin activity log (append-only)
 │
 ├── languages/               # Global language string database
-│   └── {languageCode}/      # e.g. "en", "fil", "es"
+│   └── {languageCode}/      # e.g. "en", "ceb", "fil", "es"
 │       └── strings/         # Key-value string entries
 │
 └── platform/                # Platform-level (super-admin only)
@@ -805,9 +805,9 @@ Global (not org-scoped). All UI text elements have a `stringKey` that maps to tr
 ```json
 // Language metadata document (languages/{languageCode})
 {
-  "languageCode": "string (e.g. 'en', 'fil', 'es')",
-  "displayName": "string (e.g. 'English', 'Filipino', 'Español')",
-  "nativeName": "string (e.g. 'English', 'Filipino', 'Español')",
+  "languageCode": "string (e.g. 'en', 'ceb', 'fil', 'es')",
+  "displayName": "string (e.g. 'English (US)', 'Bisaya / Cebuano', 'Tagalog')",
+  "nativeName": "string (e.g. 'English', 'Bisaya', 'Tagalog')",
   "isDefault": "boolean",
   "isActive": "boolean",
   "completionPercent": "number (0–100, how much of the string set is translated)",
@@ -823,7 +823,25 @@ Global (not org-scoped). All UI text elements have a `stringKey` that maps to tr
 ```
 
 **Implementation Notes:**
-- In practice, language strings may be bundled as JSON assets in the Flutter app for offline access and performance, with Firestore used for admin-side editing and hot-updating without app re-release
+- **v1:** UI strings ship as Flutter ARB bundles (`app_en.arb` US English home, `app_ceb.arb`, `app_fil.arb` Tagalog) per [INTERNATIONALIZATION.md](INTERNATIONALIZATION.md). **Translation Helper** produces ARB exports; Firestore `languages/` is optional phase 2 for workflow + OTA hotfixes.
+
+```json
+// Optional — Translation Helper workflow (languages/{code}/strings/{key})
+{
+  "stringKey": "authLoginTitle",
+  "sourceLocale": "en",
+  "sourceValue": "Sign In",
+  "targetValue": "string | null",
+  "aiDraft": "string | null",
+  "aiModel": "string | null (e.g. gpt-4o-mini — set by draftTranslation)",
+  "aiDraftedAt": "Timestamp | null",
+  "status": "missing | ai_draft | ai_draft_failed | in_review | approved",
+  "reviewedBy": "string (uid) | null",
+  "updatedAt": "Timestamp"
+}
+```
+
+**AI API token:** not stored in Firestore. Platform uses Firebase Secret Manager key `TRANSLATION_AI_API_KEY` — see [INTERNATIONALIZATION.md §12.1](INTERNATIONALIZATION.md#121-ai-translation-api).
 - English strings serve as the fallback when a key is missing in the selected language
 - The language selector dropdown on the home page writes the user's choice to `users/{userId}.preferredLanguage`
 

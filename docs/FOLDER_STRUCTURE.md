@@ -195,6 +195,7 @@ speakup_connect/                          # Project root
 ├── docs/                                 # Project documentation
 │   ├── ONBOARDING_NEW_SCHOOL.md          # New school client build checklist
 │   ├── SCHOOL_ONBOARDING_AND_SUBSCRIPTIONS.md  # Self-serve wizard, billing, VIP vs standard
+│   ├── INTERNATIONALIZATION.md         # i18n: en_US home, Tagalog 2nd, Translation Helper
 │   ├── CLIENT_BUILDS.md                  # Gradle flavors, CI/CD
 ├── assets/                               # Static assets
 │   ├── images/
