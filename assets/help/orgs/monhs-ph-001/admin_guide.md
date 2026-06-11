@@ -17,7 +17,7 @@ Open **Settings**. If you have admin access, you will see an **Administration** 
 | Admin Dashboard | `viewAllReports` / `manageReports` or org admin |
 | Groups & Clubs *(Administration)* | `manageGroupRoster` or org admin — manage *all* org groups |
 | Join Applications | Org admin |
-| Reminder Approvals | Org admin or `approveReminders` |
+| Pending Approvals | Org admin or `approveReminders` — announcements and group alerts |
 | Member Management | Org admin |
 | Student Roster | Org admin (schools with grade levels) |
 | School Grades | Org admin |
@@ -207,18 +207,41 @@ Leaders do **not** need org-wide `broadcastReminders`; group alerts may still re
 
 ---
 
-## Reminders and broadcasts
+## School-wide announcements
+
+**Requires:** Org admin, `postBulletinOrgWide`, or group **Leader** (leaders post on behalf of a club)
+
+Announcements are always **organization-wide** — every approved member can read them under **Home → Announcements**.
+
+### Post an announcement (admin)
+
+**Home → Announcements → Post** (or the compose action from the announcements screen)
+
+- Title and message; optional expiration
+- **Pin to top** — admins only; pinned posts sort first for all members
+
+### Group leaders
+
+Leaders use **My Groups & Clubs → Post Announcement** and select which club they represent. Good for recruitment drives and club news that should reach the whole school, not just the group roster.
+
+### Approval
+
+When **Require approval before publishing** is **ON** (see below), leader and staff announcements go to **Pending Approvals** until an approver publishes them. The same setting applies to **group alerts**.
+
+---
+
+## Reminders and broadcasts (group alerts)
 
 **Requires:** `broadcastReminders`, group **Leader** role, and/or `approveReminders` / org admin (varies by action)
 
-### Organization Settings — reminder approval
+### Organization Settings — content approval
 
 **Settings → Administration → Organization Settings** (org admin)
 
-- **Require approval before publishing** — when **ON**, reminders from group leaders and other non-approvers go to **Reminder Approvals** until an admin approves
+- **Require approval before publishing** — when **ON**, **announcements** and **group alerts** from non-approvers go to **Pending Approvals** until an admin approves
 - The toggle shows **Currently ON / OFF** and is verified on the server after you save
 
-### Compose a reminder
+### Compose a group alert
 
 **Alerts → compose (FAB)** or **Compose Reminder** (org broadcasters)
 
@@ -235,9 +258,9 @@ Group leaders: **My Groups & Clubs → Send Alert** on a group they lead
 
 ### Approval queue
 
-When **Require approval** is enabled, pending alerts appear in:
+When **Require approval** is enabled, pending **announcements** and **group alerts** appear in:
 
-- **Settings → Reminder Approvals** (badge count)
+- **Settings → Pending Approvals** (badge count)
 - **Admin Dashboard** toolbar (checklist icon)
 - **Alerts** app bar (checklist icon)
 

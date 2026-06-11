@@ -36,7 +36,8 @@ Open **Settings** from the bottom navigation for:
 - **My Groups & Clubs** — organizations and groups you belong to (when your admin has added you)
 - **Submit a concern** — safety, maintenance, suggestions, and other categories
 - **My Reports** — track status of reports you submitted
-- **Alerts** — reminders and announcements sent to you
+- **Announcements** — school-wide bulletin board (all members)
+- **Alerts** — group reminders and notifications sent to you
 
 ---
 
@@ -49,9 +50,15 @@ Open **Settings** from the bottom navigation for:
 
 ---
 
+## School-wide announcements
+
+**Home → Announcements** lists posts for the whole organization. Group **leaders** can post from **My Groups & Clubs → Post Announcement** (on behalf of a club they lead) — useful for recruitment and club news outside the group roster.
+
+If your org requires approval, leaders tap **Submit for Approval** until an administrator publishes the post.
+
 ## Alerts and reminders
 
-Open **Alerts** to read broadcasts. Some alerts include response forms (text, checkboxes, or choices).
+Open **Alerts** for group-targeted broadcasts and notifications. Some alerts include response forms (text, checkboxes, or choices).
 
 - **Response required** — you must submit before dismissing
 - **Checkboxes** — you may submit with none checked if that is your answer
@@ -77,13 +84,14 @@ If your roster role is **Leader**, you can manage that group without org-admin a
 | Add people | **Add Members** — search, set Leader/Member role, optional club position, **Assign** |
 | Review join/leave requests | **Requests** |
 | Change role or remove someone | **Manage Members** → **⋮** on a row |
+| Post school-wide news | **Post Announcement** on the group card, or **Home → Announcements → Post** |
 | Message the group | **Send Alert** on the group card, or **Alerts → Group Alert** |
 | See what you sent | **Alerts → Sent Group Alerts** or **Settings → Sent Group Alerts** |
 | Read poll answers | Open a sent alert → **View responses** |
 
 **Leader vs club position:** **Leader** controls roster and alerts; **club position** (President, Secretary, etc.) is a display label only.
 
-**Approval:** Some organizations require an administrator to approve group alerts before they are delivered. Use **Submit for Approval** when shown; track status in **Sent Group Alerts**.
+**Approval:** Some organizations require an administrator to approve **announcements** and **group alerts** before they are delivered. Use **Submit for Approval** when shown.
 
 **Limits:** Leaders cannot create groups, edit position-title lists, or broadcast outside groups they lead. Contact your administrator for those tasks.
 

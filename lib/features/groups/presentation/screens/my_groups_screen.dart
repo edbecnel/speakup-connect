@@ -286,9 +286,16 @@ class _MyGroupCard extends ConsumerWidget {
                   ),
                   AppButton.primary(
                     label: 'Send Alert',
-                    icon: Icons.campaign_outlined,
+                    icon: Icons.notifications_active_outlined,
                     onPressed: () => context.push(
                       Routes.composeReminderForGroupPath(group.groupId),
+                    ),
+                  ),
+                  AppButton.secondary(
+                    label: 'Post Announcement',
+                    icon: Icons.campaign_outlined,
+                    onPressed: () => context.push(
+                      Routes.composeAnnouncementForGroupPath(group.groupId),
                     ),
                   ),
                   if (canEditPolicies)

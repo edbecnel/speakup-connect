@@ -18,7 +18,7 @@ Common areas:
 | Admin Dashboard | Review and manage submitted reports |
 | Groups & Clubs *(Administration)* | Create groups and manage all org rosters |
 | Join Applications | Approve new member sign-ups |
-| Reminder Approvals | Approve pending group/org alerts (when enabled) |
+| Pending Approvals | Approve pending announcements and group alerts (when enabled) |
 | Member Management | Block, unenroll, edit profiles, reset passwords, restore members |
 | Roles | Assign staff capabilities |
 
@@ -40,15 +40,23 @@ Users with report-triage permissions can open the **Admin Dashboard**, update re
 
 **Org admins** can **edit member profiles** (name, student ID, email, grade) and **reset passwords** from **Member Management**.
 
-**Group leaders** (roster role Leader) may manage their group's roster and send **group alerts** from **My Groups & Clubs** without org-wide broadcast permission.
+**Group leaders** (roster role Leader) may manage their group's roster, post **school-wide announcements** on behalf of their club, and send **group alerts** from **My Groups & Clubs** without org-wide broadcast permission.
 
 After adding a member to a group, they should see it under **My Groups & Clubs** within a few seconds.
 
 ---
 
-## Reminders
+## Announcements
 
-Authorized staff and group leaders can compose reminders (audience varies by role). Org admins may enable **Require approval before publishing** under **Organization Settings**; pending items appear under **Reminder Approvals**.
+**Home → Announcements** is the organization-wide bulletin board. Admins and staff with `postBulletinOrgWide` can publish directly; group leaders use **Post Announcement** and attribute the source club.
+
+Admins may **pin** posts so they stay at the top of the list.
+
+---
+
+## Reminders (group alerts)
+
+Authorized staff and group leaders can compose group-targeted alerts. Org admins may enable **Require approval before publishing** under **Organization Settings**; pending **announcements** and **alerts** appear under **Pending Approvals**.
 
 Optional **Request a response** supports free text, checkboxes, and multiple choice, plus **response required** and **allow changing responses** (turn off for votes).
 

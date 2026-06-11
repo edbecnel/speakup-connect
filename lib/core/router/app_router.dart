@@ -3,6 +3,10 @@ import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:speakup_connect/core/constants/route_constants.dart';
 import 'package:speakup_connect/core/permissions/providers/permission_provider.dart';
+import 'package:speakup_connect/features/announcements/presentation/screens/announcement_detail_screen.dart';
+import 'package:speakup_connect/features/announcements/presentation/screens/announcements_screen.dart';
+import 'package:speakup_connect/features/announcements/presentation/screens/compose_announcement_screen.dart';
+import 'package:speakup_connect/features/announcements/presentation/screens/my_announcements_screen.dart';
 import 'package:speakup_connect/features/admin/presentation/screens/admin_branding_screen.dart';
 import 'package:speakup_connect/features/admin/presentation/screens/admin_dashboard_screen.dart';
 import 'package:speakup_connect/features/admin/presentation/screens/admin_report_detail_screen.dart';
@@ -219,6 +223,31 @@ GoRouter appRouter(Ref ref) {
         path: Routes.changePassword,
         name: 'changePassword',
         builder: (context, state) => const ChangePasswordScreen(),
+      ),
+      GoRoute(
+        path: Routes.announcements,
+        name: 'announcements',
+        builder: (context, state) => const AnnouncementsScreen(),
+      ),
+      GoRoute(
+        path: Routes.composeAnnouncement,
+        name: 'composeAnnouncement',
+        builder: (context, state) => ComposeAnnouncementScreen(
+          initialGroupId: state.uri.queryParameters['groupId'],
+        ),
+      ),
+      GoRoute(
+        path: Routes.myAnnouncements,
+        name: 'myAnnouncements',
+        builder: (context, state) => const MyAnnouncementsScreen(),
+      ),
+      GoRoute(
+        path: Routes.announcementDetail,
+        name: 'announcementDetail',
+        builder: (context, state) {
+          final bulletinId = state.pathParameters['bulletinId']!;
+          return AnnouncementDetailScreen(bulletinId: bulletinId);
+        },
       ),
       GoRoute(
         path: Routes.helpHub,

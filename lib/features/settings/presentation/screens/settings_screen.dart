@@ -242,8 +242,10 @@ class SettingsScreen extends ConsumerWidget {
                     ),
                   ),
                 ),
-                title: const Text('Reminder Approvals'),
-                subtitle: const Text('Review group alerts awaiting publish'),
+                title: const Text('Pending Approvals'),
+                subtitle: const Text(
+                  'Review announcements and group alerts awaiting publish',
+                ),
                 trailing: const Icon(Icons.chevron_right_rounded),
                 onTap: () => context.push(Routes.reminderApprovals),
               ),

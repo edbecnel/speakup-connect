@@ -98,12 +98,7 @@ class HomeDashboardScreen extends ConsumerWidget {
                     icon: Icons.campaign_rounded,
                     label: 'Announcements',
                     color: const Color(0xFFF57C00),
-                    onTap: () {
-                      // TODO: Navigate to announcements — Sprint 2
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Announcements — Coming Soon')),
-                      );
-                    },
+                    onTap: () => context.push(Routes.announcements),
                   ),
                   _DashboardTile(
                     icon: Icons.info_outline_rounded,

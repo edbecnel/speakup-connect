@@ -10,6 +10,7 @@ import 'package:speakup_connect/features/notifications/presentation/providers/no
 import 'package:speakup_connect/features/notifications/presentation/providers/notification_provider.dart';
 import 'package:speakup_connect/features/notifications/presentation/screens/notification_detail_screen.dart';
 import 'package:speakup_connect/features/reminders/presentation/screens/broadcast_detail_screen.dart';
+import 'package:speakup_connect/features/announcements/presentation/providers/announcement_provider.dart';
 import 'package:speakup_connect/features/reminders/presentation/providers/reminder_provider.dart';
 import 'package:speakup_connect/features/reminders/presentation/providers/reminder_response_provider.dart';
 import 'package:speakup_connect/features/reminders/presentation/widgets/edit_reminder_dialog.dart';
@@ -307,6 +308,17 @@ class _NotificationRow extends ConsumerWidget {
         context.push(Routes.groupMembershipRequestsPath(groupId));
         return;
       }
+    }
+
+    final bulletinId = notification.type == 'bulletin'
+        ? bulletinIdFromNotificationData(notification.data)
+        : null;
+    if (bulletinId != null && bulletinId.isNotEmpty) {
+      if (!notification.read && !notification.id.startsWith('broadcast-')) {
+        ref.read(notificationActionsProvider.notifier).markRead(notification.id);
+      }
+      context.push(Routes.announcementDetailPath(bulletinId));
+      return;
     }
 
     final Widget screen;

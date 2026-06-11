@@ -551,10 +551,27 @@ service cloud.firestore {
         allow update, delete: if isAdminOrAbove(orgId);
       }
 
-      // ── Bulletins ───────────────────────────────────────────────────────────
+      // ── Bulletins (org-wide announcements) ────────────────────────────────────
       match /bulletins/{bulletinId} {
-        allow read:  if isSuperAdmin() || isOrgMember(orgId);
-        allow write: if isModeratorOrAbove(orgId);
+        allow read: if isSuperAdmin() || isOrgMember(orgId);
+
+        allow create: if isSignedIn()
+                      && request.resource.data.organizationId == orgId
+                      && request.resource.data.authorId == request.auth.uid
+                      && (
+                        (isAdminOrAbove(orgId)
+                          || hasClaimedPermission('postBulletinOrgWide'))
+                        && (
+                          request.resource.data.status == 'pending'
+                          || (request.resource.data.status == 'published'
+                              && canPublishRemindersDirectly(orgId))
+                        )
+                      );
+
+        allow update: if isAdminOrAbove(orgId)
+                      || hasClaimedPermission('approveReminders');
+
+        allow delete: if isAdminOrAbove(orgId);
       }
 
       // ── News Posts ──────────────────────────────────────────────────────────

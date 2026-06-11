@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:speakup_connect/config/app_config.dart';
 import 'package:speakup_connect/core/permissions/providers/permission_provider.dart';
+import 'package:speakup_connect/features/announcements/presentation/providers/announcement_provider.dart';
 import 'package:speakup_connect/features/auth/presentation/providers/auth_provider.dart';
 import 'package:speakup_connect/features/groups/presentation/providers/group_provider.dart';
 import 'package:speakup_connect/features/organization/presentation/providers/organization_provider.dart';
@@ -42,14 +43,19 @@ final pendingRemindersProvider = StreamProvider<List<ReminderEntity>>((ref) {
       .watchPendingReminders(AppConfig.defaultOrganizationId);
 });
 
-/// Count of reminders awaiting approval — for admin badges.
+/// Count of reminders and announcements awaiting approval — for admin badges.
 final pendingReminderCountProvider = Provider<int>((ref) {
   if (!ref.watch(canReviewPendingRemindersProvider)) return 0;
 
-  return ref.watch(pendingRemindersProvider).maybeWhen(
-        data: (reminders) => reminders.length,
+  final reminders = ref.watch(pendingRemindersProvider).maybeWhen(
+        data: (items) => items.length,
         orElse: () => 0,
       );
+  final announcements = ref.watch(pendingBulletinsProvider).maybeWhen(
+        data: (items) => items.length,
+        orElse: () => 0,
+      );
+  return reminders + announcements;
 });
 
 /// Reminders authored by the current user — drives the compose-history list

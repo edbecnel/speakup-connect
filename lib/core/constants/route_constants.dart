@@ -35,6 +35,9 @@ abstract class Routes {
   static const String helpArticle = '/help/:articleId';
   static const String organizationInfo = '/org/info';
   static const String announcements = '/announcements';
+  static const String composeAnnouncement = '/announcements/compose';
+  static const String myAnnouncements = '/announcements/mine';
+  static const String announcementDetail = '/announcements/:bulletinId';
 
   // --- Admin ---
   static const String adminDashboard = '/admin';
@@ -101,4 +104,10 @@ abstract class Routes {
 
   /// Builds the help article path for a concrete [articleId] (`member`, `admin`).
   static String helpArticlePath(String articleId) => '/help/$articleId';
+
+  static String announcementDetailPath(String bulletinId) =>
+      '/announcements/$bulletinId';
+
+  static String composeAnnouncementForGroupPath(String groupId) =>
+      '/announcements/compose?groupId=$groupId';
 }

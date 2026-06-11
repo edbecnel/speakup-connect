@@ -60,7 +60,22 @@ The home screen is your starting point:
 - **My Groups & Clubs** — clubs, SSLG, program cohorts, and other groups you belong to (shown when you are on at least one roster)
 - **Submit a concern** — report a safety issue, bullying, maintenance need, suggestion, or other category
 - **My Reports** — track reports you submitted and their status
-- **Alerts** — reminders and announcements sent to you
+- **Announcements** — school-wide news and updates (bulletin board for everyone)
+- **Alerts** — group reminders, polls, and personal notifications sent to you
+
+---
+
+## School-wide announcements
+
+**Home → Announcements** shows posts visible to **every** approved member of the school.
+
+- Tap a card to read the full message
+- Pinned posts appear at the top
+- Posts may show **From [club name]** when a group leader shared recruitment or club news
+
+You may also get a push or **Alerts** entry when a new announcement is published — tap it to open the same post.
+
+**Group leaders** can post school-wide announcements from **My Groups & Clubs → Post Announcement** (on behalf of a club they lead). If your school requires approval, the button says **Submit for Approval** until an administrator publishes it.
 
 ---
 
@@ -79,7 +94,7 @@ You can open **My Reports** later to see status updates (Submitted, In Review, R
 
 ## Alerts and reminders
 
-The **Alerts** tab shows broadcasts sent to you — all members, your groups, or your role.
+The **Alerts** tab shows **group alerts**, polls, and notifications sent to you — not the full announcement archive (use **Home → Announcements** for school-wide posts).
 
 ### Reading an alert
 
@@ -264,6 +279,20 @@ You **cannot** create new position titles (e.g. add “Auditor”) — only a sc
 
 Members receive **Alerts** when requests are approved, denied, or when they are removed from a group.
 
+#### Post a school-wide announcement
+
+**Requires:** **Leader** on at least one group
+
+Use this for recruitment, club news, or any message the **whole school** should see (not just your group roster).
+
+1. From **My Groups & Clubs**, tap **Post Announcement** on the group card  
+   **or** open **Home → Announcements → Post**
+2. Choose which **group** you are posting on behalf of
+3. Enter a **title** and **message**; optional **expiration**
+4. Tap **Publish** or **Submit for Approval** (when your school requires admin approval)
+
+Track pending posts from **Announcements → My announcements** (outbox icon).
+
 #### Send a group alert
 
 **Requires:** **Leader** on at least one group
@@ -307,16 +336,17 @@ Even as a leader, you still get alerts sent **to** your groups like any other me
 
 - Create new clubs or delete a club — school administrator only
 - Edit the list of club position names — administrator only
-- Send alerts to the **whole school** or to groups you do not lead
-- Approve other people’s alerts — administrator only (unless you are also an admin)
+- Send **group alerts** to groups you do not lead (use **Post Announcement** for school-wide posts instead)
+- Approve other people’s posts — administrator only (unless you are also an admin)
 
 #### Quick checklist for new SSLG/club officers
 
 1. Confirm you show as **Leader** under **My Groups & Clubs**
 2. **Manage Members** — verify the roster looks correct
 3. **Add Members** — add missing members or use **Requests** to approve join requests
-4. **Send Alert** — test a message to your group (or submit for approval if required)
-5. **Sent Group Alerts** — confirm delivery and open **View responses** if you asked for replies
+4. **Post Announcement** — share school-wide club news (or submit for approval if required)
+5. **Send Alert** — test a message to your group only (or submit for approval if required)
+6. **Sent Group Alerts** — confirm delivery and open **View responses** if you asked for replies
 
 ---
 
