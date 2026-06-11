@@ -440,11 +440,17 @@
 
 ### Epic 2.1 — Organization Onboarding
 
-- [ ] Build organization self-registration web form
-- [ ] Firebase function to create organization document
-- [ ] Admin notification on new org registration
-- [ ] Organization activation workflow
-- [ ] Custom app name (`appCustomName`) configuration in org setup wizard (e.g., "SpeakUp MONHSIAN")
+> **Design:** [SCHOOL_ONBOARDING_AND_SUBSCRIPTIONS.md](SCHOOL_ONBOARDING_AND_SUBSCRIPTIONS.md) — self-serve wizard, pay at end, `pending_payment` → `active`
+
+- [ ] In-app **Register your school** wizard (pricing shown first; branding, join policy, admin link)
+- [ ] `submitSchoolOnboarding` Cloud Function — auto Phase A (`organizations/{orgId}`, seed roles/categories, admin profile)
+- [ ] `onboardingRequests/{requestId}` collection + realtime status in initiating app
+- [ ] `subscriptionStatus` on org doc (`pending_payment` \| `active` \| …); gate directory + student join on `active`
+- [ ] PayMongo / Stripe checkout (web) + webhook → activate org + in-app notification to admin
+- [ ] Sandbox mode before payment (admin configures; students blocked)
+- [ ] Super-admin manual activate (invoice / pilot override)
+- [ ] Platform notification on new org registration (optional fraud review)
+- [ ] Custom app name (`appCustomName`) / display name in wizard (e.g., "MONHS")
 
 ### Epic 2.2 — Branding Customization
 

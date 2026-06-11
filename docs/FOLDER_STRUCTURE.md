@@ -194,6 +194,7 @@ speakup_connect/                          # Project root
 ├── ios/                                  # iOS native project (future)
 ├── docs/                                 # Project documentation
 │   ├── ONBOARDING_NEW_SCHOOL.md          # New school client build checklist
+│   ├── SCHOOL_ONBOARDING_AND_SUBSCRIPTIONS.md  # Self-serve wizard, billing, VIP vs standard
 │   ├── CLIENT_BUILDS.md                  # Gradle flavors, CI/CD
 ├── assets/                               # Static assets
 │   ├── images/

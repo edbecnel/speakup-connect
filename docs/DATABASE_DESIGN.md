@@ -94,7 +94,10 @@ Firestore Root
   "createdAt": "Timestamp",
   "updatedAt": "Timestamp",
   "subscriptionTier": "free | pilot | standard | enterprise",
-  "subscriptionExpiresAt": "Timestamp | null"
+  "subscriptionExpiresAt": "Timestamp | null",
+  "subscriptionStatus": "draft | pending_payment | active | past_due | suspended | cancelled",
+  "onboardingCompletedAt": "Timestamp | null",
+  "activatedAt": "Timestamp | null"
 }
 ```
 
@@ -105,6 +108,23 @@ Firestore Root
 - `allowAnonymousReports` can be toggled per organization
 - `defaultLanguage` sets the org-wide default; individual users can override in their profile
 - `signupRequiresApproval: true` enables the apply-to-join flow where students submit name + school ID for admin review
+- `subscriptionStatus` gates whether the org is **live**: only `active` orgs appear in the global school directory and accept student join requests. See [SCHOOL_ONBOARDING_AND_SUBSCRIPTIONS.md](SCHOOL_ONBOARDING_AND_SUBSCRIPTIONS.md).
+- `isActive` should be `false` while `subscriptionStatus` is `pending_payment` (wizard complete, payment not yet received).
+
+### `onboardingRequests/{requestId}` — School self-serve signup (planned)
+
+Tracks in-app wizard progress for a prospective school admin. See [SCHOOL_ONBOARDING_AND_SUBSCRIPTIONS.md §2.4](SCHOOL_ONBOARDING_AND_SUBSCRIPTIONS.md#24-subscription-and-org-lifecycle-states).
+
+```json
+{
+  "requestedBy": "string (Firebase UID)",
+  "orgId": "string",
+  "status": "in_progress | awaiting_payment | completed | failed",
+  "wizardStep": "number",
+  "createdAt": "Timestamp",
+  "updatedAt": "Timestamp"
+}
+```
 
 ---
 

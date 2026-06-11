@@ -1,8 +1,9 @@
 # Onboarding a New School — Client App Build Guide
 
 > **Audience:** Developers deploying Speakup Connect for a new VIP / pilot school  
-> **Prerequisite:** Organization document already exists in Firestore (`organizations/{orgId}`)  
-> **Deep dive:** [CLIENT_BUILDS.md](CLIENT_BUILDS.md) (Gradle flavors, CI/CD, Firebase per flavor)
+> **Prerequisite:** Organization document already exists in Firestore (`organizations/{orgId}`) — typically created by the [self-serve wizard](SCHOOL_ONBOARDING_AND_SUBSCRIPTIONS.md) or super-admin seed  
+> **Deep dive:** [CLIENT_BUILDS.md](CLIENT_BUILDS.md) (Gradle flavors, CI/CD, Firebase per flavor)  
+> **Product flow (wizard, billing, VIP vs standard):** [SCHOOL_ONBOARDING_AND_SUBSCRIPTIONS.md](SCHOOL_ONBOARDING_AND_SUBSCRIPTIONS.md)
 
 ---
 
@@ -10,8 +11,8 @@
 
 | Model | App store listing | Launcher name | Icon | Default org | When to use |
 |---|---|---|---|---|---|
-| **Standard app** | One shared listing: *Speakup Connect* | `Speakup Connect` | Default blue/green | User picks / joins org at runtime | Standard-plan schools; multi-tenant in one app |
-| **Client build** | **Separate listing per school** | `Speakup {ShortName}` (e.g. `Speakup MONHS`) | School color theme | Pre-loaded `orgId` | Pilot schools, VIP / enterprise contracts |
+| **Standard app** | One shared listing: *Speakup Connect* | `Speakup Connect` | Default blue/green | User picks / joins org at runtime | Standard-plan schools; multi-tenant in one app; admin uses **setup wizard → pay to activate** |
+| **Client build (VIP)** | **Separate listing per school** | `Speakup {ShortName}` (e.g. `Speakup MONHS`) | School color theme on home screen | Pre-loaded `orgId` | Enterprise / VIP contracts; icon and launcher name fixed at install time |
 
 **Rule of thumb:** If the school needs its **own icon and name under the app icon on the phone home screen**, you must publish a **client build**. Colors, logo, tagline, and in-app org name can still be changed at runtime via Firestore — but the **OS launcher label and icon are fixed at install time**.
 
@@ -301,6 +302,7 @@ These **require a new client build** (or reinstall):
 
 | Document | Contents |
 |---|---|
+| [SCHOOL_ONBOARDING_AND_SUBSCRIPTIONS.md](SCHOOL_ONBOARDING_AND_SUBSCRIPTIONS.md) | Self-serve wizard, pay-at-end activation, VIP vs standard |
 | [CLIENT_BUILDS.md](CLIENT_BUILDS.md) | Full Gradle/iOS flavor setup, CI/CD, git branching |
 | [SPEAKUP CONNECT BRANDING.md](SPEAKUP%20CONNECT%20BRANDING.md) | Brand rules, icon restrictions, color palettes |
 | [DATABASE_DESIGN.md](DATABASE_DESIGN.md) | `organizations/{orgId}` schema |

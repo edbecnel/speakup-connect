@@ -6,6 +6,7 @@
 > org settings, while sharing 100% of the core codebase.
 >
 > **Quick start for a new school:** [ONBOARDING_NEW_SCHOOL.md](ONBOARDING_NEW_SCHOOL.md)  
+> **Self-serve signup, billing, and when to choose VIP:** [SCHOOL_ONBOARDING_AND_SUBSCRIPTIONS.md](SCHOOL_ONBOARDING_AND_SUBSCRIPTIONS.md)  
 > **Worked example throughout:** MONHS (red/black, launcher name **"Speakup MONHS"**).
 
 ---
@@ -27,6 +28,17 @@ the same source tree. It differs from the standard app in:
 | Git branch | `main` | `client/monhs` |
 
 Everything else — Firestore data, Auth, all features, all screens — is identical.
+
+### Standard vs VIP (which schools get a client build?)
+
+| | **Standard plan** | **VIP client build** |
+|---|---|---|
+| Store listing | Shared **Speakup Connect** | **Dedicated** listing (e.g. **Speakup MONHS**) |
+| Home-screen icon & name | Product default | **School colors** + **`Speakup {ShortName}`** |
+| Admin onboarding | In-app wizard → **pay at end** to activate org | Same org setup; **plus** developer publishes client APK/IPA |
+| Typical student install | Free Speakup Connect + pick school | VIP app **or** standard app (per contract) |
+
+See [SCHOOL_ONBOARDING_AND_SUBSCRIPTIONS.md §3](SCHOOL_ONBOARDING_AND_SUBSCRIPTIONS.md#3-vip-plan--app-store-presence-monhs-model) for the full VIP workflow.
 
 ---
 
