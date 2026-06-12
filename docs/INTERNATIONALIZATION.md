@@ -1,7 +1,7 @@
 # Internationalization (i18n) — Architecture
 
 > **Status:** Phase 1 + 1b shipped (June 2026) — `app_en.arb` / `app_ceb.arb` (English placeholders), Home + Settings language pickers, locale-aware help, `kLanguageNativeLabels`  
-> **Tasks:** [MASTER_TASK_LIST.md → Epic 2.5](MASTER_TASK_LIST.md) (authoritative checklist) · [SPRINT_TRACKER.md](SPRINT_TRACKER.md) (Sprint 15 delivered, Sprint 16 planned)  
+> **Tasks:** [MASTER_TASK_LIST.md → Epic 2.5](MASTER_TASK_LIST.md) (authoritative checklist) · [SPRINT_TRACKER.md](SPRINT_TRACKER.md) (Sprint 15 delivered, Sprint 16 planned) · **GitHub:** [#48–#53](https://github.com/edbecnel/speakup-connect/issues?q=is%3Aissue+is%3Aopen+label%3Aepic%3A2.5)  
 > **Priority:** High — see language rollout table below  
 > **Epic:** [MASTER_TASK_LIST.md → Epic 2.5](MASTER_TASK_LIST.md)  
 > **Related:** [DATABASE_DESIGN.md](DATABASE_DESIGN.md), [ARCHITECTURE.md](ARCHITECTURE.md), [RBAC_ARCHITECTURE.md](RBAC_ARCHITECTURE.md)
@@ -675,7 +675,7 @@ Authoritative task list: **[MASTER_TASK_LIST.md → Epic 2.5](MASTER_TASK_LIST.m
 | Document | Contents |
 |----------|----------|
 | [MASTER_TASK_LIST.md](MASTER_TASK_LIST.md) | **Epic 2.5** — full task checklist (infrastructure, migration, Translation Helper, locales, testing) |
-| [SPRINT_TRACKER.md](SPRINT_TRACKER.md) | Sprint 15 delivered; Sprint 16 i18n Phase 2 planned |
+| [SPRINT_TRACKER.md](SPRINT_TRACKER.md) | Sprint 15 delivered; Sprint 16 i18n Phase 2 planned; GitHub #47–#56 |
 | [DATABASE_DESIGN.md](DATABASE_DESIGN.md) | `languages/`, `preferredLanguage` |
 | [CODING_STANDARDS.md](CODING_STANDARDS.md) | Developer rule: new UI text → `app_en.arb` |
 | [ROADMAP.md](ROADMAP.md) | Product-level localization milestones |

@@ -3,19 +3,20 @@
 > Last Updated: June 13, 2026  
 > Current Sprint: **Sprint 13** (Group Membership Requests) — design complete; implementation not started  
 > Last completed: **Sprint 15** (i18n Phase 1 + 1b) — June 2026  
-> Sprint Duration: 2 weeks
+> Sprint Duration: 2 weeks  
+> **GitHub Issues synced:** June 13, 2026 — closed stale MVP issues (#1–#21 except #13); filed #47–#56 for active work
 
 ---
 
 ## High-Priority Backlog (queued)
 
-| Order | Initiative | Design doc | Epic |
-|-------|------------|------------|------|
-| 1 | Multi-language — Phase 1 + 1b ✅; **next:** Translation Helper MVP, real Cebuano, Tagalog, feature extraction, Firestore sync | [INTERNATIONALIZATION.md](INTERNATIONALIZATION.md) | 2.5 |
-| 2 | Peer-to-peer + group messaging | TBD | 2.10, 2.11 |
-| 3 | Parent accounts and login | TBD | 2.13 |
+| Order | Initiative | Design doc | Epic | GitHub |
+|-------|------------|------------|------|--------|
+| 1 | Multi-language — Phase 1 + 1b ✅; **next:** Translation Helper MVP, real Cebuano, Tagalog, feature extraction, Firestore sync | [INTERNATIONALIZATION.md](INTERNATIONALIZATION.md) | 2.5 | #48–#53 |
+| 2 | Peer-to-peer + group messaging | TBD | 2.10, 2.11 | #55 |
+| 3 | Parent accounts and login | TBD | 2.13 | #56 |
 
-Suggested next sprint after Sprint 13 closure: **Sprint 16 — i18n Phase 2** (Translation Helper MVP, real Cebuano in `app_ceb.arb` + help, `validators.dart` → l10n, CI key parity). Tagalog (`app_fil.arb`) and feature-by-feature extraction can follow in Sprint 17+.
+Suggested next sprint after Sprint 13 closure: **Sprint 16 — i18n Phase 2** ([#48](https://github.com/edbecnel/speakup-connect/issues/48) Translation Helper, [#49](https://github.com/edbecnel/speakup-connect/issues/49) real Cebuano, [#51](https://github.com/edbecnel/speakup-connect/issues/51) feature extraction, [#52](https://github.com/edbecnel/speakup-connect/issues/52) validators/CI). Tagalog ([#50](https://github.com/edbecnel/speakup-connect/issues/50)) and Firestore language sync ([#53](https://github.com/edbecnel/speakup-connect/issues/53)) can follow in Sprint 17+.
 
 > **Development Velocity Note:** Development has significantly outpaced the original planned schedule. As of May 23, 2026 (day 5 of the project), the codebase covers work originally scoped for Sprints 1–6. Sprint numbering below reflects original plan order but completion dates reflect actual delivery dates.
 
@@ -25,6 +26,8 @@ Suggested next sprint after Sprint 13 closure: **Sprint 16 — i18n Phase 2** (T
 
 ### Sprint 13 — Group Membership Requests (Join & Leave) *(Epic 2.6.1)*
 - **Status:** 📋 Design complete — implementation not started
+- **GitHub Issues:** [#47](https://github.com/edbecnel/speakup-connect/issues/47)
+- **Milestone:** Sprint 13 — Group Membership Requests
 - **Goal:** Join: members **request to join** when `allowJoinRequests` is on (default off). Leave: `voluntary` (leave anytime) or `request_required` (reason form + approval, default). Alerts when **removed** or **leave denied** (with reason).
 - **Design:** [GROUP_JOIN_REQUESTS.md](GROUP_JOIN_REQUESTS.md)
 - **Source epic:** [MASTER_TASK_LIST.md → Epic 2.6.1](MASTER_TASK_LIST.md)
@@ -68,6 +71,7 @@ Suggested next sprint after Sprint 13 closure: **Sprint 16 — i18n Phase 2** (T
 ### Delivered June 2026 — i18n Phase 1 + 1b (Sprint 15) *(Epic 2.5)*
 - **Commits:** `41877a1`, `ee38c77`
 - **Design:** [INTERNATIONALIZATION.md](INTERNATIONALIZATION.md)
+- **GitHub Issues:** *(shipped before issue sync — track Phase 2 in #48–#53)*
 - [x] `l10n.yaml`, `flutter_localizations`, `flutter: generate: true`
 - [x] `app_en.arb` (source) + `app_ceb.arb` (English placeholders); `AppLocalizations` + `context.l10n`
 - [x] `appLocaleProvider` + `SharedPreferences` cold-start cache
@@ -79,16 +83,17 @@ Suggested next sprint after Sprint 13 closure: **Sprint 16 — i18n Phase 2** (T
 - [x] `docs/help/` synced with language UI; CODING_STANDARDS.md requires new UI text → `app_en.arb`
 
 #### 📋 Remaining (Epic 2.5 — see MASTER_TASK_LIST)
-- [ ] Translation Helper MVP + AI draft callables
-- [ ] Real Cebuano copy in `app_ceb.arb` + `member_guide_ceb.md`
-- [ ] `app_fil.arb` + Tagalog help + `kLanguageNativeLabels`
-- [ ] Feature extraction (reports, admin, groups, announcements, reminders, roles, …)
-- [ ] `validators.dart` → l10n; `locale_resolution.dart`; `preferredLanguage` Firestore sync
-- [ ] Org `defaultLanguage` / `supportedLanguages`; CI ARB key parity
+- [ ] Translation Helper MVP + AI draft callables — [#48](https://github.com/edbecnel/speakup-connect/issues/48)
+- [ ] Real Cebuano copy in `app_ceb.arb` + `member_guide_ceb.md` — [#49](https://github.com/edbecnel/speakup-connect/issues/49)
+- [ ] `app_fil.arb` + Tagalog help + `kLanguageNativeLabels` — [#50](https://github.com/edbecnel/speakup-connect/issues/50)
+- [ ] Feature extraction (reports, admin, groups, announcements, reminders, roles, …) — [#51](https://github.com/edbecnel/speakup-connect/issues/51)
+- [ ] `validators.dart` → l10n; CI ARB key parity — [#52](https://github.com/edbecnel/speakup-connect/issues/52)
+- [ ] `locale_resolution.dart`; `preferredLanguage` Firestore sync; org language admin — [#53](https://github.com/edbecnel/speakup-connect/issues/53)
 
 ---
 
 ### Delivered June 11, 2026 — Announcement scheduling
+- **Deploy tracking:** [#54](https://github.com/edbecnel/speakup-connect/issues/54) — production Cloud Functions + indexes still needed
 - [x] **Schedule for later** on **Post Announcement** (parity with Compose Reminder)
 - [x] `scheduledAt` on bulletins; `publishDueBulletins` scheduled Cloud Function
 - [x] Expiration relative to scheduled send; **My announcements** shows scheduled status/time

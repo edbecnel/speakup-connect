@@ -19,11 +19,11 @@
 
 > **Next product pillars** after current pilot hardening. Architecture docs where noted.
 
-| # | Initiative | Epic | Architecture |
-|---|------------|------|----------------|
-| 1 | **Multi-language support** — Phase 1 + 1b ✅; Translation Helper + real `ceb`/`fil` + feature extraction ⏳ | [2.5](#epic-25--multi-language-support) | [INTERNATIONALIZATION.md](INTERNATIONALIZATION.md) |
-| 2 | **Peer-to-peer and group messaging** | [2.10](#epic-210--peer-to-peer-messaging), [2.11](#epic-211--group-messaging) | TBD — `DATABASE_DESIGN.md` § directMessages / messages |
-| 3 | **Parent accounts and login** | [2.13](#epic-213--parent-accounts) | TBD |
+| # | Initiative | Epic | Architecture | GitHub |
+|---|------------|------|--------------|--------|
+| 1 | **Multi-language support** — Phase 1 + 1b ✅; Translation Helper + real `ceb`/`fil` + feature extraction ⏳ | [2.5](#epic-25--multi-language-support) | [INTERNATIONALIZATION.md](INTERNATIONALIZATION.md) | [#48–#53](https://github.com/edbecnel/speakup-connect/issues?q=is%3Aissue+is%3Aopen+label%3Aepic%3A2.5) |
+| 2 | **Peer-to-peer and group messaging** | [2.10](#epic-210--peer-to-peer-messaging), [2.11](#epic-211--group-messaging) | TBD — `DATABASE_DESIGN.md` § directMessages / messages | [#55](https://github.com/edbecnel/speakup-connect/issues/55) |
+| 3 | **Parent accounts and login** | [2.13](#epic-213--parent-accounts) | TBD | [#56](https://github.com/edbecnel/speakup-connect/issues/56) |
 
 Suggested implementation order: **i18n → messaging → parents** (messaging is independent; parents may link to student profiles and alerts).
 
@@ -541,7 +541,8 @@ Suggested implementation order: **i18n → messaging → parents** (messaging is
 ### Epic 2.5 — Multi-Language Support
 
 > **Status:** `[~]` In progress — **Phase 1 + 1b shipped** (June 2026, commit `ee38c77`); next: Translation Helper MVP → real Cebuano copy → Tagalog → feature extraction → Firestore sync  
-> **Architecture:** [INTERNATIONALIZATION.md](INTERNATIONALIZATION.md) — US English (`en_US`) home language; **`ceb`** first regional add-on; **`fil` (Tagalog)** second platform language; **Translation Helper** for scale.
+> **Architecture:** [INTERNATIONALIZATION.md](INTERNATIONALIZATION.md) — US English (`en_US`) home language; **`ceb`** first regional add-on; **`fil` (Tagalog)** second platform language; **Translation Helper** for scale.  
+> **GitHub:** [#48](https://github.com/edbecnel/speakup-connect/issues/48) Translation Helper · [#49](https://github.com/edbecnel/speakup-connect/issues/49) Cebuano · [#50](https://github.com/edbecnel/speakup-connect/issues/50) Tagalog · [#51](https://github.com/edbecnel/speakup-connect/issues/51) feature extraction · [#52](https://github.com/edbecnel/speakup-connect/issues/52) validators/CI · [#53](https://github.com/edbecnel/speakup-connect/issues/53) Firestore sync
 
 **Infrastructure (Phase 1)**
 - [x] Add `flutter_localizations`; configure `l10n.yaml` and `flutter: generate: true`
@@ -658,6 +659,7 @@ Suggested implementation order: **i18n → messaging → parents** (messaging is
 
 ### Epic 2.6.1 — Group Membership Requests (Join & Leave) *(planned)*
 
+> **GitHub:** [#47](https://github.com/edbecnel/speakup-connect/issues/47) · **Milestone:** Sprint 13  
 > Design: [GROUP_JOIN_REQUESTS.md](GROUP_JOIN_REQUESTS.md). Join: default **closed** (`allowJoinRequests`). Leave: default **request required** (`memberLeavePolicy`). Admins and group leaders configure both per group.
 
 **Domain**
