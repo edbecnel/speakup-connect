@@ -1,8 +1,8 @@
 # Sprint Tracker — SpeakUp Connect
 
-> Last Updated: June 11, 2026  
+> Last Updated: June 13, 2026  
 > Current Sprint: **Sprint 13** (Group Membership Requests) — design complete; implementation not started  
-> Last completed: **Sprint 14** (Profile Photos) — June 5, 2026  
+> Last completed: **Sprint 15** (i18n Phase 1 + 1b) — June 2026  
 > Sprint Duration: 2 weeks
 
 ---
@@ -11,11 +11,11 @@
 
 | Order | Initiative | Design doc | Epic |
 |-------|------------|------------|------|
-| 1 | Multi-language — US English home + Cebuano + **Tagalog (2nd)** + Translation Helper | [INTERNATIONALIZATION.md](INTERNATIONALIZATION.md) | 2.5 |
+| 1 | Multi-language — Phase 1 + 1b ✅; **next:** Translation Helper MVP, real Cebuano, Tagalog, feature extraction, Firestore sync | [INTERNATIONALIZATION.md](INTERNATIONALIZATION.md) | 2.5 |
 | 2 | Peer-to-peer + group messaging | TBD | 2.10, 2.11 |
 | 3 | Parent accounts and login | TBD | 2.13 |
 
-Suggested next sprint after Sprint 13 closure: **Sprint 15 — i18n foundation** (gen-l10n, locale provider, auth/home/settings extraction, Cebuano pass).
+Suggested next sprint after Sprint 13 closure: **Sprint 16 — i18n Phase 2** (Translation Helper MVP, real Cebuano in `app_ceb.arb` + help, `validators.dart` → l10n, CI key parity). Tagalog (`app_fil.arb`) and feature-by-feature extraction can follow in Sprint 17+.
 
 > **Development Velocity Note:** Development has significantly outpaced the original planned schedule. As of May 23, 2026 (day 5 of the project), the codebase covers work originally scoped for Sprints 1–6. Sprint numbering below reflects original plan order but completion dates reflect actual delivery dates.
 
@@ -65,6 +65,29 @@ Suggested next sprint after Sprint 13 closure: **Sprint 15 — i18n foundation**
 
 ---
 
+### Delivered June 2026 — i18n Phase 1 + 1b (Sprint 15) *(Epic 2.5)*
+- **Commits:** `41877a1`, `ee38c77`
+- **Design:** [INTERNATIONALIZATION.md](INTERNATIONALIZATION.md)
+- [x] `l10n.yaml`, `flutter_localizations`, `flutter: generate: true`
+- [x] `app_en.arb` (source) + `app_ceb.arb` (English placeholders); `AppLocalizations` + `context.l10n`
+- [x] `appLocaleProvider` + `SharedPreferences` cold-start cache
+- [x] `MaterialApp` wired with `localizationsDelegates`, `supportedLocales`, `locale`
+- [x] Phase-1 string extraction: auth (login, splash), home, settings, help hub
+- [x] `kLanguageNativeLabels` — picker options **not** in ARB (§6.1)
+- [x] Home `LanguageSelectorDropdown` + Settings `showLanguagePickerSheet`
+- [x] `HelpAssetResolver` + `member_guide_ceb.md` assets (`_default` + MONHS; English placeholders)
+- [x] `docs/help/` synced with language UI; CODING_STANDARDS.md requires new UI text → `app_en.arb`
+
+#### 📋 Remaining (Epic 2.5 — see MASTER_TASK_LIST)
+- [ ] Translation Helper MVP + AI draft callables
+- [ ] Real Cebuano copy in `app_ceb.arb` + `member_guide_ceb.md`
+- [ ] `app_fil.arb` + Tagalog help + `kLanguageNativeLabels`
+- [ ] Feature extraction (reports, admin, groups, announcements, reminders, roles, …)
+- [ ] `validators.dart` → l10n; `locale_resolution.dart`; `preferredLanguage` Firestore sync
+- [ ] Org `defaultLanguage` / `supportedLanguages`; CI ARB key parity
+
+---
+
 ### Delivered June 11, 2026 — Announcement scheduling
 - [x] **Schedule for later** on **Post Announcement** (parity with Compose Reminder)
 - [x] `scheduledAt` on bulletins; `publishDueBulletins` scheduled Cloud Function
@@ -79,6 +102,15 @@ Suggested next sprint after Sprint 13 closure: **Sprint 15 — i18n foundation**
 - [x] `resolveLoginEmail` — admin/staff sign in with real email; students with ID or contact email
 - [x] Home: Quick Actions first; **My Groups & Clubs** collapsed by default
 - [x] Help guides synced (`assets/help/`, `docs/help/`)
+
+---
+
+### Sprint 15 — i18n Phase 1 + 1b *(Epic 2.5)* — ✅ Complete
+- **Date/Time:** June 2026
+- **Commits:** `41877a1`, `ee38c77`
+- **Goal:** gen-l10n foundation, Phase-1 English extraction, Cebuano scaffold, Home + Settings language pickers, locale-aware help.
+- **Design:** [INTERNATIONALIZATION.md](INTERNATIONALIZATION.md)
+- See **Delivered June 2026 — i18n Phase 1 + 1b** above for scope checklist and remaining Epic 2.5 tasks.
 
 ---
 

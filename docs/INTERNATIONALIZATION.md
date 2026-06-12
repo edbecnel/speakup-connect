@@ -1,6 +1,7 @@
 # Internationalization (i18n) — Architecture
 
-> **Status:** Phase 1 + 1b shipped — `app_en.arb` / `app_ceb.arb` (English placeholders), Home + Settings language pickers, locale-aware help, `kLanguageNativeLabels`  
+> **Status:** Phase 1 + 1b shipped (June 2026) — `app_en.arb` / `app_ceb.arb` (English placeholders), Home + Settings language pickers, locale-aware help, `kLanguageNativeLabels`  
+> **Tasks:** [MASTER_TASK_LIST.md → Epic 2.5](MASTER_TASK_LIST.md) (authoritative checklist) · [SPRINT_TRACKER.md](SPRINT_TRACKER.md) (Sprint 15 delivered, Sprint 16 planned)  
 > **Priority:** High — see language rollout table below  
 > **Epic:** [MASTER_TASK_LIST.md → Epic 2.5](MASTER_TASK_LIST.md)  
 > **Related:** [DATABASE_DESIGN.md](DATABASE_DESIGN.md), [ARCHITECTURE.md](ARCHITECTURE.md), [RBAC_ARCHITECTURE.md](RBAC_ARCHITECTURE.md)
@@ -288,7 +289,8 @@ Implementation: `lib/shared/widgets/language_selector.dart`.
 | Buttons, labels, errors, nav titles | ARB / `AppLocalizations` | ✅ phase 1 (auth, splash, home, settings, help hub) |
 | Language picker **option** labels | `kLanguageNativeLabels` only — **not** ARB | ✅ |
 | Validation messages in `validators.dart` | Move to l10n keys | ⏳ |
-| `SnackBar` / dialog copy in features | Replace hardcoded strings | ⏳ most features |
+| `SnackBar` / dialog copy in features | Replace hardcoded strings | ⏳ phase 2 — reports, admin, groups, announcements, reminders, roles, notifications (see Epic 2.5) |
+| `intl` dates and numbers | Pass active locale from `appLocaleProvider` | ⏳ |
 | Help markdown (`assets/help/`) | Per-locale: `member_guide_ceb.md`, `member_guide_fil.md` | ✅ resolver; content mostly English placeholders |
 | Firestore org `welcomeMessage`, `tagline` | Admin-authored; not auto-translated | — |
 | Announcements, reminders, alerts body | User-authored | — |
@@ -368,9 +370,15 @@ Already sketched in [DATABASE_DESIGN.md](DATABASE_DESIGN.md) and `firestore.rule
 5. **Translation Helper** (MVP) — import `app_en.arb`; export `app_ceb.arb` / `app_fil.arb`.
 6. **Cebuano pass** — AI draft + human review → real `app_ceb.arb` + `member_guide_ceb.md` content.
 7. **Tagalog pass** — same workflow → `app_fil.arb` (second language).
-8. **Feature-by-feature** — reports, admin, groups, announcements UI strings.
-9. **CI** — fail build if `app_ceb.arb` or `app_fil.arb` missing keys from `app_en.arb`.
-10. **Firestore** — `preferredLanguage` sync + org `supportedLanguages` filter on pickers.
+8. **Feature-by-feature extraction** — remaining hardcoded UI → `app_en.arb`:
+   - Auth: register, apply-to-join
+   - Reports: submit, my reports, details, confirmation
+   - Admin: roster, approvals, branding, grades, members, enrolled users
+   - Groups: browse, create, membership requests, policy sheets
+   - Announcements + reminders (compose, detail, responses, widgets)
+   - Roles, notifications/alerts, settings sub-screens
+9. **CI** — fail build if `app_ceb.arb` or `app_fil.arb` missing keys from `app_en.arb`; lint ban on new hardcoded strings in `presentation/`
+10. **Firestore** — `preferredLanguage` sync + org `supportedLanguages` filter on pickers + admin branding UI
 
 **Lint:** add custom lint or CI script banning new raw strings in `presentation/` (except debug).
 
@@ -607,12 +615,14 @@ Use **`en_US`** as the explicit English locale for formatting when `locale.langu
 
 ## 14. Testing
 
-| Test | Purpose |
-|------|---------|
-| `locale_resolution_test.dart` | Resolution order unit tests |
-| Widget test with `Locale('ceb')` and `Locale('fil')` | Key screens render without overflow |
-| Golden tests (optional) | Catch layout breaks in longer Tagalog/Cebuano strings |
-| CI key parity | `app_ceb.arb` and `app_fil.arb` keys match `app_en.arb` |
+| Test | Purpose | Status |
+|------|---------|--------|
+| `locale_resolution_test.dart` | Resolution order unit tests | ⏳ |
+| Widget test with `Locale('ceb')` | Auth + home render without overflow | ⏳ |
+| Widget test with `Locale('fil')` | Same after `app_fil.arb` ships | ⏳ |
+| Golden tests (optional) | Catch layout breaks in longer Tagalog/Cebuano strings | ⏳ |
+| CI key parity script | `app_ceb.arb` and `app_fil.arb` keys match `app_en.arb` | ⏳ |
+| Validator l10n smoke | Form errors resolve from ARB in `ceb`/`fil` | ⏳ after validators migration |
 
 ---
 
@@ -631,19 +641,32 @@ Use **`en_US`** as the explicit English locale for formatting when `locale.langu
 
 ## 16. Implementation checklist
 
-See [MASTER_TASK_LIST.md → Epic 2.5](MASTER_TASK_LIST.md). Summary ship order:
+Authoritative task list: **[MASTER_TASK_LIST.md → Epic 2.5](MASTER_TASK_LIST.md)**. Summary ship order:
+
+### Shipped (Phase 1 + 1b)
 
 1. ✅ `gen-l10n` + `appLocaleProvider` + `MaterialApp` (`en_US` home)  
-2. ✅ Phase-1 extraction → `app_en.arb` (auth, splash, home, settings, help)  
+2. ✅ Phase-1 extraction → `app_en.arb` (auth, splash, home, settings, help hub)  
 3. ✅ `app_ceb.arb` scaffold + locale-aware help + `kLanguageNativeLabels` + Home/Settings pickers  
-4. Translation Helper MVP (list view, ARB import/export)  
-5. `app_ceb.arb` — AI draft + human review (MONHS) — replace English placeholders  
-6. `app_fil.arb` — AI draft + human review (**second language**)  
-7. `preferredLanguage` Firestore sync + org `supportedLanguages` filter  
-8. Remaining features → ARB; help markdown content in `ceb` / `fil`  
-9. CI key parity for target ARBs  
-10. Translation Helper in-context preview (phase 2)  
-11. (Optional) Firestore OTA overlay  
+4. ✅ `docs/help/` + `assets/help/` member guide suffixes; CODING_STANDARDS localization rule  
+
+### Next (Phase 2+)
+
+5. **Translation Helper MVP** — list view, ARB import/export, super-admin auth  
+6. **AI draft callables** — `draftTranslation`, `batchDraftTranslations`, Secret Manager key  
+7. **`app_ceb.arb` content** — AI draft + human review → replace English placeholders (MONHS)  
+8. **`app_fil.arb` scaffold + content** — second language; add `fil` to pickers + `kLanguageNativeLabels`  
+9. **`validators.dart` → l10n** — all form validation messages via ARB keys  
+10. **Feature extraction** — reports, admin, groups, announcements, reminders, roles, notifications (see Epic 2.5)  
+11. **`locale_resolution.dart`** — user profile + org default + device locale chain  
+12. **`preferredLanguage` Firestore sync** + org `supportedLanguages` filter on pickers  
+13. **Admin branding UI** — org `defaultLanguage` + `supportedLanguages`  
+14. **CI key parity** for target ARBs + presentation-layer string lint  
+15. **Help content** — real Cebuano/Tagalog in `member_guide_ceb.md` / `member_guide_fil.md` (assets + docs)  
+16. **Widget tests** — `Locale('ceb')` / `Locale('fil')` smoke on auth + home  
+17. **Translation Helper in-context preview** (phase 2)  
+18. **Cloud Functions push i18n** — localized notification templates (phase 2)  
+19. **(Optional) Firestore OTA overlay** — `languages/{code}/strings` hotfixes  
 
 ---
 
@@ -651,7 +674,8 @@ See [MASTER_TASK_LIST.md → Epic 2.5](MASTER_TASK_LIST.md). Summary ship order:
 
 | Document | Contents |
 |----------|----------|
-| [MASTER_TASK_LIST.md](MASTER_TASK_LIST.md) | Epic 2.5 tasks, high-priority backlog |
+| [MASTER_TASK_LIST.md](MASTER_TASK_LIST.md) | **Epic 2.5** — full task checklist (infrastructure, migration, Translation Helper, locales, testing) |
+| [SPRINT_TRACKER.md](SPRINT_TRACKER.md) | Sprint 15 delivered; Sprint 16 i18n Phase 2 planned |
 | [DATABASE_DESIGN.md](DATABASE_DESIGN.md) | `languages/`, `preferredLanguage` |
-| [SPRINT_TRACKER.md](SPRINT_TRACKER.md) | Sprint scheduling |
-| [ROADMAP.md](ROADMAP.md) | Product timeline |
+| [CODING_STANDARDS.md](CODING_STANDARDS.md) | Developer rule: new UI text → `app_en.arb` |
+| [ROADMAP.md](ROADMAP.md) | Product-level localization milestones |

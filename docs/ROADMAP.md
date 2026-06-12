@@ -116,12 +116,15 @@ This roadmap tracks the evolution from MVP pilot to a full multi-tenant SaaS pla
 - [ ] Rate limiting (max 5 reports per user per day)
 
 **Localization**
-- [ ] Multi-language support: Flutter gen-l10n + ARB bundles (see [INTERNATIONALIZATION.md](INTERNATIONALIZATION.md))
-- [ ] **US English (`en_US`)** home language; **Tagalog (`fil`)** second language; **Cebuano (`ceb`)** regional (MONHS)
+- [~] Multi-language support: Flutter gen-l10n + ARB bundles (see [INTERNATIONALIZATION.md](INTERNATIONALIZATION.md)) — **Phase 1 + 1b shipped** (June 2026)
+- [x] **US English (`en_US`)** home language — `app_en.arb`, `appLocaleProvider`, `MaterialApp` wiring
+- [~] **Cebuano (`ceb`)** regional (MONHS) — `app_ceb.arb` + help resolver scaffold; **real translations pending**
+- [ ] **Tagalog (`fil`)** second language — `app_fil.arb` not yet created
 - [ ] **Translation Helper** tool — list + in-context views, **AI model API** initial draft (server-side API token), human approval, ARB export
-- [ ] Language selector in Settings (+ optional Home)
-- [ ] Admin can set org default language
-- [ ] Language database: Firestore-backed or bundled JSON per language
+- [x] Language selector in Settings + Home (`kLanguageNativeLabels`; Tagalog option when `fil` ships)
+- [ ] Admin can set org `defaultLanguage` + `supportedLanguages`
+- [ ] `preferredLanguage` Firestore sync on user profile
+- [ ] Language database: Firestore overlay (optional phase 2) — bundled ARB is v1 source of truth
 
 **Announcements**
 - [ ] School / Organization Information page

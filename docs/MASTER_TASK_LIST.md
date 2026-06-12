@@ -21,7 +21,7 @@
 
 | # | Initiative | Epic | Architecture |
 |---|------------|------|----------------|
-| 1 | **Multi-language support** (US English home + Cebuano + **Tagalog 2nd**) | [2.5](#epic-25--multi-language-support) | [INTERNATIONALIZATION.md](INTERNATIONALIZATION.md) |
+| 1 | **Multi-language support** — Phase 1 + 1b ✅; Translation Helper + real `ceb`/`fil` + feature extraction ⏳ | [2.5](#epic-25--multi-language-support) | [INTERNATIONALIZATION.md](INTERNATIONALIZATION.md) |
 | 2 | **Peer-to-peer and group messaging** | [2.10](#epic-210--peer-to-peer-messaging), [2.11](#epic-211--group-messaging) | TBD — `DATABASE_DESIGN.md` § directMessages / messages |
 | 3 | **Parent accounts and login** | [2.13](#epic-213--parent-accounts) | TBD |
 
@@ -540,22 +540,35 @@ Suggested implementation order: **i18n → messaging → parents** (messaging is
 
 ### Epic 2.5 — Multi-Language Support
 
+> **Status:** `[~]` In progress — **Phase 1 + 1b shipped** (June 2026, commit `ee38c77`); next: Translation Helper MVP → real Cebuano copy → Tagalog → feature extraction → Firestore sync  
 > **Architecture:** [INTERNATIONALIZATION.md](INTERNATIONALIZATION.md) — US English (`en_US`) home language; **`ceb`** first regional add-on; **`fil` (Tagalog)** second platform language; **Translation Helper** for scale.
 
-**Infrastructure**
-- [ ] Add `flutter_localizations`; configure `l10n.yaml` and `flutter: generate: true`
-- [ ] Create `lib/l10n/app_en.arb` (US English template), `app_ceb.arb`, `app_fil.arb`
-- [ ] Implement `localeProvider` + `locale_resolution.dart` (user → org → device → `en_US`)
-- [ ] Wire `MaterialApp` `localizationsDelegates`, `supportedLocales`, `locale`
-- [ ] `LocaleCacheService` (SharedPreferences) for cold-start language
-- [ ] `context.l10n` extension for generated `AppLocalizations`
+**Infrastructure (Phase 1)**
+- [x] Add `flutter_localizations`; configure `l10n.yaml` and `flutter: generate: true`
+- [x] Create `lib/l10n/app_en.arb` (US English template) and `app_ceb.arb` (English placeholders)
+- [ ] Create `lib/l10n/app_fil.arb` (scaffold — copy English until Translation Helper export)
+- [x] Implement `appLocaleProvider` + `SharedPreferences` cold-start cache (`lib/core/l10n/locale_provider.dart`)
+- [ ] Implement `locale_resolution.dart` — full chain: user `preferredLanguage` → org `defaultLanguage` → device locale → `en_US`
+- [x] Wire `MaterialApp` `localizationsDelegates`, `supportedLocales`, `locale` (`lib/app.dart`)
+- [x] `context.l10n` extension (`lib/core/l10n/app_localizations_extension.dart`)
 
 **String migration**
-- [ ] Define key conventions (see INTERNATIONALIZATION.md §6)
-- [ ] Extract hardcoded strings: auth, splash, home, settings (phase 1) into `app_en.arb`
-- [ ] Extract remaining features (reports, admin, groups, announcements, …)
-- [ ] Migrate `validators.dart` messages to l10n keys
-- [ ] CI: fail if `app_ceb.arb` or `app_fil.arb` missing keys from `app_en.arb`
+- [x] Define key conventions (see INTERNATIONALIZATION.md §6)
+- [x] Phase 1 extraction → `app_en.arb`: **auth** (login, splash), **home**, **settings**, **help hub**
+- [ ] Phase 2 extraction — by feature area (hardcoded UI → `app_en.arb`):
+  - [ ] **Auth:** register, apply-to-join
+  - [ ] **Reports:** submit flow, my reports, report details, confirmation
+  - [ ] **Admin:** roster, approval queue, branding, grades, add/edit member, enrolled users, admin report detail
+  - [ ] **Groups:** browse, create, my groups, membership requests, policy sheets, position roles
+  - [ ] **Announcements:** compose, detail, my announcements, responses, edit dialog
+  - [ ] **Reminders:** compose, responses, expiration/response config widgets
+  - [ ] **Roles:** management, assign, editor, user assignments
+  - [ ] **Notifications / alerts** inbox and snackbars
+  - [ ] **Settings:** change password and any remaining settings sub-screens
+- [ ] Migrate `lib/core/utils/validators.dart` messages to l10n keys (pass `AppLocalizations` or `BuildContext`)
+- [ ] Audit `intl` date/number formatting — pass active locale, not hardcoded `en_US` (INTERNATIONALIZATION.md §13)
+- [ ] CI: fail build if `app_ceb.arb` or `app_fil.arb` missing keys from `app_en.arb`
+- [ ] CI or custom lint: ban new hardcoded user-facing strings in `lib/features/**/presentation/`
 
 **Translation Helper tool** (see INTERNATIONALIZATION.md §12)
 - [ ] MVP: web or admin UI — import `app_en.arb`, list all keys with US English source
@@ -572,24 +585,37 @@ Suggested implementation order: **i18n → messaging → parents** (messaging is
 - [ ] Phase 2: Firestore-backed workflow (`languages/{code}/strings` + export job)
 
 **Cebuano (Bisaya) — 1st add-on**
-- [ ] Translate phase-1 keys via Translation Helper → `app_ceb.arb` (native speaker review)
-- [ ] Cebuano help: `assets/help/.../member_guide_ceb.md` (+ MONHS org copy)
+- [x] Scaffold `app_ceb.arb` + add `ceb` to `supportedAppLanguageCodes` and `kLanguageNativeLabels`
+- [x] Locale-aware help resolver + `member_guide_ceb.md` in `assets/help/` (`_default` + MONHS org copy; English placeholders)
+- [x] Sync `docs/help/` member guides with language UI (keep in sync when editing help)
+- [ ] Translate phase-1 keys via Translation Helper → real Cebuano in `app_ceb.arb` (native speaker review)
+- [ ] Replace English placeholder content in `member_guide_ceb.md` (assets + docs)
 - [ ] Widget tests with `Locale('ceb')` on auth + home (layout smoke)
 
 **Tagalog — 2nd language**
+- [ ] Add `app_fil.arb` + `fil` to `supportedAppLanguageCodes` and `kLanguageNativeLabels` (`Tagalog`)
+- [ ] Add `member_guide_fil.md` under `assets/help/` (+ MONHS org copy) and `docs/help/`
 - [ ] Translate phase-1 keys via Translation Helper → `app_fil.arb` (native speaker review)
-- [ ] Tagalog help: `assets/help/.../member_guide_fil.md`
 - [ ] Widget tests with `Locale('fil')` on auth + home (layout smoke)
 
-**Presentation**
-- [ ] Language selector in Settings (English / Bisaya-Cebuano / Tagalog)
-- [ ] Optional compact language control on Home dashboard
-- [ ] Sync `preferredLanguage` to `users/{uid}` on change
-- [ ] Admin: org `defaultLanguage` + `supportedLanguages` in branding settings
+**Presentation & org config**
+- [x] Language picker — Settings → Appearance → Language (`showLanguagePickerSheet`)
+- [x] Language picker — Home dashboard (`LanguageSelectorDropdown` at top of scroll)
+- [x] Picker option labels via `kLanguageNativeLabels` only — **not** ARB (INTERNATIONALIZATION.md §6.1)
+- [ ] Sync `preferredLanguage` to `users/{uid}` on change (read on sign-in; write on picker change)
+- [ ] `supportedLocalesForOrgProvider` — filter pickers by org `supportedLanguages`
+- [ ] Admin: org `defaultLanguage` + `supportedLanguages` in branding settings UI
+
+**Cloud Functions & push (phase 2)**
+- [ ] Localized push notification titles/bodies — functions i18n map or template per locale (INTERNATIONALIZATION.md §7)
 
 **Firestore overlay (phase 2 — optional)**
 - [ ] Seed `languages/en`, `languages/ceb`, `languages/fil` metadata in Firestore
 - [ ] Super-admin / Translation Helper hot-reload overlay on bundled ARB
+
+**Testing**
+- [ ] `locale_resolution_test.dart` — resolution order unit tests
+- [ ] Widget/golden tests for longer Cebuano/Tagalog strings on key screens (optional goldens)
 
 ### Epic 2.6 — Groups & Clubs
 
