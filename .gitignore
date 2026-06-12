@@ -4,6 +4,7 @@
 *.pyc
 *.swp
 .DS_Store
+._*
 .atom/
 .buildlog/
 .history
@@ -12,6 +13,23 @@
 .obsidian/
 migrate_working_dir/
 All .md files.md
+
+# Temporary / backup files
+*~
+*.tmp
+*.temp
+*.bak
+*.orig
+*.rej
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# macOS Finder metadata (._* above)
+.AppleDouble
+.LSOverride
 
 # IntelliJ related
 *.iml
@@ -60,9 +78,28 @@ scripts/service-account.json
 .env.local
 .env.staging
 .env.production
+.env.*
+!.env.example
 
-# Generated files (keep in .gitignore to avoid committing build artifacts)
-# Note: *.g.dart and *.freezed.dart are typically committed for reliability
-# but can be excluded from diffs with the following:
-# *.g.dart linguist-generated=true
-# *.freezed.dart linguist-generated=true
+# Test / analysis output
+coverage/
+.test_coverage.dart
+
+# Flutter gen-l10n missing-key report (CI only; not shipped)
+lib/l10n/untranslated.json
+
+# FVM (Flutter Version Management) — local SDK pin
+.fvm/
+
+# Local release / field-test binaries
+*.apk
+*.aab
+*.ipa
+
+# Firebase CLI / emulator logs
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+
+# Code generation — *.g.dart and *.freezed.dart are committed in this repo.
+# Mark as generated in GitHub: *.g.dart linguist-generated=true
