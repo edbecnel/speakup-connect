@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:speakup_connect/core/constants/route_constants.dart';
+import 'package:speakup_connect/core/l10n/app_localizations_extension.dart';
 import 'package:speakup_connect/features/groups/domain/entities/my_group_membership.dart';
 import 'package:speakup_connect/features/groups/presentation/providers/group_provider.dart';
 
@@ -23,13 +24,14 @@ class _MyGroupsHomeSectionState extends ConsumerState<MyGroupsHomeSection> {
   Widget build(BuildContext context) {
     final membershipsAsync = ref.watch(myGroupMembershipsProvider);
     final theme = Theme.of(context);
+    final l10n = context.l10n;
 
     return membershipsAsync.when(
       loading: () => _CollapsibleSectionHeader(
         expanded: _expanded,
         onToggle: () => setState(() => _expanded = !_expanded),
         onSeeAll: () => context.push(Routes.myGroups),
-        seeAllLabel: 'See all',
+        seeAllLabel: l10n.homeGroupsSeeAll,
         subtitle: null,
         child: const Padding(
           padding: EdgeInsets.symmetric(vertical: 8),
@@ -40,12 +42,12 @@ class _MyGroupsHomeSectionState extends ConsumerState<MyGroupsHomeSection> {
         expanded: _expanded,
         onToggle: () => setState(() => _expanded = !_expanded),
         onSeeAll: () => context.push(Routes.myGroups),
-        seeAllLabel: 'See all',
+        seeAllLabel: l10n.homeGroupsSeeAll,
         subtitle: null,
         child: Padding(
           padding: const EdgeInsets.only(top: 4, bottom: 8),
           child: Text(
-            'Could not load your groups. Tap See all to retry.',
+            l10n.homeGroupsLoadError,
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.error,
             ),
@@ -56,13 +58,13 @@ class _MyGroupsHomeSectionState extends ConsumerState<MyGroupsHomeSection> {
         final preview = memberships.take(_previewLimit).toList();
         final hasMore = memberships.length > _previewLimit;
         final seeAllLabel = memberships.isEmpty
-            ? 'View'
+            ? l10n.homeGroupsView
             : hasMore
-                ? 'See all (${memberships.length})'
-                : 'See all';
+                ? l10n.homeGroupsSeeAllCount(memberships.length)
+                : l10n.homeGroupsSeeAll;
         final subtitle = memberships.isEmpty
-            ? 'No groups yet'
-            : '${memberships.length} group${memberships.length == 1 ? '' : 's'}';
+            ? l10n.homeGroupsNone
+            : l10n.homeGroupsCount(memberships.length);
 
         return _CollapsibleSectionHeader(
           expanded: _expanded,
@@ -74,7 +76,7 @@ class _MyGroupsHomeSectionState extends ConsumerState<MyGroupsHomeSection> {
               ? Padding(
                   padding: const EdgeInsets.only(top: 4, bottom: 8),
                   child: Text(
-                    'You are not in any groups yet. Tap View for details.',
+                    l10n.homeGroupsEmptyMessage,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
@@ -140,7 +142,7 @@ class _CollapsibleSectionHeader extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'My Groups & Clubs',
+                          context.l10n.homeGroupsTitle,
                           style: theme.textTheme.titleSmall?.copyWith(
                             color: theme.colorScheme.onSurfaceVariant,
                             fontWeight: FontWeight.w600,

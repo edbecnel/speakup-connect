@@ -10,6 +10,8 @@ This generic guide describes administration features that may be available in yo
 
 If you have admin access, **Settings** shows an **Administration** section. Items appear based on your role and capabilities — you may not see every item listed here.
 
+**Member tip:** students and parents can change app language from the **globe dropdown at the top of Home** or **Settings → Appearance → Language** (**English** / **Bisaya / Cebuano**). Point them there if they cannot read the current UI language.
+
 Common areas:
 
 | Area | Typical use |

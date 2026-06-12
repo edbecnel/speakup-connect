@@ -1,18 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:speakup_connect/l10n/app_localizations.dart';
 
 /// A bundled markdown help article shown in the in-app Help Center.
 class HelpArticle {
   const HelpArticle({
     required this.id,
-    required this.title,
-    required this.subtitle,
     required this.icon,
     required this.audience,
   });
 
   final String id;
-  final String title;
-  final String subtitle;
   final HelpAudience audience;
   final HelpArticleIcon icon;
 }
@@ -37,20 +34,30 @@ extension HelpArticleIconX on HelpArticleIcon {
       };
 }
 
+extension HelpArticleL10n on HelpArticle {
+  String title(AppLocalizations l10n) => switch (id) {
+        'member' => l10n.helpMemberGuideTitle,
+        'admin' => l10n.helpAdminGuideTitle,
+        _ => id,
+      };
+
+  String subtitle(AppLocalizations l10n) => switch (id) {
+        'member' => l10n.helpMemberGuideSubtitle,
+        'admin' => l10n.helpAdminGuideSubtitle,
+        _ => '',
+      };
+}
+
 /// Catalog of in-app help articles (content resolved per org via [HelpAssetResolver]).
 abstract class HelpArticles {
   static const member = HelpArticle(
     id: 'member',
-    title: 'Member Guide',
-    subtitle: 'Sign in, submit reports, and use alerts',
     icon: HelpArticleIcon.people,
     audience: HelpAudience.member,
   );
 
   static const admin = HelpArticle(
     id: 'admin',
-    title: 'Administrator Guide',
-    subtitle: 'Roster, groups, reports, and reminders',
     icon: HelpArticleIcon.adminPanel,
     audience: HelpAudience.admin,
   );

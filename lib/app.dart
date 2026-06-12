@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:speakup_connect/config/app_config.dart';
+import 'package:speakup_connect/core/l10n/locale_provider.dart';
 import 'package:speakup_connect/core/router/app_router.dart';
 import 'package:speakup_connect/core/theme/app_theme.dart';
 import 'package:speakup_connect/features/organization/presentation/providers/organization_provider.dart';
 import 'package:speakup_connect/features/settings/presentation/providers/settings_provider.dart';
+import 'package:speakup_connect/l10n/app_localizations.dart';
 
 /// Root application widget.
 ///
@@ -29,6 +31,8 @@ class SpeakUpConnectApp extends ConsumerWidget {
     final orgColors =
         orgConfigAsync.value?.themeColors ?? AppConfig.defaultThemeColors;
 
+    final locale = ref.watch(appLocaleProvider);
+
     return MaterialApp.router(
       title: AppConfig.appName,
       debugShowCheckedModeBanner: false,
@@ -36,6 +40,9 @@ class SpeakUpConnectApp extends ConsumerWidget {
       theme: AppTheme.light(orgColors: orgColors),
       darkTheme: AppTheme.dark(orgColors: orgColors),
       themeMode: themeMode,
+      locale: locale,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
     );
   }
 }

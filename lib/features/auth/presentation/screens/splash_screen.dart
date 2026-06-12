@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:speakup_connect/core/constants/route_constants.dart';
 import 'package:speakup_connect/config/app_config.dart';
+import 'package:speakup_connect/core/l10n/app_localizations_extension.dart';
 import 'package:speakup_connect/features/organization/presentation/providers/organization_provider.dart';
 
 /// Splash / Welcome screen — the first screen the user sees.
@@ -53,11 +54,11 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
         child: orgConfigAsync.when(
           loading: () => _SplashContent(
             orgName: AppConfig.clientDisplayName,
-            tagline: 'Your voice. Our action.',
+            tagline: context.l10n.splashDefaultTagline,
           ),
           error: (_, __) => _SplashContent(
             orgName: AppConfig.clientDisplayName,
-            tagline: 'Your voice. Our action.',
+            tagline: context.l10n.splashDefaultTagline,
           ),
           data: (config) => _SplashContent(
             orgName: config.displayName,
@@ -84,6 +85,7 @@ class _SplashContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
     final minHeight = MediaQuery.sizeOf(context).height -
         MediaQuery.paddingOf(context).vertical;
 
@@ -102,7 +104,7 @@ class _SplashContent extends StatelessWidget {
 
             // --- App Title: "SpeakUp {orgName}" ---
             Text(
-              'SpeakUp',
+              l10n.appName,
               style: theme.textTheme.displaySmall?.copyWith(
                 color: theme.colorScheme.primary,
                 fontWeight: FontWeight.w800,
@@ -144,7 +146,7 @@ class _SplashContent extends StatelessWidget {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () => context.go(Routes.login),
-                child: const Text('Get Started'),
+                child: Text(l10n.splashGetStarted),
               ),
             ),
 
@@ -155,7 +157,7 @@ class _SplashContent extends StatelessWidget {
               onPressed: () {
                 // TODO: Show organization info bottom sheet
               },
-              child: const Text('Learn More'),
+              child: Text(l10n.splashLearnMore),
             ),
 
             const SizedBox(height: 32),

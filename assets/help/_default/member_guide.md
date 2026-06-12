@@ -41,6 +41,7 @@ If personal uploads are not enabled yet, tapping the badge shows a short message
 - **Change Password** — enter your current password and a new password twice (use the eye icon to show or hide each field; minimum 8 characters for the new password)
 - **My Groups & Clubs** — full list of your group memberships
 - **Browse Groups & Clubs** — request to join open groups (when enabled)
+- **Language** — English or Bisaya / Cebuano (same choices as the globe dropdown on **Home**)
 - **Theme**
 - **Help Center**
 - **Sign out**
@@ -87,7 +88,15 @@ Group **leaders** can send alerts to groups they lead from **My Groups & Clubs**
 
 ## Home dashboard
 
-The **Home** tab puts **Quick Actions** at the top (Submit a concern, My Reports, Announcements, and other shortcuts your org enables).
+### App language
+
+At the top of **Home**, tap the **globe** icon and use the dropdown to choose **English** or **Bisaya / Cebuano**. Each language is listed by its own name so you can switch even when the rest of the screen is still in another language.
+
+You can also open **Settings → Appearance → Language**.
+
+Your choice is saved on this device. **Help Center** articles load the matching guide when a translation is available (otherwise English is shown).
+
+The **Home** tab puts **Quick Actions** below the language control (Submit a concern, My Reports, Announcements, and other shortcuts your org enables).
 
 **My Groups & Clubs** appears below when you belong to at least one group. The section starts **collapsed** — tap the header to expand it and see your group cards, join/browse actions, and leader tools.
 

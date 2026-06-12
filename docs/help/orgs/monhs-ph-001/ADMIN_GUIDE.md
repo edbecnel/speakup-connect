@@ -9,6 +9,8 @@ This guide is for MONHS administrators and staff with delegated capabilities (re
 
 ## Administration menu
 
+**Member tip:** students and parents can change app language from the **globe dropdown at the top of Home** or **Settings → Appearance → Language** (**English** / **Bisaya / Cebuano**).
+
 Open **Settings**. If you have admin access, you will see an **Administration** section with some or all of:
 
 | Item | Typical permission |

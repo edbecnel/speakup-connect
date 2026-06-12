@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:speakup_connect/core/constants/route_constants.dart';
+import 'package:speakup_connect/core/l10n/app_localizations_extension.dart';
 import 'package:speakup_connect/core/theme/app_theme.dart';
 import 'package:speakup_connect/features/announcements/presentation/providers/announcement_provider.dart';
 import 'package:speakup_connect/features/auth/presentation/providers/auth_provider.dart';
 import 'package:speakup_connect/features/notifications/presentation/providers/notification_provider.dart';
 import 'package:speakup_connect/features/organization/presentation/providers/organization_provider.dart';
 import 'package:speakup_connect/features/groups/presentation/widgets/my_groups_home_section.dart';
+import 'package:speakup_connect/shared/widgets/language_selector.dart';
 import 'package:speakup_connect/shared/widgets/notification_badge_icon.dart';
 
 /// Home Dashboard — the main screen for authenticated users.
@@ -27,6 +29,7 @@ class HomeDashboardScreen extends ConsumerWidget {
     final theme = Theme.of(context);
 
     final orgConfig = orgConfigAsync.value;
+    final l10n = context.l10n;
     final firstName = user?.displayName?.split(' ').first ?? 'there';
     final unreadAlerts = ref.watch(unreadNotificationCountProvider);
     final unreadAnnouncements = ref.watch(unreadAnnouncementCountProvider);
@@ -39,7 +42,7 @@ class HomeDashboardScreen extends ConsumerWidget {
             // TODO: Open drawer/side menu
           },
         ),
-        title: const Text('Home'),
+        title: Text(l10n.homeTitle),
         actions: [
           IconButton(
             icon: NotificationBadgeIcon(
@@ -56,17 +59,20 @@ class HomeDashboardScreen extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              const _HomeLanguageSelector(),
+              const SizedBox(height: 16),
+
               // --- Welcome Card ---
               _WelcomeCard(
                 firstName: firstName,
                 message: orgConfig?.effectiveWelcomeMessage ??
-                    'How can we help make things better?',
+                    l10n.homeDefaultWelcomeMessage,
               ),
               const SizedBox(height: 24),
 
               // --- Feature Grid ---
               Text(
-                'Quick Actions',
+                l10n.homeQuickActions,
                 style: theme.textTheme.titleSmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                   fontWeight: FontWeight.w600,
@@ -83,19 +89,19 @@ class HomeDashboardScreen extends ConsumerWidget {
                 children: [
                   _DashboardTile(
                     icon: Icons.edit_note_rounded,
-                    label: 'Submit\nConcern',
+                    label: l10n.homeSubmitConcern,
                     color: theme.colorScheme.primary,
                     onTap: () => context.push(Routes.submitReport),
                   ),
                   _DashboardTile(
                     icon: Icons.list_alt_rounded,
-                    label: 'My Reports\n(Track Status)',
+                    label: l10n.homeMyReports,
                     color: theme.colorScheme.secondary,
                     onTap: () => context.push(Routes.myReports),
                   ),
                   _DashboardTile(
                     icon: Icons.campaign_rounded,
-                    label: 'Announcements',
+                    label: l10n.homeAnnouncements,
                     color: unreadAnnouncements > 0
                         ? theme.colorScheme.primary
                         : const Color(0xFFF57C00),
@@ -104,12 +110,14 @@ class HomeDashboardScreen extends ConsumerWidget {
                   ),
                   _DashboardTile(
                     icon: Icons.info_outline_rounded,
-                    label: '${orgConfig?.displayName ?? 'Org'}\nInformation',
+                    label: l10n.homeOrgInformation(
+                      orgConfig?.displayName ?? l10n.homeOrgFallback,
+                    ),
                     color: const Color(0xFF37474F),
                     onTap: () {
                       // TODO: Navigate to org info — Sprint 2
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Organization Info — Coming Soon')),
+                        SnackBar(content: Text(l10n.homeOrgInfoComingSoon)),
                       );
                     },
                   ),
@@ -131,6 +139,25 @@ class HomeDashboardScreen extends ConsumerWidget {
         child: const Icon(Icons.add_rounded),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+    );
+  }
+}
+
+/// Prominent language control — native option names stay visible before UI is translated.
+class _HomeLanguageSelector extends StatelessWidget {
+  const _HomeLanguageSelector();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Material(
+      color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.45),
+      borderRadius: BorderRadius.circular(12),
+      child: const Padding(
+        padding: EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+        child: LanguageSelectorDropdown(),
+      ),
     );
   }
 }
@@ -163,7 +190,7 @@ class _WelcomeCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Welcome, $firstName!',
+            context.l10n.homeWelcome(firstName),
             style: theme.textTheme.titleLarge?.copyWith(
               color: theme.colorScheme.onPrimary,
               fontWeight: FontWeight.w700,
@@ -267,6 +294,8 @@ class _AppBottomNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return BottomNavigationBar(
       currentIndex: currentIndex,
       onTap: (index) {
@@ -282,15 +311,15 @@ class _AppBottomNavBar extends StatelessWidget {
         }
       },
       items: [
-        const BottomNavigationBarItem(
-          icon: Icon(Icons.home_outlined),
-          activeIcon: Icon(Icons.home_rounded),
-          label: 'Home',
+        BottomNavigationBarItem(
+          icon: const Icon(Icons.home_outlined),
+          activeIcon: const Icon(Icons.home_rounded),
+          label: l10n.homeTitle,
         ),
-        const BottomNavigationBarItem(
-          icon: Icon(Icons.list_alt_outlined),
-          activeIcon: Icon(Icons.list_alt_rounded),
-          label: 'My Reports',
+        BottomNavigationBarItem(
+          icon: const Icon(Icons.list_alt_outlined),
+          activeIcon: const Icon(Icons.list_alt_rounded),
+          label: l10n.homeNavMyReports,
         ),
         // Index 2 is the FAB — represented as a spacer
         const BottomNavigationBarItem(
@@ -306,12 +335,12 @@ class _AppBottomNavBar extends StatelessWidget {
             icon: Icons.notifications_rounded,
             unreadCount: unreadAlerts,
           ),
-          label: 'Alerts',
+          label: l10n.homeNavAlerts,
         ),
-        const BottomNavigationBarItem(
-          icon: Icon(Icons.person_outline_rounded),
-          activeIcon: Icon(Icons.person_rounded),
-          label: 'Profile',
+        BottomNavigationBarItem(
+          icon: const Icon(Icons.person_outline_rounded),
+          activeIcon: const Icon(Icons.person_rounded),
+          label: l10n.homeNavProfile,
         ),
       ],
     );

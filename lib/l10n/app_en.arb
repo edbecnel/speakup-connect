@@ -1,0 +1,182 @@
+{
+  "@@locale": "en",
+
+  "appName": "SpeakUp",
+  "@appName": {
+    "description": "Product name shown in splash title and about dialogs."
+  },
+
+  "splashDefaultTagline": "Your voice. Our action.",
+  "splashGetStarted": "Get Started",
+  "splashLearnMore": "Learn More",
+
+  "commonLogin": "Login",
+  "commonSignUp": "Sign Up",
+  "commonOr": "or",
+  "commonPassword": "Password",
+  "commonEmail": "Email",
+
+  "authAcceptTermsSnackbar": "Please accept the Terms & Privacy Policy",
+  "authSignInFailed": "Sign in failed. Please try again.",
+  "authOrgFallbackName": "Connect",
+  "authContinueWithGoogle": "Continue with Google",
+  "authGoogleSignInSoon": "Google sign-in coming soon!",
+  "authTermsFooter": "By continuing, you agree to our Terms and Privacy Policy.",
+  "authEmailOrStudentId": "Email or student ID",
+  "authEmailOrStudentIdHint": "you@school.edu or student ID",
+  "authPasswordHintLogin": "Your password or student ID",
+  "authForgotPassword": "Forgot Password?",
+  "authFullName": "Full Name",
+  "authFullNameHint": "Enter your full name",
+  "authEmailHint": "you@school.edu",
+  "authPasswordHintRegister": "At least 8 characters",
+  "authConfirmPassword": "Confirm Password",
+  "authConfirmPasswordHint": "Re-enter your password",
+  "authAcceptTermsCheckbox": "I accept the Terms & Privacy Policy",
+
+  "homeTitle": "Home",
+  "homeWelcome": "Welcome, {firstName}!",
+  "@homeWelcome": {
+    "placeholders": {
+      "firstName": { "type": "String" }
+    }
+  },
+  "homeDefaultWelcomeMessage": "How can we help make things better?",
+  "homeQuickActions": "Quick Actions",
+  "homeSubmitConcern": "Submit\nConcern",
+  "homeMyReports": "My Reports\n(Track Status)",
+  "homeAnnouncements": "Announcements",
+  "homeOrgInformation": "{orgName}\nInformation",
+  "@homeOrgInformation": {
+    "placeholders": {
+      "orgName": { "type": "String" }
+    }
+  },
+  "homeOrgFallback": "Org",
+  "homeOrgInfoComingSoon": "Organization Info — Coming Soon",
+  "homeNavMyReports": "My Reports",
+  "homeNavAlerts": "Alerts",
+  "homeNavProfile": "Profile",
+
+  "homeGroupsTitle": "My Groups & Clubs",
+  "homeGroupsSeeAll": "See all",
+  "homeGroupsSeeAllCount": "See all ({count})",
+  "@homeGroupsSeeAllCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "homeGroupsView": "View",
+  "homeGroupsLoadError": "Could not load your groups. Tap See all to retry.",
+  "homeGroupsNone": "No groups yet",
+  "homeGroupsCount": "{count, plural, =1{1 group} other{{count} groups}}",
+  "@homeGroupsCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "homeGroupsEmptyMessage": "You are not in any groups yet. Tap View for details.",
+
+  "settingsTitle": "Settings",
+  "settingsAnonymous": "Anonymous",
+  "settingsOrgUnavailable": "—",
+  "settingsPhotoUpdateFailed": "Could not update photo: {message}",
+  "@settingsPhotoUpdateFailed": {
+    "placeholders": {
+      "message": { "type": "String" }
+    }
+  },
+  "settingsUnknownError": "Unknown error",
+  "settingsPersonalPhotosDisabled": "Personal profile photos are not enabled. Ask an administrator to turn on \"Allow personal profile photos\" under Organization Settings.",
+  "settingsPersonalPhotoUpdated": "Personal profile photo updated",
+  "settingsPersonalPhotoRemoved": "Personal photo removed — showing school photo",
+  "settingsSpeakUpOrg": "SpeakUp {orgName}",
+  "@settingsSpeakUpOrg": {
+    "placeholders": {
+      "orgName": { "type": "String" }
+    }
+  },
+  "settingsTapPhotoChange": "Tap your photo to change your personal badge",
+  "settingsSchoolPhotoOnFile": "School photo on file — ask an admin to enable personal uploads",
+  "settingsPersonalUploadsRequireApproval": "Tap your photo — personal uploads require admin approval",
+  "settingsSectionGroups": "Groups & Clubs",
+  "settingsMyGroups": "My Groups & Clubs",
+  "settingsPendingMembershipRequests": "{count, plural, =1{1 pending membership request} other{{count} pending membership requests}}",
+  "@settingsPendingMembershipRequests": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "settingsGroupsSubtitle": "Clubs and organizations you belong to",
+  "settingsBrowseGroups": "Browse Groups & Clubs",
+  "settingsBrowseGroupsSubtitle": "Discover clubs and request to join",
+  "settingsSentGroupAlerts": "Sent Group Alerts",
+  "settingsMyBroadcasts": "My Broadcasts",
+  "settingsSentGroupAlertsSubtitle": "View alerts you sent and member responses",
+  "settingsMyBroadcastsSubtitle": "Manage sent reminders and view responses",
+  "settingsSectionAppearance": "Appearance",
+  "settingsTheme": "Theme",
+  "settingsThemeSystem": "System Default",
+  "settingsThemeLight": "Light",
+  "settingsThemeDark": "Dark",
+  "settingsSectionAccount": "Account",
+  "settingsChangePassword": "Change Password",
+  "settingsNotificationPreferences": "Notification Preferences",
+  "settingsNotificationsComingSoon": "Notifications — coming soon",
+  "settingsSectionHelp": "Help & Support",
+  "settingsHelpCenter": "Help Center",
+  "settingsHelpCenterSubtitle": "Guides for members and administrators",
+  "settingsSectionAbout": "About",
+  "settingsAboutApp": "About {appName}",
+  "@settingsAboutApp": {
+    "placeholders": {
+      "appName": { "type": "String" }
+    }
+  },
+  "settingsAboutLegalese": "© 2026 SpeakUp Connect",
+  "settingsSectionAdmin": "Administration",
+  "settingsAdminDashboard": "Admin Dashboard",
+  "settingsAdminDashboardSubtitle": "Review and manage submitted reports",
+  "settingsAdminGroups": "Groups & Clubs",
+  "settingsAdminGroupsSubtitle": "Create groups and manage member rosters",
+  "settingsJoinApplications": "Join Applications",
+  "settingsJoinApplicationsSubtitle": "Approve new member sign-ups",
+  "settingsPendingApprovals": "Pending Approvals",
+  "settingsPendingApprovalsSubtitle": "Review announcements and group alerts awaiting publish",
+  "settingsMemberManagement": "Member Management",
+  "settingsMemberManagementSubtitle": "View, block, unenroll, unblock, or re-enroll members",
+  "settingsStudentRoster": "Student Roster",
+  "settingsStudentRosterSubtitle": "Add students, assign grades individually or in bulk",
+  "settingsSchoolGrades": "School Grades",
+  "settingsSchoolGradesSubtitle": "Define which grade levels your school uses",
+  "settingsSignOut": "Sign Out",
+
+  "settingsLanguage": "Language",
+  "settingsLanguageEnglish": "English",
+  "settingsLanguageCebuano": "Bisaya / Cebuano",
+
+  "helpTitle": "Help",
+  "helpHubHeadline": "Guides for using SpeakUp Connect",
+  "helpHubDescription": "Guides for {orgName}. {adminNote}Content is specific to how this organization is set up.",
+  "@helpHubDescription": {
+    "placeholders": {
+      "orgName": { "type": "String" },
+      "adminNote": { "type": "String" }
+    }
+  },
+  "helpHubAdminNote": "Includes administration topics for your role. ",
+  "helpOrgFallback": "your organization",
+  "helpMemberGuideTitle": "Member Guide",
+  "helpMemberGuideSubtitle": "Sign in, submit reports, and use alerts",
+  "helpAdminGuideTitle": "Administrator Guide",
+  "helpAdminGuideSubtitle": "Roster, groups, reports, and reminders",
+  "helpGuideNotFound": "This guide could not be found.",
+  "helpAdminAccessDenied": "You do not have access to this administrator guide.",
+  "helpLoadFailed": "Could not load guide for your organization.",
+  "helpLoadFailedDetail": "Could not load guide for your organization.\n{error}",
+  "@helpLoadFailedDetail": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  }
+}

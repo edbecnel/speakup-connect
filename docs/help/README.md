@@ -37,10 +37,12 @@ assets/help/                  ← same structure, lowercase filenames for the ap
 ## How the app picks a guide
 
 1. Resolve the signed-in user's `organizationId` (from profile, or `FlavorConfig.orgId` on client builds).
-2. Load `assets/help/orgs/{organizationId}/{article}_guide.md`.
-3. If missing, fall back to `assets/help/_default/{article}_guide.md`.
+2. Load `assets/help/orgs/{organizationId}/{article}_guide.md` (or `{article}_guide_{locale}.md` when locale is not English).
+3. If missing, fall back to `assets/help/_default/{article}_guide.md` (then localized `_default` name, then English).
 
-Implementation: `lib/features/help/data/help_asset_resolver.dart`.
+Implementation: `lib/features/help/data/help_asset_resolver.dart`. Locale comes from `appLocaleProvider` (`en` → no suffix; `ceb` → `_ceb`).
+
+**Phase 1b:** `*_ceb.md` files may duplicate English until native speakers translate them. Same for `app_ceb.arb` UI strings.
 
 ---
 
@@ -85,6 +87,8 @@ Add a third guide only for a clearly different audience (e.g. applicants before 
 **Settings → Help & Support → Help Center**
 
 Lists guides for the current organization. Subtitle shows the org display name when loaded from Firestore.
+
+**App language:** members change UI language from the **globe dropdown at the top of Home** or **Settings → Appearance → Language**. Picker options always show **English** and **Bisaya / Cebuano** by native name. Help markdown loads `member_guide_ceb.md` (etc.) when that locale is active — see [INTERNATIONALIZATION.md](../INTERNATIONALIZATION.md).
 
 ---
 

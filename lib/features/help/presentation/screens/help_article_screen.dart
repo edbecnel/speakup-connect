@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:speakup_connect/core/l10n/app_localizations_extension.dart';
+import 'package:speakup_connect/core/l10n/locale_provider.dart';
 import 'package:speakup_connect/features/help/data/help_asset_resolver.dart';
 import 'package:speakup_connect/features/help/domain/help_article.dart';
 import 'package:speakup_connect/features/help/presentation/providers/help_provider.dart';
@@ -16,17 +18,19 @@ class HelpArticleScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final article = HelpArticles.byId(articleId);
     final canViewAdmin = ref.watch(canViewAdminHelpProvider);
     final organizationId = ref.watch(activeHelpOrganizationIdProvider);
+    final languageCode = helpLanguageCodeForLocale(ref.watch(appLocaleProvider));
 
     if (article == null) {
       return Scaffold(
         appBar: AppBar(
           leading: BackButton(onPressed: () => context.pop()),
-          title: const Text('Help'),
+          title: Text(l10n.helpTitle),
         ),
-        body: const AppErrorWidget(message: 'This guide could not be found.'),
+        body: AppErrorWidget(message: l10n.helpGuideNotFound),
       );
     }
 
@@ -34,11 +38,9 @@ class HelpArticleScreen extends ConsumerWidget {
       return Scaffold(
         appBar: AppBar(
           leading: BackButton(onPressed: () => context.pop()),
-          title: Text(article.title),
+          title: Text(article.title(l10n)),
         ),
-        body: const AppErrorWidget(
-          message: 'You do not have access to this administrator guide.',
-        ),
+        body: AppErrorWidget(message: l10n.helpAdminAccessDenied),
       );
     }
 
@@ -46,12 +48,13 @@ class HelpArticleScreen extends ConsumerWidget {
     final contentFuture = HelpAssetResolver.loadMarkdown(
       organizationId: organizationId,
       articleId: article.id,
+      languageCode: languageCode,
     );
 
     return Scaffold(
       appBar: AppBar(
         leading: BackButton(onPressed: () => context.pop()),
-        title: Text(article.title),
+        title: Text(article.title(l10n)),
       ),
       body: FutureBuilder<String>(
         future: contentFuture,
@@ -61,8 +64,7 @@ class HelpArticleScreen extends ConsumerWidget {
           }
           if (snapshot.hasError) {
             return AppErrorWidget(
-              message: 'Could not load guide for your organization.\n'
-                  '${snapshot.error}',
+              message: l10n.helpLoadFailedDetail('${snapshot.error}'),
             );
           }
 

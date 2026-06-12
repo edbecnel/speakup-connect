@@ -261,14 +261,20 @@ final isSmallScreen = screenWidth < 400;
 
 ### String Localization
 
-All user-facing strings must be localized from the start. Use `AppLocalizations` (or the org's configurable string system) rather than hardcoded strings:
+All user-facing UI strings **must** be added to **`lib/l10n/app_en.arb`** (US English source of truth) and referenced via `context.l10n` — never hardcoded in Dart widgets. Target locales (`app_ceb.arb`, `app_fil.arb`, …) are filled by translators later; developers only author English keys.
+
+1. Add the key and English copy to `app_en.arb`.
+2. Run `flutter pub get` (regenerates `AppLocalizations`).
+3. Use `context.l10n.yourKey` in presentation code.
+
+See [INTERNATIONALIZATION.md](INTERNATIONALIZATION.md) for key naming, placeholders, and the full workflow.
 
 ```dart
 // ✅
-Text(context.l10n.welcomeMessage)
+Text(context.l10n.homeWelcome(firstName))
 
-// ❌ 
-Text('Welcome to our school!')  // org-specific and hardcoded
+// ❌
+Text('Welcome, $firstName!')  // hardcoded — belongs in app_en.arb
 ```
 
 ---

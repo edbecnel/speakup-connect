@@ -69,9 +69,19 @@ If your account was blocked or unenrolled, contact your school administrator. Th
 
 ## Home dashboard
 
-The home screen is your starting point:
+The home screen is your starting point.
 
-- **Quick Actions** at the top — **Submit a concern**, **My Reports**, **Announcements**, and other shortcuts
+### App language
+
+At the top of **Home**, tap the **globe** icon and use the dropdown to choose **English** or **Bisaya / Cebuano**. Each language is listed by its own name so you can switch even when the rest of the screen is still in another language.
+
+You can also open **Settings → Appearance → Language**.
+
+Your choice is saved on this device. **Help Center** articles load the matching guide when a translation is available (otherwise English is shown).
+
+Below the language control:
+
+- **Quick Actions** — **Submit a concern**, **My Reports**, **Announcements**, and other shortcuts
 - **My Groups & Clubs** — below Quick Actions when you are on at least one roster; the section starts **collapsed** — tap the header to expand and see your groups, leader actions, and browse/join options
 
 You can always open your full group list under **Settings → My Groups & Clubs**.
@@ -177,6 +187,7 @@ If you forgot your current password, ask a school administrator to **reset** it 
 
 - **My Groups & Clubs** — full list of groups you belong to, with your role and club position
 - **Browse Groups & Clubs** — discover open clubs and request to join
+- **Language** — English or Bisaya / Cebuano (same choices as the globe dropdown on **Home**)
 - **Theme** — light, dark, or system default
 - **Help Center** — this guide and other help for your role
 - **About** — app version and organization name

@@ -4,6 +4,9 @@ import 'package:go_router/go_router.dart';
 import 'package:speakup_connect/config/app_config.dart';
 import 'package:speakup_connect/core/errors/app_exception.dart';
 import 'package:speakup_connect/core/constants/route_constants.dart';
+import 'package:speakup_connect/core/l10n/app_localizations_extension.dart';
+import 'package:speakup_connect/core/l10n/locale_provider.dart';
+import 'package:speakup_connect/l10n/app_localizations.dart';
 import 'package:speakup_connect/core/permissions/providers/permission_provider.dart';
 import 'package:speakup_connect/features/auth/presentation/providers/auth_provider.dart';
 import 'package:speakup_connect/features/groups/presentation/providers/group_membership_provider.dart';
@@ -16,6 +19,7 @@ import 'package:speakup_connect/features/organization/presentation/widgets/membe
 import 'package:speakup_connect/features/organization/presentation/widgets/profile_photo_picker.dart';
 import 'package:speakup_connect/features/settings/presentation/providers/settings_provider.dart';
 import 'package:speakup_connect/shared/widgets/app_button.dart';
+import 'package:speakup_connect/shared/widgets/language_selector.dart';
 import 'package:speakup_connect/shared/widgets/notification_badge_icon.dart';
 
 /// Settings / Profile screen.
@@ -39,22 +43,23 @@ class SettingsScreen extends ConsumerWidget {
     final canComposeAlerts = ref.watch(canComposeRemindersProvider);
     final leaderOnlyAlerts = ref.watch(isGroupLeaderOnlyComposerProvider);
 
-    final orgName = orgConfigAsync.value?.displayName ?? '—';
+    final l10n = context.l10n;
+    final orgName = orgConfigAsync.value?.displayName ?? l10n.settingsOrgUnavailable;
     final theme = Theme.of(context);
     final photoBusy = ref.watch(profilePhotoProvider).isLoading;
     final allowPersonalPhotos = ref.watch(allowMemberProfilePhotosProvider);
     final displayName =
-        user?.displayName ?? profile?.fullName ?? 'Anonymous';
+        user?.displayName ?? profile?.fullName ?? l10n.settingsAnonymous;
 
     ref.listen(profilePhotoProvider, (prev, next) {
       if (prev?.isLoading == true && !next.isLoading && next.hasError) {
         final err = next.error;
         final message = err is AppException
             ? err.message
-            : err?.toString() ?? 'Unknown error';
+            : err?.toString() ?? l10n.settingsUnknownError;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Could not update photo: $message'),
+            content: Text(l10n.settingsPhotoUpdateFailed(message)),
             backgroundColor: theme.colorScheme.error,
           ),
         );
@@ -64,7 +69,7 @@ class SettingsScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         leading: BackButton(onPressed: () => context.go(Routes.home)),
-        title: const Text('Settings'),
+        title: Text(l10n.settingsTitle),
       ),
       body: ListView(
         children: [
@@ -85,12 +90,8 @@ class SettingsScreen extends ConsumerWidget {
                     if (!allowPersonalPhotos) {
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text(
-                              'Personal profile photos are not enabled. '
-                              'Ask an administrator to turn on “Allow personal '
-                              'profile photos” under Organization Settings.',
-                            ),
+                          SnackBar(
+                            content: Text(l10n.settingsPersonalPhotosDisabled),
                           ),
                         );
                       }
@@ -101,8 +102,8 @@ class SettingsScreen extends ConsumerWidget {
                         .uploadMemberAvatar(path);
                     if (context.mounted && ok) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Personal profile photo updated'),
+                        SnackBar(
+                          content: Text(l10n.settingsPersonalPhotoUpdated),
                         ),
                       );
                     }
@@ -114,10 +115,8 @@ class SettingsScreen extends ConsumerWidget {
                               .clearMemberAvatar();
                           if (context.mounted && ok) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                  'Personal photo removed — showing school photo',
-                                ),
+                              SnackBar(
+                                content: Text(l10n.settingsPersonalPhotoRemoved),
                               ),
                             );
                           }
@@ -136,7 +135,7 @@ class SettingsScreen extends ConsumerWidget {
                         ),
                       ),
                       Text(
-                        'SpeakUp $orgName',
+                        l10n.settingsSpeakUpOrg(orgName),
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: theme.colorScheme.primary,
                         ),
@@ -144,11 +143,11 @@ class SettingsScreen extends ConsumerWidget {
                       const SizedBox(height: 4),
                       Text(
                         allowPersonalPhotos
-                            ? 'Tap your photo to change your personal badge'
+                            ? l10n.settingsTapPhotoChange
                             : (profile?.officialPhotoUrl != null &&
                                     profile!.officialPhotoUrl!.isNotEmpty
-                                ? 'School photo on file — ask an admin to enable personal uploads'
-                                : 'Tap your photo — personal uploads require admin approval'),
+                                ? l10n.settingsSchoolPhotoOnFile
+                                : l10n.settingsPersonalUploadsRequireApproval),
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
@@ -165,36 +164,42 @@ class SettingsScreen extends ConsumerWidget {
           const Divider(),
 
           // --- My groups ---
-          const _SectionHeader(title: 'Groups & Clubs'),
+          _SectionHeader(title: l10n.settingsSectionGroups),
           ListTile(
             leading: NotificationBadgeIcon(
               icon: Icons.groups_outlined,
               unreadCount: pendingGroupRequestsCount,
             ),
-            title: const Text('My Groups & Clubs'),
+            title: Text(l10n.settingsMyGroups),
             subtitle: Text(
               pendingGroupRequestsCount > 0
-                  ? '$pendingGroupRequestsCount pending membership request(s)'
-                  : 'Clubs and organizations you belong to',
+                  ? l10n.settingsPendingMembershipRequests(
+                      pendingGroupRequestsCount,
+                    )
+                  : l10n.settingsGroupsSubtitle,
             ),
             trailing: const Icon(Icons.chevron_right_rounded),
             onTap: () => context.push(Routes.myGroups),
           ),
           ListTile(
             leading: const Icon(Icons.search_rounded),
-            title: const Text('Browse Groups & Clubs'),
-            subtitle: const Text('Discover clubs and request to join'),
+            title: Text(l10n.settingsBrowseGroups),
+            subtitle: Text(l10n.settingsBrowseGroupsSubtitle),
             trailing: const Icon(Icons.chevron_right_rounded),
             onTap: () => context.push(Routes.browseGroups),
           ),
           if (canComposeAlerts)
             ListTile(
               leading: const Icon(Icons.outbox_outlined),
-              title: Text(leaderOnlyAlerts ? 'Sent Group Alerts' : 'My Broadcasts'),
+              title: Text(
+                leaderOnlyAlerts
+                    ? l10n.settingsSentGroupAlerts
+                    : l10n.settingsMyBroadcasts,
+              ),
               subtitle: Text(
                 leaderOnlyAlerts
-                    ? 'View alerts you sent and member responses'
-                    : 'Manage sent reminders and view responses',
+                    ? l10n.settingsSentGroupAlertsSubtitle
+                    : l10n.settingsMyBroadcastsSubtitle,
               ),
               trailing: const Icon(Icons.chevron_right_rounded),
               onTap: () => context.push(Routes.myBroadcasts),
@@ -203,33 +208,43 @@ class SettingsScreen extends ConsumerWidget {
           const Divider(),
 
           // --- Appearance ---
-          const _SectionHeader(title: 'Appearance'),
+          _SectionHeader(title: l10n.settingsSectionAppearance),
+          ListTile(
+            leading: const Icon(Icons.language_outlined),
+            title: Text(l10n.settingsLanguage),
+            subtitle: Text(
+              kLanguageNativeLabels[ref.watch(appLocaleProvider).languageCode] ??
+                  l10n.settingsLanguageEnglish,
+            ),
+            trailing: const Icon(Icons.chevron_right_rounded),
+            onTap: () => showLanguagePickerSheet(context, ref),
+          ),
           ListTile(
             leading: const Icon(Icons.brightness_6_outlined),
-            title: const Text('Theme'),
-            subtitle: Text(themeMode.label),
+            title: Text(l10n.settingsTheme),
+            subtitle: Text(_themeModeLabel(l10n, themeMode)),
             trailing: const Icon(Icons.chevron_right_rounded),
-            onTap: () => _showThemeSelector(context, ref, themeMode),
+            onTap: () => _showThemeSelector(context, ref, themeMode, l10n),
           ),
 
           const Divider(),
 
           // --- Account ---
-          const _SectionHeader(title: 'Account'),
+          _SectionHeader(title: l10n.settingsSectionAccount),
           ListTile(
             leading: const Icon(Icons.lock_outline_rounded),
-            title: const Text('Change Password'),
+            title: Text(l10n.settingsChangePassword),
             trailing: const Icon(Icons.chevron_right_rounded),
             onTap: () => context.push(Routes.changePassword),
           ),
           ListTile(
             leading: const Icon(Icons.notifications_outlined),
-            title: const Text('Notification Preferences'),
+            title: Text(l10n.settingsNotificationPreferences),
             trailing: const Icon(Icons.chevron_right_rounded),
             onTap: () {
               // TODO — Sprint 2
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Notifications — coming soon')),
+                SnackBar(content: Text(l10n.settingsNotificationsComingSoon)),
               );
             },
           ),
@@ -237,11 +252,11 @@ class SettingsScreen extends ConsumerWidget {
           const Divider(),
 
           // --- Help ---
-          const _SectionHeader(title: 'Help & Support'),
+          _SectionHeader(title: l10n.settingsSectionHelp),
           ListTile(
             leading: const Icon(Icons.help_outline_rounded),
-            title: const Text('Help Center'),
-            subtitle: const Text('Guides for members and administrators'),
+            title: Text(l10n.settingsHelpCenter),
+            subtitle: Text(l10n.settingsHelpCenterSubtitle),
             trailing: const Icon(Icons.chevron_right_rounded),
             onTap: () => context.push(Routes.helpHub),
           ),
@@ -249,17 +264,17 @@ class SettingsScreen extends ConsumerWidget {
           const Divider(),
 
           // --- About ---
-          const _SectionHeader(title: 'About'),
+          _SectionHeader(title: l10n.settingsSectionAbout),
           ListTile(
             leading: const Icon(Icons.info_outline_rounded),
-            title: Text('About ${AppConfig.appName}'),
+            title: Text(l10n.settingsAboutApp(AppConfig.appName)),
             trailing: const Icon(Icons.chevron_right_rounded),
             onTap: () {
               showAboutDialog(
                 context: context,
-                applicationName: 'SpeakUp $orgName',
+                applicationName: l10n.settingsSpeakUpOrg(orgName),
                 applicationVersion: '1.0.0',
-                applicationLegalese: '© 2026 SpeakUp Connect',
+                applicationLegalese: l10n.settingsAboutLegalese,
               );
             },
           ),
@@ -270,20 +285,20 @@ class SettingsScreen extends ConsumerWidget {
           if (profile?.isAdmin == true ||
               canTriageReports ||
               canManageGroups) ...[
-            const _SectionHeader(title: 'Administration'),
+            _SectionHeader(title: l10n.settingsSectionAdmin),
             if (canTriageReports)
               ListTile(
                 leading: const Icon(Icons.admin_panel_settings_outlined),
-                title: const Text('Admin Dashboard'),
-                subtitle: const Text('Review and manage submitted reports'),
+                title: Text(l10n.settingsAdminDashboard),
+                subtitle: Text(l10n.settingsAdminDashboardSubtitle),
                 trailing: const Icon(Icons.chevron_right_rounded),
                 onTap: () => context.push(Routes.adminDashboard),
               ),
             if (profile?.isAdmin == true || canManageGroups) ...[
               ListTile(
                 leading: const Icon(Icons.groups_outlined),
-                title: const Text('Groups & Clubs'),
-                subtitle: const Text('Create groups and manage member rosters'),
+                title: Text(l10n.settingsAdminGroups),
+                subtitle: Text(l10n.settingsAdminGroupsSubtitle),
                 trailing: const Icon(Icons.chevron_right_rounded),
                 onTap: () => context.push(Routes.groupsList),
               ),
@@ -300,8 +315,8 @@ class SettingsScreen extends ConsumerWidget {
                     ),
                   ),
                 ),
-                title: const Text('Join Applications'),
-                subtitle: const Text('Approve new member sign-ups'),
+                title: Text(l10n.settingsJoinApplications),
+                subtitle: Text(l10n.settingsJoinApplicationsSubtitle),
                 trailing: const Icon(Icons.chevron_right_rounded),
                 onTap: () => context.push(Routes.memberApprovals),
               ),
@@ -316,36 +331,30 @@ class SettingsScreen extends ConsumerWidget {
                     ),
                   ),
                 ),
-                title: const Text('Pending Approvals'),
-                subtitle: const Text(
-                  'Review announcements and group alerts awaiting publish',
-                ),
+                title: Text(l10n.settingsPendingApprovals),
+                subtitle: Text(l10n.settingsPendingApprovalsSubtitle),
                 trailing: const Icon(Icons.chevron_right_rounded),
                 onTap: () => context.push(Routes.reminderApprovals),
               ),
               ListTile(
                 leading: const Icon(Icons.people_outline),
-                title: const Text('Member Management'),
-                subtitle: const Text(
-                  'View, block, unenroll, unblock, or re-enroll members',
-                ),
+                title: Text(l10n.settingsMemberManagement),
+                subtitle: Text(l10n.settingsMemberManagementSubtitle),
                 trailing: const Icon(Icons.chevron_right_rounded),
                 onTap: () => context.push(Routes.enrolledUsers),
               ),
               if (supportsGrades) ...[
                 ListTile(
                   leading: const Icon(Icons.school_outlined),
-                  title: const Text('Student Roster'),
-                  subtitle: const Text(
-                    'Add students, assign grades individually or in bulk',
-                  ),
+                  title: Text(l10n.settingsStudentRoster),
+                  subtitle: Text(l10n.settingsStudentRosterSubtitle),
                   trailing: const Icon(Icons.chevron_right_rounded),
                   onTap: () => context.push(Routes.rosterManagement),
                 ),
                 ListTile(
                   leading: const Icon(Icons.format_list_numbered_outlined),
-                  title: const Text('School Grades'),
-                  subtitle: const Text('Define which grade levels your school uses'),
+                  title: Text(l10n.settingsSchoolGrades),
+                  subtitle: Text(l10n.settingsSchoolGradesSubtitle),
                   trailing: const Icon(Icons.chevron_right_rounded),
                   onTap: () => context.push(Routes.schoolGradesSettings),
                 ),
@@ -358,7 +367,7 @@ class SettingsScreen extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.all(16),
             child: AppButton.text(
-              label: 'Sign Out',
+              label: l10n.settingsSignOut,
               onPressed: () async {
                 await ref.read(authProvider.notifier).signOut();
                 if (context.mounted) {
@@ -374,7 +383,12 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  void _showThemeSelector(BuildContext context, WidgetRef ref, ThemeMode current) {
+  void _showThemeSelector(
+    BuildContext context,
+    WidgetRef ref,
+    ThemeMode current,
+    AppLocalizations l10n,
+  ) {
     showModalBottomSheet<void>(
       context: context,
       builder: (_) => SafeArea(
@@ -391,7 +405,7 @@ class SettingsScreen extends ConsumerWidget {
             children: ThemeMode.values
                 .map((mode) => RadioListTile<ThemeMode>(
                       value: mode,
-                      title: Text(mode.label),
+                      title: Text(_themeModeLabel(l10n, mode)),
                     ))
                 .toList(),
           ),
@@ -401,6 +415,12 @@ class SettingsScreen extends ConsumerWidget {
   }
 
 }
+
+String _themeModeLabel(AppLocalizations l10n, ThemeMode mode) => switch (mode) {
+      ThemeMode.system => l10n.settingsThemeSystem,
+      ThemeMode.light => l10n.settingsThemeLight,
+      ThemeMode.dark => l10n.settingsThemeDark,
+    };
 
 class _SectionHeader extends StatelessWidget {
   const _SectionHeader({required this.title});
@@ -423,10 +443,3 @@ class _SectionHeader extends StatelessWidget {
   }
 }
 
-extension on ThemeMode {
-  String get label => switch (this) {
-        ThemeMode.system => 'System Default',
-        ThemeMode.light => 'Light',
-        ThemeMode.dark => 'Dark',
-      };
-}

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:speakup_connect/core/constants/route_constants.dart';
 import 'package:speakup_connect/core/errors/failure.dart';
 import 'package:speakup_connect/core/extensions/context_extensions.dart';
+import 'package:speakup_connect/core/l10n/app_localizations_extension.dart';
 import 'package:speakup_connect/core/utils/validators.dart';
 import 'package:speakup_connect/features/auth/presentation/providers/auth_provider.dart';
 import 'package:speakup_connect/features/organization/presentation/providers/organization_provider.dart';
@@ -75,7 +76,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
   Future<void> _onRegister() async {
     if (!_registerFormKey.currentState!.validate()) return;
     if (!_termsAccepted) {
-      context.showSnackBar('Please accept the Terms & Privacy Policy', isError: true);
+      context.showSnackBar(context.l10n.authAcceptTermsSnackbar, isError: true);
       return;
     }
     await ref.read(authProvider.notifier).signUpWithEmail(
@@ -95,13 +96,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
     ref.listen(authProvider, (_, next) {
       if (next is AsyncError) {
         final error = next.error;
-        final message = error is Failure ? error.message : 'Sign in failed. Please try again.';
+        final message = error is Failure
+            ? error.message
+            : context.l10n.authSignInFailed;
         context.showSnackBar(message, isError: true);
       }
     });
 
     final theme = Theme.of(context);
-    final orgName = orgConfigAsync.value?.displayName ?? 'Connect';
+    final l10n = context.l10n;
+    final orgName =
+        orgConfigAsync.value?.displayName ?? l10n.authOrgFallbackName;
 
     return Scaffold(
       appBar: AppBar(
@@ -131,9 +136,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                   labelColor: theme.colorScheme.onPrimary,
                   unselectedLabelColor: theme.colorScheme.onSurfaceVariant,
                   dividerColor: Colors.transparent,
-                  tabs: const [
-                    Tab(text: 'Login'),
-                    Tab(text: 'Sign Up'),
+                  tabs: [
+                    Tab(text: l10n.commonLogin),
+                    Tab(text: l10n.commonSignUp),
                   ],
                 ),
               ),
@@ -187,7 +192,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Text(
-                      'or',
+                      l10n.commonOr,
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
@@ -200,10 +205,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
               OutlinedButton.icon(
                 onPressed: () {
                   // TODO: Google sign-in — Sprint 3
-                  context.showSnackBar('Google sign-in coming soon!');
+                  context.showSnackBar(l10n.authGoogleSignInSoon);
                 },
                 icon: const Icon(Icons.login),
-                label: const Text('Continue with Google'),
+                label: Text(l10n.authContinueWithGoogle),
                 style: OutlinedButton.styleFrom(minimumSize: const Size(double.infinity, 52)),
               ),
 
@@ -211,7 +216,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
 
               // --- Terms ---
               Text(
-                'By continuing, you agree to our Terms and Privacy Policy.',
+                l10n.authTermsFooter,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
@@ -249,6 +254,8 @@ class _LoginForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return Form(
       key: formKey,
       child: Column(
@@ -256,8 +263,8 @@ class _LoginForm extends StatelessWidget {
         children: [
           AppTextField(
             controller: identifierController,
-            label: 'Email or student ID',
-            hint: 'you@school.edu or student ID',
+            label: l10n.authEmailOrStudentId,
+            hint: l10n.authEmailOrStudentIdHint,
             prefixIcon: Icons.person_outline_rounded,
             keyboardType: TextInputType.text,
             textInputAction: TextInputAction.next,
@@ -266,8 +273,8 @@ class _LoginForm extends StatelessWidget {
           const SizedBox(height: 16),
           AppTextField(
             controller: passwordController,
-            label: 'Password',
-            hint: 'Your password or student ID',
+            label: l10n.commonPassword,
+            hint: l10n.authPasswordHintLogin,
             prefixIcon: Icons.lock_outline_rounded,
             obscureText: !passwordVisible,
             textInputAction: TextInputAction.done,
@@ -286,12 +293,12 @@ class _LoginForm extends StatelessWidget {
               onPressed: () {
                 // TODO: Navigate to forgot password screen
               },
-              child: const Text('Forgot Password?'),
+              child: Text(l10n.authForgotPassword),
             ),
           ),
           const SizedBox(height: 16),
           AppButton.primary(
-            label: 'Login',
+            label: l10n.commonLogin,
             onPressed: onLogin,
             isLoading: isLoading,
           ),
@@ -334,6 +341,8 @@ class _RegisterForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return Form(
       key: formKey,
       child: Column(
@@ -341,17 +350,17 @@ class _RegisterForm extends StatelessWidget {
         children: [
           AppTextField(
             controller: nameController,
-            label: 'Full Name',
-            hint: 'Enter your full name',
+            label: l10n.authFullName,
+            hint: l10n.authFullNameHint,
             prefixIcon: Icons.person_outline_rounded,
             textInputAction: TextInputAction.next,
-            validator: (v) => Validators.required(v, fieldName: 'Full name'),
+            validator: (v) => Validators.required(v, fieldName: l10n.authFullName),
           ),
           const SizedBox(height: 12),
           AppTextField(
             controller: emailController,
-            label: 'Email',
-            hint: 'you@school.edu',
+            label: l10n.commonEmail,
+            hint: l10n.authEmailHint,
             prefixIcon: Icons.email_outlined,
             keyboardType: TextInputType.emailAddress,
             textInputAction: TextInputAction.next,
@@ -360,8 +369,8 @@ class _RegisterForm extends StatelessWidget {
           const SizedBox(height: 12),
           AppTextField(
             controller: passwordController,
-            label: 'Password',
-            hint: 'At least 8 characters',
+            label: l10n.commonPassword,
+            hint: l10n.authPasswordHintRegister,
             prefixIcon: Icons.lock_outline_rounded,
             obscureText: !passwordVisible,
             textInputAction: TextInputAction.next,
@@ -376,8 +385,8 @@ class _RegisterForm extends StatelessWidget {
           const SizedBox(height: 12),
           AppTextField(
             controller: confirmPasswordController,
-            label: 'Confirm Password',
-            hint: 'Re-enter your password',
+            label: l10n.authConfirmPassword,
+            hint: l10n.authConfirmPasswordHint,
             prefixIcon: Icons.lock_outline_rounded,
             obscureText: !confirmPasswordVisible,
             textInputAction: TextInputAction.done,
@@ -395,14 +404,14 @@ class _RegisterForm extends StatelessWidget {
           Row(
             children: [
               Checkbox(value: termsAccepted, onChanged: onTermsChanged),
-              const Expanded(
-                child: Text('I accept the Terms & Privacy Policy'),
+              Expanded(
+                child: Text(l10n.authAcceptTermsCheckbox),
               ),
             ],
           ),
           const SizedBox(height: 8),
           AppButton.primary(
-            label: 'Sign Up',
+            label: l10n.commonSignUp,
             onPressed: onRegister,
             isLoading: isLoading,
           ),
