@@ -249,4 +249,23 @@ textarea.target-input {
 
 .toolbar .row + .row { margin-top: 0.75rem; }
 
+.search-filters-row {
+  align-items: center;
+  padding-top: 0.25rem;
+  border-top: 1px solid var(--border);
+}
+
+.search-filters-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--muted);
+  min-width: 3.5rem;
+}
+
+.search-filters-row input[type="search"] {
+  min-width: 11rem;
+  flex: 1 1 11rem;
+  max-width: 18rem;
+}
+
 code { font-size: 0.85em; }

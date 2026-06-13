@@ -45,7 +45,7 @@
         <h3>Quick start (translation moderator)</h3>
         <ol>
           <li>Select the <strong>Target locale</strong> for the language you are editing.</li>
-          <li>Use <strong>Search</strong>, <strong>Filter status</strong>, or <strong>Feature</strong> to find strings.</li>
+          <li>Use <strong>Search filters</strong> (Key, English, Target), <strong>Filter status</strong>, or <strong>Feature</strong> to find strings.</li>
           <li>Read the <strong>English</strong> column, then type your translation in the <strong>Target</strong> field.</li>
           <li>Click <strong>Save</strong> to store as <em>in review</em>, or <strong>Approve</strong> when the wording is final.</li>
           <li>Optional: <strong>AI draft</strong> on one row for a suggested first pass &mdash; always review before approving.</li>
@@ -68,8 +68,8 @@
           <dd>Limit rows by workflow state (see Status values below).</dd>
           <dt>Feature</dt>
           <dd>Filter by key prefix (for example <code>settings</code>, <code>auth</code>).</dd>
-          <dt>Search</dt>
-          <dd>Find keys or text in English or the target language.</dd>
+          <dt>Search filters</dt>
+          <dd>Filter by <strong>Key</strong>, <strong>English</strong>, or <strong>Target</strong> text (combine any of them). Use <strong>Clear filters</strong> to reset.</dd>
           <dt>Refresh</dt>
           <dd>Reload the list from the server.</dd>
           <dt class="help-platform">Import <code>app_en.arb</code></dt>
@@ -201,7 +201,13 @@
             <option value="">All</option>
           </select>
         </label>
-        <input id="search" type="search" placeholder="Search keys or text" />
+      </div>
+      <div class="row wrap search-filters-row">
+        <span class="search-filters-label">Search</span>
+        <input id="search-key" type="search" placeholder="Key…" aria-label="Filter by key" />
+        <input id="search-english" type="search" placeholder="English…" aria-label="Filter by English text" />
+        <input id="search-target" type="search" placeholder="Target…" aria-label="Filter by target text" />
+        <button id="clear-filters-btn" type="button" class="secondary" title="Clear search filters">Clear filters</button>
       </div>
       <div class="row wrap">
         <label class="file-label">

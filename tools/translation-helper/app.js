@@ -43,7 +43,10 @@ const els = {
   targetLocale: document.getElementById('target-locale'),
   statusFilter: document.getElementById('status-filter'),
   featureFilter: document.getElementById('feature-filter'),
-  search: document.getElementById('search'),
+  searchKey: document.getElementById('search-key'),
+  searchEnglish: document.getElementById('search-english'),
+  searchTarget: document.getElementById('search-target'),
+  clearFiltersBtn: document.getElementById('clear-filters-btn'),
   importArb: document.getElementById('import-arb'),
   refreshBtn: document.getElementById('refresh-btn'),
   batchAiBtn: document.getElementById('batch-ai-btn'),
@@ -156,21 +159,59 @@ function displayValue(entry) {
   return '';
 }
 
+function normalizeSearchText(text) {
+  return String(text ?? '')
+    .toLowerCase()
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function matchesFilter(value, query) {
+  if (!query) return true;
+  return normalizeSearchText(value).includes(normalizeSearchText(query));
+}
+
+function getSearchFilters() {
+  return {
+    key: els.searchKey.value.trim().toLowerCase(),
+    english: els.searchEnglish.value.trim().toLowerCase(),
+    target: els.searchTarget.value.trim().toLowerCase(),
+  };
+}
+
+function hasActiveSearchFilters() {
+  const f = getSearchFilters();
+  return Boolean(f.key || f.english || f.target);
+}
+
+function clearSearchFilters() {
+  els.searchKey.value = '';
+  els.searchEnglish.value = '';
+  els.searchTarget.value = '';
+  els.clearFiltersBtn.disabled = true;
+  renderTable();
+}
+
+function updateClearFiltersButton() {
+  els.clearFiltersBtn.disabled = !hasActiveSearchFilters();
+}
+
 function renderTable() {
   const status = els.statusFilter.value;
   const feature = els.featureFilter.value;
-  const q = els.search.value.trim().toLowerCase();
+  const { key: keyQ, english: englishQ, target: targetQ } = getSearchFilters();
 
   const filtered = entries.filter((e) => {
     if (status && e.status !== status) return false;
     if (feature && parseFeature(e.stringKey) !== feature) return false;
-    if (!q) return true;
-    const blob = [e.stringKey, e.sourceValue, e.targetValue, e.aiDraft]
-      .filter(Boolean)
-      .join(' ')
-      .toLowerCase();
-    return blob.includes(q);
+    if (!matchesFilter(e.stringKey, keyQ)) return false;
+    if (!matchesFilter(e.sourceValue, englishQ)) return false;
+    const targetText = [e.targetValue, e.aiDraft].filter(Boolean).join(' ');
+    if (!matchesFilter(targetText, targetQ)) return false;
+    return true;
   });
+
+  updateClearFiltersButton();
 
   els.entriesBody.innerHTML = filtered.map((entry) => {
     const val = displayValue(entry);
@@ -363,10 +404,14 @@ els.signOutBtn.addEventListener('click', () => signOut(auth));
 els.targetLocale.addEventListener('change', () => loadEntries().catch(showError));
 els.statusFilter.addEventListener('change', renderTable);
 els.featureFilter.addEventListener('change', renderTable);
-els.search.addEventListener('input', () => {
-  clearTimeout(searchTimer);
-  searchTimer = setTimeout(renderTable, 200);
-});
+for (const input of [els.searchKey, els.searchEnglish, els.searchTarget]) {
+  input.addEventListener('input', () => {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(renderTable, 200);
+  });
+}
+els.clearFiltersBtn.addEventListener('click', clearSearchFilters);
+els.clearFiltersBtn.disabled = true;
 els.refreshBtn.addEventListener('click', () => loadEntries().catch(showError));
 els.batchAiBtn.addEventListener('click', () => batchDraft().catch(showError));
 els.exportBtn.addEventListener('click', () => exportArb().catch(showError));
