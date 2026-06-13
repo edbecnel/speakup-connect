@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:speakup_connect/core/l10n/app_localizations_extension.dart';
 import 'package:speakup_connect/features/groups/domain/entities/group_position_role.dart';
 import 'package:speakup_connect/features/groups/presentation/providers/group_provider.dart';
 import 'package:speakup_connect/features/groups/presentation/widgets/group_position_roles_editor.dart';
@@ -30,22 +31,26 @@ class _EditGroupPositionRolesScreenState
         .submit(groupId: widget.groupId, positionRoles: _roles);
 
     if (!mounted) return;
+    final l10n = context.l10n;
 
     if (ok) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Club positions saved')),
+        SnackBar(content: Text(l10n.groupsClubPositionsSaved)),
       );
       context.pop();
     } else {
       final error = ref.read(updateGroupPositionRolesProvider).error;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error?.toString() ?? 'Could not save positions')),
+        SnackBar(
+          content: Text(error?.toString() ?? l10n.groupsCouldNotSavePositions),
+        ),
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final groupAsync = ref.watch(groupByIdProvider(widget.groupId));
     final saveState = ref.watch(updateGroupPositionRolesProvider);
 
@@ -53,9 +58,9 @@ class _EditGroupPositionRolesScreenState
       appBar: AppBar(
         leading: BackButton(onPressed: () => context.pop()),
         title: groupAsync.when(
-          data: (g) => Text(g?.name ?? 'Club Positions'),
-          loading: () => const Text('Club Positions'),
-          error: (_, __) => const Text('Club Positions'),
+          data: (g) => Text(g?.name ?? l10n.groupsClubPositionsTitle),
+          loading: () => Text(l10n.groupsClubPositionsTitle),
+          error: (_, __) => Text(l10n.groupsClubPositionsTitle),
         ),
       ),
       body: groupAsync.when(
@@ -63,7 +68,7 @@ class _EditGroupPositionRolesScreenState
         error: (e, _) => AppErrorWidget(message: e.toString()),
         data: (group) {
           if (group == null) {
-            return const AppErrorWidget(message: 'Group not found');
+            return AppErrorWidget(message: l10n.groupsGroupNotFound);
           }
 
           if (!_initialized) {
@@ -81,7 +86,7 @@ class _EditGroupPositionRolesScreenState
               ),
               const SizedBox(height: 24),
               AppButton.primary(
-                label: 'Save Positions',
+                label: l10n.groupsSavePositions,
                 isLoading: saveState.isLoading,
                 onPressed: _save,
               ),

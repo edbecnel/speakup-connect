@@ -452,6 +452,8 @@ Extracurricular units (clubs, organizations, corps). Separate from academic clas
 }
 ```
 
+**Client editing:** `EditGroupScreen` updates name, description, membership policies, and (for admins / `manageGroupRoster`) `positionRoles` and `isActive`. Group leaders may update name, description, and policy fields only. Renaming a group syncs `groupName` on each member’s `users/{uid}/groupMemberships/{groupId}` index. Roster changes use the `members` subcollection, not Edit Group.
+
 #### `organizations/{organizationId}/groups/{groupId}/joinRequests/{userId}` — Group Join Requests
 
 > One document per requester per group (document ID = `userId`). Mutations via Cloud Functions. See [GROUP_JOIN_REQUESTS.md](GROUP_JOIN_REQUESTS.md).

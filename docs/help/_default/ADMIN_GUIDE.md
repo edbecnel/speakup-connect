@@ -37,9 +37,35 @@ Users with report-triage permissions can open the **Admin Dashboard**, update re
 
 ## Groups and clubs
 
-**Members** see their own groups under **Home** or **Settings → My Groups & Clubs** (read-only).
+**Members** see their own groups under **Home** or **Settings → My Groups & Clubs**. On each group card:
 
-**Staff with `manageGroupRoster`** (or org admins) use **Settings → Administration → Groups & Clubs** to create groups, add members, review **join/leave requests**, configure join/leave policies, and assign leader/member roles. Some organizations also support **custom club positions** (offices such as President or Secretary).
+- **View Members** — open the roster (read-only)
+- **Leave group** / **Request to leave** — when the club’s policy allows
+
+**Staff with `manageGroupRoster`** (or org admins) use **Settings → Administration → Groups & Clubs** to create groups, add members, review **join/leave requests**, and assign leader/member roles. Some organizations also support **custom club positions** (offices such as President or Secretary).
+
+### Edit group settings (not the member roster)
+
+**Who can open Edit Group:** org admin, holder of **`manageGroupRoster`**, or **Leader** on that group’s roster.
+
+**What can be edited in one screen** (`EditGroupScreen`):
+
+| Field | Org admin / `manageGroupRoster` | Group leader only |
+|-------|--------------------------------|-------------------|
+| Name, description | ✅ | ✅ |
+| Allow join requests, join hint, leave policy | ✅ | ✅ |
+| Club position titles | ✅ | ❌ |
+| Active / inactive (hide from browse) | Org admin only | ❌ |
+
+**Where to find Edit Group:**
+
+| Path | Audience |
+|------|----------|
+| **Administration → Groups & Clubs** → tap a group → **Edit Group** card at top of roster (or pencil on list row) | Admin / `manageGroupRoster` |
+| **My Groups & Clubs** → **Edit Group** on a group you lead | Group leader |
+| Group roster app bar → **Edit Group** | Admin / leader for that group |
+
+Member roster changes (add, remove, roles, positions) stay on the **members** screen — not in Edit Group.
 
 **Org admins** can **edit member profiles** (name, student ID, email, grade) and **reset passwords** from **Member Management**.
 

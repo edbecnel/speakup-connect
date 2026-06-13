@@ -287,10 +287,10 @@ Implementation: `lib/shared/widgets/language_selector.dart`.
 
 | Content type | Mechanism | v1 |
 |--------------|-----------|-----|
-| Buttons, labels, errors, nav titles | ARB / `AppLocalizations` | ✅ phase 1 (auth, splash, home, settings, help hub) |
+| Buttons, labels, errors, nav titles | ARB / `AppLocalizations` | ✅ phase 1 (auth, splash, home, settings, help hub); ✅ **groups** screens (`groups*` keys in `app_en.arb`, June 2026) |
 | Language picker **option** labels | `kLanguageNativeLabels` only — **not** ARB | ✅ |
 | Validation messages in `validators.dart` | Move to l10n keys | ⏳ |
-| `SnackBar` / dialog copy in features | Replace hardcoded strings | ⏳ phase 2 — reports, admin, groups, announcements, reminders, roles, notifications (see Epic 2.5) |
+| `SnackBar` / dialog copy in features | Replace hardcoded strings | ⏳ phase 2 — reports, admin, announcements, reminders, roles, notifications (groups shipped June 2026) |
 | `intl` dates and numbers | Pass active locale from `appLocaleProvider` | ⏳ |
 | Help markdown (`assets/help/`) | Per-locale: `member_guide_ceb.md`, `member_guide_fil.md` | ✅ resolver; content mostly English placeholders |
 | Firestore org `welcomeMessage`, `tagline` | Admin-authored; not auto-translated | — |

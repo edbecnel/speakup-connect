@@ -152,6 +152,78 @@ abstract class AppLocalizations {
   /// **'Email'**
   String get commonEmail;
 
+  /// No description provided for @commonCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get commonCancel;
+
+  /// No description provided for @commonSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit'**
+  String get commonSubmit;
+
+  /// No description provided for @commonRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get commonRemove;
+
+  /// No description provided for @commonBrowse.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse'**
+  String get commonBrowse;
+
+  /// No description provided for @commonLeave.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave'**
+  String get commonLeave;
+
+  /// No description provided for @commonApprove.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve'**
+  String get commonApprove;
+
+  /// No description provided for @commonDecline.
+  ///
+  /// In en, this message translates to:
+  /// **'Decline'**
+  String get commonDecline;
+
+  /// No description provided for @commonDeny.
+  ///
+  /// In en, this message translates to:
+  /// **'Deny'**
+  String get commonDeny;
+
+  /// No description provided for @commonBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get commonBack;
+
+  /// No description provided for @commonSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get commonSearch;
+
+  /// No description provided for @commonSelectAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Select all'**
+  String get commonSelectAll;
+
+  /// No description provided for @commonClearAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear all'**
+  String get commonClearAll;
+
   /// No description provided for @authAcceptTermsSnackbar.
   ///
   /// In en, this message translates to:
@@ -499,6 +571,864 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Tap your photo — personal uploads require admin approval'**
   String get settingsPersonalUploadsRequireApproval;
+
+  /// No description provided for @groupsManageMembers.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage Members'**
+  String get groupsManageMembers;
+
+  /// No description provided for @groupsViewMembers.
+  ///
+  /// In en, this message translates to:
+  /// **'View Members'**
+  String get groupsViewMembers;
+
+  /// No description provided for @groupsAddMembers.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Members'**
+  String get groupsAddMembers;
+
+  /// No description provided for @groupsRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'Requests'**
+  String get groupsRequests;
+
+  /// No description provided for @groupsRequestsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Requests ({count})'**
+  String groupsRequestsCount(int count);
+
+  /// No description provided for @groupsSendAlert.
+  ///
+  /// In en, this message translates to:
+  /// **'Send Alert'**
+  String get groupsSendAlert;
+
+  /// No description provided for @groupsEditGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Group'**
+  String get groupsEditGroup;
+
+  /// No description provided for @groupsEditGroupMembersHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Change name, description, policies, and club positions'**
+  String get groupsEditGroupMembersHint;
+
+  /// No description provided for @groupsPostAnnouncement.
+  ///
+  /// In en, this message translates to:
+  /// **'Post Announcement'**
+  String get groupsPostAnnouncement;
+
+  /// No description provided for @groupsCancelLeaveRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel leave request'**
+  String get groupsCancelLeaveRequest;
+
+  /// No description provided for @groupsLeaveGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave group'**
+  String get groupsLeaveGroup;
+
+  /// No description provided for @groupsRequestToLeave.
+  ///
+  /// In en, this message translates to:
+  /// **'Request to leave'**
+  String get groupsRequestToLeave;
+
+  /// No description provided for @groupsLeavePending.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave pending'**
+  String get groupsLeavePending;
+
+  /// No description provided for @groupsMemberCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 member} other{{count} members}}'**
+  String groupsMemberCount(int count);
+
+  /// No description provided for @groupsMyGroupsEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'When an administrator adds you to a club, it will appear here. You can also browse open groups and request to join.'**
+  String get groupsMyGroupsEmptyMessage;
+
+  /// No description provided for @groupsLeaveGroupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave group?'**
+  String get groupsLeaveGroupTitle;
+
+  /// No description provided for @groupsLeaveGroupMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You will stop receiving alerts for this group.'**
+  String get groupsLeaveGroupMessage;
+
+  /// No description provided for @groupsLeftGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'You left the group'**
+  String get groupsLeftGroup;
+
+  /// No description provided for @groupsCouldNotLeave.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not leave'**
+  String get groupsCouldNotLeave;
+
+  /// No description provided for @groupsLeaveRequestCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave request cancelled'**
+  String get groupsLeaveRequestCancelled;
+
+  /// No description provided for @groupsCouldNotCancelRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not cancel request'**
+  String get groupsCouldNotCancelRequest;
+
+  /// No description provided for @groupsLeaveReasonMinLength.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter at least 20 characters'**
+  String get groupsLeaveReasonMinLength;
+
+  /// No description provided for @groupsLeaveRequestSubmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave request submitted'**
+  String get groupsLeaveRequestSubmitted;
+
+  /// No description provided for @groupsCouldNotSubmitRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not submit request'**
+  String get groupsCouldNotSubmitRequest;
+
+  /// No description provided for @groupsLeaveRequestDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Request to leave'**
+  String get groupsLeaveRequestDialogTitle;
+
+  /// No description provided for @groupsLeaveReasonLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Why do you want to leave?'**
+  String get groupsLeaveReasonLabel;
+
+  /// No description provided for @groupsLeaveReasonHint.
+  ///
+  /// In en, this message translates to:
+  /// **'At least 20 characters'**
+  String get groupsLeaveReasonHint;
+
+  /// No description provided for @groupsGenericName.
+  ///
+  /// In en, this message translates to:
+  /// **'Group'**
+  String get groupsGenericName;
+
+  /// No description provided for @groupsGroupMembersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Group Members'**
+  String get groupsGroupMembersTitle;
+
+  /// No description provided for @groupsMembershipRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'Membership requests'**
+  String get groupsMembershipRequests;
+
+  /// No description provided for @groupsMembershipSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Membership settings'**
+  String get groupsMembershipSettings;
+
+  /// No description provided for @groupsMembershipRequestsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Membership requests ({count})'**
+  String groupsMembershipRequestsCount(int count);
+
+  /// No description provided for @groupsEditGroupSettingsTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit group settings'**
+  String get groupsEditGroupSettingsTooltip;
+
+  /// No description provided for @groupsNoMembersYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No members yet'**
+  String get groupsNoMembersYet;
+
+  /// No description provided for @groupsNoMembersManageHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add students or staff to this group.'**
+  String get groupsNoMembersManageHint;
+
+  /// No description provided for @groupsNoMembersViewHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Members will appear here once added.'**
+  String get groupsNoMembersViewHint;
+
+  /// No description provided for @groupsRemoveMemberTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove member?'**
+  String get groupsRemoveMemberTitle;
+
+  /// No description provided for @groupsRemoveMemberMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {name} from this group?'**
+  String groupsRemoveMemberMessage(String name);
+
+  /// No description provided for @groupsCouldNotRemoveMember.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not remove member'**
+  String get groupsCouldNotRemoveMember;
+
+  /// No description provided for @groupsCouldNotUpdatePosition.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not update position'**
+  String get groupsCouldNotUpdatePosition;
+
+  /// No description provided for @groupsAssignPosition.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign position'**
+  String get groupsAssignPosition;
+
+  /// No description provided for @groupsNoPosition.
+  ///
+  /// In en, this message translates to:
+  /// **'No position'**
+  String get groupsNoPosition;
+
+  /// No description provided for @groupsNoPositionSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'No position ✓'**
+  String get groupsNoPositionSelected;
+
+  /// No description provided for @groupsMakeLeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Make leader'**
+  String get groupsMakeLeader;
+
+  /// No description provided for @groupsMakeMember.
+  ///
+  /// In en, this message translates to:
+  /// **'Make member'**
+  String get groupsMakeMember;
+
+  /// No description provided for @groupsRemoveFromGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from group'**
+  String get groupsRemoveFromGroup;
+
+  /// No description provided for @groupsRoleLeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Leader'**
+  String get groupsRoleLeader;
+
+  /// No description provided for @groupsRoleMember.
+  ///
+  /// In en, this message translates to:
+  /// **'Member'**
+  String get groupsRoleMember;
+
+  /// No description provided for @groupsSearchClubHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Club or program name'**
+  String get groupsSearchClubHint;
+
+  /// No description provided for @groupsNoSearchResults.
+  ///
+  /// In en, this message translates to:
+  /// **'No groups match your search.'**
+  String get groupsNoSearchResults;
+
+  /// No description provided for @groupsStatusMember.
+  ///
+  /// In en, this message translates to:
+  /// **'Member'**
+  String get groupsStatusMember;
+
+  /// No description provided for @groupsStatusPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get groupsStatusPending;
+
+  /// No description provided for @groupsStatusOpenToRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'Open to requests'**
+  String get groupsStatusOpenToRequests;
+
+  /// No description provided for @groupsStatusInvitationOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Invitation only'**
+  String get groupsStatusInvitationOnly;
+
+  /// No description provided for @groupsRequestToJoin.
+  ///
+  /// In en, this message translates to:
+  /// **'Request to Join'**
+  String get groupsRequestToJoin;
+
+  /// No description provided for @groupsCancelRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel Request'**
+  String get groupsCancelRequest;
+
+  /// No description provided for @groupsInvitationOnlyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Membership by invitation only. Contact your adviser.'**
+  String get groupsInvitationOnlyMessage;
+
+  /// No description provided for @groupsJoinRequestTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Request to join {groupName}'**
+  String groupsJoinRequestTitle(String groupName);
+
+  /// No description provided for @groupsJoinMessageLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Message (optional)'**
+  String get groupsJoinMessageLabel;
+
+  /// No description provided for @groupsJoinMessageHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell the leader why you want to join'**
+  String get groupsJoinMessageHint;
+
+  /// No description provided for @groupsJoinRequestSubmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'Join request submitted'**
+  String get groupsJoinRequestSubmitted;
+
+  /// No description provided for @groupsCouldNotSubmitJoin.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not submit: {error}'**
+  String groupsCouldNotSubmitJoin(String error);
+
+  /// No description provided for @groupsRequestCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Request cancelled'**
+  String get groupsRequestCancelled;
+
+  /// No description provided for @groupsOpenToJoin.
+  ///
+  /// In en, this message translates to:
+  /// **'open to join'**
+  String get groupsOpenToJoin;
+
+  /// No description provided for @groupsPending.
+  ///
+  /// In en, this message translates to:
+  /// **'pending'**
+  String get groupsPending;
+
+  /// No description provided for @groupsNewGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'New Group'**
+  String get groupsNewGroup;
+
+  /// No description provided for @groupsCreateGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Group'**
+  String get groupsCreateGroup;
+
+  /// No description provided for @groupsSearchGroupsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search groups…'**
+  String get groupsSearchGroupsHint;
+
+  /// No description provided for @groupsNoSearchMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'No groups match your search'**
+  String get groupsNoSearchMatch;
+
+  /// No description provided for @groupsEmptySeedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Seed the MONHS demo groups or create your own.'**
+  String get groupsEmptySeedHint;
+
+  /// No description provided for @groupsTryDifferentSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Try a different search term.'**
+  String get groupsTryDifferentSearch;
+
+  /// No description provided for @groupsSeedDemoGroups.
+  ///
+  /// In en, this message translates to:
+  /// **'Seed Demo Groups'**
+  String get groupsSeedDemoGroups;
+
+  /// No description provided for @groupsSeeding.
+  ///
+  /// In en, this message translates to:
+  /// **'Seeding…'**
+  String get groupsSeeding;
+
+  /// No description provided for @groupsSeedFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Seed failed: {error}'**
+  String groupsSeedFailed(String error);
+
+  /// No description provided for @groupsSeedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Demo groups added successfully'**
+  String get groupsSeedSuccess;
+
+  /// No description provided for @groupsSyncFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync failed: {error}'**
+  String groupsSyncFailed(String error);
+
+  /// No description provided for @groupsSyncSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Synced 1 membership for My Groups} other{Synced {count} memberships for My Groups}}'**
+  String groupsSyncSuccess(int count);
+
+  /// No description provided for @groupsMoreActions.
+  ///
+  /// In en, this message translates to:
+  /// **'More actions'**
+  String get groupsMoreActions;
+
+  /// No description provided for @groupsSeedDemoSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'SPJ, Drum & Lyre, SSLG'**
+  String get groupsSeedDemoSubtitle;
+
+  /// No description provided for @groupsSyncIndexes.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync My Groups Indexes'**
+  String get groupsSyncIndexes;
+
+  /// No description provided for @groupsSyncing.
+  ///
+  /// In en, this message translates to:
+  /// **'Syncing…'**
+  String get groupsSyncing;
+
+  /// No description provided for @groupsSyncIndexesSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Repair member visibility after roster changes'**
+  String get groupsSyncIndexesSubtitle;
+
+  /// No description provided for @groupsEditGroupTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit group'**
+  String get groupsEditGroupTooltip;
+
+  /// No description provided for @groupsCreateGroupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Group'**
+  String get groupsCreateGroupTitle;
+
+  /// No description provided for @groupsGroupNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Group name'**
+  String get groupsGroupNameLabel;
+
+  /// No description provided for @groupsGroupNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Journalism Club'**
+  String get groupsGroupNameHint;
+
+  /// No description provided for @groupsGroupNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a group name'**
+  String get groupsGroupNameRequired;
+
+  /// No description provided for @groupsDescriptionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Description (optional)'**
+  String get groupsDescriptionLabel;
+
+  /// No description provided for @groupsDescriptionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'What is this group about?'**
+  String get groupsDescriptionHint;
+
+  /// No description provided for @groupsDefineClubPositions.
+  ///
+  /// In en, this message translates to:
+  /// **'Define club positions'**
+  String get groupsDefineClubPositions;
+
+  /// No description provided for @groupsDefineClubPositionsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional offices like President or Treasurer'**
+  String get groupsDefineClubPositionsSubtitle;
+
+  /// No description provided for @groupsAllowJoinRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow join requests'**
+  String get groupsAllowJoinRequests;
+
+  /// No description provided for @groupsAllowJoinRequestsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Let students request to join (off for elected groups like SSLG)'**
+  String get groupsAllowJoinRequestsSubtitle;
+
+  /// No description provided for @groupsMemberLeavePolicy.
+  ///
+  /// In en, this message translates to:
+  /// **'Member leave policy'**
+  String get groupsMemberLeavePolicy;
+
+  /// No description provided for @groupsLeaveAnytime.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave anytime'**
+  String get groupsLeaveAnytime;
+
+  /// No description provided for @groupsMustRequestToLeave.
+  ///
+  /// In en, this message translates to:
+  /// **'Must request to leave'**
+  String get groupsMustRequestToLeave;
+
+  /// No description provided for @groupsLeaveAnytimeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Members can leave without approval'**
+  String get groupsLeaveAnytimeSubtitle;
+
+  /// No description provided for @groupsMustRequestToLeaveSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Requires a reason and leader approval'**
+  String get groupsMustRequestToLeaveSubtitle;
+
+  /// No description provided for @groupsJoinHintLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Join hint (optional)'**
+  String get groupsJoinHintLabel;
+
+  /// No description provided for @groupsJoinHintHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Auditions in August'**
+  String get groupsJoinHintHint;
+
+  /// No description provided for @groupsCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Created {name}'**
+  String groupsCreated(String name);
+
+  /// No description provided for @groupsCouldNotCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not create group'**
+  String get groupsCouldNotCreate;
+
+  /// No description provided for @groupsEditGroupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Group'**
+  String get groupsEditGroupTitle;
+
+  /// No description provided for @groupsGroupNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Group not found'**
+  String get groupsGroupNotFound;
+
+  /// No description provided for @groupsGroupSettingsSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Group settings saved'**
+  String get groupsGroupSettingsSaved;
+
+  /// No description provided for @groupsCouldNotSaveSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save group settings'**
+  String get groupsCouldNotSaveSettings;
+
+  /// No description provided for @groupsSaveChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Changes'**
+  String get groupsSaveChanges;
+
+  /// No description provided for @groupsGroupIsActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Group is active'**
+  String get groupsGroupIsActive;
+
+  /// No description provided for @groupsGroupIsActiveSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Inactive groups are hidden from browse and lists'**
+  String get groupsGroupIsActiveSubtitle;
+
+  /// No description provided for @groupsAddPosition.
+  ///
+  /// In en, this message translates to:
+  /// **'Add position'**
+  String get groupsAddPosition;
+
+  /// No description provided for @groupsSavePositions.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Positions'**
+  String get groupsSavePositions;
+
+  /// No description provided for @groupsClubPositionsSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Club positions saved'**
+  String get groupsClubPositionsSaved;
+
+  /// No description provided for @groupsCouldNotSavePositions.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save positions'**
+  String get groupsCouldNotSavePositions;
+
+  /// No description provided for @groupsClubPositionsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Club Positions'**
+  String get groupsClubPositionsTitle;
+
+  /// No description provided for @groupsClubPositionsSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Club positions'**
+  String get groupsClubPositionsSectionTitle;
+
+  /// No description provided for @groupsClubPositionsSectionSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional offices members can hold (e.g. President, Treasurer). You can assign these when adding or managing members.'**
+  String get groupsClubPositionsSectionSubtitle;
+
+  /// No description provided for @groupsMembershipRequestsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{groupName} — Requests'**
+  String groupsMembershipRequestsTitle(String groupName);
+
+  /// No description provided for @groupsTabJoinCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Join ({count})'**
+  String groupsTabJoinCount(int count);
+
+  /// No description provided for @groupsTabLeaveCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave ({count})'**
+  String groupsTabLeaveCount(int count);
+
+  /// No description provided for @groupsNoPendingJoinRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'No pending join requests'**
+  String get groupsNoPendingJoinRequests;
+
+  /// No description provided for @groupsNoPendingLeaveRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'No pending leave requests'**
+  String get groupsNoPendingLeaveRequests;
+
+  /// No description provided for @groupsStudentIdPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'ID: {id}'**
+  String groupsStudentIdPrefix(String id);
+
+  /// No description provided for @groupsApproveLeave.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve leave'**
+  String get groupsApproveLeave;
+
+  /// No description provided for @groupsDeclineJoinTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Decline join request?'**
+  String get groupsDeclineJoinTitle;
+
+  /// No description provided for @groupsDeclineJoinReasonLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason (optional)'**
+  String get groupsDeclineJoinReasonLabel;
+
+  /// No description provided for @groupsDenyLeaveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Deny leave request'**
+  String get groupsDenyLeaveTitle;
+
+  /// No description provided for @groupsDenyLeaveReasonLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason (required)'**
+  String get groupsDenyLeaveReasonLabel;
+
+  /// No description provided for @groupsReasonRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'A reason is required'**
+  String get groupsReasonRequired;
+
+  /// No description provided for @groupsJoinRequestUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Join request updated'**
+  String get groupsJoinRequestUpdated;
+
+  /// No description provided for @groupsLeaveRequestUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave request updated'**
+  String get groupsLeaveRequestUpdated;
+
+  /// No description provided for @groupsActionFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Action failed'**
+  String get groupsActionFailed;
+
+  /// No description provided for @groupsAddMembersSearchLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Search members'**
+  String get groupsAddMembersSearchLabel;
+
+  /// No description provided for @groupsAddMembersSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Name, email, or school ID'**
+  String get groupsAddMembersSearchHint;
+
+  /// No description provided for @groupsCouldNotAddMembers.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not add members: {error}'**
+  String groupsCouldNotAddMembers(String error);
+
+  /// No description provided for @groupsAllMembersAlreadyInGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'All approved members are already in this group.'**
+  String get groupsAllMembersAlreadyInGroup;
+
+  /// No description provided for @groupsNoUsersMatchSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'No users match your search.'**
+  String get groupsNoUsersMatchSearch;
+
+  /// No description provided for @groupsAssignSelectedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} selected — choose role and assign'**
+  String groupsAssignSelectedHint(int count);
+
+  /// No description provided for @groupsAssignSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search and tap a member below'**
+  String get groupsAssignSearchHint;
+
+  /// No description provided for @groupsAssignButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign'**
+  String get groupsAssignButton;
+
+  /// No description provided for @groupsGroupRoleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Group role'**
+  String get groupsGroupRoleLabel;
+
+  /// No description provided for @groupsClubPositionOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Club position (optional)'**
+  String get groupsClubPositionOptional;
+
+  /// No description provided for @groupsAssignMembers.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Assign 1 member} other{Assign {count} members}}'**
+  String groupsAssignMembers(int count);
+
+  /// No description provided for @groupsAssignMembersPartial.
+  ///
+  /// In en, this message translates to:
+  /// **'Assigned {added, plural, =1{1 member} other{{added} members}}; {skipped} could not be added'**
+  String groupsAssignMembersPartial(int added, int skipped);
 
   /// No description provided for @settingsSectionGroups.
   ///

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:speakup_connect/core/l10n/app_localizations_extension.dart';
 import 'package:speakup_connect/features/groups/domain/entities/group_join_request_entity.dart';
 import 'package:speakup_connect/features/groups/domain/entities/group_leave_request_entity.dart';
 import 'package:speakup_connect/features/groups/presentation/providers/group_membership_provider.dart';
@@ -36,14 +37,15 @@ class _GroupMembershipRequestsScreenState
   }
 
   Future<void> _reviewJoin(GroupJoinRequestEntity req, bool approve) async {
+    final l10n = context.l10n;
     String? reason;
     if (!approve) {
       reason = await showDialog<String>(
         context: context,
-        builder: (_) => const _DeclineReasonDialog(
-          title: 'Decline join request?',
-          label: 'Reason (optional)',
-          confirmLabel: 'Decline',
+        builder: (_) => _DeclineReasonDialog(
+          title: l10n.groupsDeclineJoinTitle,
+          label: l10n.groupsDeclineJoinReasonLabel,
+          confirmLabel: l10n.commonDecline,
         ),
       );
       if (reason == null) return;
@@ -59,20 +61,25 @@ class _GroupMembershipRequestsScreenState
         );
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(ok ? 'Join request updated' : 'Action failed')),
+        SnackBar(
+          content: Text(
+            ok ? l10n.groupsJoinRequestUpdated : l10n.groupsActionFailed,
+          ),
+        ),
       );
     }
   }
 
   Future<void> _reviewLeave(GroupLeaveRequestEntity req, bool approve) async {
+    final l10n = context.l10n;
     String? reason;
     if (!approve) {
       reason = await showDialog<String>(
         context: context,
-        builder: (_) => const _DeclineReasonDialog(
-          title: 'Deny leave request',
-          label: 'Reason (required)',
-          confirmLabel: 'Deny',
+        builder: (_) => _DeclineReasonDialog(
+          title: l10n.groupsDenyLeaveTitle,
+          label: l10n.groupsDenyLeaveReasonLabel,
+          confirmLabel: l10n.commonDeny,
           required: true,
         ),
       );
@@ -89,30 +96,36 @@ class _GroupMembershipRequestsScreenState
         );
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(ok ? 'Leave request updated' : 'Action failed')),
+        SnackBar(
+          content: Text(
+            ok ? l10n.groupsLeaveRequestUpdated : l10n.groupsActionFailed,
+          ),
+        ),
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final groupAsync = ref.watch(groupByIdProvider(widget.groupId));
     final joinAsync = ref.watch(pendingJoinRequestsProvider(widget.groupId));
     final leaveAsync = ref.watch(pendingLeaveRequestsProvider(widget.groupId));
     final isBusy = ref.watch(groupMembershipActionsProvider).isLoading;
-    final groupName = groupAsync.asData?.value?.name ?? 'Group';
+    final groupName = groupAsync.asData?.value?.name ?? l10n.groupsGenericName;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('$groupName — Requests'),
+        title: Text(l10n.groupsMembershipRequestsTitle(groupName)),
         bottom: TabBar(
           controller: _tabs,
           tabs: [
             Tab(
-              text: 'Join (${joinAsync.asData?.value.length ?? 0})',
+              text: l10n.groupsTabJoinCount(joinAsync.asData?.value.length ?? 0),
             ),
             Tab(
-              text: 'Leave (${leaveAsync.asData?.value.length ?? 0})',
+              text:
+                  l10n.groupsTabLeaveCount(leaveAsync.asData?.value.length ?? 0),
             ),
           ],
         ),
@@ -161,8 +174,9 @@ class _JoinRequestList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     if (items.isEmpty) {
-      return const Center(child: Text('No pending join requests'));
+      return Center(child: Text(l10n.groupsNoPendingJoinRequests));
     }
     return ListView.separated(
       padding: const EdgeInsets.all(16),
@@ -176,7 +190,8 @@ class _JoinRequestList extends StatelessWidget {
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (req.studentId != null) Text('ID: ${req.studentId}'),
+                if (req.studentId != null)
+                  Text(l10n.groupsStudentIdPrefix(req.studentId!)),
                 if (req.message != null && req.message!.isNotEmpty)
                   Text(req.message!),
               ],
@@ -192,12 +207,12 @@ class _JoinRequestList extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       IconButton(
-                        tooltip: 'Approve',
+                        tooltip: l10n.commonApprove,
                         icon: const Icon(Icons.check_circle_outline),
                         onPressed: () => onApprove(req),
                       ),
                       IconButton(
-                        tooltip: 'Decline',
+                        tooltip: l10n.commonDecline,
                         icon: const Icon(Icons.cancel_outlined),
                         onPressed: () => onDecline(req),
                       ),
@@ -225,8 +240,9 @@ class _LeaveRequestList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     if (items.isEmpty) {
-      return const Center(child: Text('No pending leave requests'));
+      return Center(child: Text(l10n.groupsNoPendingLeaveRequests));
     }
     return ListView.separated(
       padding: const EdgeInsets.all(16),
@@ -249,12 +265,12 @@ class _LeaveRequestList extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       IconButton(
-                        tooltip: 'Approve leave',
+                        tooltip: l10n.groupsApproveLeave,
                         icon: const Icon(Icons.check_circle_outline),
                         onPressed: () => onApprove(req),
                       ),
                       IconButton(
-                        tooltip: 'Deny',
+                        tooltip: l10n.commonDeny,
                         icon: const Icon(Icons.cancel_outlined),
                         onPressed: () => onDeny(req),
                       ),
@@ -295,9 +311,10 @@ class _DeclineReasonDialogState extends State<_DeclineReasonDialog> {
   }
 
   void _submit() {
+    final l10n = context.l10n;
     final text = _controller.text.trim();
     if (widget.required && text.isEmpty) {
-      setState(() => _error = 'A reason is required');
+      setState(() => _error = l10n.groupsReasonRequired);
       return;
     }
     Navigator.pop(context, text);
@@ -305,6 +322,7 @@ class _DeclineReasonDialogState extends State<_DeclineReasonDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return AlertDialog(
       title: Text(widget.title),
       content: TextField(
@@ -322,7 +340,7 @@ class _DeclineReasonDialogState extends State<_DeclineReasonDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
+          child: Text(l10n.commonCancel),
         ),
         FilledButton(
           onPressed: _submit,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:speakup_connect/core/constants/route_constants.dart';
+import 'package:speakup_connect/core/l10n/app_localizations_extension.dart';
 import 'package:speakup_connect/features/groups/domain/entities/group_membership_policy.dart';
 import 'package:speakup_connect/features/groups/domain/entities/group_position_role.dart';
 import 'package:speakup_connect/features/groups/presentation/providers/group_provider.dart';
@@ -45,19 +46,18 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
         );
 
     if (!mounted) return;
+    final l10n = context.l10n;
 
     if (group != null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Created ${group.name}')),
+        SnackBar(content: Text(l10n.groupsCreated(group.name))),
       );
       context.go(Routes.groupMembersPath(group.groupId));
     } else {
       final error = ref.read(createGroupActionProvider).error;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            error?.toString() ?? 'Could not create group',
-          ),
+          content: Text(error?.toString() ?? l10n.groupsCouldNotCreate),
         ),
       );
     }
@@ -65,11 +65,12 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final isLoading = ref.watch(createGroupActionProvider).isLoading;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Create Group'),
+        title: Text(l10n.groupsCreateGroupTitle),
       ),
       body: Form(
         key: _formKey,
@@ -78,16 +79,16 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
           children: [
             AppTextField(
               controller: _nameController,
-              label: 'Group name',
-              hint: 'e.g. Journalism Club',
+              label: l10n.groupsGroupNameLabel,
+              hint: l10n.groupsGroupNameHint,
               textInputAction: TextInputAction.next,
               autofocus: true,
               validator: (v) {
                 if (v == null || v.trim().isEmpty) {
-                  return 'Enter a group name';
+                  return l10n.groupsGroupNameRequired;
                 }
                 if (v.trim().length > 120) {
-                  return 'Name must be 120 characters or fewer';
+                  return l10n.validationMaxLength(l10n.groupsGroupNameLabel, 120);
                 }
                 return null;
               },
@@ -95,18 +96,16 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
             const SizedBox(height: 16),
             AppTextField(
               controller: _descriptionController,
-              label: 'Description (optional)',
-              hint: 'What is this group about?',
+              label: l10n.groupsDescriptionLabel,
+              hint: l10n.groupsDescriptionHint,
               maxLines: 4,
               maxLength: 500,
             ),
             const SizedBox(height: 16),
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
-              title: const Text('Define club positions'),
-              subtitle: const Text(
-                'Optional offices like President or Treasurer',
-              ),
+              title: Text(l10n.groupsDefineClubPositions),
+              subtitle: Text(l10n.groupsDefineClubPositionsSubtitle),
               value: _definePositions,
               onChanged: isLoading
                   ? null
@@ -138,19 +137,20 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
             const SizedBox(height: 16),
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
-              title: const Text('Allow join requests'),
-              subtitle: const Text(
-                'Let students request to join (off for elected groups like SSLG)',
-              ),
+              title: Text(l10n.groupsAllowJoinRequests),
+              subtitle: Text(l10n.groupsAllowJoinRequestsSubtitle),
               value: _allowJoinRequests,
               onChanged: isLoading
                   ? null
                   : (v) => setState(() => _allowJoinRequests = v),
             ),
             const SizedBox(height: 8),
-            Text('Member leave policy', style: Theme.of(context).textTheme.titleSmall),
+            Text(
+              l10n.groupsMemberLeavePolicy,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
             RadioListTile<MemberLeavePolicy>(
-              title: const Text('Leave anytime'),
+              title: Text(l10n.groupsLeaveAnytime),
               value: MemberLeavePolicy.voluntary,
               groupValue: _leavePolicy,
               onChanged: isLoading
@@ -158,7 +158,7 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
                   : (v) => setState(() => _leavePolicy = v!),
             ),
             RadioListTile<MemberLeavePolicy>(
-              title: const Text('Must request to leave'),
+              title: Text(l10n.groupsMustRequestToLeave),
               value: MemberLeavePolicy.requestRequired,
               groupValue: _leavePolicy,
               onChanged: isLoading
@@ -167,7 +167,7 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
             ),
             const SizedBox(height: 24),
             AppButton.primary(
-              label: 'Create Group',
+              label: l10n.groupsCreateGroup,
               isLoading: isLoading,
               onPressed: _submit,
             ),

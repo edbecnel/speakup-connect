@@ -100,7 +100,7 @@ The **Home** tab puts **Quick Actions** below the language control (Submit a con
 
 **My Groups & Clubs** appears below when you belong to at least one group. The section starts **collapsed** — tap the header to expand it and see your group cards, join/browse actions, and leader tools.
 
-If your organization uses groups, you may **browse and request to join** open clubs, or an administrator may add you directly. View your full membership list under **Settings → My Groups & Clubs**. You may **leave** or **request to leave** depending on each group’s policy. Group membership may determine which **Alerts** you receive.
+If your organization uses groups, you may **browse and request to join** open clubs, or an administrator may add you directly. On each group card, tap **View Members** to see the roster. View your full membership list under **Settings → My Groups & Clubs**. You may **leave** or **request to leave** depending on each group’s policy. Group membership may determine which **Alerts** you receive.
 
 ### Group leaders (not administrators)
 
@@ -110,9 +110,10 @@ If your roster role is **Leader**, you can manage that group without org-admin a
 
 | Task | How |
 |------|-----|
-| See who is in the group | **Manage Members** |
+| See who is in the group | **View Members** (everyone) or **Manage Members** (leaders/admins) |
 | Add people | **Add Members** — search, set Leader/Member role, optional club position, **Assign** |
 | Review join/leave requests | **Requests** |
+| Change name, description, or join/leave policies | **Edit Group** on the card or on the roster screen |
 | Change role or remove someone | **Manage Members** → **⋮** on a row |
 | Post school-wide news | **Post Announcement** on the group card, or **Home → Announcements → Post** |
 | Message the group | **Send Alert** on the group card, or **Alerts → Group Alert** |
@@ -123,7 +124,7 @@ If your roster role is **Leader**, you can manage that group without org-admin a
 
 **Approval:** Some organizations require an administrator to approve **announcements** and **group alerts** before they are delivered. Use **Submit for Approval** when shown.
 
-**Limits:** Leaders cannot create groups, edit position-title lists, or broadcast outside groups they lead. Contact your administrator for those tasks.
+**Limits:** Leaders cannot create or delete groups, edit **club position title lists** (admins only), or broadcast outside groups they lead. Contact your administrator for those tasks.
 
 Your organization’s custom member guide may include local step-by-step instructions (e.g. school-specific examples).
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:speakup_connect/features/groups/data/models/group_position_role_codec.dart';
+import 'package:speakup_connect/core/l10n/app_localizations_extension.dart';
 import 'package:speakup_connect/features/groups/domain/entities/group_position_role.dart';
 import 'package:uuid/uuid.dart';
 
@@ -92,19 +93,19 @@ class _GroupPositionRolesEditorState extends State<GroupPositionRolesEditor> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
-          'Club positions',
+          l10n.groupsClubPositionsSectionTitle,
           style: theme.textTheme.titleSmall,
         ),
         const SizedBox(height: 4),
         Text(
-          'Optional offices members can hold (e.g. President, Treasurer). '
-          'You can assign these when adding or managing members.',
+          l10n.groupsClubPositionsSectionSubtitle,
           style: theme.textTheme.bodySmall?.copyWith(
             color: theme.colorScheme.onSurfaceVariant,
           ),
@@ -175,7 +176,7 @@ class _GroupPositionRolesEditorState extends State<GroupPositionRolesEditor> {
           child: TextButton.icon(
             onPressed: widget.enabled ? _addRole : null,
             icon: const Icon(Icons.add),
-            label: const Text('Add position'),
+            label: Text(l10n.groupsAddPosition),
           ),
         ),
       ],

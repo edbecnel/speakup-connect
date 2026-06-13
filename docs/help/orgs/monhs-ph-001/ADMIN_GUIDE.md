@@ -176,7 +176,7 @@ Groups can define **custom position labels** independent of Leader/Member permis
 **Define positions:**
 
 - When creating a group — toggle **Define club positions**
-- On an existing group — open the roster → **badge icon** → edit positions
+- On an existing group — **Edit Group** (admins and `manageGroupRoster` only) → **Define club positions**
 
 **Assign positions:**
 
@@ -190,10 +190,21 @@ Members are sorted by position order, then name. SSLG seed includes default offi
 - **Add Members** — search approved org members, set Leader/Member and optional position
 - **⋮ menu** on a member — change leader status, assign position, or remove (removed members get an **Alerts** notification)
 - **Requests** — review **join** and **leave** requests (same screen group leaders use)
-- **Settings** (badge icon on roster, or **Settings** on **My Groups** for leaders) — configure:
-  - **Allow join requests** — members can browse and request to join
-  - **Join request hint** — message shown on the join form
-  - **Leave policy** — voluntary leave vs approval required (leave requests need a reason; denials require admin/leader reason)
+
+### Edit group settings
+
+Open **Edit Group** from:
+
+- **Administration → Groups & Clubs** — pencil icon on a row, or the card at the top of the roster after you open a group
+- **My Groups & Clubs** — **Edit Group** on a group you lead
+
+One screen covers:
+
+- Group **name** and **description**
+- **Allow join requests** and optional **join hint**
+- **Leave policy** — voluntary leave vs approval required
+- **Define club positions** (admins / `manageGroupRoster` only)
+- **Group is active** (org admin only — inactive groups are hidden from browse)
 
 Org admins can open any group under **Groups & Clubs** and use **Requests** even if not on the roster.
 
@@ -203,7 +214,7 @@ Members with **Leader** on a group roster (e.g. SSLG officers) can, for groups t
 
 - **Manage Members** and **Add Members** (add members, change roles/positions)
 - **Requests** — approve/deny join and leave requests (badge when pending)
-- **Settings** — edit join/leave policies when enabled for leaders
+- **Edit Group** — name, description, join/leave policies (leaders cannot edit club position titles)
 - **Send Alert** — group-targeted reminder from **My Groups & Clubs**
 - **Sent Group Alerts** — review broadcasts they sent and **View responses**
 

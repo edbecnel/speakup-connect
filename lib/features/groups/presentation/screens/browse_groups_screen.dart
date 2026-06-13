@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:speakup_connect/core/l10n/app_localizations_extension.dart';
 import 'package:speakup_connect/features/groups/presentation/providers/group_membership_provider.dart';
 import 'package:speakup_connect/shared/widgets/app_button.dart';
 import 'package:speakup_connect/shared/widgets/app_error_widget.dart';
@@ -31,6 +32,7 @@ class _BrowseGroupsScreenState extends ConsumerState<BrowseGroupsScreen> {
     );
     if (message == null || !mounted) return;
 
+    final l10n = context.l10n;
     final ok = await ref
         .read(groupMembershipActionsProvider.notifier)
         .submitJoinRequest(
@@ -40,30 +42,34 @@ class _BrowseGroupsScreenState extends ConsumerState<BrowseGroupsScreen> {
     if (!mounted) return;
     if (ok) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Join request submitted')),
+        SnackBar(content: Text(l10n.groupsJoinRequestSubmitted)),
       );
     } else {
       final err = ref.read(groupMembershipActionsProvider).error;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Could not submit: $err')),
+        SnackBar(content: Text(l10n.groupsCouldNotSubmitJoin('$err'))),
       );
     }
   }
 
   Future<void> _cancelJoinRequest(String groupId) async {
+    final l10n = context.l10n;
     final ok = await ref
         .read(groupMembershipActionsProvider.notifier)
         .withdrawJoinRequest(groupId: groupId);
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(ok ? 'Request cancelled' : 'Could not cancel request'),
+        content: Text(
+          ok ? l10n.groupsRequestCancelled : l10n.groupsCouldNotCancelRequest,
+        ),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     final entriesAsync = ref.watch(groupBrowseEntriesProvider);
     final isBusy = ref.watch(groupMembershipActionsProvider).isLoading;
@@ -71,7 +77,7 @@ class _BrowseGroupsScreenState extends ConsumerState<BrowseGroupsScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Browse Groups & Clubs'),
+        title: Text(l10n.settingsBrowseGroups),
       ),
       body: Column(
         children: [
@@ -79,8 +85,8 @@ class _BrowseGroupsScreenState extends ConsumerState<BrowseGroupsScreen> {
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
             child: AppTextField(
               controller: _searchController,
-              label: 'Search',
-              hint: 'Club or program name',
+              label: l10n.commonSearch,
+              hint: l10n.groupsSearchClubHint,
               prefixIcon: Icons.search,
               onChanged: (v) => setState(() => _filter = v.toLowerCase()),
             ),
@@ -98,7 +104,7 @@ class _BrowseGroupsScreenState extends ConsumerState<BrowseGroupsScreen> {
                 if (filtered.isEmpty) {
                   return Center(
                     child: Text(
-                      'No groups match your search.',
+                      l10n.groupsNoSearchResults,
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
@@ -143,12 +149,15 @@ class _BrowseGroupCard extends StatelessWidget {
   final VoidCallback onRequestJoin;
   final VoidCallback onCancelRequest;
 
-  String _statusLabel() => switch (entry.status) {
-        GroupBrowseStatus.member => 'Member',
-        GroupBrowseStatus.joinPending => 'Pending',
-        GroupBrowseStatus.canRequestJoin => 'Open to requests',
-        GroupBrowseStatus.invitationOnly => 'Invitation only',
-      };
+  String _statusLabel(BuildContext context) {
+    final l10n = context.l10n;
+    return switch (entry.status) {
+      GroupBrowseStatus.member => l10n.groupsStatusMember,
+      GroupBrowseStatus.joinPending => l10n.groupsStatusPending,
+      GroupBrowseStatus.canRequestJoin => l10n.groupsStatusOpenToRequests,
+      GroupBrowseStatus.invitationOnly => l10n.groupsStatusInvitationOnly,
+    };
+  }
 
   Color _chipColor(ThemeData theme) => switch (entry.status) {
         GroupBrowseStatus.member => theme.colorScheme.primaryContainer,
@@ -160,6 +169,7 @@ class _BrowseGroupCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     final group = entry.group;
 
@@ -182,7 +192,7 @@ class _BrowseGroupCard extends StatelessWidget {
                 ),
                 Chip(
                   label: Text(
-                    _statusLabel(),
+                    _statusLabel(context),
                     style: theme.textTheme.labelSmall,
                   ),
                   backgroundColor: _chipColor(theme),
@@ -209,20 +219,20 @@ class _BrowseGroupCard extends StatelessWidget {
             const SizedBox(height: 12),
             if (entry.status == GroupBrowseStatus.canRequestJoin)
               AppButton.primary(
-                label: 'Request to Join',
+                label: l10n.groupsRequestToJoin,
                 icon: Icons.person_add_alt_1_outlined,
                 isLoading: isBusy,
                 onPressed: isBusy ? null : onRequestJoin,
               )
             else if (entry.status == GroupBrowseStatus.joinPending)
               AppButton.secondary(
-                label: 'Cancel Request',
+                label: l10n.groupsCancelRequest,
                 isLoading: isBusy,
                 onPressed: isBusy ? null : onCancelRequest,
               )
             else if (entry.status == GroupBrowseStatus.invitationOnly)
               Text(
-                'Membership by invitation only. Contact your adviser.',
+                l10n.groupsInvitationOnlyMessage,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
@@ -254,23 +264,25 @@ class _JoinRequestDialogState extends State<_JoinRequestDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return AlertDialog(
-      title: Text('Request to join ${widget.groupName}'),
+      title: Text(l10n.groupsJoinRequestTitle(widget.groupName)),
       content: AppTextField(
         controller: _controller,
-        label: 'Message (optional)',
-        hint: 'Tell the leader why you want to join',
+        label: l10n.groupsJoinMessageLabel,
+        hint: l10n.groupsJoinMessageHint,
         maxLength: 200,
         maxLines: 3,
       ),
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
+          child: Text(l10n.commonCancel),
         ),
         FilledButton(
           onPressed: () => Navigator.pop(context, _controller.text.trim()),
-          child: const Text('Submit'),
+          child: Text(l10n.commonSubmit),
         ),
       ],
     );

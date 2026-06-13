@@ -125,13 +125,16 @@ The following features are **intentionally excluded from the mobile admin app** 
 
 ### 6. Group & Club Management — Lightweight
 
-**Who:** Org Admin, Group Leader  
-**Why on mobile:** Quick actions only — no bulk operations.
+**Who:** Org Admin, Group Leader, Member (view-only)  
+**Why on mobile:** Quick roster and policy actions — no bulk import.
 
 - View list of groups/clubs in the org
-- Add or remove a single member from a group
-- Post to a group's news board
-- **Not on mobile:** Create/delete groups, bulk member import, group settings
+- **View Members** (all members) or **Manage Members** (leaders/admins)
+- Add or remove a single member from a group; assign leader role and club position
+- **Edit Group** — name, description, join/leave policies; club positions and active flag for admins
+- Create groups (org admin / `manageGroupRoster`)
+- Post to a group's news board / send group alerts
+- **Not on mobile:** Bulk member import, delete group (org admin only — if not yet exposed in UI)
 
 ---
 

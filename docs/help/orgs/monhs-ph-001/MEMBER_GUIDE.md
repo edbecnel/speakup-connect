@@ -245,11 +245,12 @@ You can be a **Leader** with any club position, or a **Member** without leadersh
 1. Go to **Home → My Groups & Clubs** (or **Settings → My Groups & Clubs**)
 2. Find your club — the subtitle shows **Leader** or **Member**, your position, and member count
 3. Use the buttons on the card:
-   - **Manage Members** — see the full roster (everyone can do this)
+   - **View Members** — see the full roster *(everyone)*
+   - **Manage Members** — same roster; leaders/admins also manage from here *(leaders and admins)*
    - **Add Members** — add people to the club *(leaders only)*
    - **Requests** — review join and leave requests *(leaders only; badge when pending)*
    - **Send Alert** — message everyone in the club *(leaders only)*
-   - **Settings** — join/leave policies for the club *(leaders only)*
+   - **Edit Group** — change name, description, join/leave policies *(leaders only; club position lists are admin-only)*
    - **Leave group** or **Request to leave** — see [Leaving a group](#leaving-a-group) below
 
 If a group is missing after your adviser adds you, open **My Groups & Clubs** once — the list syncs from the school roster.
@@ -267,11 +268,11 @@ You cannot leave if you are the **only leader** — ask an admin to assign anoth
 
 #### View the member list
 
-1. Tap **Manage Members** on the group card, or open a group from the list
+1. Tap **View Members** (or **Manage Members** if you are a leader) on the group card, or open a group from the admin list
 2. Members are sorted by club position, then name
 3. Each row shows **Leader** or **Member** and their **club position** when assigned
 
-From this screen, leaders also see an **Add Members** button at the bottom.
+From this screen, leaders also see **Edit Group** at the top and an **Add Members** button at the bottom.
 
 #### Add members to your club
 

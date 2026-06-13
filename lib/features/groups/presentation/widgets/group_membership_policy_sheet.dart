@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:speakup_connect/core/l10n/app_localizations_extension.dart';
 import 'package:speakup_connect/features/groups/domain/entities/group_entity.dart';
 import 'package:speakup_connect/features/groups/domain/entities/group_membership_policy.dart';
 import 'package:speakup_connect/features/groups/presentation/providers/group_membership_provider.dart';
@@ -60,17 +61,19 @@ class _GroupMembershipPolicySheetState
           joinRequestHint: _hintController.text,
         );
     if (!mounted) return;
+    final l10n = context.l10n;
     if (ok) {
       ref.invalidate(groupByIdProvider(widget.group.groupId));
       Navigator.pop(context);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Group settings saved')),
+        SnackBar(content: Text(l10n.groupsGroupSettingsSaved)),
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final isLoading = ref.watch(groupMembershipActionsProvider).isLoading;
     final keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
     final maxHeight = MediaQuery.sizeOf(context).height * 0.85;
@@ -93,7 +96,7 @@ class _GroupMembershipPolicySheetState
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       Text(
-                        'Membership settings',
+                        l10n.groupsMembershipSettings,
                         style: Theme.of(context).textTheme.titleMedium,
                       ),
                       const SizedBox(height: 8),
@@ -104,10 +107,8 @@ class _GroupMembershipPolicySheetState
                       const SizedBox(height: 16),
                       SwitchListTile(
                         contentPadding: EdgeInsets.zero,
-                        title: const Text('Allow join requests'),
-                        subtitle: const Text(
-                          'When off, students cannot request to join (e.g. SSLG).',
-                        ),
+                        title: Text(l10n.groupsAllowJoinRequests),
+                        subtitle: Text(l10n.groupsAllowJoinRequestsSubtitle),
                         value: _allowJoin,
                         onChanged:
                             isLoading ? null : (v) => setState(() => _allowJoin = v),
@@ -116,22 +117,21 @@ class _GroupMembershipPolicySheetState
                         const SizedBox(height: 8),
                         AppTextField(
                           controller: _hintController,
-                          label: 'Join hint (optional)',
-                          hint: 'e.g. Auditions in August',
+                          label: l10n.groupsJoinHintLabel,
+                          hint: l10n.groupsJoinHintHint,
                           maxLength: 120,
                           maxLines: 2,
                         ),
                       ],
                       const SizedBox(height: 8),
                       Text(
-                        'Leave policy',
+                        l10n.groupsMemberLeavePolicy,
                         style: Theme.of(context).textTheme.titleSmall,
                       ),
                       RadioListTile<MemberLeavePolicy>(
                         contentPadding: EdgeInsets.zero,
-                        title: const Text('Leave anytime'),
-                        subtitle:
-                            const Text('Members can leave without approval'),
+                        title: Text(l10n.groupsLeaveAnytime),
+                        subtitle: Text(l10n.groupsLeaveAnytimeSubtitle),
                         value: MemberLeavePolicy.voluntary,
                         groupValue: _leavePolicy,
                         onChanged: isLoading
@@ -140,10 +140,8 @@ class _GroupMembershipPolicySheetState
                       ),
                       RadioListTile<MemberLeavePolicy>(
                         contentPadding: EdgeInsets.zero,
-                        title: const Text('Must request to leave'),
-                        subtitle: const Text(
-                          'Requires a reason and leader approval',
-                        ),
+                        title: Text(l10n.groupsMustRequestToLeave),
+                        subtitle: Text(l10n.groupsMustRequestToLeaveSubtitle),
                         value: MemberLeavePolicy.requestRequired,
                         groupValue: _leavePolicy,
                         onChanged: isLoading
@@ -157,7 +155,7 @@ class _GroupMembershipPolicySheetState
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
                 child: AppButton.primary(
-                  label: 'Save',
+                  label: l10n.commonSave,
                   isLoading: isLoading,
                   onPressed: isLoading ? null : _save,
                 ),

@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:speakup_connect/core/constants/route_constants.dart';
+import 'package:speakup_connect/core/l10n/app_localizations_extension.dart';
 import 'package:speakup_connect/features/groups/domain/entities/group_membership_policy.dart';
 import 'package:speakup_connect/features/groups/domain/entities/my_group_membership.dart';
 import 'package:speakup_connect/features/announcements/presentation/providers/announcement_provider.dart';
+import 'package:speakup_connect/features/groups/presentation/l10n/group_ui_l10n.dart';
 import 'package:speakup_connect/features/groups/presentation/providers/group_membership_provider.dart';
 import 'package:speakup_connect/features/groups/presentation/providers/group_provider.dart';
 import 'package:speakup_connect/shared/widgets/app_button.dart';
@@ -18,16 +20,17 @@ class MyGroupsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final membershipsAsync = ref.watch(myGroupMembershipsProvider);
 
     return Scaffold(
       appBar: AppBar(
         leading: BackButton(onPressed: () => context.pop()),
-        title: const Text('My Groups & Clubs'),
+        title: Text(l10n.homeGroupsTitle),
         actions: [
           TextButton(
             onPressed: () => context.push(Routes.browseGroups),
-            child: const Text('Browse'),
+            child: Text(l10n.commonBrowse),
           ),
         ],
       ),
@@ -60,6 +63,7 @@ class _EmptyMyGroups extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
 
     return Center(
@@ -75,13 +79,12 @@ class _EmptyMyGroups extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             Text(
-              'No groups yet',
+              l10n.homeGroupsNone,
               style: theme.textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
             Text(
-              'When an administrator adds you to a club, it will appear here. '
-              'You can also browse open groups and request to join.',
+              l10n.groupsMyGroupsEmptyMessage,
               textAlign: TextAlign.center,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
@@ -89,7 +92,7 @@ class _EmptyMyGroups extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             AppButton.primary(
-              label: 'Browse Groups & Clubs',
+              label: l10n.settingsBrowseGroups,
               onPressed: onBrowse,
             ),
           ],
@@ -105,21 +108,20 @@ class _MyGroupCard extends ConsumerWidget {
   final MyGroupMembership entry;
 
   Future<void> _leaveVoluntarily(BuildContext context, WidgetRef ref) async {
+    final l10n = context.l10n;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Leave group?'),
-        content: const Text(
-          'You will stop receiving alerts for this group.',
-        ),
+        title: Text(l10n.groupsLeaveGroupTitle),
+        content: Text(l10n.groupsLeaveGroupMessage),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+            child: Text(l10n.commonCancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Leave'),
+            child: Text(l10n.commonLeave),
           ),
         ],
       ),
@@ -131,12 +133,17 @@ class _MyGroupCard extends ConsumerWidget {
         .voluntaryLeave(groupId: entry.group.groupId);
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(ok ? 'You left the group' : 'Could not leave')),
+        SnackBar(
+          content: Text(
+            ok ? l10n.groupsLeftGroup : l10n.groupsCouldNotLeave,
+          ),
+        ),
       );
     }
   }
 
   Future<void> _cancelLeaveRequest(BuildContext context, WidgetRef ref) async {
+    final l10n = context.l10n;
     final ok = await ref
         .read(groupMembershipActionsProvider.notifier)
         .withdrawLeaveRequest(groupId: entry.group.groupId);
@@ -144,7 +151,9 @@ class _MyGroupCard extends ConsumerWidget {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            ok ? 'Leave request cancelled' : 'Could not cancel request',
+            ok
+                ? l10n.groupsLeaveRequestCancelled
+                : l10n.groupsCouldNotCancelRequest,
           ),
         ),
       );
@@ -152,6 +161,7 @@ class _MyGroupCard extends ConsumerWidget {
   }
 
   Future<void> _requestLeave(BuildContext context, WidgetRef ref) async {
+    final l10n = context.l10n;
     final reason = await showDialog<String>(
       context: context,
       builder: (_) => const _LeaveRequestDialog(),
@@ -160,9 +170,7 @@ class _MyGroupCard extends ConsumerWidget {
     if (reason.length < 20) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Please enter at least 20 characters'),
-          ),
+          SnackBar(content: Text(l10n.groupsLeaveReasonMinLength)),
         );
       }
       return;
@@ -180,8 +188,8 @@ class _MyGroupCard extends ConsumerWidget {
         SnackBar(
           content: Text(
             ok
-                ? 'Leave request submitted'
-                : (error ?? 'Could not submit request'),
+                ? l10n.groupsLeaveRequestSubmitted
+                : (error ?? l10n.groupsCouldNotSubmitRequest),
           ),
         ),
       );
@@ -190,6 +198,7 @@ class _MyGroupCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     final group = entry.group;
     final member = entry.membership;
@@ -212,10 +221,10 @@ class _MyGroupCard extends ConsumerWidget {
         group.pendingJoinRequestCount + group.pendingLeaveRequestCount;
 
     final subtitleParts = <String>[
-      (rosterMember ?? member).groupRole.label,
+      context.localizedGroupRole((rosterMember ?? member).groupRole),
       if (position != null) position,
-      if (group.memberCount > 0) '${group.memberCount} members',
-      if (leavePending) 'Leave pending',
+      if (group.memberCount > 0) l10n.groupsMemberCount(group.memberCount),
+      if (leavePending) l10n.groupsLeavePending,
     ];
 
     return Card(
@@ -280,7 +289,9 @@ class _MyGroupCard extends ConsumerWidget {
               runSpacing: 8,
               children: [
                 AppButton.secondary(
-                  label: 'Manage Members',
+                  label: canManageRoster
+                      ? l10n.groupsManageMembers
+                      : l10n.groupsViewMembers,
                   icon: Icons.people_outline,
                   minimumWidth: 0,
                   onPressed: () =>
@@ -288,7 +299,7 @@ class _MyGroupCard extends ConsumerWidget {
                 ),
                 if (canManageRoster) ...[
                   AppButton.secondary(
-                    label: 'Add Members',
+                    label: l10n.groupsAddMembers,
                     icon: Icons.person_add_outlined,
                     minimumWidth: 0,
                     onPressed: () => context
@@ -296,8 +307,8 @@ class _MyGroupCard extends ConsumerWidget {
                   ),
                   AppButton.secondary(
                     label: pendingCount > 0
-                        ? 'Requests ($pendingCount)'
-                        : 'Requests',
+                        ? l10n.groupsRequestsCount(pendingCount)
+                        : l10n.groupsRequests,
                     icon: Icons.inbox_outlined,
                     minimumWidth: 0,
                     onPressed: () => context.push(
@@ -305,7 +316,7 @@ class _MyGroupCard extends ConsumerWidget {
                     ),
                   ),
                   AppButton.primary(
-                    label: 'Send Alert',
+                    label: l10n.groupsSendAlert,
                     icon: Icons.notifications_active_outlined,
                     minimumWidth: 0,
                     onPressed: () => context.push(
@@ -314,7 +325,7 @@ class _MyGroupCard extends ConsumerWidget {
                   ),
                   if (canEditSettings)
                     AppButton.secondary(
-                      label: 'Edit Group',
+                      label: l10n.groupsEditGroup,
                       icon: Icons.edit_outlined,
                       minimumWidth: 0,
                       onPressed: () => context.push(
@@ -324,7 +335,7 @@ class _MyGroupCard extends ConsumerWidget {
                 ],
                 if (canPostAnnouncement)
                   AppButton.secondary(
-                    label: 'Post Announcement',
+                    label: l10n.groupsPostAnnouncement,
                     icon: Icons.campaign_outlined,
                     minimumWidth: 0,
                     onPressed: () => context.push(
@@ -333,7 +344,7 @@ class _MyGroupCard extends ConsumerWidget {
                   ),
                 if (leavePending)
                   AppButton.secondary(
-                    label: 'Cancel leave request',
+                    label: l10n.groupsCancelLeaveRequest,
                     icon: Icons.close,
                     isLoading: isBusy,
                     onPressed:
@@ -341,7 +352,7 @@ class _MyGroupCard extends ConsumerWidget {
                   )
                 else if (group.memberLeavePolicy == MemberLeavePolicy.voluntary)
                   AppButton.secondary(
-                    label: 'Leave group',
+                    label: l10n.groupsLeaveGroup,
                     icon: Icons.logout,
                     isLoading: isBusy,
                     onPressed: isBusy
@@ -351,7 +362,7 @@ class _MyGroupCard extends ConsumerWidget {
                 else if (group.memberLeavePolicy ==
                     MemberLeavePolicy.requestRequired)
                   AppButton.secondary(
-                    label: 'Request to leave',
+                    label: l10n.groupsRequestToLeave,
                     icon: Icons.exit_to_app,
                     isLoading: isBusy,
                     onPressed:
@@ -386,23 +397,25 @@ class _LeaveRequestDialogState extends State<_LeaveRequestDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return AlertDialog(
-      title: const Text('Request to leave'),
+      title: Text(l10n.groupsLeaveRequestDialogTitle),
       content: AppTextField(
         controller: _controller,
-        label: 'Why do you want to leave?',
-        hint: 'At least 20 characters',
+        label: l10n.groupsLeaveReasonLabel,
+        hint: l10n.groupsLeaveReasonHint,
         maxLines: 4,
         maxLength: 500,
       ),
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
+          child: Text(l10n.commonCancel),
         ),
         FilledButton(
           onPressed: () => Navigator.pop(context, _controller.text.trim()),
-          child: const Text('Submit'),
+          child: Text(l10n.commonSubmit),
         ),
       ],
     );

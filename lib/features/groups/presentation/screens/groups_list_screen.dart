@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:speakup_connect/core/constants/route_constants.dart';
+import 'package:speakup_connect/core/l10n/app_localizations_extension.dart';
 import 'package:speakup_connect/core/permissions/app_permission.dart';
 import 'package:speakup_connect/core/permissions/providers/permission_provider.dart';
 import 'package:speakup_connect/features/groups/domain/entities/group_entity.dart';
@@ -16,6 +17,7 @@ class GroupsListScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final groupsAsync = ref.watch(orgGroupsProvider);
     final query = ref.watch(groupsSearchQueryProvider).trim().toLowerCase();
     final canManage = ref.watch(canManageGroupsProvider);
@@ -32,12 +34,12 @@ class GroupsListScreen extends ConsumerWidget {
       if (!next.isLoading && prev?.isLoading == true) {
         if (next.hasError) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text('Seed failed: ${next.error}'),
+            content: Text(l10n.groupsSeedFailed('${next.error}')),
             backgroundColor: theme.colorScheme.error,
           ));
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text('Demo groups added successfully'),
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(l10n.groupsSeedSuccess),
             backgroundColor: Colors.green,
           ));
         }
@@ -48,7 +50,7 @@ class GroupsListScreen extends ConsumerWidget {
       if (!next.isLoading && prev?.isLoading == true) {
         if (next.hasError) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text('Sync failed: ${next.error}'),
+            content: Text(l10n.groupsSyncFailed('${next.error}')),
             backgroundColor: theme.colorScheme.error,
           ));
         }
@@ -57,11 +59,11 @@ class GroupsListScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Groups & Clubs'),
+        title: Text(l10n.settingsAdminGroups),
         actions: [
           if (canSeedDemoGroups)
             PopupMenuButton<String>(
-              tooltip: 'More actions',
+              tooltip: l10n.groupsMoreActions,
               onSelected: (value) async {
                 if (value == 'seed' && !seedState.isLoading) {
                   ref.read(seedDemoGroupsProvider.notifier).seed();
@@ -72,10 +74,7 @@ class GroupsListScreen extends ConsumerWidget {
                         .run();
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                        content: Text(
-                          'Synced $count membership${count == 1 ? '' : 's'} '
-                          'for My Groups',
-                        ),
+                        content: Text(l10n.groupsSyncSuccess(count)),
                         backgroundColor: Colors.green,
                       ));
                     }
@@ -96,9 +95,11 @@ class GroupsListScreen extends ConsumerWidget {
                           )
                         : const Icon(Icons.auto_fix_high_outlined),
                     title: Text(
-                      seedState.isLoading ? 'Seeding…' : 'Seed Demo Groups',
+                      seedState.isLoading
+                          ? l10n.groupsSeeding
+                          : l10n.groupsSeedDemoGroups,
                     ),
-                    subtitle: const Text('SPJ, Drum & Lyre, SSLG'),
+                    subtitle: Text(l10n.groupsSeedDemoSubtitle),
                   ),
                 ),
                 PopupMenuItem(
@@ -115,12 +116,10 @@ class GroupsListScreen extends ConsumerWidget {
                         : const Icon(Icons.sync_outlined),
                     title: Text(
                       backfillState.isLoading
-                          ? 'Syncing…'
-                          : 'Sync My Groups Indexes',
+                          ? l10n.groupsSyncing
+                          : l10n.groupsSyncIndexes,
                     ),
-                    subtitle: const Text(
-                      'Repair member visibility after roster changes',
-                    ),
+                    subtitle: Text(l10n.groupsSyncIndexesSubtitle),
                   ),
                 ),
               ],
@@ -131,7 +130,7 @@ class GroupsListScreen extends ConsumerWidget {
           ? FloatingActionButton.extended(
               onPressed: () => context.push(Routes.createGroup),
               icon: const Icon(Icons.add),
-              label: const Text('New Group'),
+              label: Text(l10n.groupsNewGroup),
               shape: const StadiumBorder(),
             )
           : null,
@@ -141,7 +140,7 @@ class GroupsListScreen extends ConsumerWidget {
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
             child: TextField(
               decoration: InputDecoration(
-                hintText: 'Search groups…',
+                hintText: l10n.groupsSearchGroupsHint,
                 prefixIcon: const Icon(Icons.search),
                 suffixIcon: query.isNotEmpty
                     ? IconButton(
@@ -187,15 +186,15 @@ class GroupsListScreen extends ConsumerWidget {
                           const SizedBox(height: 12),
                           Text(
                             groups.isEmpty
-                                ? 'No groups yet'
-                                : 'No groups match your search',
+                                ? l10n.homeGroupsNone
+                                : l10n.groupsNoSearchMatch,
                             style: theme.textTheme.titleMedium,
                           ),
                           const SizedBox(height: 8),
                           Text(
                             groups.isEmpty && canManage
-                                ? 'Seed the MONHS demo groups or create your own.'
-                                : 'Try a different search term.',
+                                ? l10n.groupsEmptySeedHint
+                                : l10n.groupsTryDifferentSearch,
                             textAlign: TextAlign.center,
                             style: theme.textTheme.bodySmall?.copyWith(
                               color: theme.colorScheme.onSurfaceVariant,
@@ -223,8 +222,8 @@ class GroupsListScreen extends ConsumerWidget {
                                     : const Icon(Icons.auto_fix_high_outlined),
                                 label: Text(
                                   seedState.isLoading
-                                      ? 'Seeding…'
-                                      : 'Seed Demo Groups',
+                                      ? l10n.groupsSeeding
+                                      : l10n.groupsSeedDemoGroups,
                                 ),
                               ),
                             ),
@@ -237,7 +236,7 @@ class GroupsListScreen extends ConsumerWidget {
                                 onPressed: () =>
                                     context.push(Routes.createGroup),
                                 icon: const Icon(Icons.add),
-                                label: const Text('Create Group'),
+                                label: Text(l10n.groupsCreateGroup),
                               ),
                             ),
                           ],
@@ -269,6 +268,7 @@ class _GroupCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     final canEdit = ref.watch(canEditGroupSettingsProvider(group.groupId));
 
@@ -315,12 +315,12 @@ class _GroupCard extends ConsumerWidget {
                     const SizedBox(height: 6),
                     Text(
                       [
-                        '${group.memberCount} member${group.memberCount == 1 ? '' : 's'}',
-                        if (group.allowJoinRequests) 'open to join',
+                        l10n.groupsMemberCount(group.memberCount),
+                        if (group.allowJoinRequests) l10n.groupsOpenToJoin,
                         if (group.pendingJoinRequestCount +
                                 group.pendingLeaveRequestCount >
                             0)
-                          '${group.pendingJoinRequestCount + group.pendingLeaveRequestCount} pending',
+                          '${group.pendingJoinRequestCount + group.pendingLeaveRequestCount} ${l10n.groupsPending}',
                       ].join(' · '),
                       style: theme.textTheme.labelSmall?.copyWith(
                         color: theme.colorScheme.primary,
@@ -332,7 +332,7 @@ class _GroupCard extends ConsumerWidget {
               ),
               if (canEdit)
                 IconButton(
-                  tooltip: 'Edit group',
+                  tooltip: l10n.groupsEditGroupTooltip,
                   icon: const Icon(Icons.edit_outlined),
                   onPressed: () {
                     context.push(Routes.editGroupPath(group.groupId));

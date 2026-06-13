@@ -560,7 +560,7 @@ Suggested implementation order: **i18n → messaging → parents** (messaging is
   - [ ] **Auth:** register, apply-to-join
   - [ ] **Reports:** submit flow, my reports, report details, confirmation
   - [ ] **Admin:** roster, approval queue, branding, grades, add/edit member, enrolled users, admin report detail
-  - [ ] **Groups:** browse, create, my groups, membership requests, policy sheets, position roles
+  - [x] **Groups:** browse, create, edit, my groups, members, membership requests (`groups*` ARB keys; Cebuano via Translation Helper)
   - [ ] **Announcements:** compose, detail, my announcements, responses, edit dialog
   - [ ] **Reminders:** compose, responses, expiration/response config widgets
   - [ ] **Roles:** management, assign, editor, user assignments
@@ -643,7 +643,9 @@ Suggested implementation order: **i18n → messaging → parents** (messaging is
 - [x] Build `CreateGroupScreen` (admin) — name, description, custom club positions
 - [x] Build `GroupMembersScreen` (admin/leader) — add/remove members, assign leader & club position
 - [x] Build `AddGroupMembersScreen` — search, role/position assignment, scroll-safe layout
-- [x] Build `MyGroupsScreen` — member view with leader actions (view/manage members, send alert)
+- [x] Build `MyGroupsScreen` — member view; **View Members** vs **Manage Members** by role; leader actions
+- [x] Build `EditGroupScreen` — unified group settings (name, description, policies, club positions, active flag)
+- [x] `updateGroup` in repository + datasource; sync `groupName` on membership indexes when renamed
 - [x] Show user's groups on home dashboard (`MyGroupsHomeSection`) and Settings
 - [x] Group role badge: leader vs. member; club position display
 
@@ -691,15 +693,15 @@ Suggested implementation order: **i18n → messaging → parents** (messaging is
 
 **Security**
 - [ ] Firestore rules: `joinRequests` / `leaveRequests` read for requester, leader, admin; writes via callables only
-- [ ] Extend `onlyGroupLeaderGroupUpdate()` for `allowJoinRequests`, `joinRequestHint`, `memberLeavePolicy`
+- [x] Extend `onlyGroupLeaderGroupUpdate()` for `name`, `description`, `allowJoinRequests`, `joinRequestHint`, `memberLeavePolicy`
 - [ ] Route roster deletes through callables so removal notifications always fire
 - [ ] Composite / collection-group indexes for pending join and leave queues
 
 **Presentation — settings & admin**
 - [ ] **Allow join requests** toggle on `CreateGroupScreen` (default OFF)
 - [ ] **Member leave policy** selector: Leave anytime | Must request to leave (default request)
-- [ ] Group settings sheet — join toggle, leave policy, hint (admin + `manageGroupRoster` + leader on led groups)
-- [ ] Badge on admin `GroupsListScreen` for pending join + leave counts
+- [x] **Edit Group** screen — join toggle, leave policy, hint, name, description (admin + `manageGroupRoster` + leader; leaders cannot edit position lists or active flag)
+- [x] Badge on admin `GroupsListScreen` for pending join + leave counts (subtitle + requests icon)
 
 **Presentation — members (join)**
 - [ ] `BrowseGroupsScreen` — status: Member | Pending | Request to join | Invitation only
@@ -725,7 +727,7 @@ Suggested implementation order: **i18n → messaging → parents** (messaging is
 - [ ] Optional: voluntary leave → notify leaders
 
 **Routes & providers**
-- [ ] `Routes.browseGroups`, `Routes.groupMembershipRequestsPath(groupId)`
+- [x] `Routes.browseGroups`, `Routes.editGroupPath(groupId)`, `Routes.groupMembershipRequestsPath(groupId)`
 - [ ] `canReviewGroupMembershipRequestsProvider`, pending join/leave providers, `groupMembershipPolicyProvider`
 
 **Documentation & help**

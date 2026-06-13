@@ -16,6 +16,19 @@
   "commonPassword": "Password",
   "commonEmail": "Email",
 
+  "commonCancel": "Cancel",
+  "commonSubmit": "Submit",
+  "commonRemove": "Remove",
+  "commonBrowse": "Browse",
+  "commonLeave": "Leave",
+  "commonApprove": "Approve",
+  "commonDecline": "Decline",
+  "commonDeny": "Deny",
+  "commonBack": "Back",
+  "commonSearch": "Search",
+  "commonSelectAll": "Select all",
+  "commonClearAll": "Clear all",
+
   "authAcceptTermsSnackbar": "Please accept the Terms & Privacy Policy",
   "authSignInFailed": "Sign in failed. Please try again.",
   "authOrgFallbackName": "Connect",
@@ -112,6 +125,243 @@
   "settingsTapPhotoChange": "Tap your photo to change your personal badge",
   "settingsSchoolPhotoOnFile": "School photo on file — ask an admin to enable personal uploads",
   "settingsPersonalUploadsRequireApproval": "Tap your photo — personal uploads require admin approval",
+  "homeGroupsEmptyMessage": "You are not in any groups yet. Tap View for details.",
+
+  "groupsManageMembers": "Manage Members",
+  "groupsViewMembers": "View Members",
+  "groupsAddMembers": "Add Members",
+  "groupsRequests": "Requests",
+  "groupsRequestsCount": "Requests ({count})",
+  "@groupsRequestsCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "groupsSendAlert": "Send Alert",
+  "groupsEditGroup": "Edit Group",
+  "groupsEditGroupMembersHint": "Change name, description, policies, and club positions",
+  "groupsPostAnnouncement": "Post Announcement",
+  "groupsCancelLeaveRequest": "Cancel leave request",
+  "groupsLeaveGroup": "Leave group",
+  "groupsRequestToLeave": "Request to leave",
+  "groupsLeavePending": "Leave pending",
+  "groupsMemberCount": "{count, plural, =1{1 member} other{{count} members}}",
+  "@groupsMemberCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "groupsMyGroupsEmptyMessage": "When an administrator adds you to a club, it will appear here. You can also browse open groups and request to join.",
+  "groupsLeaveGroupTitle": "Leave group?",
+  "groupsLeaveGroupMessage": "You will stop receiving alerts for this group.",
+  "groupsLeftGroup": "You left the group",
+  "groupsCouldNotLeave": "Could not leave",
+  "groupsLeaveRequestCancelled": "Leave request cancelled",
+  "groupsCouldNotCancelRequest": "Could not cancel request",
+  "groupsLeaveReasonMinLength": "Please enter at least 20 characters",
+  "groupsLeaveRequestSubmitted": "Leave request submitted",
+  "groupsCouldNotSubmitRequest": "Could not submit request",
+  "groupsLeaveRequestDialogTitle": "Request to leave",
+  "groupsLeaveReasonLabel": "Why do you want to leave?",
+  "groupsLeaveReasonHint": "At least 20 characters",
+  "groupsGenericName": "Group",
+  "groupsGroupMembersTitle": "Group Members",
+  "groupsMembershipRequests": "Membership requests",
+  "groupsMembershipSettings": "Membership settings",
+  "groupsMembershipRequestsCount": "Membership requests ({count})",
+  "@groupsMembershipRequestsCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "groupsEditGroupSettingsTooltip": "Edit group settings",
+  "groupsNoMembersYet": "No members yet",
+  "groupsNoMembersManageHint": "Add students or staff to this group.",
+  "groupsNoMembersViewHint": "Members will appear here once added.",
+  "groupsRemoveMemberTitle": "Remove member?",
+  "groupsRemoveMemberMessage": "Remove {name} from this group?",
+  "@groupsRemoveMemberMessage": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "groupsCouldNotRemoveMember": "Could not remove member",
+  "groupsCouldNotUpdatePosition": "Could not update position",
+  "groupsAssignPosition": "Assign position",
+  "groupsNoPosition": "No position",
+  "groupsNoPositionSelected": "No position ✓",
+  "groupsMakeLeader": "Make leader",
+  "groupsMakeMember": "Make member",
+  "groupsRemoveFromGroup": "Remove from group",
+  "groupsRoleLeader": "Leader",
+  "groupsRoleMember": "Member",
+  "groupsSearchClubHint": "Club or program name",
+  "groupsNoSearchResults": "No groups match your search.",
+  "groupsStatusMember": "Member",
+  "groupsStatusPending": "Pending",
+  "groupsStatusOpenToRequests": "Open to requests",
+  "groupsStatusInvitationOnly": "Invitation only",
+  "groupsRequestToJoin": "Request to Join",
+  "groupsCancelRequest": "Cancel Request",
+  "groupsInvitationOnlyMessage": "Membership by invitation only. Contact your adviser.",
+  "groupsJoinRequestTitle": "Request to join {groupName}",
+  "@groupsJoinRequestTitle": {
+    "placeholders": {
+      "groupName": { "type": "String" }
+    }
+  },
+  "groupsJoinMessageLabel": "Message (optional)",
+  "groupsJoinMessageHint": "Tell the leader why you want to join",
+  "groupsJoinRequestSubmitted": "Join request submitted",
+  "groupsCouldNotSubmitJoin": "Could not submit: {error}",
+  "@groupsCouldNotSubmitJoin": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "groupsRequestCancelled": "Request cancelled",
+  "groupsOpenToJoin": "open to join",
+  "groupsPending": "pending",
+  "groupsNewGroup": "New Group",
+  "groupsCreateGroup": "Create Group",
+  "groupsSearchGroupsHint": "Search groups…",
+  "groupsNoSearchMatch": "No groups match your search",
+  "groupsEmptySeedHint": "Seed the MONHS demo groups or create your own.",
+  "groupsTryDifferentSearch": "Try a different search term.",
+  "groupsSeedDemoGroups": "Seed Demo Groups",
+  "groupsSeeding": "Seeding…",
+  "groupsSeedFailed": "Seed failed: {error}",
+  "@groupsSeedFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "groupsSeedSuccess": "Demo groups added successfully",
+  "groupsSyncFailed": "Sync failed: {error}",
+  "@groupsSyncFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "groupsSyncSuccess": "{count, plural, =1{Synced 1 membership for My Groups} other{Synced {count} memberships for My Groups}}",
+  "@groupsSyncSuccess": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "groupsMoreActions": "More actions",
+  "groupsSeedDemoSubtitle": "SPJ, Drum & Lyre, SSLG",
+  "groupsSyncIndexes": "Sync My Groups Indexes",
+  "groupsSyncing": "Syncing…",
+  "groupsSyncIndexesSubtitle": "Repair member visibility after roster changes",
+  "groupsEditGroupTooltip": "Edit group",
+  "groupsCreateGroupTitle": "Create Group",
+  "groupsGroupNameLabel": "Group name",
+  "groupsGroupNameHint": "e.g. Journalism Club",
+  "groupsGroupNameRequired": "Enter a group name",
+  "groupsDescriptionLabel": "Description (optional)",
+  "groupsDescriptionHint": "What is this group about?",
+  "groupsDefineClubPositions": "Define club positions",
+  "groupsDefineClubPositionsSubtitle": "Optional offices like President or Treasurer",
+  "groupsAllowJoinRequests": "Allow join requests",
+  "groupsAllowJoinRequestsSubtitle": "Let students request to join (off for elected groups like SSLG)",
+  "groupsMemberLeavePolicy": "Member leave policy",
+  "groupsLeaveAnytime": "Leave anytime",
+  "groupsMustRequestToLeave": "Must request to leave",
+  "groupsLeaveAnytimeSubtitle": "Members can leave without approval",
+  "groupsMustRequestToLeaveSubtitle": "Requires a reason and leader approval",
+  "groupsJoinHintLabel": "Join hint (optional)",
+  "groupsJoinHintHint": "e.g. Auditions in August",
+  "groupsCreated": "Created {name}",
+  "@groupsCreated": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "groupsCouldNotCreate": "Could not create group",
+  "groupsEditGroupTitle": "Edit Group",
+  "groupsGroupNotFound": "Group not found",
+  "groupsGroupSettingsSaved": "Group settings saved",
+  "groupsCouldNotSaveSettings": "Could not save group settings",
+  "groupsSaveChanges": "Save Changes",
+  "groupsGroupIsActive": "Group is active",
+  "groupsGroupIsActiveSubtitle": "Inactive groups are hidden from browse and lists",
+  "groupsAddPosition": "Add position",
+  "groupsSavePositions": "Save Positions",
+  "groupsClubPositionsSaved": "Club positions saved",
+  "groupsCouldNotSavePositions": "Could not save positions",
+  "groupsClubPositionsTitle": "Club Positions",
+  "groupsClubPositionsSectionTitle": "Club positions",
+  "groupsClubPositionsSectionSubtitle": "Optional offices members can hold (e.g. President, Treasurer). You can assign these when adding or managing members.",
+  "groupsMembershipRequestsTitle": "{groupName} — Requests",
+  "@groupsMembershipRequestsTitle": {
+    "placeholders": {
+      "groupName": { "type": "String" }
+    }
+  },
+  "groupsTabJoinCount": "Join ({count})",
+  "@groupsTabJoinCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "groupsTabLeaveCount": "Leave ({count})",
+  "@groupsTabLeaveCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "groupsNoPendingJoinRequests": "No pending join requests",
+  "groupsNoPendingLeaveRequests": "No pending leave requests",
+  "groupsStudentIdPrefix": "ID: {id}",
+  "@groupsStudentIdPrefix": {
+    "placeholders": {
+      "id": { "type": "String" }
+    }
+  },
+  "groupsApproveLeave": "Approve leave",
+  "groupsDeclineJoinTitle": "Decline join request?",
+  "groupsDeclineJoinReasonLabel": "Reason (optional)",
+  "groupsDenyLeaveTitle": "Deny leave request",
+  "groupsDenyLeaveReasonLabel": "Reason (required)",
+  "groupsReasonRequired": "A reason is required",
+  "groupsJoinRequestUpdated": "Join request updated",
+  "groupsLeaveRequestUpdated": "Leave request updated",
+  "groupsActionFailed": "Action failed",
+  "groupsAddMembersSearchLabel": "Search members",
+  "groupsAddMembersSearchHint": "Name, email, or school ID",
+  "groupsCouldNotAddMembers": "Could not add members: {error}",
+  "@groupsCouldNotAddMembers": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "groupsAllMembersAlreadyInGroup": "All approved members are already in this group.",
+  "groupsNoUsersMatchSearch": "No users match your search.",
+  "groupsAssignSelectedHint": "{count} selected — choose role and assign",
+  "@groupsAssignSelectedHint": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "groupsAssignSearchHint": "Search and tap a member below",
+  "groupsAssignButton": "Assign",
+  "groupsGroupRoleLabel": "Group role",
+  "groupsClubPositionOptional": "Club position (optional)",
+  "groupsAssignMembers": "{count, plural, =1{Assign 1 member} other{Assign {count} members}}",
+  "@groupsAssignMembers": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "groupsAssignMembersPartial": "Assigned {added, plural, =1{1 member} other{{added} members}}; {skipped} could not be added",
+  "@groupsAssignMembersPartial": {
+    "placeholders": {
+      "added": { "type": "int" },
+      "skipped": { "type": "int" }
+    }
+  },
+
   "settingsSectionGroups": "Groups & Clubs",
   "settingsMyGroups": "My Groups & Clubs",
   "settingsPendingMembershipRequests": "{count, plural, =1{1 pending membership request} other{{count} pending membership requests}}",

@@ -162,7 +162,7 @@ When an admin or leader uses **Remove from group** on the roster:
 
 ### J — Admin configures leave policy
 
-`CreateGroupScreen` and group settings include **Member leave policy**:
+`CreateGroupScreen` and **Edit Group** include **Member leave policy**:
 
 - **Leave anytime** (`voluntary`)
 - **Must request to leave** (`request_required`) — default
@@ -273,31 +273,32 @@ Client writes to `joinRequests` are **not** trusted for approve/reject. Use Clou
 
 - `joinRequests` / `leaveRequests` read: requester (own doc), group leader, admin, `manageGroupRoster`.
 - `joinRequests` / `leaveRequests` write: **deny** direct client create/update/delete — functions only.
-- Group policy fields update: admin, `manageGroupRoster`, or leader on that group; extend `onlyGroupLeaderGroupUpdate()` to allow `allowJoinRequests`, `joinRequestHint`, `memberLeavePolicy`, `updatedAt`.
+- Group policy fields update: admin, `manageGroupRoster`, or leader on that group; `onlyGroupLeaderGroupUpdate()` allows `name`, `description`, `allowJoinRequests`, `joinRequestHint`, `memberLeavePolicy`, `updatedAt` (not `positionRoles` or `isActive`).
 - Prefer routing roster **deletes** through `removeGroupMember` / review callables so notifications always fire.
 
 ---
 
-## UI surfaces (planned)
+## UI surfaces (shipped)
 
 | Screen / widget | Audience | Purpose |
 |-----------------|----------|---------|
 | `BrowseGroupsScreen` | All approved members | Discover groups, status chip, request action |
-| `GroupJoinRequestSheet` | Member | Optional message + submit |
+| `GroupJoinRequestSheet` / join dialog | Member | Optional message + submit |
 | `GroupMembershipRequestsScreen` | Leader / admin | Per-group queue with **Join** and **Leave** tabs |
-| `PendingGroupMembershipRequestsScreen` | Leader / admin | Cross-group aggregate (optional v1) |
-| Toggle on `CreateGroupScreen` | Admin | Join default closed; leave policy default `request_required` |
-| Group settings sheet / edit | Admin, leader | Join toggle, leave policy, hint text |
+| `CreateGroupScreen` | Admin / `manageGroupRoster` | Create group; join default closed; leave policy default `request_required` |
+| `EditGroupScreen` | Admin, `manageGroupRoster`, or leader | Unified settings: name, description, join/leave policies, club positions (admin only), active flag (org admin only) |
 | **Leave group** / **Request to leave** on `MyGroupsScreen` | Member | Policy-driven exit actions |
-| `GroupLeaveRequestSheet` | Member | Required reason form |
+| `GroupLeaveRequestSheet` / leave dialog | Member | Required reason form |
 | Badge on `MyGroupsScreen` leader card | Leader | Pending join + leave counts |
-| Badge on admin `GroupsListScreen` | Admin | Pending counts per group |
+| Pending counts on admin `GroupsListScreen` | Admin | Per-group join + leave totals in list subtitle |
 
-**Routes (proposed)**
+**Routes**
 
 - `/groups/browse` — member browse
+- `/groups/:groupId/edit` — edit group settings
+- `/groups/:groupId/members` — roster (view or manage)
 - `/groups/:groupId/membership-requests` — review join + leave queues
-- `/settings/group-membership-requests` — aggregate (if shipped)
+- `/groups/:groupId/roles` — redirects to `/groups/:groupId/edit` (legacy)
 
 ---
 

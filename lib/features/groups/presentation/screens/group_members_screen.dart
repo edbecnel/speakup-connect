@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:speakup_connect/core/constants/route_constants.dart';
+import 'package:speakup_connect/core/l10n/app_localizations_extension.dart';
 import 'package:speakup_connect/features/groups/domain/entities/group_entity.dart';
 import 'package:speakup_connect/features/groups/domain/entities/group_member_entity.dart';
+import 'package:speakup_connect/features/groups/presentation/l10n/group_ui_l10n.dart';
 import 'package:speakup_connect/features/groups/presentation/providers/group_provider.dart';
 import 'package:speakup_connect/shared/widgets/app_error_widget.dart';
 import 'package:speakup_connect/shared/widgets/app_loading_indicator.dart';
@@ -16,6 +18,7 @@ class GroupMembersScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final groupAsync = ref.watch(groupByIdProvider(groupId));
     final membersAsync = ref.watch(groupMembersProvider(groupId));
     final canManageRoster = ref.watch(canManageGroupRosterProvider(groupId));
@@ -30,16 +33,16 @@ class GroupMembersScreen extends ConsumerWidget {
       appBar: AppBar(
         leading: BackButton(onPressed: () => context.pop()),
         title: groupAsync.when(
-          data: (g) => Text(g?.name ?? 'Group Members'),
-          loading: () => const Text('Group Members'),
-          error: (_, __) => const Text('Group Members'),
+          data: (g) => Text(g?.name ?? l10n.groupsGroupMembersTitle),
+          loading: () => Text(l10n.groupsGroupMembersTitle),
+          error: (_, __) => Text(l10n.groupsGroupMembersTitle),
         ),
         actions: [
           if (canManageRoster)
             IconButton(
               tooltip: pendingCount > 0
-                  ? 'Membership requests ($pendingCount)'
-                  : 'Membership requests',
+                  ? l10n.groupsMembershipRequestsCount(pendingCount)
+                  : l10n.groupsMembershipRequests,
               onPressed: () => context.push(
                 Routes.groupMembershipRequestsPath(groupId),
               ),
@@ -51,10 +54,10 @@ class GroupMembersScreen extends ConsumerWidget {
                   : const Icon(Icons.inbox_outlined),
             ),
           if (canEditSettings)
-            IconButton(
-              tooltip: 'Edit group settings',
+            TextButton.icon(
               onPressed: () => context.push(Routes.editGroupPath(groupId)),
               icon: const Icon(Icons.edit_outlined),
+              label: Text(l10n.groupsEditGroup),
             ),
         ],
       ),
@@ -64,7 +67,7 @@ class GroupMembersScreen extends ConsumerWidget {
                   ? null
                   : () => context.push(Routes.addGroupMembersPath(groupId)),
               icon: const Icon(Icons.person_add_outlined),
-              label: const Text('Add Members'),
+              label: Text(l10n.groupsAddMembers),
               shape: const StadiumBorder(),
             )
           : null,
@@ -76,7 +79,74 @@ class GroupMembersScreen extends ConsumerWidget {
           error: (e, _) => AppErrorWidget(message: e.toString()),
           data: (members) {
             if (members.isEmpty) {
-              return _EmptyMembers(canManage: canManageRoster);
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (canEditSettings)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                      child: Card(
+                        clipBehavior: Clip.antiAlias,
+                        child: InkWell(
+                          onTap: () =>
+                              context.push(Routes.editGroupPath(groupId)),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 12,
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.edit_outlined,
+                                  color:
+                                      Theme.of(context).colorScheme.primary,
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        l10n.groupsEditGroup,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleSmall
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        l10n.groupsEditGroupMembersHint,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall
+                                            ?.copyWith(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .onSurfaceVariant,
+                                            ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Icon(
+                                  Icons.chevron_right_rounded,
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  Expanded(child: _EmptyMembers(canManage: canManageRoster)),
+                ],
+              );
             }
 
             final sorted = List<GroupMemberEntity>.from(members)
@@ -90,17 +160,84 @@ class GroupMembersScreen extends ConsumerWidget {
                 return a.displayName.compareTo(b.displayName);
               });
 
-            return ListView.separated(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 96),
-              itemCount: sorted.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 4),
-              itemBuilder: (_, i) => _MemberTile(
-                member: sorted[i],
-                group: group,
-                groupId: groupId,
-                canManage: canManageRoster,
-                isBusy: actionState.isLoading,
-              ),
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (canEditSettings)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                    child: Card(
+                      clipBehavior: Clip.antiAlias,
+                      child: InkWell(
+                        onTap: () =>
+                            context.push(Routes.editGroupPath(groupId)),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.edit_outlined,
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      l10n.groupsEditGroup,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleSmall
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      l10n.groupsEditGroupMembersHint,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall
+                                          ?.copyWith(
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .onSurfaceVariant,
+                                          ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Icon(
+                                Icons.chevron_right_rounded,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                Expanded(
+                  child: ListView.separated(
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 96),
+                    itemCount: sorted.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 4),
+                    itemBuilder: (_, i) => _MemberTile(
+                      member: sorted[i],
+                      group: group,
+                      groupId: groupId,
+                      canManage: canManageRoster,
+                      isBusy: actionState.isLoading,
+                    ),
+                  ),
+                ),
+              ],
             );
           },
         ),
@@ -116,6 +253,8 @@ class _EmptyMembers extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -129,14 +268,14 @@ class _EmptyMembers extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             Text(
-              'No members yet',
+              l10n.groupsNoMembersYet,
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
             Text(
               canManage
-                  ? 'Add students or staff to this group.'
-                  : 'Members will appear here once added.',
+                  ? l10n.groupsNoMembersManageHint
+                  : l10n.groupsNoMembersViewHint,
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -164,8 +303,8 @@ class _MemberTile extends ConsumerWidget {
   final bool canManage;
   final bool isBusy;
 
-  String _subtitle() {
-    final parts = <String>[member.groupRole.label];
+  String _subtitle(BuildContext context) {
+    final parts = <String>[context.localizedGroupRole(member.groupRole)];
     final position = group?.positionLabel(member.positionRoleId);
     if (position != null) {
       parts.add(position);
@@ -175,6 +314,7 @@ class _MemberTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     final hasPositions = group?.hasPositionRoles ?? false;
 
@@ -197,7 +337,7 @@ class _MemberTile extends ConsumerWidget {
           ),
         ),
         title: Text(member.displayName),
-        subtitle: Text(_subtitle()),
+        subtitle: Text(_subtitle(context)),
         trailing: canManage
             ? PopupMenuButton<String>(
                 enabled: !isBusy,
@@ -220,18 +360,18 @@ class _MemberTile extends ConsumerWidget {
                     final confirmed = await showDialog<bool>(
                       context: context,
                       builder: (ctx) => AlertDialog(
-                        title: const Text('Remove member?'),
+                        title: Text(l10n.groupsRemoveMemberTitle),
                         content: Text(
-                          'Remove ${member.displayName} from this group?',
+                          l10n.groupsRemoveMemberMessage(member.displayName),
                         ),
                         actions: [
                           TextButton(
                             onPressed: () => Navigator.pop(ctx, false),
-                            child: const Text('Cancel'),
+                            child: Text(l10n.commonCancel),
                           ),
                           FilledButton(
                             onPressed: () => Navigator.pop(ctx, true),
-                            child: const Text('Remove'),
+                            child: Text(l10n.commonRemove),
                           ),
                         ],
                       ),
@@ -243,8 +383,8 @@ class _MemberTile extends ConsumerWidget {
                       );
                       if (context.mounted && !ok) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Could not remove member'),
+                          SnackBar(
+                            content: Text(l10n.groupsCouldNotRemoveMember),
                           ),
                         );
                       }
@@ -260,20 +400,20 @@ class _MemberTile extends ConsumerWidget {
                     );
                     if (context.mounted && !ok) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Could not update position'),
+                        SnackBar(
+                          content: Text(l10n.groupsCouldNotUpdatePosition),
                         ),
                       );
                     }
                   }
                 },
-                itemBuilder: (_) {
+                itemBuilder: (ctx) {
                   final items = <PopupMenuEntry<String>>[];
                   if (hasPositions) {
                     items.add(
-                      const PopupMenuItem(
+                      PopupMenuItem(
                         enabled: false,
-                        child: Text('Assign position'),
+                        child: Text(l10n.groupsAssignPosition),
                       ),
                     );
                     items.add(
@@ -281,8 +421,8 @@ class _MemberTile extends ConsumerWidget {
                         value: 'position:__none__',
                         child: Text(
                           member.positionRoleId == null
-                              ? 'No position ✓'
-                              : 'No position',
+                              ? l10n.groupsNoPositionSelected
+                              : l10n.groupsNoPosition,
                         ),
                       ),
                     );
@@ -301,24 +441,24 @@ class _MemberTile extends ConsumerWidget {
                   }
                   if (!member.isLeader) {
                     items.add(
-                      const PopupMenuItem(
+                      PopupMenuItem(
                         value: 'leader',
-                        child: Text('Make leader'),
+                        child: Text(l10n.groupsMakeLeader),
                       ),
                     );
                   }
                   if (member.isLeader) {
                     items.add(
-                      const PopupMenuItem(
+                      PopupMenuItem(
                         value: 'member',
-                        child: Text('Make member'),
+                        child: Text(l10n.groupsMakeMember),
                       ),
                     );
                   }
                   items.add(
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: 'remove',
-                      child: Text('Remove from group'),
+                      child: Text(l10n.groupsRemoveFromGroup),
                     ),
                   );
                   return items;

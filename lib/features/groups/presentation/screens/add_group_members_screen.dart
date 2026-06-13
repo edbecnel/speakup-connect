@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:speakup_connect/core/constants/route_constants.dart';
+import 'package:speakup_connect/core/l10n/app_localizations_extension.dart';
 import 'package:speakup_connect/features/groups/domain/entities/group_member_entity.dart';
 import 'package:speakup_connect/features/groups/domain/entities/group_position_role.dart';
+import 'package:speakup_connect/features/groups/presentation/l10n/group_ui_l10n.dart';
 import 'package:speakup_connect/features/groups/presentation/providers/group_provider.dart';
 import 'package:speakup_connect/features/organization/domain/entities/user_profile_entity.dart';
 import 'package:speakup_connect/shared/widgets/app_error_widget.dart';
@@ -68,6 +70,7 @@ class _AddGroupMembersScreenState extends ConsumerState<AddGroupMembersScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     final usersAsync = ref.watch(approvedOrgUsersProvider);
     final membersAsync = ref.watch(groupMembersProvider(widget.groupId));
@@ -84,7 +87,7 @@ class _AddGroupMembersScreenState extends ConsumerState<AddGroupMembersScreen> {
         if (next.hasError) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Could not add members: ${next.error}'),
+              content: Text(l10n.groupsCouldNotAddMembers('${next.error}')),
               backgroundColor: theme.colorScheme.error,
             ),
           );
@@ -103,10 +106,10 @@ class _AddGroupMembersScreenState extends ConsumerState<AddGroupMembersScreen> {
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          tooltip: 'Back',
+          tooltip: l10n.commonBack,
           onPressed: _leaveScreen,
         ),
-        title: const Text('Add Members'),
+        title: Text(l10n.groupsAddMembers),
       ),
       body: usersAsync.when(
         loading: () => const AppLoadingIndicator(),
@@ -142,8 +145,8 @@ class _AddGroupMembersScreenState extends ConsumerState<AddGroupMembersScreen> {
                       AppTextField(
                         controller: _searchController,
                         focusNode: _searchFocus,
-                        label: 'Search members',
-                        hint: 'Name, email, or school ID',
+                        label: l10n.groupsAddMembersSearchLabel,
+                        hint: l10n.groupsAddMembersSearchHint,
                         prefixIcon: Icons.search,
                         suffixIcon: _searchController.text.isNotEmpty
                             ? IconButton(
@@ -190,8 +193,11 @@ class _AddGroupMembersScreenState extends ConsumerState<AddGroupMembersScreen> {
                                         );
                                       }
                                     }),
-                            child:
-                                Text(allSelected ? 'Clear all' : 'Select all'),
+                            child: Text(
+                              allSelected
+                                  ? l10n.commonClearAll
+                                  : l10n.commonSelectAll,
+                            ),
                           ),
                         ),
                     ],
@@ -205,8 +211,8 @@ class _AddGroupMembersScreenState extends ConsumerState<AddGroupMembersScreen> {
                           padding: const EdgeInsets.all(32),
                           child: Text(
                             available.isEmpty
-                                ? 'All approved members are already in this group.'
-                                : 'No users match your search.',
+                                ? l10n.groupsAllMembersAlreadyInGroup
+                                : l10n.groupsNoUsersMatchSearch,
                             textAlign: TextAlign.center,
                             style: theme.textTheme.bodyMedium?.copyWith(
                               color: theme.colorScheme.onSurfaceVariant,
@@ -258,12 +264,13 @@ class _AddGroupMembersScreenState extends ConsumerState<AddGroupMembersScreen> {
         );
 
     if (!mounted) return;
+    final l10n = context.l10n;
 
     if (added > 0) {
       final skipped = toAdd.length - added;
       final message = skipped > 0
-          ? 'Assigned $added member(s); $skipped could not be added'
-          : 'Assigned $added member${added == 1 ? '' : 's'}';
+          ? l10n.groupsAssignMembersPartial(added, skipped)
+          : l10n.groupsAssignMembers(added);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(message)),
       );
@@ -301,6 +308,7 @@ class _AssignPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
 
     return Card(
@@ -311,8 +319,8 @@ class _AssignPanel extends StatelessWidget {
           children: [
             Text(
               hasSelection
-                  ? '$selectedCount selected — choose role and assign'
-                  : 'Search and tap a member below',
+                  ? l10n.groupsAssignSelectedHint(selectedCount)
+                  : l10n.groupsAssignSearchHint,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: theme.textTheme.bodySmall?.copyWith(
@@ -323,8 +331,8 @@ class _AssignPanel extends StatelessWidget {
             DropdownButtonFormField<GroupRole>(
               isExpanded: true,
               value: role,
-              decoration: const InputDecoration(
-                labelText: 'Group role',
+              decoration: InputDecoration(
+                labelText: l10n.groupsGroupRoleLabel,
                 border: OutlineInputBorder(),
                 isDense: true,
               ),
@@ -332,7 +340,10 @@ class _AssignPanel extends StatelessWidget {
                   .map(
                     (r) => DropdownMenuItem(
                       value: r,
-                      child: Text(r.label, overflow: TextOverflow.ellipsis),
+                      child: Text(
+                        context.localizedGroupRole(r),
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                   )
                   .toList(),
@@ -341,7 +352,7 @@ class _AssignPanel extends StatelessWidget {
                     (r) => Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
-                        r.label,
+                        context.localizedGroupRole(r),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
@@ -354,15 +365,15 @@ class _AssignPanel extends StatelessWidget {
               DropdownButtonFormField<String?>(
                 isExpanded: true,
                 value: positionRoleId,
-                decoration: const InputDecoration(
-                  labelText: 'Club position (optional)',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: l10n.groupsClubPositionOptional,
+                  border: const OutlineInputBorder(),
                   isDense: true,
                 ),
                 items: [
-                  const DropdownMenuItem<String?>(
+                  DropdownMenuItem<String?>(
                     value: null,
-                    child: Text('No position'),
+                    child: Text(l10n.groupsNoPosition),
                   ),
                   ...positionRoles.map(
                     (r) => DropdownMenuItem<String?>(
@@ -372,9 +383,12 @@ class _AssignPanel extends StatelessWidget {
                   ),
                 ],
                 selectedItemBuilder: (context) => [
-                  const Align(
+                  Align(
                     alignment: Alignment.centerLeft,
-                    child: Text('No position', overflow: TextOverflow.ellipsis),
+                    child: Text(
+                      l10n.groupsNoPosition,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                   ...positionRoles.map(
                     (r) => Align(
@@ -404,10 +418,8 @@ class _AssignPanel extends StatelessWidget {
                   : const Icon(Icons.person_add_alt_1_outlined),
               label: Text(
                 hasSelection
-                    ? selectedCount == 1
-                        ? 'Assign member'
-                        : 'Assign $selectedCount members'
-                    : 'Assign',
+                    ? l10n.groupsAssignMembers(selectedCount)
+                    : l10n.groupsAssignButton,
                 overflow: TextOverflow.ellipsis,
               ),
             ),
