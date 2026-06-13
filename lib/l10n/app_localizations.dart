@@ -692,6 +692,18 @@ abstract class AppLocalizations {
   /// **'Define which grade levels your school uses'**
   String get settingsSchoolGradesSubtitle;
 
+  /// No description provided for @settingsTranslations.
+  ///
+  /// In en, this message translates to:
+  /// **'Translations'**
+  String get settingsTranslations;
+
+  /// No description provided for @settingsTranslationsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit UI strings for your organization\'s languages'**
+  String get settingsTranslationsSubtitle;
+
   /// No description provided for @settingsSignOut.
   ///
   /// In en, this message translates to:
@@ -889,6 +901,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Description'**
   String get validationReportDescriptionField;
+
+  /// No description provided for @commonSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get commonSave;
+
+  /// No description provided for @translationSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search keys or English text'**
+  String get translationSearchHint;
+
+  /// No description provided for @translationBatchAi.
+  ///
+  /// In en, this message translates to:
+  /// **'Translate missing (AI)'**
+  String get translationBatchAi;
+
+  /// No description provided for @translationBatchAiResult.
+  ///
+  /// In en, this message translates to:
+  /// **'AI draft: {succeeded} of {total} succeeded'**
+  String translationBatchAiResult(int succeeded, int total);
+
+  /// No description provided for @translationExportArb.
+  ///
+  /// In en, this message translates to:
+  /// **'Export ARB (copy JSON)'**
+  String get translationExportArb;
+
+  /// No description provided for @translationExportCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'ARB JSON copied to clipboard'**
+  String get translationExportCopied;
+
+  /// No description provided for @translationEntryCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} strings loaded'**
+  String translationEntryCount(int count);
+
+  /// No description provided for @translationNoEntries.
+  ///
+  /// In en, this message translates to:
+  /// **'No translation entries yet. Platform operators import app_en.arb first.'**
+  String get translationNoEntries;
+
+  /// No description provided for @translationTargetLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Translation'**
+  String get translationTargetLabel;
+
+  /// No description provided for @translationAiDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'AI draft'**
+  String get translationAiDraft;
+
+  /// No description provided for @translationApprove.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve'**
+  String get translationApprove;
 }
 
 class _AppLocalizationsDelegate

@@ -41,6 +41,7 @@ const ALL_PERMISSIONS = [
   // Org Administration
   'manageOrganizationSettings',
   'manageRoles',
+  'manageTranslations',
   'viewAuditLogs',
 ];
 

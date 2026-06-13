@@ -7,6 +7,8 @@ import 'package:speakup_connect/features/announcements/presentation/screens/anno
 import 'package:speakup_connect/features/announcements/presentation/screens/announcements_screen.dart';
 import 'package:speakup_connect/features/announcements/presentation/screens/compose_announcement_screen.dart';
 import 'package:speakup_connect/features/announcements/presentation/screens/my_announcements_screen.dart';
+import 'package:speakup_connect/features/translations/presentation/providers/translation_provider.dart';
+import 'package:speakup_connect/features/translations/presentation/screens/translation_workspace_screen.dart';
 import 'package:speakup_connect/features/admin/presentation/screens/admin_branding_screen.dart';
 import 'package:speakup_connect/features/admin/presentation/screens/admin_dashboard_screen.dart';
 import 'package:speakup_connect/features/admin/presentation/screens/admin_report_detail_screen.dart';
@@ -141,7 +143,12 @@ GoRouter appRouter(Ref ref) {
               return Routes.home;
             }
             if (!isReportTriageRoute && !profile.isAdmin) {
-              return Routes.home;
+              if (loc == Routes.translationWorkspace &&
+                  ref.read(canManageTranslationsProvider)) {
+                // Translation moderators may access /admin/translations only.
+              } else {
+                return Routes.home;
+              }
             }
           }
         }
@@ -432,6 +439,11 @@ GoRouter appRouter(Ref ref) {
           final reportId = state.pathParameters['reportId']!;
           return AdminReportDetailScreen(reportId: reportId);
         },
+      ),
+      GoRoute(
+        path: Routes.translationWorkspace,
+        name: 'translationWorkspace',
+        builder: (context, state) => const TranslationWorkspaceScreen(),
       ),
       GoRoute(
         path: Routes.adminSettings,

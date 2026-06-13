@@ -17,6 +17,7 @@ import 'package:speakup_connect/features/organization/presentation/providers/use
 import 'package:speakup_connect/features/organization/presentation/providers/profile_photo_provider.dart';
 import 'package:speakup_connect/features/organization/presentation/widgets/member_profile_account_section.dart';
 import 'package:speakup_connect/features/organization/presentation/widgets/profile_photo_picker.dart';
+import 'package:speakup_connect/features/translations/presentation/providers/translation_provider.dart';
 import 'package:speakup_connect/features/settings/presentation/providers/settings_provider.dart';
 import 'package:speakup_connect/shared/widgets/app_button.dart';
 import 'package:speakup_connect/shared/widgets/language_selector.dart';
@@ -40,6 +41,7 @@ class SettingsScreen extends ConsumerWidget {
     final supportsGrades = ref.watch(orgSupportsStudentGradesProvider);
     final canTriageReports = ref.watch(canAccessAdminReportsProvider);
     final canManageGroups = ref.watch(canManageGroupsProvider);
+    final canManageTranslations = ref.watch(canManageTranslationsProvider);
     final canComposeAlerts = ref.watch(canComposeRemindersProvider);
     final leaderOnlyAlerts = ref.watch(isGroupLeaderOnlyComposerProvider);
 
@@ -284,7 +286,8 @@ class SettingsScreen extends ConsumerWidget {
           // --- Admin ---
           if (profile?.isAdmin == true ||
               canTriageReports ||
-              canManageGroups) ...[
+              canManageGroups ||
+              canManageTranslations) ...[
             _SectionHeader(title: l10n.settingsSectionAdmin),
             if (canTriageReports)
               ListTile(
@@ -301,6 +304,15 @@ class SettingsScreen extends ConsumerWidget {
                 subtitle: Text(l10n.settingsAdminGroupsSubtitle),
                 trailing: const Icon(Icons.chevron_right_rounded),
                 onTap: () => context.push(Routes.groupsList),
+              ),
+            ],
+            if (profile?.isAdmin == true || canManageTranslations) ...[
+              ListTile(
+                leading: const Icon(Icons.translate_outlined),
+                title: Text(l10n.settingsTranslations),
+                subtitle: Text(l10n.settingsTranslationsSubtitle),
+                trailing: const Icon(Icons.chevron_right_rounded),
+                onTap: () => context.push(Routes.translationWorkspace),
               ),
             ],
             if (profile?.isAdmin == true) ...[

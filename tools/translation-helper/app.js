@@ -47,10 +47,67 @@ const els = {
   exportBtn: document.getElementById('export-btn'),
   meta: document.getElementById('meta'),
   entriesBody: document.getElementById('entries-body'),
+  helpPanel: document.getElementById('help-panel'),
+  helpToggleBtn: document.getElementById('help-toggle-btn'),
 };
 
 let entries = [];
 let searchTimer;
+let workspaceAccess = {
+  isPlatformSuperAdmin: false,
+  organizationId: null,
+  canImportSource: false,
+  canExportArb: false,
+  canBatchAi: false,
+};
+
+function orgPayload(extra = {}) {
+  if (workspaceAccess.isPlatformSuperAdmin) {
+    return { ...extra };
+  }
+  const orgId =
+    workspaceAccess.organizationId ||
+    window.ORGANIZATION_ID ||
+    null;
+  return { organizationId: orgId, ...extra };
+}
+
+function applyWorkspaceCapabilities() {
+  els.importArb.closest('label')?.classList.toggle(
+    'hidden',
+    !workspaceAccess.canImportSource,
+  );
+  els.batchAiBtn.classList.toggle('hidden', !workspaceAccess.canBatchAi);
+  els.exportBtn.classList.toggle('hidden', !workspaceAccess.canExportArb);
+  applyHelpVisibility();
+}
+
+function applyHelpVisibility() {
+  const showPlatform = workspaceAccess.canImportSource;
+  const showOrgAdmin =
+    workspaceAccess.canExportArb || workspaceAccess.canBatchAi;
+
+  document.querySelectorAll('.help-platform').forEach((el) => {
+    el.classList.toggle('help-hidden', !showPlatform);
+  });
+  document.querySelectorAll('.help-org-admin').forEach((el) => {
+    el.classList.toggle('help-hidden', !showOrgAdmin);
+  });
+}
+
+async function refreshAccess() {
+  const { data } = await call('getTranslationWorkspaceAccess')(
+    orgPayload({ targetLocale: els.targetLocale.value }),
+  );
+  workspaceAccess = {
+    isPlatformSuperAdmin: data.isPlatformSuperAdmin === true,
+    organizationId: data.organizationId ?? window.ORGANIZATION_ID ?? null,
+    canImportSource: data.canImportSource === true,
+    canExportArb: data.canExportArb === true,
+    canBatchAi: data.canBatchAi === true,
+  };
+  applyWorkspaceCapabilities();
+}
 
 function setStatus(text, kind = '') {
   els.authStatus.textContent = text;
@@ -127,9 +184,10 @@ function escapeHtml(s) {
 
 async function loadEntries() {
   setStatus('Loading…');
-  const { data } = await call('listTranslationEntries')({
+  await refreshAccess();
+  const { data } = await call('listTranslationEntries')(orgPayload({
     targetLocale: els.targetLocale.value,
-  });
+  }));
   entries = data.entries ?? [];
   updateFeatureFilter();
   renderTable();
@@ -144,10 +202,10 @@ async function importArbFile(file) {
     .map(([key, sourceValue]) => ({ key, sourceValue }));
 
   setStatus(`Importing ${entriesToImport.length} keys…`);
-  const { data } = await call('importTranslationSource')({
+  const { data } = await call('importTranslationSource')(orgPayload({
     targetLocale: els.targetLocale.value,
     entries: entriesToImport,
-  });
+  }));
   setStatus(`Imported ${data.imported} new, updated ${data.updated}`, 'ok');
   await loadEntries();
 }
@@ -155,22 +213,22 @@ async function importArbFile(file) {
 async function saveEntry(stringKey, approve = false) {
   const textarea = els.entriesBody.querySelector(`textarea[data-key="${stringKey}"]`);
   const targetValue = textarea?.value?.trim() ?? '';
-  await call('saveTranslationEntry')({
+  await call('saveTranslationEntry')(orgPayload({
     targetLocale: els.targetLocale.value,
     stringKey,
     targetValue,
     status: approve ? 'approved' : 'in_review',
-  });
+  }));
   await loadEntries();
 }
 
 async function draftOne(stringKey) {
   setStatus(`AI drafting ${stringKey}…`);
   try {
-    await call('draftTranslation')({
+    await call('draftTranslation')(orgPayload({
       targetLocale: els.targetLocale.value,
       stringKey,
-    });
+    }));
     setStatus('Draft ready', 'ok');
   } catch (err) {
     setStatus(err.message ?? String(err), 'error');
@@ -182,10 +240,10 @@ async function batchDraft() {
   els.batchAiBtn.disabled = true;
   setStatus('Batch AI translation running…');
   try {
-    const { data } = await call('batchDraftTranslations')({
+    const { data } = await call('batchDraftTranslations')(orgPayload({
       targetLocale: els.targetLocale.value,
       onlyMissing: true,
-    });
+    }));
     setStatus(`AI batch: ${data.succeeded}/${data.total} succeeded`, 'ok');
   } catch (err) {
     setStatus(err.message ?? String(err), 'error');
@@ -196,10 +254,10 @@ async function batchDraft() {
 }
 
 async function exportArb() {
-  const { data } = await call('exportTranslationArb')({
+  const { data } = await call('exportTranslationArb')(orgPayload({
     targetLocale: els.targetLocale.value,
     includeEnglishFallback: true,
-  });
+  }));
   const blob = new Blob([JSON.stringify(data.arb, null, 2)], {
     type: 'application/json',
   });
@@ -268,16 +326,39 @@ onAuthStateChanged(auth, async (user) => {
   if (!user) {
     els.workspace.classList.add('hidden');
     els.signOutBtn.classList.add('hidden');
+    els.helpToggleBtn?.classList.add('hidden');
     setStatus('Not signed in');
     return;
   }
   const token = await user.getIdTokenResult();
-  if (token.claims.role !== 'super_admin') {
+  const role = token.claims.role;
+  const perms = token.claims.permissions ?? [];
+  const isSuperAdmin = role === 'super_admin';
+  const isOrgAdmin = ['admin', 'owner', 'super_admin'].includes(role);
+  const isModerator = perms.includes('manageTranslations');
+
+  if (!isSuperAdmin && !isOrgAdmin && !isModerator) {
     await signOut(auth);
-    setStatus('Access denied — super_admin role required on JWT.', 'error');
+    setStatus(
+      'Access denied — org admin or manageTranslations permission required.',
+      'error',
+    );
     return;
   }
   els.workspace.classList.remove('hidden');
   els.signOutBtn.classList.remove('hidden');
+  els.helpToggleBtn?.classList.remove('hidden');
   await loadEntries();
+});
+
+els.helpToggleBtn?.addEventListener('click', () => {
+  if (!els.helpPanel) return;
+  els.helpPanel.open = !els.helpPanel.open;
+  els.helpToggleBtn.setAttribute(
+    'aria-expanded',
+    els.helpPanel.open ? 'true' : 'false',
+  );
+  if (els.helpPanel.open) {
+    els.helpPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
 });

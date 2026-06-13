@@ -29,6 +29,93 @@ header {
 header h1 { margin: 0 0 0.25rem; font-size: 1.35rem; }
 .subtitle { margin: 0; opacity: 0.9; font-size: 0.95rem; }
 
+.header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.header-btn {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.help-panel summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--accent);
+  user-select: none;
+}
+
+.help-panel[open] summary {
+  margin-bottom: 0.75rem;
+}
+
+.help-body h3 {
+  margin: 1.25rem 0 0.5rem;
+  font-size: 1rem;
+}
+
+.help-body h3:first-of-type {
+  margin-top: 0.75rem;
+}
+
+.help-body ol,
+.help-body ul {
+  margin: 0.5rem 0 0;
+  padding-left: 1.25rem;
+}
+
+.help-dl {
+  margin: 0.5rem 0 0;
+}
+
+.help-dl dt {
+  font-weight: 600;
+  margin-top: 0.65rem;
+}
+
+.help-dl dd {
+  margin: 0.15rem 0 0;
+  color: var(--muted);
+}
+
+.help-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+}
+
+.help-table th,
+.help-table td {
+  border: 1px solid var(--border);
+  padding: 0.45rem 0.55rem;
+  text-align: left;
+}
+
+.help-table th {
+  background: #eef1f8;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.help-status-list code {
+  font-size: 0.82em;
+}
+
+.help-footer {
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border);
+}
+
+.help-hidden {
+  display: none !important;
+}
+
 .panel {
   background: var(--panel);
   border: 1px solid var(--border);

@@ -1,7 +1,7 @@
 import { onCall, HttpsError } from 'firebase-functions/v2/https';
 import { logger } from 'firebase-functions';
 import * as admin from 'firebase-admin';
-import { assertPlatformSuperAdmin } from './translation_auth';
+import { resolveTranslationAccess } from './translation_auth';
 import {
   draftTranslationText,
   parseFeatureFromKey,
@@ -99,9 +99,26 @@ async function updateLocaleMetadata(locale: string): Promise<void> {
 
 const aiSecrets = [translationAiApiKey];
 
-export const importTranslationSource = onCall(async (request) => {
-  assertPlatformSuperAdmin(request);
+export const getTranslationWorkspaceAccess = onCall(async (request) => {
   const targetLocale = request.data?.['targetLocale'] as string | undefined;
+  const access = await resolveTranslationAccess(request, { targetLocale });
+
+  return {
+    allowedLocales: access.allowedLocales,
+    organizationId: access.organizationId,
+    isPlatformSuperAdmin: access.isPlatformSuperAdmin,
+    canImportSource: access.canImportSource,
+    canExportArb: access.canExportArb,
+    canBatchAi: access.canBatchAi,
+  };
+});
+
+export const importTranslationSource = onCall(async (request) => {
+  const targetLocale = request.data?.['targetLocale'] as string | undefined;
+  await resolveTranslationAccess(request, {
+    targetLocale,
+    requireImport: true,
+  });
   const entries = request.data?.['entries'] as
     | Array<{ key: string; sourceValue: string; context?: string }>
     | undefined;
@@ -164,8 +181,8 @@ export const importTranslationSource = onCall(async (request) => {
 });
 
 export const listTranslationEntries = onCall(async (request) => {
-  assertPlatformSuperAdmin(request);
   const targetLocale = request.data?.['targetLocale'] as string | undefined;
+  await resolveTranslationAccess(request, { targetLocale });
   const statusFilter = request.data?.['status'] as TranslationStatus | undefined;
   const featureFilter = request.data?.['feature'] as string | undefined;
   const search = (request.data?.['search'] as string | undefined)?.trim().toLowerCase();
@@ -201,8 +218,9 @@ export const listTranslationEntries = onCall(async (request) => {
 });
 
 export const saveTranslationEntry = onCall(async (request) => {
-  const uid = assertPlatformSuperAdmin(request);
   const targetLocale = request.data?.['targetLocale'] as string | undefined;
+  const access = await resolveTranslationAccess(request, { targetLocale });
+  const uid = access.uid;
   const stringKey = request.data?.['stringKey'] as string | undefined;
   const targetValue = request.data?.['targetValue'] as string | undefined;
   const status = request.data?.['status'] as TranslationStatus | undefined;
@@ -221,7 +239,11 @@ export const saveTranslationEntry = onCall(async (request) => {
   const sourceValue = (existing.data()?.['sourceValue'] as string) ?? '';
   const patch: Record<string, unknown> = {
     updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    lastEditedBy: uid,
   };
+  if (access.organizationId) {
+    patch['lastEditedByOrgId'] = access.organizationId;
+  }
 
   if (targetValue !== undefined) {
     if (targetValue && !placeholdersMatch(sourceValue, targetValue)) {
@@ -250,15 +272,16 @@ export const saveTranslationEntry = onCall(async (request) => {
 export const draftTranslation = onCall(
   { secrets: aiSecrets },
   async (request) => {
-    assertPlatformSuperAdmin(request);
-    if (!(await isAiDraftEnabled())) {
-      throw new HttpsError('failed-precondition', 'AI draft is disabled.');
-    }
-
     const targetLocale = request.data?.['targetLocale'] as string | undefined;
     const stringKey = request.data?.['stringKey'] as string | undefined;
     let sourceText = request.data?.['sourceText'] as string | undefined;
     const context = request.data?.['context'] as string | undefined;
+
+    await resolveTranslationAccess(request, { targetLocale });
+
+    if (!(await isAiDraftEnabled())) {
+      throw new HttpsError('failed-precondition', 'AI draft is disabled.');
+    }
 
     if (!targetLocale || !stringKey) {
       throw new HttpsError('invalid-argument', 'targetLocale and stringKey required.');
@@ -337,12 +360,16 @@ export const draftTranslation = onCall(
 export const batchDraftTranslations = onCall(
   { secrets: aiSecrets },
   async (request) => {
-    assertPlatformSuperAdmin(request);
+    const targetLocale = request.data?.['targetLocale'] as string | undefined;
+    await resolveTranslationAccess(request, {
+      targetLocale,
+      requireBatchAi: true,
+    });
+
     if (!(await isAiDraftEnabled())) {
       throw new HttpsError('failed-precondition', 'AI draft is disabled.');
     }
 
-    const targetLocale = request.data?.['targetLocale'] as string | undefined;
     const stringKeys = request.data?.['stringKeys'] as string[] | undefined;
     const onlyMissing = request.data?.['onlyMissing'] !== false;
 
@@ -448,8 +475,11 @@ export const batchDraftTranslations = onCall(
 );
 
 export const exportTranslationArb = onCall(async (request) => {
-  assertPlatformSuperAdmin(request);
   const targetLocale = request.data?.['targetLocale'] as string | undefined;
+  await resolveTranslationAccess(request, {
+    targetLocale,
+    requireExport: true,
+  });
   const includeEnglishFallback =
     request.data?.['includeEnglishFallback'] !== false;
 

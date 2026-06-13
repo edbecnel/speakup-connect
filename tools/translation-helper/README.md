@@ -1,7 +1,6 @@
 # Translation Helper (MVP)
 
-Super-admin web workspace for managing UI translations before exporting ARB files into `lib/l10n/`.
-
+Web workspace for org admins and translation moderators to manage UI translations before exporting ARB files into `lib/l10n/`. In-page help is built into `index.html` (expand **Translation workspace help** or click **Help** after sign-in).
 **GitHub issue:** [#48](https://github.com/edbecnel/speakup-connect/issues/48)  
 **Design:** [docs/INTERNATIONALIZATION.md §12](../../docs/INTERNATIONALIZATION.md)
 
@@ -18,7 +17,7 @@ Workflow data lives in Firestore: `languages/{locale}/strings/{stringKey}`.
 ## Prerequisites
 
 - Firebase project `speakup-connect-891dd`
-- Signed-in user with JWT custom claim **`role: super_admin`**
+- Signed-in user with JWT custom claim **`role: super_admin`**, **org admin**, or **`manageTranslations`** permission
 - Cloud Functions deployed (translation callables)
 - For AI draft: secret `TRANSLATION_AI_API_KEY` set (OpenAI by default)
 
@@ -38,7 +37,7 @@ firebase deploy --only functions:importTranslationSource,functions:listTranslati
 
 ## Run locally
 
-1. Copy `firebase-config.example.js` → `firebase-config.js` and add your **Web app** config from Firebase Console.
+1. Copy `firebase-config.example.js` → `firebase-config.js` and add your **Web app** config from Firebase Console. Set `ORGANIZATION_ID` for org admin / moderator sign-in (e.g. `monhs-ph-001`).
 2. Serve the folder (any static server):
 
 ```powershell
@@ -60,14 +59,13 @@ npx --yes serve -p 5050
 ## Security
 
 - AI API key is **server-side only** (Firebase Secret Manager).
-- Only `super_admin` may call translation callables or write `languages/` docs.
+- Callables require platform `super_admin`, org admin, or `manageTranslations` permission; org-scoped actions require `organizationId` in config.
 - Do not commit `firebase-config.js` if it contains sensitive keys (web API keys are public by design but keep config local).
-
 ## Related Cloud Functions
 
 | Callable | Purpose |
 |----------|---------|
-| `importTranslationSource` | Upsert English keys from imported ARB |
+| `getTranslationWorkspaceAccess` | Resolve allowed locales and capabilities for caller |
 | `listTranslationEntries` | List/filter workflow entries |
 | `saveTranslationEntry` | Save target text + status |
 | `draftTranslation` | AI draft one key |

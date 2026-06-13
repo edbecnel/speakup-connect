@@ -14,12 +14,15 @@ final activeHelpOrganizationIdProvider = Provider<String>((ref) {
   return AppConfig.defaultOrganizationId;
 });
 
+import 'package:speakup_connect/features/translations/presentation/providers/translation_provider.dart';
+
 /// Whether the signed-in user should see administration help content.
 final canViewAdminHelpProvider = Provider<bool>((ref) {
   final profile = ref.watch(userProfileProvider).value;
   if (profile?.isAdmin == true) return true;
   if (ref.watch(canAccessAdminReportsProvider)) return true;
   if (ref.watch(canManageGroupsProvider)) return true;
+  if (ref.watch(canManageTranslationsProvider)) return true;
   return false;
 });
 

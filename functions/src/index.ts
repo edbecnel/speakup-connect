@@ -2173,6 +2173,7 @@ export {
   deleteBulletin,
 } from './announcements';
 export {
+  getTranslationWorkspaceAccess,
   importTranslationSource,
   listTranslationEntries,
   saveTranslationEntry,

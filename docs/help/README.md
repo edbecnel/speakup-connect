@@ -53,9 +53,9 @@ Within each organization, use **two guides** — not one file per custom role:
 | Guide | Who sees it |
 |-------|-------------|
 | **Member Guide** | All approved members |
-| **Administrator Guide** | Org admins and staff with Administration menu access |
+| **Administrator Guide** | Org admins, translation moderators (`manageTranslations`), and staff with Administration menu access |
 
-Custom org roles (Club Adviser, Guidance Counselor, etc.) are covered **by topic** inside the Admin Guide, tagged with required capabilities. Do not fork help per role name.
+Custom org roles (Club Adviser, Guidance Counselor, **Cebuano Translator**, etc.) are covered **by topic** inside the Admin Guide, tagged with required capabilities. Do not fork help per role name. **UI translation editing** is documented only in the Administrator Guide — not the Member Guide.
 
 Add a third guide only for a clearly different audience (e.g. applicants before approval).
 

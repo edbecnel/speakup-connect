@@ -8,3 +8,6 @@ window.FIREBASE_CONFIG = {
   messagingSenderId: '212080957929',
   appId: 'YOUR_WEB_APP_ID',
 };
+
+/** Required for org admins and translation moderators (not platform super_admin). */
+window.ORGANIZATION_ID = 'monhs-ph-001';

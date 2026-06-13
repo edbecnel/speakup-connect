@@ -572,16 +572,17 @@ Suggested implementation order: **i18n → messaging → parents** (messaging is
 - [ ] CI or custom lint: ban new hardcoded user-facing strings in `lib/features/**/presentation/`
 
 **Translation Helper tool** (see INTERNATIONALIZATION.md §12)
-- [ ] MVP: web or admin UI — import `app_en.arb`, list all keys with US English source
-- [ ] Per-target-language editor with status: `missing` \| `ai_draft` \| `in_review` \| `approved`
-- [ ] Export approved strings to `app_ceb.arb` / `app_fil.arb` (and future ARB files)
-- [ ] `draftTranslation` + `batchDraftTranslations` Cloud Functions — AI first draft via **model API**; **human approval required** before export
+- [x] MVP: web or admin UI — import `app_en.arb`, list all keys with US English source
+- [x] Per-target-language editor with status: `missing` \| `ai_draft` \| `in_review` \| `approved`
+- [x] Export approved strings to `app_ceb.arb` / `app_fil.arb` (and future ARB files)
+- [x] `draftTranslation` + `batchDraftTranslations` Cloud Functions — AI first draft via **model API**; **human approval required** before export
 - [ ] Store **`TRANSLATION_AI_API_KEY`** in Firebase Secret Manager (`functions:secrets:set`); never in app or git
-- [ ] Env/params: `TRANSLATION_AI_PROVIDER`, `TRANSLATION_AI_MODEL`; provider HTTP client in `functions/src/translation_ai.ts`
-- [ ] Prompt template: preserve ICU placeholders; post-validate `{name}` / plurals; `ai_draft_failed` on mismatch
-- [ ] Super-admin auth gate on translation callables; rate limits + batch chunking
+- [x] Env/params: `TRANSLATION_AI_PROVIDER`, `TRANSLATION_AI_MODEL`; provider HTTP client in `functions/src/translation_ai.ts`
+- [x] Prompt template: preserve ICU placeholders; post-validate `{name}` / plurals; `ai_draft_failed` on mismatch
+- [x] Auth: platform `super_admin`, org admin, or **`manageTranslations`** permission (assignable via Roles)
 - [ ] Translation Helper: **Translate missing (AI)** + per-row re-draft; no direct browser → provider calls
-- [ ] Filter/search by feature, missing keys, review status
+- [x] Filter/search by feature, missing keys, review status
+- [x] In-app Translation Workspace (`/admin/translations`) for org admins and translation moderators
 - [ ] Phase 2: in-context preview (screenshots or Flutter web shell with callouts)
 - [ ] Phase 2: Firestore-backed workflow (`languages/{code}/strings` + export job)
 

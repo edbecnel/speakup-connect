@@ -7,14 +7,22 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <header>
-    <h1>Translation Helper</h1>
-    <p class="subtitle">Super-admin workspace for ARB localization (Epic 2.5)</p>
-  </header>
+<header>
+  <div class="header-row">
+    <div>
+      <h1>Translation Helper</h1>
+      <p class="subtitle">Edit and approve UI strings for your organization&rsquo;s languages</p>
+    </div>
+    <button type="button" id="help-toggle-btn" class="secondary header-btn hidden" aria-controls="help-panel" aria-expanded="false">
+      Help
+    </button>
+  </div>
+</header>
 
   <section id="auth-section" class="panel">
     <h2>Sign in</h2>
-    <p class="hint">Platform <code>super_admin</code> account required.</p>
+    <p class="hint">Platform <code>super_admin</code>, org admin, or <code>manageTranslations</code> permission.</p>
+    <p class="hint">After sign-in, open <strong>Translation workspace help</strong> or click <strong>Help</strong> for editing instructions.</p>
     <div class="row">
       <input id="email" type="email" placeholder="Email" autocomplete="username" />
       <input id="password" type="password" placeholder="Password" autocomplete="current-password" />
@@ -25,6 +33,130 @@
   </section>
 
   <section id="workspace" class="hidden">
+    <details id="help-panel" class="panel help-panel">
+      <summary>Translation workspace help</summary>
+      <div class="help-body">
+        <p class="hint">
+          English is the source language. Your organization maintains other UI languages here
+          (for example <strong>Bisaya / Cebuano</strong> or <strong>Tagalog</strong>).
+          End users only pick which language they see in the mobile app &mdash; they do not edit strings here.
+        </p>
+
+        <h3>Quick start (translation moderator)</h3>
+        <ol>
+          <li>Select the <strong>Target locale</strong> for the language you are editing.</li>
+          <li>Use <strong>Search</strong>, <strong>Filter status</strong>, or <strong>Feature</strong> to find strings.</li>
+          <li>Read the <strong>English</strong> column, then type your translation in the <strong>Target</strong> field.</li>
+          <li>Click <strong>Save</strong> to store as <em>in review</em>, or <strong>Approve</strong> when the wording is final.</li>
+          <li>Optional: <strong>AI draft</strong> on one row for a suggested first pass &mdash; always review before approving.</li>
+        </ol>
+
+        <h3 class="help-org-admin">Assign translation moderators</h3>
+        <p class="help-org-admin">
+          <strong>Org admins only.</strong> Delegates can edit translations without full admin access.
+          In the mobile app: <strong>Settings &rarr; Admin Dashboard &rarr; Roles &amp; Permissions</strong>.
+          Create or edit a role, enable <strong>Translation moderator (edit UI strings)</strong>
+          (<code>manageTranslations</code>), save, then <strong>Assign</strong> the role to an approved member.
+          They will see <strong>Settings &rarr; Administration &rarr; Translations</strong> in the app.
+        </p>
+
+        <h3>Toolbar reference</h3>
+        <dl class="help-dl">
+          <dt>Target locale</dt>
+          <dd>Languages enabled for your organization. You cannot edit English here.</dd>
+          <dt>Filter status</dt>
+          <dd>Limit rows by workflow state (see Status values below).</dd>
+          <dt>Feature</dt>
+          <dd>Filter by key prefix (for example <code>settings</code>, <code>auth</code>).</dd>
+          <dt>Search</dt>
+          <dd>Find keys or text in English or the target language.</dd>
+          <dt>Refresh</dt>
+          <dd>Reload the list from the server.</dd>
+          <dt class="help-platform">Import <code>app_en.arb</code></dt>
+          <dd class="help-platform"><strong>Platform super-admin only.</strong> Upload English source keys from <code>lib/l10n/app_en.arb</code>.</dd>
+          <dt class="help-org-admin">Translate missing (AI)</dt>
+          <dd class="help-org-admin"><strong>Org admin only.</strong> Batch AI drafts for all missing strings in the selected locale.</dd>
+          <dt class="help-org-admin">Export ARB</dt>
+          <dd class="help-org-admin"><strong>Org admin only.</strong> Download approved strings as ARB JSON for app releases.</dd>
+        </dl>
+
+        <h3>Row actions</h3>
+        <dl class="help-dl">
+          <dt>Save</dt>
+          <dd>Stores your edit with status <code>in_review</code>.</dd>
+          <dt>Approve</dt>
+          <dd>Marks the string <code>approved</code> and ready for export.</dd>
+          <dt>AI draft</dt>
+          <dd>Generates a machine suggestion for this row only. Review and edit before approving.</dd>
+        </dl>
+
+        <h3>Status values</h3>
+        <ul class="help-status-list">
+          <li><code>missing</code> &mdash; no target text yet</li>
+          <li><code>ai_draft</code> &mdash; AI suggestion present; needs human review</li>
+          <li><code>ai_draft_failed</code> &mdash; AI could not draft (often placeholder mismatch); edit manually</li>
+          <li><code>in_review</code> &mdash; human edit saved, not yet approved</li>
+          <li><code>approved</code> &mdash; final; included in ARB export</li>
+        </ul>
+
+        <h3>Placeholder rules</h3>
+        <p>
+          Keep ICU placeholders exactly as they appear in English, for example
+          <code>{name}</code>, <code>{count}</code>, or <code>{error}</code>.
+          Do not translate or remove curly-brace placeholders or the app may show broken text.
+        </p>
+
+        <h3>Who can do what</h3>
+        <table class="help-table">
+          <thead>
+            <tr>
+              <th>Action</th>
+              <th>Translation moderator</th>
+              <th>Org admin</th>
+              <th>Platform super-admin</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Edit / Save / Approve</td>
+              <td>Yes</td>
+              <td>Yes</td>
+              <td>Yes</td>
+            </tr>
+            <tr>
+              <td>AI draft (single row)</td>
+              <td>Yes</td>
+              <td>Yes</td>
+              <td>Yes</td>
+            </tr>
+            <tr>
+              <td>Translate missing (AI batch)</td>
+              <td>No</td>
+              <td>Yes</td>
+              <td>Yes</td>
+            </tr>
+            <tr>
+              <td>Export ARB</td>
+              <td>No</td>
+              <td>Yes</td>
+              <td>Yes</td>
+            </tr>
+            <tr>
+              <td>Import English source</td>
+              <td>No</td>
+              <td>No</td>
+              <td>Yes</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p class="hint help-footer">
+          The in-app editor is at <strong>Settings &rarr; Administration &rarr; Translations</strong>.
+          Full administrator documentation is in the app <strong>Help Center &rarr; Administrator Guide</strong>.
+        </p>
+      </div>
+    </details>
+
     <div class="toolbar panel">
       <div class="row wrap">
         <label>

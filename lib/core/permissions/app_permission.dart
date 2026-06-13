@@ -60,6 +60,9 @@ enum AppPermission {
   /// Create, edit, and delete roles; assign roles to users.
   manageRoles,
 
+  /// Edit and approve UI translations for org-supported languages.
+  manageTranslations,
+
   /// View the organization audit log.
   viewAuditLogs;
 
@@ -116,6 +119,8 @@ enum AppPermission {
         AppPermission.manageOrganizationSettings =>
           'Manage org settings & branding',
         AppPermission.manageRoles => 'Manage roles & assign permissions',
+        AppPermission.manageTranslations =>
+          'Translation moderator (edit UI strings)',
         AppPermission.viewAuditLogs => 'View audit logs',
       };
 
@@ -139,6 +144,7 @@ enum AppPermission {
           'Roster & Users',
         AppPermission.manageOrganizationSettings ||
         AppPermission.manageRoles ||
+        AppPermission.manageTranslations ||
         AppPermission.viewAuditLogs =>
           'Administration',
       };

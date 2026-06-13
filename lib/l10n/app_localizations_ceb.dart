@@ -353,6 +353,13 @@ class AppLocalizationsCeb extends AppLocalizations {
       'Define which grade levels your school uses';
 
   @override
+  String get settingsTranslations => 'Translations';
+
+  @override
+  String get settingsTranslationsSubtitle =>
+      'Edit UI strings for your organization\'s languages';
+
+  @override
   String get settingsSignOut => 'Sign Out';
 
   @override
@@ -467,4 +474,42 @@ class AppLocalizationsCeb extends AppLocalizations {
 
   @override
   String get validationReportDescriptionField => 'Description';
+
+  @override
+  String get commonSave => 'Save';
+
+  @override
+  String get translationSearchHint => 'Search keys or English text';
+
+  @override
+  String get translationBatchAi => 'Translate missing (AI)';
+
+  @override
+  String translationBatchAiResult(int succeeded, int total) {
+    return 'AI draft: $succeeded of $total succeeded';
+  }
+
+  @override
+  String get translationExportArb => 'Export ARB (copy JSON)';
+
+  @override
+  String get translationExportCopied => 'ARB JSON copied to clipboard';
+
+  @override
+  String translationEntryCount(int count) {
+    return '$count strings loaded';
+  }
+
+  @override
+  String get translationNoEntries =>
+      'No translation entries yet. Platform operators import app_en.arb first.';
+
+  @override
+  String get translationTargetLabel => 'Translation';
+
+  @override
+  String get translationAiDraft => 'AI draft';
+
+  @override
+  String get translationApprove => 'Approve';
 }

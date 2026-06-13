@@ -149,6 +149,8 @@
   "settingsStudentRosterSubtitle": "Add students, assign grades individually or in bulk",
   "settingsSchoolGrades": "School Grades",
   "settingsSchoolGradesSubtitle": "Define which grade levels your school uses",
+  "settingsTranslations": "Translations",
+  "settingsTranslationsSubtitle": "Edit UI strings for your organization's languages",
   "settingsSignOut": "Sign Out",
 
   "settingsLanguage": "Language",
@@ -212,5 +214,29 @@
     }
   },
   "validationReportTitleField": "Title",
-  "validationReportDescriptionField": "Description"
+  "validationReportDescriptionField": "Description",
+
+  "commonSave": "Save",
+
+  "translationSearchHint": "Search keys or English text",
+  "translationBatchAi": "Translate missing (AI)",
+  "translationBatchAiResult": "AI draft: {succeeded} of {total} succeeded",
+  "@translationBatchAiResult": {
+    "placeholders": {
+      "succeeded": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "translationExportArb": "Export ARB (copy JSON)",
+  "translationExportCopied": "ARB JSON copied to clipboard",
+  "translationEntryCount": "{count} strings loaded",
+  "@translationEntryCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "translationNoEntries": "No translation entries yet. Platform operators import app_en.arb first.",
+  "translationTargetLabel": "Translation",
+  "translationAiDraft": "AI draft",
+  "translationApprove": "Approve"
 }

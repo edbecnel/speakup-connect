@@ -23,6 +23,7 @@ Common areas:
 | Pending Approvals | Approve pending announcements and group alerts (when enabled) |
 | Member Management | Block, unenroll, edit profiles, reset passwords, restore members |
 | Roles | Assign staff capabilities |
+| Translations | Edit and approve UI strings for org languages (`manageTranslations` or org admin) |
 
 School-type organizations may also show **Student Roster** and **School Grades**.
 
@@ -98,6 +99,52 @@ Optional **Request a response** supports free text, checkboxes, and multiple cho
 ## Roles and permissions
 
 Org admins can define roles and assign capabilities to staff. See [RBAC_ARCHITECTURE.md](../../RBAC_ARCHITECTURE.md) for the platform permission list.
+
+---
+
+## UI translations
+
+The app can show more than one **UI language** (for example **English**, **Bisaya / Cebuano**, and **Tagalog**). **English** is the source language for all labels and messages. Keeping other languages accurate is an **administration** task for org admins and delegated **translation moderators** — not something regular members do from the Member Guide.
+
+> **Member tip:** students and parents only choose which language *they* see via **Home → globe icon** or **Settings → Appearance → Language**. That is separate from the translation workspace below.
+
+### Assign translation moderators
+
+**Requires:** org admin (or staff with `manageRoles`)
+
+Org admins always have full translation access. To let a teacher, parent volunteer, or staff member edit translations without full admin rights:
+
+1. Open **Settings → Admin Dashboard** → toolbar **Roles & Permissions** (org admin path), or open **Roles & Permissions** directly if your role includes it.
+2. **Create Role** or edit an existing role (for example *Bisaya Translator*).
+3. Under **Administration**, enable **Translation moderator (edit UI strings)** (`manageTranslations`).
+4. Save the role.
+5. On the role card, tap **Assign** (or open **Assignments**), search for the user, and confirm the assignment.
+
+The person must be an **approved** organization member. After assignment, they see **Settings → Administration → Translations** but not other admin-only items (unless they have other capabilities).
+
+You can combine `manageTranslations` with other capabilities on the same role if needed.
+
+### Edit and approve UI strings
+
+**Requires:** org admin **or** `manageTranslations` (translation moderator)
+
+1. **Settings → Administration → Translations**
+2. Select the **target language** (only languages enabled for your organization are listed).
+3. Use **Search** to find a string by key name or English text.
+4. For each row:
+   - Read the **English source** shown above the field.
+   - Type or edit the translation. Keep placeholders such as `{name}` exactly as they appear in English.
+   - **Save** — stores your edit as *in review*.
+   - **Approve** — marks the string final and ready for export.
+   - **AI draft** — optional machine-generated suggestion for that row; always review before approving.
+5. The status chip shows progress: `missing`, `ai_draft`, `in_review`, or `approved`.
+
+**Org admins only** (translation moderators do not see these):
+
+- **Translate missing (AI)** — batch AI drafts for all missing strings in the selected language.
+- **Export ARB (copy JSON)** — copy approved strings as ARB JSON for app release builds.
+
+Platform operators import the English source key list. School staff focus on reviewing, correcting, and approving target-language text.
 
 ---
 

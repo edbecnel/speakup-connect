@@ -23,6 +23,7 @@ Open **Settings**. If you have admin access, you will see an **Administration** 
 | Member Management | Org admin |
 | Student Roster | Org admin (schools with grade levels) |
 | School Grades | Org admin |
+| Translations | Org admin or `manageTranslations` — edit UI strings for org languages |
 
 If you only see some items, your role has partial capabilities — read the matching sections below.
 
@@ -307,6 +308,39 @@ Edit/recall where allowed, and open **View responses** for polls and forms.
 Custom org roles (Guidance Counselor, Club Adviser, etc.) bundle **capabilities** such as `manageGroupRoster` or `viewAllReports`. Assign roles to users under **Roles** management (admin settings area).
 
 See [RBAC_ARCHITECTURE.md](../RBAC_ARCHITECTURE.md) for the full permission list. You do not need a separate help file per role — assign capabilities and point staff to the relevant sections of this guide.
+
+---
+
+## UI translations
+
+MONHS supports **English** and **Bisaya / Cebuano** in the app UI (with **Tagalog** planned). English is the source language. Updating Cebuano labels and messages is an **administration** task — not covered in the Member Guide.
+
+> **Member tip:** students only pick which language *they* see via **Home → globe icon** or **Settings → Appearance → Language**.
+
+### Assign translation moderators
+
+**Requires:** org admin (or staff with `manageRoles`)
+
+Org admins always have translation access. To delegate to a teacher, SSLG officer, or parent volunteer who speaks Cebuano (or another enabled language):
+
+1. **Settings → Admin Dashboard** → toolbar **Roles & Permissions**
+2. **Create Role** or edit an existing role (for example *Cebuano Translator*).
+3. Under **Administration**, enable **Translation moderator (edit UI strings)** (`manageTranslations`).
+4. Save the role, then **Assign** it to the staff member (they must be an approved MONHS member).
+
+They will see **Settings → Administration → Translations** without gaining other admin menus.
+
+### Edit and approve UI strings
+
+**Requires:** org admin **or** `manageTranslations`
+
+1. **Settings → Administration → Translations**
+2. Choose **Bisaya / Cebuano** (or another enabled language).
+3. Search by English text or key name.
+4. For each string, enter the Cebuano translation, then **Save** or **Approve** when ready. Use **AI draft** for a suggested first pass — always review before approving.
+5. Keep placeholders like `{name}` unchanged.
+
+Org admins may also run **Translate missing (AI)** for a whole language and **Export ARB (copy JSON)** when approved strings are ready for an app release. Translation moderators edit and approve individual strings only.
 
 ---
 

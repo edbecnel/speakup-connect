@@ -54,6 +54,7 @@ enum AppPermission {
   // Org Administration
   manageOrganizationSettings,
   manageRoles,
+  manageTranslations,
   viewAuditLogs,
 }
 ```
@@ -165,6 +166,18 @@ The `manageRoles` capability supports scoped delegation — an org admin can gra
 ```
 
 The permission provider enforces: *"does this user have `manageRoles` AND is the target user within the assigner's scope?"* Firestore Security Rules verify this on all role assignment writes — a scoped `manageRoles` holder cannot assign roles outside their declared scope.
+
+### `manageTranslations` (Translation Moderator)
+
+Org admins can edit UI translations for their organization's supported languages (`ceb`, `fil`, etc.). They may delegate this work by assigning the **`manageTranslations`** capability to any role via **Settings → Roles & Permissions**.
+
+| Actor | Locale scope | Import EN source | Edit / approve | Single AI draft | Batch AI | Export ARB |
+|-------|--------------|------------------|----------------|-----------------|----------|------------|
+| Platform `super_admin` | All | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Org admin | Org `supportedLanguages` | ❌ | ✅ | ✅ | ✅ | ✅ |
+| `manageTranslations` | Same as org admin | ❌ | ✅ | ✅ | ❌ | ❌ |
+
+Cloud Functions require `organizationId` in the callable payload for non–super-admin callers. Writes are scoped to the org's enabled locales; moderators cannot import English keys or run bulk export/batch AI (org admin only).
 
 ---
 

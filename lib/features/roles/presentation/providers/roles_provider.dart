@@ -271,6 +271,7 @@ class SeedRoles extends Notifier<AsyncValue<void>> {
     // Org Administration
     'manageOrganizationSettings',
     'manageRoles',
+    'manageTranslations',
     'viewAuditLogs',
   ];
 

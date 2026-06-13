@@ -414,8 +414,9 @@ A separate **Message Translator Helper** (web app or super-admin Flutter/web mod
 
 | Role | Access |
 |------|--------|
-| Super-admin | All languages, approve exports, configure AI |
-| Language lead / interpreter | Assigned language only (`ceb`, `fil`, …) |
+| Super-admin | All languages, import English source, export, configure AI |
+| Org admin | Org `supportedLanguages`; edit, approve, export, batch AI |
+| User with **`manageTranslations`** | Same locales as org admin; edit, single AI draft, approve |
 | Developer | Read-only + sync from repo |
 
 ### Modes
@@ -553,7 +554,9 @@ export const draftTranslation = onCall(
 | `draftTranslation` | Translation Helper | Single key: `{ stringKey, sourceText, targetLocale, context? }` → `{ draft, model }` |
 | `batchDraftTranslations` | Translation Helper | `{ targetLocale, keys[] }` or “all missing” for locale; rate-limited queue |
 
-**Auth:** `isSuperAdmin()` or dedicated `manageTranslations` platform claim. Reject unauthenticated and org-admin callers — this is **not** a school-facing feature.
+Assign **`manageTranslations`** via **Settings → Roles & Permissions** (same as other capabilities). Org admins always have translation access; moderators need this permission on their role.
+
+**Auth:** Cloud Functions accept platform `super_admin`, org admin, or JWT/profile `manageTranslations`. Non–super-admin callers pass `organizationId`; writes are limited to org `supportedLanguages` (defaults `ceb`, `fil` when unset).
 
 **Prompt template (sketch):**
 
