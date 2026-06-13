@@ -275,6 +275,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsChangePassword => 'Change Password';
 
   @override
+  String get settingsMemberSignInHint =>
+      'Sign in with your student ID or contact email and your password.';
+
+  @override
   String get settingsNotificationPreferences => 'Notification Preferences';
 
   @override

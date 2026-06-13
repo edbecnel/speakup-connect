@@ -49,6 +49,7 @@ const els = {
   clearFiltersBtn: document.getElementById('clear-filters-btn'),
   importArb: document.getElementById('import-arb'),
   refreshBtn: document.getElementById('refresh-btn'),
+  approveAllSavedBtn: document.getElementById('approve-all-saved-btn'),
   batchAiBtn: document.getElementById('batch-ai-btn'),
   exportBtn: document.getElementById('export-btn'),
   meta: document.getElementById('meta'),
@@ -369,6 +370,92 @@ async function batchDraft() {
   await loadEntries();
 }
 
+async function approveAllSavedViaSaveEntry(toApprove) {
+  let approved = 0;
+  for (const entry of toApprove) {
+    await call('saveTranslationEntry')(
+      orgPayload({
+        targetLocale: els.targetLocale.value,
+        stringKey: entry.stringKey,
+        status: 'approved',
+      }),
+    );
+    approved++;
+  }
+  return approved;
+}
+
+async function approveAllSaved() {
+  const toApprove = entries.filter(
+    (e) => e.status === 'in_review' && String(e.targetValue ?? '').trim(),
+  );
+  const inReviewCount = toApprove.length;
+  if (inReviewCount === 0) {
+    setWorkspaceStatus(
+      'No saved/in-review strings to approve. Use Save on rows first.',
+      'ok',
+    );
+    return;
+  }
+
+  if (
+    !window.confirm(
+      `Approve ${inReviewCount} saved/in-review string${inReviewCount === 1 ? '' : 's'}?`,
+    )
+  ) {
+    return;
+  }
+
+  const prevLabel = els.approveAllSavedBtn.textContent;
+  els.approveAllSavedBtn.disabled = true;
+  els.batchAiBtn.disabled = true;
+  els.approveAllSavedBtn.classList.add('busy');
+  els.approveAllSavedBtn.textContent = `Approving ${inReviewCount}…`;
+  setWorkspaceStatus(`Approving ${inReviewCount} saved/in-review strings…`);
+
+  try {
+    let approved = 0;
+    let total = inReviewCount;
+    try {
+      const { data } = await call('batchApproveSavedTranslations')(
+        orgPayload({ targetLocale: els.targetLocale.value }),
+      );
+      approved = data.approved ?? 0;
+      total = data.total ?? 0;
+    } catch (err) {
+      const code = err?.code ?? '';
+      if (code === 'functions/not-found' || code === 'not-found') {
+        setWorkspaceStatus(
+          `Batch approve unavailable — approving ${inReviewCount} saved/in-review one at a time…`,
+        );
+        approved = await approveAllSavedViaSaveEntry(toApprove);
+      } else {
+        throw err;
+      }
+    }
+
+    if (total === 0) {
+      setWorkspaceStatus(
+        'No saved/in-review strings to approve. Use Save on rows first.',
+        'ok',
+      );
+    } else {
+      setWorkspaceStatus(
+        `Approved ${approved} of ${total} saved/in-review string${total === 1 ? '' : 's'}.`,
+        'ok',
+      );
+    }
+  } catch (err) {
+    setWorkspaceStatus(formatError(err), 'error');
+  } finally {
+    els.approveAllSavedBtn.disabled = false;
+    els.batchAiBtn.disabled = false;
+    els.approveAllSavedBtn.classList.remove('busy');
+    els.approveAllSavedBtn.textContent = prevLabel;
+  }
+  await loadEntries();
+}
+
 async function exportArb() {
   setWorkspaceStatus('Exporting ARB…');
   try {
@@ -413,6 +500,9 @@ for (const input of [els.searchKey, els.searchEnglish, els.searchTarget]) {
 els.clearFiltersBtn.addEventListener('click', clearSearchFilters);
 els.clearFiltersBtn.disabled = true;
 els.refreshBtn.addEventListener('click', () => loadEntries().catch(showError));
+els.approveAllSavedBtn.addEventListener('click', () =>
+  approveAllSaved().catch(showError),
+);
 els.batchAiBtn.addEventListener('click', () => batchDraft().catch(showError));
 els.exportBtn.addEventListener('click', () => exportArb().catch(showError));
 

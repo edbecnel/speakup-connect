@@ -74,6 +74,8 @@
           <dd>Reload the list from the server.</dd>
           <dt class="help-platform">Import <code>app_en.arb</code></dt>
           <dd class="help-platform"><strong>Platform super-admin only.</strong> Upload English source keys from <code>lib/l10n/app_en.arb</code>.</dd>
+          <dt>Approve all saved/in-review</dt>
+          <dd>Sets every <code>in_review</code> row (saved target, not yet approved) to <code>approved</code> in one step.</dd>
           <dt class="help-org-admin">Translate missing (AI)</dt>
           <dd class="help-org-admin"><strong>Org admin only.</strong> Batch AI drafts for all missing strings in the selected locale.</dd>
           <dt class="help-org-admin">Export ARB</dt>
@@ -215,6 +217,7 @@
           <input id="import-arb" type="file" accept=".arb,application/json" />
         </label>
         <button id="refresh-btn" type="button" class="secondary">Refresh</button>
+        <button id="approve-all-saved-btn" type="button" class="secondary">Approve all saved/in-review</button>
         <button id="batch-ai-btn" type="button">Translate missing (AI)</button>
         <button id="export-btn" type="button" class="secondary">Export ARB</button>
       </div>

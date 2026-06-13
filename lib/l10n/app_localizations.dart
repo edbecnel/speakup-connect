@@ -554,6 +554,12 @@ abstract class AppLocalizations {
   /// **'Change Password'**
   String get settingsChangePassword;
 
+  /// No description provided for @settingsMemberSignInHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in with your student ID or contact email and your password.'**
+  String get settingsMemberSignInHint;
+
   /// No description provided for @settingsNotificationPreferences.
   ///
   /// In en, this message translates to:

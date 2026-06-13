@@ -2179,5 +2179,6 @@ export {
   saveTranslationEntry,
   draftTranslation,
   batchDraftTranslations,
+  batchApproveSavedTranslations,
   exportTranslationArb,
 } from './translation_helper';

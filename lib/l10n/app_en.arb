@@ -121,6 +121,7 @@
   "settingsThemeDark": "Dark",
   "settingsSectionAccount": "Account",
   "settingsChangePassword": "Change Password",
+  "settingsMemberSignInHint": "Sign in with your student ID or contact email and your password.",
   "settingsNotificationPreferences": "Notification Preferences",
   "settingsNotificationsComingSoon": "Notifications — coming soon",
   "settingsSectionHelp": "Help & Support",

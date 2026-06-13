@@ -463,6 +463,58 @@ export const batchDraftTranslations = onCall(async (request) => {
     return { ok: true, total: results.length, succeeded, results };
 });
 
+/** Approve all strings in `in_review` with a non-empty saved target value. */
+export const batchApproveSavedTranslations = onCall(async (request) => {
+  const targetLocale = request.data?.['targetLocale'] as string | undefined;
+  const access = await resolveTranslationAccess(request, { targetLocale });
+  const uid = access.uid;
+
+  if (!targetLocale) {
+    throw new HttpsError('invalid-argument', 'targetLocale is required.');
+  }
+
+  const snap = await stringsRef(targetLocale).get();
+  const toApprove = snap.docs.filter((doc) => {
+    const data = doc.data();
+    const target = data['targetValue'];
+    return (
+      data['status'] === 'in_review' &&
+      typeof target === 'string' &&
+      target.trim().length > 0
+    );
+  });
+
+  if (toApprove.length === 0) {
+    return { ok: true, total: 0, approved: 0 };
+  }
+
+  let approved = 0;
+  const now = admin.firestore.FieldValue.serverTimestamp();
+
+  for (let i = 0; i < toApprove.length; i += 500) {
+    const batch = db.batch();
+    const chunk = toApprove.slice(i, i + 500);
+    for (const doc of chunk) {
+      const patch: Record<string, unknown> = {
+        status: 'approved',
+        reviewedBy: uid,
+        lastEditedBy: uid,
+        updatedAt: now,
+      };
+      if (access.organizationId) {
+        patch['lastEditedByOrgId'] = access.organizationId;
+      }
+      batch.set(doc.ref, patch, { merge: true });
+    }
+    await batch.commit();
+    approved += chunk.length;
+  }
+
+  await updateLocaleMetadata(targetLocale);
+  logger.info('batchApproveSavedTranslations', { targetLocale, approved });
+  return { ok: true, total: toApprove.length, approved };
+});
+
 export const exportTranslationArb = onCall(async (request) => {
   const targetLocale = request.data?.['targetLocale'] as string | undefined;
   await resolveTranslationAccess(request, {
