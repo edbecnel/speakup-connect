@@ -158,7 +158,7 @@
         <ol class="help-deployment-lead">
           <li>
             Deploy Cloud Functions:
-            <code>firebase deploy --only functions:getTranslationWorkspaceAccess,functions:importTranslationSource,functions:listTranslationEntries,functions:saveTranslationEntry,functions:draftTranslation,functions:batchDraftTranslations,functions:exportTranslationArb</code>
+            <code>npx firebase-tools deploy --only functions:getTranslationWorkspaceAccess,functions:importTranslationSource,functions:listTranslationEntries,functions:saveTranslationEntry,functions:draftTranslation,functions:batchDraftTranslations,functions:exportTranslationArb</code>
           </li>
           <li>Seed roles: <code>node scripts/seed_roles.js</code> (or add <code>manageTranslations</code> in Firestore manually).</li>
           <li>Optional AI: set secret <code>TRANSLATION_AI_API_KEY</code>.</li>

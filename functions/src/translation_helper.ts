@@ -4,11 +4,9 @@ import * as admin from 'firebase-admin';
 import { resolveTranslationAccess } from './translation_auth';
 import {
   draftTranslationText,
+  getTranslationAiConfig,
   parseFeatureFromKey,
   placeholdersMatch,
-  translationAiApiKey,
-  translationAiModel,
-  translationAiProvider,
 } from './translation_ai';
 
 const db = admin.firestore();
@@ -96,8 +94,6 @@ async function updateLocaleMetadata(locale: string): Promise<void> {
     { merge: true },
   );
 }
-
-const aiSecrets = [translationAiApiKey];
 
 export const getTranslationWorkspaceAccess = onCall(async (request) => {
   const targetLocale = request.data?.['targetLocale'] as string | undefined;
@@ -269,9 +265,7 @@ export const saveTranslationEntry = onCall(async (request) => {
   return { ok: true };
 });
 
-export const draftTranslation = onCall(
-  { secrets: aiSecrets },
-  async (request) => {
+export const draftTranslation = onCall(async (request) => {
     const targetLocale = request.data?.['targetLocale'] as string | undefined;
     const stringKey = request.data?.['stringKey'] as string | undefined;
     let sourceText = request.data?.['sourceText'] as string | undefined;
@@ -310,14 +304,15 @@ export const draftTranslation = onCall(
     }
 
     try {
+      const ai = getTranslationAiConfig();
       const { draft, model } = await draftTranslationText({
         stringKey,
         sourceText,
         targetLocaleCode: targetLocale,
         context,
-        apiKey: translationAiApiKey.value(),
-        provider: translationAiProvider.value(),
-        model: translationAiModel.value(),
+        apiKey: ai.apiKey,
+        provider: ai.provider,
+        model: ai.model,
       });
 
       await ref.set(
@@ -354,12 +349,9 @@ export const draftTranslation = onCall(
       );
       throw new HttpsError('internal', message);
     }
-  },
-);
+});
 
-export const batchDraftTranslations = onCall(
-  { secrets: aiSecrets },
-  async (request) => {
+export const batchDraftTranslations = onCall(async (request) => {
     const targetLocale = request.data?.['targetLocale'] as string | undefined;
     await resolveTranslationAccess(request, {
       targetLocale,
@@ -394,9 +386,7 @@ export const batchDraftTranslations = onCall(
     }
 
     const results: Array<{ stringKey: string; ok: boolean; error?: string }> = [];
-    const apiKey = translationAiApiKey.value();
-    const provider = translationAiProvider.value();
-    const model = translationAiModel.value();
+    const ai = getTranslationAiConfig();
 
     for (let i = 0; i < keys.length; i += BATCH_CHUNK_SIZE) {
       const chunk = keys.slice(i, i + BATCH_CHUNK_SIZE);
@@ -429,9 +419,9 @@ export const batchDraftTranslations = onCall(
             sourceText,
             targetLocaleCode: targetLocale,
             context: (data['context'] as string | undefined) ?? undefined,
-            apiKey,
-            provider,
-            model,
+            apiKey: ai.apiKey,
+            provider: ai.provider,
+            model: ai.model,
           });
           await ref.set(
             {
@@ -471,8 +461,7 @@ export const batchDraftTranslations = onCall(
       succeeded,
     });
     return { ok: true, total: results.length, succeeded, results };
-  },
-);
+});
 
 export const exportTranslationArb = onCall(async (request) => {
   const targetLocale = request.data?.['targetLocale'] as string | undefined;

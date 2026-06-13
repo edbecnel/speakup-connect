@@ -349,7 +349,7 @@ Org admins may also run **Translate missing (AI)** for a whole language and **Ex
 1. **Deploy translation Cloud Functions** (from the repo `functions/` folder):
 
    ```powershell
-   firebase deploy --only functions:getTranslationWorkspaceAccess,functions:importTranslationSource,functions:listTranslationEntries,functions:saveTranslationEntry,functions:draftTranslation,functions:batchDraftTranslations,functions:exportTranslationArb
+   npx firebase-tools deploy --only functions:getTranslationWorkspaceAccess,functions:importTranslationSource,functions:listTranslationEntries,functions:saveTranslationEntry,functions:draftTranslation,functions:batchDraftTranslations,functions:exportTranslationArb
    ```
 
 2. **Seed or update roles** for organization `monhs-ph-001` so **`manageTranslations`** is in the capability catalog:

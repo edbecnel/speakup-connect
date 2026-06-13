@@ -1,13 +1,3 @@
-import { defineSecret, defineString } from 'firebase-functions/params';
-
-export const translationAiApiKey = defineSecret('TRANSLATION_AI_API_KEY');
-export const translationAiProvider = defineString('TRANSLATION_AI_PROVIDER', {
-  default: 'openai',
-});
-export const translationAiModel = defineString('TRANSLATION_AI_MODEL', {
-  default: 'gpt-4o-mini',
-});
-
 const LOCALE_NAMES: Record<string, string> = {
   ceb: 'Bisaya / Cebuano',
   fil: 'Tagalog (Filipino)',
@@ -28,6 +18,26 @@ export function placeholdersMatch(source: string, target: string): boolean {
   const a = extractPlaceholders(source).join('|');
   const b = extractPlaceholders(target).join('|');
   return a === b;
+}
+
+/** Reads AI provider settings from Cloud Functions environment (functions/.env at deploy). */
+export function getTranslationAiConfig(): {
+  apiKey: string;
+  provider: string;
+  model: string;
+} {
+  const apiKey = process.env.TRANSLATION_AI_API_KEY?.trim();
+  if (!apiKey) {
+    throw new Error(
+      'TRANSLATION_AI_API_KEY is not set. Add it to functions/.env (see .env.example) ' +
+        'and redeploy, or set the variable in your Firebase/Google Cloud environment.',
+    );
+  }
+  return {
+    apiKey,
+    provider: process.env.TRANSLATION_AI_PROVIDER?.trim() || 'openai',
+    model: process.env.TRANSLATION_AI_MODEL?.trim() || 'gpt-4o-mini',
+  };
 }
 
 function buildPrompt(

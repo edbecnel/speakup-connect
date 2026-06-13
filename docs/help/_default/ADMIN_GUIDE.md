@@ -153,7 +153,7 @@ Platform operators import the English source key list. School staff focus on rev
 1. **Deploy translation Cloud Functions** (from the repo `functions/` folder):
 
    ```powershell
-   firebase deploy --only functions:getTranslationWorkspaceAccess,functions:importTranslationSource,functions:listTranslationEntries,functions:saveTranslationEntry,functions:draftTranslation,functions:batchDraftTranslations,functions:exportTranslationArb
+   npx firebase-tools deploy --only functions:getTranslationWorkspaceAccess,functions:importTranslationSource,functions:listTranslationEntries,functions:saveTranslationEntry,functions:draftTranslation,functions:batchDraftTranslations,functions:exportTranslationArb
    ```
 
 2. **Seed or update roles** so **`manageTranslations`** appears in the capability catalog:
