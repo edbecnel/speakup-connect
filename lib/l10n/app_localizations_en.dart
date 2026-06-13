@@ -100,6 +100,32 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeDefaultWelcomeMessage => 'How can we help make things better?';
 
   @override
+  String homeWelcomeMessageWithOrgType(String orgType) {
+    return 'How can we help make our $orgType better?';
+  }
+
+  @override
+  String get orgTypeWordSchool => 'school';
+
+  @override
+  String get orgTypeWordUniversity => 'university';
+
+  @override
+  String get orgTypeWordLgu => 'community';
+
+  @override
+  String get orgTypeWordNgo => 'organization';
+
+  @override
+  String get orgTypeWordChurch => 'church';
+
+  @override
+  String get orgTypeWordCorporation => 'workplace';
+
+  @override
+  String get orgTypeWordOther => 'organization';
+
+  @override
   String get homeQuickActions => 'Quick Actions';
 
   @override

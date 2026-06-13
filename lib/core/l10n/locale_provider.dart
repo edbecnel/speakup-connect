@@ -9,6 +9,28 @@ const _kPreferredLanguageKey = 'preferred_language_code';
 /// Supported UI language codes bundled in the app (phase 1b).
 const supportedAppLanguageCodes = ['en', 'ceb'];
 
+Locale? _bootstrappedLocale;
+
+/// Loads the saved locale before [runApp] so hot restart starts in Cebuano
+/// (or whatever was saved) instead of briefly defaulting to English.
+Future<void> prepareAppLocaleBootstrap() async {
+  _bootstrappedLocale = await readPersistedAppLocale();
+}
+
+/// Reads the saved UI locale from SharedPreferences.
+Future<Locale> readPersistedAppLocale() async {
+  try {
+    final prefs = await SharedPreferences.getInstance();
+    final saved = prefs.getString(_kPreferredLanguageKey);
+    if (saved != null && supportedAppLanguageCodes.contains(saved)) {
+      return localeFromLanguageCode(saved);
+    }
+  } catch (_) {
+    // Keep default English; do not overwrite a saved preference on read failure.
+  }
+  return const Locale('en', 'US');
+}
+
 /// Native display names for language pickers — not localized so every option
 /// stays recognizable regardless of the active UI locale.
 ///
@@ -25,20 +47,12 @@ const kLanguageNativeLabels = <String, String>{
 class AppLocale extends _$AppLocale {
   @override
   Locale build() {
-    _loadSaved();
-    return const Locale('en', 'US');
-  }
-
-  Future<void> _loadSaved() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final saved = prefs.getString(_kPreferredLanguageKey);
-      if (saved != null && supportedAppLanguageCodes.contains(saved)) {
-        state = localeFromLanguageCode(saved);
-      }
-    } catch (_) {
-      await resetToEnglish();
+    final initial = _bootstrappedLocale;
+    if (initial != null) {
+      _bootstrappedLocale = null;
+      return initial;
     }
+    return const Locale('en', 'US');
   }
 
   Future<void> setLanguageCode(String code) async {

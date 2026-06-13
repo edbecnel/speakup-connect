@@ -103,6 +103,32 @@ class AppLocalizationsCeb extends AppLocalizations {
       'Unsaon namo pagtabang aron mapalambo ang mga butang?';
 
   @override
+  String homeWelcomeMessageWithOrgType(String orgType) {
+    return 'Unsaon namo pagtabang aron mapalambo ang among $orgType?';
+  }
+
+  @override
+  String get orgTypeWordSchool => 'school';
+
+  @override
+  String get orgTypeWordUniversity => 'university';
+
+  @override
+  String get orgTypeWordLgu => 'community';
+
+  @override
+  String get orgTypeWordNgo => 'organization';
+
+  @override
+  String get orgTypeWordChurch => 'church';
+
+  @override
+  String get orgTypeWordCorporation => 'workplace';
+
+  @override
+  String get orgTypeWordOther => 'organization';
+
+  @override
   String get homeQuickActions => 'Mabilis nga mga Aksyon';
 
   @override
@@ -112,7 +138,7 @@ class AppLocalizationsCeb extends AppLocalizations {
   String get homeMyReports => 'Ang Akong mga Report (Sundan ang Kahimtang)';
 
   @override
-  String get homeAnnouncements => 'Announcements';
+  String get homeAnnouncements => 'Mga Anunsyo';
 
   @override
   String homeOrgInformation(String orgName) {
@@ -138,7 +164,7 @@ class AppLocalizationsCeb extends AppLocalizations {
   String get homeGroupsTitle => 'Ang Akong mga Grupo ug Klab';
 
   @override
-  String get homeGroupsSeeAll => 'See all';
+  String get homeGroupsSeeAll => 'Tan-awa tanan';
 
   @override
   String homeGroupsSeeAllCount(int count) {

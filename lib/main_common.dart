@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:speakup_connect/app.dart';
 import 'package:speakup_connect/config/firebase_options.dart';
+import 'package:speakup_connect/core/l10n/locale_provider.dart';
 
 /// Shared startup for every app flavor (standard, MONHS, future clients).
 Future<void> mainCommon() async {
@@ -22,6 +23,8 @@ Future<void> mainCommon() async {
       options: DefaultFirebaseOptions.currentPlatform,
     );
   }
+
+  await prepareAppLocaleBootstrap();
 
   runApp(
     const ProviderScope(

@@ -42,6 +42,19 @@
     }
   },
   "homeDefaultWelcomeMessage": "How can we help make things better?",
+  "homeWelcomeMessageWithOrgType": "How can we help make our {orgType} better?",
+  "@homeWelcomeMessageWithOrgType": {
+    "placeholders": {
+      "orgType": { "type": "String" }
+    }
+  },
+  "orgTypeWordSchool": "school",
+  "orgTypeWordUniversity": "university",
+  "orgTypeWordLgu": "community",
+  "orgTypeWordNgo": "organization",
+  "orgTypeWordChurch": "church",
+  "orgTypeWordCorporation": "workplace",
+  "orgTypeWordOther": "organization",
   "homeQuickActions": "Quick Actions",
   "homeSubmitConcern": "Submit\nConcern",
   "homeMyReports": "My Reports\n(Track Status)",

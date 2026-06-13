@@ -3,12 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:speakup_connect/core/constants/route_constants.dart';
 import 'package:speakup_connect/core/l10n/app_localizations_extension.dart';
+import 'package:speakup_connect/core/l10n/organization_type_l10n.dart';
 import 'package:speakup_connect/core/theme/app_theme.dart';
 import 'package:speakup_connect/features/announcements/presentation/providers/announcement_provider.dart';
 import 'package:speakup_connect/features/auth/presentation/providers/auth_provider.dart';
+import 'package:speakup_connect/features/groups/presentation/widgets/my_groups_home_section.dart';
 import 'package:speakup_connect/features/notifications/presentation/providers/notification_provider.dart';
 import 'package:speakup_connect/features/organization/presentation/providers/organization_provider.dart';
-import 'package:speakup_connect/features/groups/presentation/widgets/my_groups_home_section.dart';
 import 'package:speakup_connect/shared/widgets/language_selector.dart';
 import 'package:speakup_connect/shared/widgets/notification_badge_icon.dart';
 
@@ -33,6 +34,12 @@ class HomeDashboardScreen extends ConsumerWidget {
     final firstName = user?.displayName?.split(' ').first ?? 'there';
     final unreadAlerts = ref.watch(unreadNotificationCountProvider);
     final unreadAnnouncements = ref.watch(unreadAnnouncementCountProvider);
+
+    final welcomeMessage = homeWelcomeMessageForConfig(
+      orgConfig,
+      l10n,
+      languageCode: Localizations.localeOf(context).languageCode,
+    );
 
     return Scaffold(
       appBar: AppBar(
@@ -65,8 +72,7 @@ class HomeDashboardScreen extends ConsumerWidget {
               // --- Welcome Card ---
               _WelcomeCard(
                 firstName: firstName,
-                message: orgConfig?.effectiveWelcomeMessage ??
-                    l10n.homeDefaultWelcomeMessage,
+                message: welcomeMessage,
               ),
               const SizedBox(height: 24),
 

@@ -272,6 +272,54 @@ abstract class AppLocalizations {
   /// **'How can we help make things better?'**
   String get homeDefaultWelcomeMessage;
 
+  /// No description provided for @homeWelcomeMessageWithOrgType.
+  ///
+  /// In en, this message translates to:
+  /// **'How can we help make our {orgType} better?'**
+  String homeWelcomeMessageWithOrgType(String orgType);
+
+  /// No description provided for @orgTypeWordSchool.
+  ///
+  /// In en, this message translates to:
+  /// **'school'**
+  String get orgTypeWordSchool;
+
+  /// No description provided for @orgTypeWordUniversity.
+  ///
+  /// In en, this message translates to:
+  /// **'university'**
+  String get orgTypeWordUniversity;
+
+  /// No description provided for @orgTypeWordLgu.
+  ///
+  /// In en, this message translates to:
+  /// **'community'**
+  String get orgTypeWordLgu;
+
+  /// No description provided for @orgTypeWordNgo.
+  ///
+  /// In en, this message translates to:
+  /// **'organization'**
+  String get orgTypeWordNgo;
+
+  /// No description provided for @orgTypeWordChurch.
+  ///
+  /// In en, this message translates to:
+  /// **'church'**
+  String get orgTypeWordChurch;
+
+  /// No description provided for @orgTypeWordCorporation.
+  ///
+  /// In en, this message translates to:
+  /// **'workplace'**
+  String get orgTypeWordCorporation;
+
+  /// No description provided for @orgTypeWordOther.
+  ///
+  /// In en, this message translates to:
+  /// **'organization'**
+  String get orgTypeWordOther;
+
   /// No description provided for @homeQuickActions.
   ///
   /// In en, this message translates to:

@@ -101,7 +101,10 @@ class OrganizationConfigEntity {
   String get effectiveTagline =>
       tagline ?? 'Your voice. Our action. A better community for all.';
 
-  /// The effective welcome message with a sensible default.
+  /// Admin-configured welcome text from Firestore, or null to use app l10n defaults.
+  String? get configuredWelcomeMessage => welcomeMessage;
+
+  /// @deprecated Use [configuredWelcomeMessage] with l10n in the presentation layer.
   String get effectiveWelcomeMessage =>
       welcomeMessage ?? 'How can we help make our ${type.label} better?';
 
