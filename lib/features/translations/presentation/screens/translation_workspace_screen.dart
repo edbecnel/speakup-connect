@@ -49,9 +49,17 @@ class _TranslationWorkspaceScreenState
         title: Text(l10n.settingsTranslations),
       ),
       body: workspaceAsync.when(
+        skipLoadingOnReload: true,
         loading: () => const AppLoadingIndicator(),
-        error: (e, _) => AppErrorWidget(message: e.toString()),
+        error: (e, _) => AppErrorWidget(
+          message: e.toString(),
+          onRetry: () => ref.invalidate(translationWorkspaceProvider),
+        ),
         data: (state) {
+          final localeValue = state.allowedLocales.contains(state.locale)
+              ? state.locale
+              : state.allowedLocales.first;
+
           return Column(
             children: [
               Padding(
@@ -60,8 +68,8 @@ class _TranslationWorkspaceScreenState
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     DropdownButtonFormField<String>(
-                      key: ValueKey(state.locale),
-                      initialValue: state.locale,
+                      key: ValueKey(localeValue),
+                      initialValue: localeValue,
                       decoration: InputDecoration(
                         labelText: l10n.settingsLanguage,
                         border: const OutlineInputBorder(),
@@ -188,29 +196,43 @@ class _TranslationWorkspaceScreenState
               const Divider(height: 1),
               Expanded(
                 child: state.entries.isEmpty
-                    ? Center(child: Text(l10n.translationNoEntries))
-                    : ListView.separated(
-                        padding: const EdgeInsets.all(16),
-                        itemCount: state.entries.length,
-                        separatorBuilder: (_, __) => const SizedBox(height: 8),
-                        itemBuilder: (context, index) {
-                          final entry = state.entries[index];
-                          return _TranslationEntryCard(
-                            entry: entry,
-                            initialTarget: _displayTarget(entry),
-                            onSave: (value, approve) => ref
+                    ? AppEmptyState(
+                        icon: Icons.translate_outlined,
+                        message: l10n.translationNoEntries,
+                      )
+                    : RefreshIndicator(
+                            onRefresh: () => ref
                                 .read(translationWorkspaceProvider.notifier)
-                                .save(
-                                  stringKey: entry['stringKey'] as String,
-                                  targetValue: value,
-                                  approve: approve,
-                                ),
-                            onDraft: () => ref
-                                .read(translationWorkspaceProvider.notifier)
-                                .draft(entry['stringKey'] as String),
-                          );
-                        },
-                      ),
+                                .setLocale(state.locale),
+                            child: ListView.separated(
+                              physics: const AlwaysScrollableScrollPhysics(),
+                              padding: const EdgeInsets.all(16),
+                              itemCount: state.entries.length,
+                              separatorBuilder: (_, __) =>
+                                  const SizedBox(height: 8),
+                              itemBuilder: (context, index) {
+                                final entry = state.entries[index];
+                                final stringKey =
+                                    entry['stringKey'] as String? ?? '';
+                                return _TranslationEntryCard(
+                                  entry: entry,
+                                  initialTarget: _displayTarget(entry),
+                                  onSave: (value, approve) => ref
+                                      .read(translationWorkspaceProvider
+                                          .notifier)
+                                      .save(
+                                        stringKey: stringKey,
+                                        targetValue: value,
+                                        approve: approve,
+                                      ),
+                                  onDraft: () => ref
+                                      .read(translationWorkspaceProvider
+                                          .notifier)
+                                      .draft(stringKey),
+                                );
+                              },
+                            ),
+                          ),
               ),
             ],
           );
@@ -265,20 +287,40 @@ class _TranslationEntryCardState extends State<_TranslationEntryCard> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final theme = Theme.of(context);
     final key = widget.entry['stringKey'] as String? ?? '';
     final source = widget.entry['sourceValue'] as String? ?? '';
     final status = widget.entry['status'] as String? ?? 'missing';
+    final englishDisplay = source.trim().isEmpty ? '—' : source;
 
     return Card(
+      color: theme.colorScheme.surfaceContainerLow,
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(key, style: Theme.of(context).textTheme.labelLarge),
-            const SizedBox(height: 4),
-            Text(source, style: Theme.of(context).textTheme.bodySmall),
-            const SizedBox(height: 8),
+            Text(
+              key,
+              style: theme.textTheme.labelLarge?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 12),
+            InputDecorator(
+              decoration: InputDecoration(
+                labelText: l10n.settingsLanguageEnglish,
+                border: const OutlineInputBorder(),
+                filled: true,
+                fillColor: theme.colorScheme.surface,
+              ),
+              child: Text(
+                englishDisplay,
+                style: theme.textTheme.bodyMedium,
+              ),
+            ),
+            const SizedBox(height: 12),
             TextField(
               controller: _controller,
               maxLines: 3,
@@ -288,14 +330,19 @@ class _TranslationEntryCardState extends State<_TranslationEntryCard> {
               ),
             ),
             const SizedBox(height: 8),
-            Row(
+            Chip(label: Text(status)),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 4,
+              alignment: WrapAlignment.end,
               children: [
-                Chip(label: Text(status)),
-                const Spacer(),
                 TextButton(
-                  onPressed: _busy
-                      ? null
-                      : () => _run(widget.onDraft),
+                  onPressed: _busy ? null : () => _run(widget.onDraft),
+                  style: TextButton.styleFrom(
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
                   child: Text(l10n.translationAiDraft),
                 ),
                 TextButton(
@@ -304,6 +351,10 @@ class _TranslationEntryCardState extends State<_TranslationEntryCard> {
                       : () => _run(
                             () => widget.onSave(_controller.text.trim(), false),
                           ),
+                  style: TextButton.styleFrom(
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
                   child: Text(l10n.commonSave),
                 ),
                 FilledButton(
@@ -312,6 +363,10 @@ class _TranslationEntryCardState extends State<_TranslationEntryCard> {
                       : () => _run(
                             () => widget.onSave(_controller.text.trim(), true),
                           ),
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size(0, 36),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
                   child: Text(l10n.translationApprove),
                 ),
               ],

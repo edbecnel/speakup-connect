@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:speakup_connect/config/app_config.dart';
 import 'package:speakup_connect/core/l10n/locale_provider.dart';
 import 'package:speakup_connect/core/permissions/app_permission.dart';
 import 'package:speakup_connect/core/permissions/providers/permission_provider.dart';
@@ -38,21 +39,45 @@ class TranslationWorkspaceNotifier
   String _locale = 'ceb';
   String _search = '';
 
+  String _resolveOrganizationId() {
+    final profileOrg = ref.read(userProfileProvider).value?.organizationId;
+    if (profileOrg != null && profileOrg.isNotEmpty) return profileOrg;
+    return AppConfig.defaultOrganizationId;
+  }
+
   @override
   Future<TranslationWorkspaceState> build() async {
+    final organizationId = _resolveOrganizationId();
+    if (organizationId.isEmpty) {
+      throw StateError(
+        'Organization is not configured for this app build.',
+      );
+    }
+
     final ds = ref.read(translationRemoteDataSourceProvider);
-    final access = await ds.getWorkspaceAccess(targetLocale: _locale);
+    final access = await ds.getWorkspaceAccess(
+      organizationId: organizationId,
+      targetLocale: _locale,
+    );
     final allowed = (access['allowedLocales'] as List<dynamic>?)
             ?.map((e) => e.toString())
             .where((c) => c != 'en')
             .toList() ??
         supportedAppLanguageCodes.where((c) => c != 'en').toList();
 
-    if (!allowed.contains(_locale) && allowed.isNotEmpty) {
+    if (allowed.isEmpty) {
+      throw StateError(
+        'No translation locales are enabled for this organization. '
+        'Ask an admin to add Cebuano or Tagalog under Organization Settings.',
+      );
+    }
+
+    if (!allowed.contains(_locale)) {
       _locale = allowed.first;
     }
 
     final entries = await ds.listEntries(
+      organizationId: organizationId,
       targetLocale: _locale,
       search: _search.isEmpty ? null : _search,
     );
@@ -85,6 +110,7 @@ class TranslationWorkspaceNotifier
   }) async {
     final ds = ref.read(translationRemoteDataSourceProvider);
     await ds.saveEntry(
+      organizationId: _resolveOrganizationId(),
       targetLocale: _locale,
       stringKey: stringKey,
       targetValue: targetValue,
@@ -96,14 +122,21 @@ class TranslationWorkspaceNotifier
 
   Future<void> draft(String stringKey) async {
     final ds = ref.read(translationRemoteDataSourceProvider);
-    await ds.draftEntry(targetLocale: _locale, stringKey: stringKey);
+    await ds.draftEntry(
+      organizationId: _resolveOrganizationId(),
+      targetLocale: _locale,
+      stringKey: stringKey,
+    );
     ref.invalidateSelf();
     await future;
   }
 
   Future<Map<String, dynamic>> batchDraft() async {
     final ds = ref.read(translationRemoteDataSourceProvider);
-    final result = await ds.batchDraft(targetLocale: _locale);
+    final result = await ds.batchDraft(
+      organizationId: _resolveOrganizationId(),
+      targetLocale: _locale,
+    );
     ref.invalidateSelf();
     await future;
     return result;
@@ -111,7 +144,10 @@ class TranslationWorkspaceNotifier
 
   Future<Map<String, dynamic>> exportArb() async {
     final ds = ref.read(translationRemoteDataSourceProvider);
-    return ds.exportArb(targetLocale: _locale);
+    return ds.exportArb(
+      organizationId: _resolveOrganizationId(),
+      targetLocale: _locale,
+    );
   }
 }
 
