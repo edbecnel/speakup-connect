@@ -144,12 +144,14 @@ class SchoolGradesActionNotifier extends Notifier<AsyncValue<void>> {
 
   Future<void> save(List<int> gradeLevels) async {
     state = const AsyncValue.loading();
-    state = await AsyncValue.guard(
-      () => ref.read(organizationRepositoryProvider).updateGradeLevels(
-            organizationId: AppConfig.defaultOrganizationId,
+    state = await AsyncValue.guard(() async {
+      final orgId = AppConfig.defaultOrganizationId;
+      await ref.read(organizationRepositoryProvider).updateGradeLevels(
+            organizationId: orgId,
             gradeLevels: gradeLevels,
-          ),
-    );
+          );
+      await ref.read(organizationConfigProvider.notifier).refreshFromServer();
+    });
   }
 }
 

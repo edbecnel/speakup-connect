@@ -1588,8 +1588,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'Complete the optional response settings or turn them off.';
 
   @override
-  String get schoolGradesIntro =>
-      'Define which grade levels your school uses. These appear in Student Roster and Member Management filters.';
+  String get schoolGradesIntro => 'Define which grade levels your school uses.';
+
+  @override
+  String schoolGradesIntroWhereUsed(
+      String studentRoster, String memberManagement) {
+    return 'These appear in $studentRoster and $memberManagement filters.';
+  }
 
   @override
   String get schoolGradesNonSchoolNote =>
@@ -1631,6 +1636,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get schoolGradesSaveSuccess => 'Grade levels updated';
+
+  @override
+  String get schoolGradesSaveVerifyFailed =>
+      'Grade levels were not saved correctly. Try again.';
+
+  @override
+  String get schoolGradesAtLeastOneRequired =>
+      'At least one grade level is required.';
 
   @override
   String get schoolGradesInvalidNumber => 'Enter a valid grade number';

@@ -735,7 +735,14 @@
   "composeAnnouncementValidationExpiration": "Set a valid expiration date and time.",
   "composeAnnouncementValidationResponse": "Complete the optional response settings or turn them off.",
 
-  "schoolGradesIntro": "Define which grade levels your school uses. These appear in Student Roster and Member Management filters.",
+  "schoolGradesIntro": "Define which grade levels your school uses.",
+  "schoolGradesIntroWhereUsed": "These appear in {studentRoster} and {memberManagement} filters.",
+  "@schoolGradesIntroWhereUsed": {
+    "placeholders": {
+      "studentRoster": { "type": "String" },
+      "memberManagement": { "type": "String" }
+    }
+  },
   "schoolGradesNonSchoolNote": "Municipalities, barangays, and NGOs do not use grades.",
   "schoolGradesCurrent": "Current grades",
   "schoolGradesEmpty": "No grades configured yet.",
@@ -758,6 +765,8 @@
     }
   },
   "schoolGradesSaveSuccess": "Grade levels updated",
+  "schoolGradesSaveVerifyFailed": "Grade levels were not saved correctly. Try again.",
+  "schoolGradesAtLeastOneRequired": "At least one grade level is required.",
   "schoolGradesInvalidNumber": "Enter a valid grade number",
   "schoolGradesSaveDialogTitle": "Save grade levels?",
   "schoolGradesSaveDialogBody": "Students will be filterable and assignable by:",

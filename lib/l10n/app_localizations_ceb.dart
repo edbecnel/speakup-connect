@@ -1628,17 +1628,23 @@ class AppLocalizationsCeb extends AppLocalizations {
 
   @override
   String get schoolGradesIntro =>
-      'I-define kung unsang mga grado ang gigamit sa imong eskwelahan. Magpakita kini sa Student Roster ug Member Management filters.';
+      'I-define kung unsang mga baitang ang gigamit sa imong eskwelahan.';
+
+  @override
+  String schoolGradesIntroWhereUsed(
+      String studentRoster, String memberManagement) {
+    return 'Makita kini sa mga filter sa $studentRoster ug $memberManagement.';
+  }
 
   @override
   String get schoolGradesNonSchoolNote =>
       'Ang mga munisipyo, barangay, ug NGO dili mogamit og grado.';
 
   @override
-  String get schoolGradesCurrent => 'Kasalukuyang mga grado';
+  String get schoolGradesCurrent => 'Mga baitang karon';
 
   @override
-  String get schoolGradesEmpty => 'Wala pa\'y na-configure nga mga grado.';
+  String get schoolGradesEmpty => 'Wala pa\'y gi-configure nga mga baitang.';
 
   @override
   String schoolGradesGradeChip(int level) {
@@ -1655,8 +1661,7 @@ class AppLocalizationsCeb extends AppLocalizations {
   String get schoolGradesAddButton => 'Idugang ang grado';
 
   @override
-  String get schoolGradesResetDefault =>
-      'I-reset sa default sa high school (7–12)';
+  String get schoolGradesResetDefault => 'Ibalik sa default nga Baitang 7–12';
 
   @override
   String get schoolGradesSave => 'I-save ang mga grado';
@@ -1670,7 +1675,15 @@ class AppLocalizationsCeb extends AppLocalizations {
   }
 
   @override
-  String get schoolGradesSaveSuccess => 'Na-update ang mga grado';
+  String get schoolGradesSaveSuccess => 'Na-update ang mga baitang';
+
+  @override
+  String get schoolGradesSaveVerifyFailed =>
+      'Wala matipig og husto ang mga baitang. Sulayi pag-usab.';
+
+  @override
+  String get schoolGradesAtLeastOneRequired =>
+      'Kinahanglan ang labing menos usa ka baitang.';
 
   @override
   String get schoolGradesInvalidNumber =>

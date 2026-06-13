@@ -2826,8 +2826,15 @@ abstract class AppLocalizations {
   /// No description provided for @schoolGradesIntro.
   ///
   /// In en, this message translates to:
-  /// **'Define which grade levels your school uses. These appear in Student Roster and Member Management filters.'**
+  /// **'Define which grade levels your school uses.'**
   String get schoolGradesIntro;
+
+  /// No description provided for @schoolGradesIntroWhereUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'These appear in {studentRoster} and {memberManagement} filters.'**
+  String schoolGradesIntroWhereUsed(
+      String studentRoster, String memberManagement);
 
   /// No description provided for @schoolGradesNonSchoolNote.
   ///
@@ -2900,6 +2907,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Grade levels updated'**
   String get schoolGradesSaveSuccess;
+
+  /// No description provided for @schoolGradesSaveVerifyFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Grade levels were not saved correctly. Try again.'**
+  String get schoolGradesSaveVerifyFailed;
+
+  /// No description provided for @schoolGradesAtLeastOneRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'At least one grade level is required.'**
+  String get schoolGradesAtLeastOneRequired;
 
   /// No description provided for @schoolGradesInvalidNumber.
   ///

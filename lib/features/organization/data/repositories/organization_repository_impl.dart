@@ -219,14 +219,38 @@ class OrganizationRepositoryImpl implements OrganizationRepository {
       throw const AppException(message: 'At least one grade level is required.');
     }
 
+    final docRef = _orgDoc(organizationId);
+
     try {
-      await _firestore
-          .collection(AppConstants.organizationsCollection)
-          .doc(organizationId)
-          .update({
+      await docRef.update({
         'gradeLevels': normalized,
         'updatedAt': FieldValue.serverTimestamp(),
       });
+
+      DocumentSnapshot<Map<String, dynamic>> verifySnap;
+      try {
+        verifySnap = await docRef.get(const GetOptions(source: Source.server));
+      } on FirebaseException {
+        verifySnap = await docRef.get();
+      }
+
+      if (!verifySnap.exists || verifySnap.data() == null) {
+        throw const DatabaseException(
+          message: 'Organization document not found after update.',
+        );
+      }
+
+      final saved = OrganizationConfigModel.fromJson(
+        organizationId,
+        verifySnap.data()!,
+      ).gradeLevels;
+      if (saved == null || !_gradeLevelsEqual(saved, normalized)) {
+        throw const DatabaseException(
+          message: 'Grade levels were not saved correctly. Try again.',
+        );
+      }
+    } on PermissionException {
+      rethrow;
     } on FirebaseException catch (e) {
       if (e.code == 'permission-denied') {
         throw const PermissionException();
@@ -236,6 +260,14 @@ class OrganizationRepositoryImpl implements OrganizationRepository {
         code: e.code,
       );
     }
+  }
+
+  static bool _gradeLevelsEqual(List<int> a, List<int> b) {
+    if (a.length != b.length) return false;
+    for (var i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) return false;
+    }
+    return true;
   }
 
   @override
