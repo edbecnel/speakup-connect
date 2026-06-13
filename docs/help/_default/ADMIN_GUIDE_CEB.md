@@ -146,6 +146,34 @@ You can combine `manageTranslations` with other capabilities on the same role if
 
 Platform operators import the English source key list. School staff focus on reviewing, correcting, and approving target-language text.
 
+### Platform setup (deployment lead only)
+
+**Audience:** SpeakUp Connect **deployment lead or developer** — not school org admins. Complete once per Firebase environment before the in-app **Translations** workspace and web Translation Helper will work.
+
+1. **Deploy translation Cloud Functions** (from the repo `functions/` folder):
+
+   ```powershell
+   firebase deploy --only functions:getTranslationWorkspaceAccess,functions:importTranslationSource,functions:listTranslationEntries,functions:saveTranslationEntry,functions:draftTranslation,functions:batchDraftTranslations,functions:exportTranslationArb
+   ```
+
+2. **Seed or update roles** so **`manageTranslations`** appears in the capability catalog:
+
+   ```powershell
+   node scripts/seed_roles.js
+   ```
+
+   Alternatively, add `manageTranslations` manually to role documents in Firestore. Org admins then assign it through **Roles & Permissions** (see above). Users must **sign out and sign back in** after permissions change.
+
+3. **Optional — AI draft:** set Firebase secret `TRANSLATION_AI_API_KEY` for OpenAI (or configured provider). Manual edit and approve work without it; AI buttons fail until the secret is set.
+
+4. **Import English source (platform `super_admin` only):** use the web **Translation Helper** (`tools/translation-helper/`) or call `importTranslationSource` — upload `lib/l10n/app_en.arb` so target-language rows exist before moderators edit.
+
+5. **Web Translation Helper config:** copy `firebase-config.example.js` → `firebase-config.js`, add the Firebase web app config, and set `ORGANIZATION_ID` for the tenant (e.g. `monhs-ph-001`).
+
+Full operator documentation: `tools/translation-helper/README.md` and [INTERNATIONALIZATION.md](../../INTERNATIONALIZATION.md) §12.
+
+After setup, school org admins assign translation moderators and handle day-to-day editing in the app.
+
 ---
 
 ## Org-specific documentation

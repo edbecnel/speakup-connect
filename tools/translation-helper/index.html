@@ -150,6 +150,24 @@
           </tbody>
         </table>
 
+        <h3 class="help-deployment-lead">Platform setup (deployment lead only)</h3>
+        <p class="help-deployment-lead hint">
+          <strong>Not for school org admins.</strong> One-time setup per Firebase environment before this tool and the in-app
+          <strong>Translations</strong> workspace work.
+        </p>
+        <ol class="help-deployment-lead">
+          <li>
+            Deploy Cloud Functions:
+            <code>firebase deploy --only functions:getTranslationWorkspaceAccess,functions:importTranslationSource,functions:listTranslationEntries,functions:saveTranslationEntry,functions:draftTranslation,functions:batchDraftTranslations,functions:exportTranslationArb</code>
+          </li>
+          <li>Seed roles: <code>node scripts/seed_roles.js</code> (or add <code>manageTranslations</code> in Firestore manually).</li>
+          <li>Optional AI: set secret <code>TRANSLATION_AI_API_KEY</code>.</li>
+          <li>Platform <code>super_admin</code>: import <code>lib/l10n/app_en.arb</code> here; set <code>ORGANIZATION_ID</code> in <code>firebase-config.js</code> for org-scoped sign-in.</li>
+        </ol>
+        <p class="help-deployment-lead hint">
+          See <code>tools/translation-helper/README.md</code> and <strong>Help Center &rarr; Administrator Guide &rarr; Platform setup</strong> in the app.
+        </p>
+
         <p class="hint help-footer">
           The in-app editor is at <strong>Settings &rarr; Administration &rarr; Translations</strong>.
           Full administrator documentation is in the app <strong>Help Center &rarr; Administrator Guide</strong>.

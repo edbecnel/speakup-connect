@@ -342,6 +342,32 @@ They will see **Settings → Administration → Translations** without gaining o
 
 Org admins may also run **Translate missing (AI)** for a whole language and **Export ARB (copy JSON)** when approved strings are ready for an app release. Translation moderators edit and approve individual strings only.
 
+### Platform setup (deployment lead only)
+
+**Audience:** SpeakUp Connect **deployment lead or developer** — not MONHS org admins. Complete once per Firebase environment before the in-app **Translations** workspace works for MONHS.
+
+1. **Deploy translation Cloud Functions** (from the repo `functions/` folder):
+
+   ```powershell
+   firebase deploy --only functions:getTranslationWorkspaceAccess,functions:importTranslationSource,functions:listTranslationEntries,functions:saveTranslationEntry,functions:draftTranslation,functions:batchDraftTranslations,functions:exportTranslationArb
+   ```
+
+2. **Seed or update roles** for organization `monhs-ph-001` so **`manageTranslations`** is in the capability catalog:
+
+   ```powershell
+   node scripts/seed_roles.js
+   ```
+
+   Or add `manageTranslations` manually in Firestore. MONHS org admins assign it via **Roles & Permissions**. Users must **sign out and sign back in** after permissions change.
+
+3. **Optional — AI draft:** set Firebase secret `TRANSLATION_AI_API_KEY`. Manual edit and approve work without it.
+
+4. **Import English source (platform `super_admin` only):** web **Translation Helper** at `tools/translation-helper/` — import `lib/l10n/app_en.arb`. Set `ORGANIZATION_ID = 'monhs-ph-001'` in `firebase-config.js`.
+
+5. See `tools/translation-helper/README.md` and [INTERNATIONALIZATION.md](../../INTERNATIONALIZATION.md) §12 for full operator docs.
+
+After setup, MONHS org admins assign Cebuano translators and manage editing in the app.
+
 ---
 
 ## Response-required alerts (summary)
