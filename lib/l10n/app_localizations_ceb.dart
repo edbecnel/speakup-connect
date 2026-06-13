@@ -12,22 +12,22 @@ class AppLocalizationsCeb extends AppLocalizations {
   String get appName => 'SpeakUp';
 
   @override
-  String get splashDefaultTagline => 'Your voice. Our action.';
+  String get splashDefaultTagline => 'Imong tingog. Among aksyon.';
 
   @override
-  String get splashGetStarted => 'Get Started';
+  String get splashGetStarted => 'Sugdi na';
 
   @override
-  String get splashLearnMore => 'Learn More';
+  String get splashLearnMore => 'Pagkat-on Pa';
 
   @override
-  String get commonLogin => 'Login';
+  String get commonLogin => 'Sulod';
 
   @override
-  String get commonSignUp => 'Sign Up';
+  String get commonSignUp => 'Mag-sign Up';
 
   @override
-  String get commonOr => 'or';
+  String get commonOr => 'o';
 
   @override
   String get commonPassword => 'Password';
@@ -37,61 +37,63 @@ class AppLocalizationsCeb extends AppLocalizations {
 
   @override
   String get authAcceptTermsSnackbar =>
-      'Please accept the Terms & Privacy Policy';
+      'Palihug dawata ang mga Termino ug Patakaran sa Privacy';
 
   @override
-  String get authSignInFailed => 'Sign in failed. Please try again.';
+  String get authSignInFailed =>
+      'Nakapakyas ang pag-sign in. Palihug sulayi pag-usab.';
 
   @override
   String get authOrgFallbackName => 'Sumpay';
 
   @override
-  String get authContinueWithGoogle => 'Continue with Google';
+  String get authContinueWithGoogle => 'Padayon gamit ang Google';
 
   @override
-  String get authGoogleSignInSoon => 'Google sign-in coming soon!';
+  String get authGoogleSignInSoon =>
+      'Mag-antos sa pag-sign in sa Google sa dili madugay!';
 
   @override
   String get authTermsFooter =>
-      'By continuing, you agree to our Terms and Privacy Policy.';
+      'Sa pagpadayon, mouyon ka sa among mga Termino ug Privacy Policy.';
 
   @override
-  String get authEmailOrStudentId => 'Email or student ID';
+  String get authEmailOrStudentId => 'Email o student ID';
 
   @override
-  String get authEmailOrStudentIdHint => 'you@school.edu or student ID';
+  String get authEmailOrStudentIdHint => 'you@school.edu o student ID';
 
   @override
   String get authPasswordHintLogin => 'Ang imong password o student ID';
 
   @override
-  String get authForgotPassword => 'Forgot Password?';
+  String get authForgotPassword => 'Nakalimot ka sa Password?';
 
   @override
-  String get authFullName => 'Full Name';
+  String get authFullName => 'Tibuok nga Ngalan';
 
   @override
   String get authFullNameHint => 'Ibutang ang imong tibuok ngalan';
 
   @override
-  String get authEmailHint => 'you@school.edu';
+  String get authEmailHint => 'ikaw@eskwelahan.edu';
 
   @override
   String get authPasswordHintRegister =>
       'Dapat adunay labing menos 8 ka karakter';
 
   @override
-  String get authConfirmPassword => 'Confirm Password';
+  String get authConfirmPassword => 'Kumpirmaha Password';
 
   @override
-  String get authConfirmPasswordHint => 'Re-enter your password';
+  String get authConfirmPasswordHint => 'Ibalik ang imong password';
 
   @override
   String get authAcceptTermsCheckbox =>
       'Akong gidawat ang mga Termino ug Patakaran sa Privacy';
 
   @override
-  String get homeTitle => 'Home';
+  String get homeTitle => 'Balay';
 
   @override
   String homeWelcome(String firstName) {
@@ -108,25 +110,25 @@ class AppLocalizationsCeb extends AppLocalizations {
   }
 
   @override
-  String get orgTypeWordSchool => 'school';
+  String get orgTypeWordSchool => 'eskwelahan';
 
   @override
-  String get orgTypeWordUniversity => 'university';
+  String get orgTypeWordUniversity => 'unibersidad';
 
   @override
-  String get orgTypeWordLgu => 'community';
+  String get orgTypeWordLgu => 'komunidad';
 
   @override
-  String get orgTypeWordNgo => 'organization';
+  String get orgTypeWordNgo => 'organisasyon';
 
   @override
-  String get orgTypeWordChurch => 'church';
+  String get orgTypeWordChurch => 'simbahan';
 
   @override
-  String get orgTypeWordCorporation => 'workplace';
+  String get orgTypeWordCorporation => 'opisina';
 
   @override
-  String get orgTypeWordOther => 'organization';
+  String get orgTypeWordOther => 'organisasyon';
 
   @override
   String get homeQuickActions => 'Mabilis nga mga Aksyon';
@@ -142,14 +144,15 @@ class AppLocalizationsCeb extends AppLocalizations {
 
   @override
   String homeOrgInformation(String orgName) {
-    return '$orgName\nInformation';
+    return '$orgName  \nImpormasyon';
   }
 
   @override
   String get homeOrgFallback => 'Org';
 
   @override
-  String get homeOrgInfoComingSoon => 'Organization Info — Coming Soon';
+  String get homeOrgInfoComingSoon =>
+      'Impormasyon sa Organisasyon — Sa Umaabot';
 
   @override
   String get homeNavMyReports => 'Ang Akong mga Report';
@@ -168,61 +171,62 @@ class AppLocalizationsCeb extends AppLocalizations {
 
   @override
   String homeGroupsSeeAllCount(int count) {
-    return 'See all ($count)';
+    return 'Tan-awa tanan ($count)';
   }
 
   @override
-  String get homeGroupsView => 'View';
+  String get homeGroupsView => 'Tan-awa';
 
   @override
   String get homeGroupsLoadError =>
-      'Could not load your groups. Tap See all to retry.';
+      'Dili ma-load ang imong mga grupo. I-tap ang Tan-awa ang tanan aron mosulay pag-usab.';
 
   @override
-  String get homeGroupsNone => 'No groups yet';
+  String get homeGroupsNone => 'Walay mga grupo pa';
 
   @override
   String homeGroupsCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count groups',
-      one: '1 group',
+      other: '$count mga grupo',
+      one: '1 grupo',
     );
     return '$_temp0';
   }
 
   @override
   String get homeGroupsEmptyMessage =>
-      'You are not in any groups yet. Tap View for details.';
+      'Wala ka pa sa bisan unsang grupo. I-tap ang Tan-awa para sa mga detalye.';
 
   @override
-  String get settingsTitle => 'Settings';
+  String get settingsTitle => 'Mga Setting';
 
   @override
-  String get settingsAnonymous => 'Anonymous';
+  String get settingsAnonymous => 'Walay Ngalan';
 
   @override
   String get settingsOrgUnavailable => '—';
 
   @override
   String settingsPhotoUpdateFailed(String message) {
-    return 'Could not update photo: $message';
+    return 'Dili ma-update ang litrato: $message';
   }
 
   @override
-  String get settingsUnknownError => 'Unknown error';
+  String get settingsUnknownError => 'Dili mailhan nga sayop';
 
   @override
   String get settingsPersonalPhotosDisabled =>
-      'Personal profile photos are not enabled. Ask an administrator to turn on \"Allow personal profile photos\" under Organization Settings.';
+      'Wala gi-enable ang mga personal nga profile photo. Pangutan-a ang usa ka administrador aron i-on ang \"Tugoti ang mga personal nga profile photo\" sa ilawom sa Mga Setting sa Organisasyon.';
 
   @override
-  String get settingsPersonalPhotoUpdated => 'Personal profile photo updated';
+  String get settingsPersonalPhotoUpdated =>
+      'Na-update ang personal nga profile nga litrato';
 
   @override
   String get settingsPersonalPhotoRemoved =>
-      'Personal photo removed — showing school photo';
+      'Nawala ang personal nga litrato — nagpakita sa litrato sa eskwelahan';
 
   @override
   String settingsSpeakUpOrg(String orgName) {
@@ -231,29 +235,29 @@ class AppLocalizationsCeb extends AppLocalizations {
 
   @override
   String get settingsTapPhotoChange =>
-      'Tap your photo to change your personal badge';
+      'I-tap ang imong litrato aron usbon ang imong personal nga badge';
 
   @override
   String get settingsSchoolPhotoOnFile =>
-      'School photo on file — ask an admin to enable personal uploads';
+      'Naa\'y litrato sa eskwelahan nga naka-file — pangutan-a ang admin aron ma-enable ang personal nga pag-upload';
 
   @override
   String get settingsPersonalUploadsRequireApproval =>
       'I-tap ang imong litrato — ang personal nga mga upload nagkinahanglan og pag-apruba sa admin';
 
   @override
-  String get settingsSectionGroups => 'Groups & Clubs';
+  String get settingsSectionGroups => 'Mga Grupo ug Klab';
 
   @override
-  String get settingsMyGroups => 'My Groups & Clubs';
+  String get settingsMyGroups => 'Ang Akong mga Grupo ug Klab';
 
   @override
   String settingsPendingMembershipRequests(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count pending membership requests',
-      one: '1 pending membership request',
+      other: '$count naghulat nga mga hangyo sa pagiging miyembro',
+      one: '1 naghulat nga hangyo sa pagiging miyembro',
     );
     return '$_temp0';
   }
@@ -270,288 +274,295 @@ class AppLocalizationsCeb extends AppLocalizations {
       'Suhita ang mga grupo ug mag-request nga moapil';
 
   @override
-  String get settingsSentGroupAlerts => 'Sent Group Alerts';
+  String get settingsSentGroupAlerts => 'Gipadala nga Grupo nga mga Alerto';
 
   @override
   String get settingsMyBroadcasts => 'Ang Akong mga Broadcast';
 
   @override
   String get settingsSentGroupAlertsSubtitle =>
-      'View alerts you sent and member responses';
+      'Tan-awa ang mga alerto nga imong gipadala ug ang mga tubag sa mga miyembro';
 
   @override
   String get settingsMyBroadcastsSubtitle =>
       'Pagdumala sa gipadala nga mga pahimangno ug tan-awa ang mga tubag';
 
   @override
-  String get settingsSectionAppearance => 'Appearance';
+  String get settingsSectionAppearance => 'Hitsura';
 
   @override
-  String get settingsTheme => 'Theme';
+  String get settingsTheme => 'Tema';
 
   @override
-  String get settingsThemeSystem => 'System Default';
+  String get settingsThemeSystem => 'Default sa Sistema';
 
   @override
-  String get settingsThemeLight => 'Light';
+  String get settingsThemeLight => 'Hayag';
 
   @override
-  String get settingsThemeDark => 'Dark';
+  String get settingsThemeDark => 'Ngitngit';
 
   @override
-  String get settingsSectionAccount => 'Account';
+  String get settingsSectionAccount => 'Akun';
 
   @override
-  String get settingsChangePassword => 'Change Password';
+  String get settingsChangePassword => 'Usba Password';
 
   @override
   String get settingsMemberSignInHint =>
       'Mag-sign in gamit ang imong student ID o contact email ug ang imong password.';
 
   @override
-  String get settingsNotificationPreferences => 'Notification Preferences';
+  String get settingsNotificationPreferences => 'Mga Paborito sa Notipikasyon';
 
   @override
-  String get settingsNotificationsComingSoon => 'Notifications — coming soon';
+  String get settingsNotificationsComingSoon => 'Mga pahibalo — umaabot na';
 
   @override
-  String get settingsSectionHelp => 'Help & Support';
+  String get settingsSectionHelp => 'Tabang & Suporta';
 
   @override
-  String get settingsHelpCenter => 'Help Center';
+  String get settingsHelpCenter => 'Sentro sa Tabang';
 
   @override
   String get settingsHelpCenterSubtitle =>
-      'Guides for members and administrators';
+      'Mga giya para sa mga miyembro ug mga administrador';
 
   @override
-  String get settingsSectionAbout => 'About';
+  String get settingsSectionAbout => 'Mahitungod';
 
   @override
   String settingsAboutApp(String appName) {
-    return 'About $appName';
+    return 'Mahitungod sa $appName';
   }
 
   @override
   String get settingsAboutLegalese => '© 2026 SpeakUp Connect';
 
   @override
-  String get settingsSectionAdmin => 'Administration';
+  String get settingsSectionAdmin => 'Administrasyon';
 
   @override
-  String get settingsAdminDashboard => 'Admin Dashboard';
+  String get settingsAdminDashboard => 'Dashboard sa Admin';
 
   @override
   String get settingsAdminDashboardSubtitle =>
-      'Review and manage submitted reports';
+      'Susiha ug pagdumala ang mga gisumiter nga report';
 
   @override
-  String get settingsAdminGroups => 'Groups & Clubs';
+  String get settingsAdminGroups => 'Mga Grupo ug Klab';
 
   @override
   String get settingsAdminGroupsSubtitle =>
-      'Create groups and manage member rosters';
+      'Magtukod og mga grupo ug pagdumala sa mga listahan sa mga miyembro';
 
   @override
-  String get settingsJoinApplications => 'Join Applications';
+  String get settingsJoinApplications => 'Apil sa mga Aplikasyon';
 
   @override
-  String get settingsJoinApplicationsSubtitle => 'Approve new member sign-ups';
+  String get settingsJoinApplicationsSubtitle =>
+      'Aprobahi ang mga bag-ong pag-sign up sa mga miyembro';
 
   @override
-  String get settingsPendingApprovals => 'Pending Approvals';
+  String get settingsPendingApprovals => 'Naghulat nga Pag-apruba';
 
   @override
   String get settingsPendingApprovalsSubtitle =>
-      'Review announcements and group alerts awaiting publish';
+      'Susiha ang mga anunsyo ug mga alerto sa grupo nga naghulat sa pagmantala';
 
   @override
-  String get settingsMemberManagement => 'Member Management';
+  String get settingsMemberManagement => 'Pagdumala sa mga Miyembro';
 
   @override
   String get settingsMemberManagementSubtitle =>
-      'View, block, unenroll, unblock, or re-enroll members';
+      'Tan-awa, i-block, i-unenroll, i-unblock, o i-re-enroll ang mga miyembro';
 
   @override
-  String get settingsStudentRoster => 'Student Roster';
+  String get settingsStudentRoster => 'Listahan sa mga Estudyante';
 
   @override
   String get settingsStudentRosterSubtitle =>
-      'Add students, assign grades individually or in bulk';
+      'Idugang ang mga estudyante, itakda ang mga grado sa indibidwal o sa daghan.';
 
   @override
-  String get settingsSchoolGrades => 'School Grades';
+  String get settingsSchoolGrades => 'Mga Baitang sa Eskwela';
 
   @override
   String get settingsSchoolGradesSubtitle =>
-      'Define which grade levels your school uses';
+      'I-define kung unsang mga lebel sa grado ang gigamit sa imong eskwelahan';
 
   @override
-  String get settingsTranslations => 'Translations';
+  String get settingsTranslations => 'Mga Hubad';
 
   @override
   String get settingsTranslationsSubtitle =>
-      'Edit UI strings for your organization\'s languages';
+      'I-edit ang mga UI string para sa mga sinultian sa inyong organisasyon';
 
   @override
-  String get settingsSignOut => 'Sign Out';
+  String get settingsSignOut => 'Mag-sign out';
 
   @override
-  String get settingsLanguage => 'Language';
+  String get settingsLanguage => 'Wika';
 
   @override
-  String get settingsLanguageEnglish => 'English';
+  String get settingsLanguageEnglish => 'Ingles';
 
   @override
   String get settingsLanguageCebuano => 'Bisaya / Cebuano';
 
   @override
   String get settingsLanguageRevertToEnglish =>
-      'That language could not be applied. Reverted to English.';
+      'Dili maaplikar ang maong sinultian. Gibalik sa Iningles.';
 
   @override
-  String get helpTitle => 'Help';
+  String get helpTitle => 'Tabang';
 
   @override
-  String get helpHubHeadline => 'Guides for using SpeakUp Connect';
+  String get helpHubHeadline => 'Mga giya sa paggamit sa SpeakUp Connect';
 
   @override
   String helpHubDescription(String orgName, String adminNote) {
-    return 'Guides for $orgName. ${adminNote}Content is specific to how this organization is set up.';
+    return 'Mga giya para sa $orgName. ${adminNote}Ang sulod kay espesipiko sa kung giunsa pag-set up ang kini nga organisasyon.';
   }
 
   @override
   String get helpHubAdminNote =>
-      'Includes administration topics for your role. ';
+      'Naglakip sa mga topiko sa administrasyon alang sa imong papel.';
 
   @override
-  String get helpOrgFallback => 'your organization';
+  String get helpOrgFallback => 'imong organisasyon';
 
   @override
-  String get helpMemberGuideTitle => 'Member Guide';
+  String get helpMemberGuideTitle => 'Giya sa Miyembro';
 
   @override
   String get helpMemberGuideSubtitle =>
-      'Sign in, submit reports, and use alerts';
+      'Mag-sign in, mag-submit og mga report, ug gamita ang mga alerto';
 
   @override
-  String get helpAdminGuideTitle => 'Administrator Guide';
+  String get helpAdminGuideTitle => 'Giya sa Administrator';
 
   @override
-  String get helpAdminGuideSubtitle => 'Roster, groups, reports, and reminders';
+  String get helpAdminGuideSubtitle =>
+      'Lista, mga grupo, mga report, ug mga pahimangno';
 
   @override
-  String get helpGuideNotFound => 'This guide could not be found.';
+  String get helpGuideNotFound => 'Wala makit-i ang giya nga kini.';
 
   @override
   String get helpAdminAccessDenied =>
-      'You do not have access to this administrator guide.';
+      'Wala kay access sa kini nga giya sa administrador.';
 
   @override
-  String get helpLoadFailed => 'Could not load guide for your organization.';
+  String get helpLoadFailed =>
+      'Dili ma-load ang giya para sa imong organisasyon.';
 
   @override
   String helpLoadFailedDetail(String error) {
-    return 'Could not load guide for your organization.\n$error';
+    return 'Dili ma-load ang giya para sa imong organisasyon. $error';
   }
 
   @override
-  String get validationEmailRequired => 'Email is required';
+  String get validationEmailRequired => 'Kinahanglan ang email';
 
   @override
-  String get validationEmailInvalid => 'Please enter a valid email address';
+  String get validationEmailInvalid =>
+      'Palihug isulod ang usa ka balido nga email address';
 
   @override
   String validationFieldRequired(String fieldName) {
-    return '$fieldName is required';
+    return 'Kinahanglan ang $fieldName';
   }
 
   @override
-  String get validationPasswordRequired => 'Password is required';
+  String get validationPasswordRequired => 'Kinahanglan ang password';
 
   @override
-  String get validationPasswordMin8 => 'Password must be at least 8 characters';
+  String get validationPasswordMin8 =>
+      'Kinahanglan nga ang password adunay labing menos 8 ka karakter.';
 
   @override
-  String get validationPasswordMin6 => 'Password must be at least 6 characters';
+  String get validationPasswordMin6 =>
+      'Kinahanglan ang password nga labing menos 6 ka karakter';
 
   @override
   String get validationLoginIdentifierRequired =>
-      'Email or student ID is required';
+      'Kinahanglan ang email o student ID';
 
   @override
-  String get validationStudentIdRequired => 'Student ID is required';
+  String get validationStudentIdRequired => 'Kinahanglan ang Student ID';
 
   @override
   String get validationStudentIdMin6 =>
-      'Student ID must be at least 6 characters';
+      'Kinahanglan nga ang Student ID adunay labing menos 6 ka karakter';
 
   @override
   String get validationStudentIdInvalidChars =>
-      'Use letters, numbers, and hyphens only';
+      'Gamiton lang ang mga letra, numero, ug mga hyphen.';
 
   @override
   String get validationConfirmPasswordRequired =>
-      'Please confirm your password';
+      'Palihug kumpirmaha ang imong password';
 
   @override
-  String get validationPasswordsDoNotMatch => 'Passwords do not match';
+  String get validationPasswordsDoNotMatch => 'Dili magtagbo ang mga password';
 
   @override
   String validationMaxLength(String fieldName, int maxLength) {
-    return '$fieldName must be $maxLength characters or fewer';
+    return 'Ang $fieldName kinahanglan nga $maxLength ka karakter o mas gamay.';
   }
 
   @override
   String validationMinLength(String fieldName, int minLength) {
-    return '$fieldName must be at least $minLength characters';
+    return 'Ang $fieldName kinahanglan adunay labing menos $minLength ka mga karakter.';
   }
 
   @override
-  String get validationReportTitleField => 'Title';
+  String get validationReportTitleField => 'Titulo';
 
   @override
-  String get validationReportDescriptionField => 'Description';
+  String get validationReportDescriptionField => 'Deskripsyon';
 
   @override
-  String get commonSave => 'Save';
+  String get commonSave => 'I-save';
 
   @override
-  String get translationSearchHint => 'Search keys or English text';
+  String get translationSearchHint =>
+      'Pangitaon ang mga yawe o Ingles nga teksto';
 
   @override
-  String get translationBatchAi => 'Translate missing (AI)';
+  String get translationBatchAi => 'Isalin ang kulang (AI)';
 
   @override
   String get translationBatchAiNoneMissing =>
-      'No missing strings to translate.';
+      'Walay mga nawawalang string nga isalin.';
 
   @override
   String translationBatchAiResult(int succeeded, int total) {
-    return 'AI draft: $succeeded of $total succeeded';
+    return 'AI draft: $succeeded sa $total nga nagmalampuson';
   }
 
   @override
-  String get translationExportArb => 'Export ARB (copy JSON)';
+  String get translationExportArb => 'I-export ang ARB (kopyaha ang JSON)';
 
   @override
-  String get translationExportCopied => 'ARB JSON copied to clipboard';
+  String get translationExportCopied => 'Na-clipboard na ang ARB JSON';
 
   @override
   String translationEntryCount(int count) {
-    return '$count strings loaded';
+    return '$count nga mga string ang na-load';
   }
 
   @override
   String get translationNoEntries =>
-      'No translation entries yet. Platform operators import app_en.arb first.';
+      'Wala pa\'y mga entry sa hubad. Una nga i-import sa mga operator sa plataporma ang app_en.arb.';
 
   @override
-  String get translationTargetLabel => 'Translation';
+  String get translationTargetLabel => 'Pagsalin';
 
   @override
   String get translationAiDraft => 'AI draft';
 
   @override
-  String get translationApprove => 'Approve';
+  String get translationApprove => 'Aprobahan';
 }
