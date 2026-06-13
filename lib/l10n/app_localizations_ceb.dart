@@ -1081,184 +1081,189 @@ class AppLocalizationsCeb extends AppLocalizations {
   String get commonSave => 'I-save';
 
   @override
-  String get reminderComposeTitle => 'Compose Reminder';
+  String get reminderComposeTitle => 'Paghimo og Paalaala';
 
   @override
-  String get reminderComposeSendGroupAlertTitle => 'Send Group Alert';
+  String get reminderComposeSendGroupAlertTitle =>
+      'Ipadala ang Grupo nga Alerto';
 
   @override
   String reminderComposeSendFailed(String error) {
-    return 'Failed to send: $error';
+    return 'Nakapakyas sa pagpadala: $error';
   }
 
   @override
   String get reminderComposeSubmittedForApproval =>
-      'Reminder submitted for approval.';
+      'Gihangyo ang pahimangno alang sa pag-aprubar.';
 
   @override
-  String get reminderComposeScheduled => 'Reminder scheduled.';
+  String get reminderComposeScheduled => 'Naka-iskedyul ang pahimangno.';
 
   @override
-  String get reminderComposePublished => 'Reminder published.';
+  String get reminderComposePublished => 'Nakapublish nga pahimangno.';
 
   @override
-  String get reminderComposeSubmitForApproval => 'Submit for Approval';
+  String get reminderComposeSubmitForApproval => 'Ipadala para sa Pag-apruba';
 
   @override
-  String get reminderComposeSendReminder => 'Send Reminder';
+  String get reminderComposeSendReminder => 'Magpadala og Paalaala';
 
   @override
   String get reminderComposeGroupOnlyHint =>
-      'This alert will be sent only to members of the group you select.';
+      'Ang alerto nga kini ipapadala lamang sa mga miyembro sa grupo nga imong gipili.';
 
   @override
-  String get reminderComposeTitleLabel => 'Title';
+  String get reminderComposeTitleLabel => 'Titulo';
 
   @override
-  String get reminderComposeTitleHint => 'e.g. Early dismissal Friday';
+  String get reminderComposeTitleHint =>
+      'Pananglitan: Sayong pagbiya sa Biyernes';
 
   @override
-  String get reminderComposeMessageLabel => 'Message';
+  String get reminderComposeMessageLabel => 'Mensahe';
 
   @override
-  String get reminderComposeMessageHint => 'Write the reminder details…';
+  String get reminderComposeMessageHint =>
+      'Isulat ang mga detalye sa pahimangno…';
 
   @override
-  String get reminderComposeAudienceLabel => 'Audience';
+  String get reminderComposeAudienceLabel => 'Mga Taga-paminaw';
 
   @override
-  String get reminderComposeAudienceEveryone => 'Everyone';
+  String get reminderComposeAudienceEveryone => 'Tanan';
 
   @override
-  String get reminderComposeAudienceGroup => 'Group';
+  String get reminderComposeAudienceGroup => 'Grupo';
 
   @override
-  String get reminderComposeAudienceRole => 'Role';
+  String get reminderComposeAudienceRole => 'Roly';
 
   @override
   String reminderComposeLoadGroupsFailed(String error) {
-    return 'Could not load groups: $error';
+    return 'Dili ma-load ang mga grupo: $error';
   }
 
   @override
   String get reminderComposeNoGroupsYet =>
-      'No groups exist yet. Create a group first.';
+      'Wala pa\'y mga grupo. Maghimo usa og grupo.';
 
   @override
-  String get reminderComposeSelectGroup => 'Select group';
+  String get reminderComposeSelectGroup => 'Pili-a ang grupo';
 
   @override
   String reminderComposeLoadRolesFailed(String error) {
-    return 'Could not load roles: $error';
+    return 'Dili ma-load ang mga papel: $error';
   }
 
   @override
-  String get reminderComposeNoRolesYet => 'No roles defined yet.';
+  String get reminderComposeNoRolesYet => 'Walay mga papel nga gihimo pa.';
 
   @override
-  String get reminderComposeSelectRole => 'Select role';
+  String get reminderComposeSelectRole => 'Pili-a ang papel';
 
   @override
   String get reminderComposeNoPermission =>
-      'You don\'t have permission to broadcast reminders.';
+      'Wala kay permiso sa pag-broadcast sa mga pahimangno.';
 
   @override
   String get reminderComposeApprovalBanner =>
-      'Your organization requires reminders to be approved. This will be submitted for review before it is published.';
+      'Gikinahanglan sa imong organisasyon nga maaprobahan ang mga pahimangno. Kini isumite alang sa pagrepaso sa dili pa kini ipagawas.';
 
   @override
   String get reminderComposeValidationTitleMin =>
-      'Title must be at least 3 characters.';
+      'Ang titulo kinahanglan nga labing menos 3 ka karakter.';
 
   @override
   String get reminderComposeValidationMessageMin =>
-      'Message must be at least 5 characters.';
+      'Ang mensahe kinahanglan nga labing menos 5 ka karakter.';
 
   @override
   String get reminderComposeValidationSelectGroup =>
-      'Select a group for this alert.';
+      'Pili-a ang grupo para sa kini nga pahimangno.';
 
   @override
   String get reminderComposeValidationSelectAudience =>
-      'Select an audience for this reminder.';
+      'Pili-a ang audience para sa kini nga pahimangno.';
 
   @override
   String get reminderComposeValidationExpiration =>
-      'Set a valid expiration date and time.';
+      'Mag-set ug balido nga petsa ug oras sa pag-expire.';
 
   @override
   String get reminderComposeValidationCheckboxOptions =>
-      'Add at least one checkbox option with a label.';
+      'Magdugang ug labing menos usa ka checkbox nga kapilian nga adunay label.';
 
   @override
   String get reminderComposeValidationChoiceOptions =>
-      'Add at least 2 answer choices with labels.';
+      'Magdugang ug labing menos 2 ka mga kapilian sa tubag nga adunay mga label.';
 
   @override
   String get reminderComposeValidationCharLimit =>
-      'Set a valid character limit for responses.';
+      'Mag-set og balido nga limitasyon sa karakter para sa mga tubag.';
 
   @override
-  String get reminderComposeScheduleForLater => 'Schedule for later';
+  String get reminderComposeScheduleForLater => 'I-iskedyul para sa ulahi';
 
   @override
-  String get reminderComposeScheduleOff => 'Off — send immediately';
+  String get reminderComposeScheduleOff => 'Walay — ipadala dayon';
 
   @override
-  String get reminderComposeChangeTime => 'Change time';
+  String get reminderComposeChangeTime => 'Usba ang oras';
 
   @override
-  String get reminderComposeSetExpiration => 'Set expiration';
+  String get reminderComposeSetExpiration => 'I-set ang pagkaputol';
 
   @override
   String get reminderComposeExpirationOff =>
-      'Off — stays until manually deleted';
+      'Wala — magpabilin hangtod nga manu-manong tanggalon';
 
   @override
-  String get reminderComposeSetExpirationBelow => 'Set expiration below';
+  String get reminderComposeSetExpirationBelow =>
+      'I-set ang pag-expire sa ubos';
 
   @override
-  String get reminderComposeExpirationDateTime => 'Date & time';
+  String get reminderComposeExpirationDateTime => 'Petsa ug oras';
 
   @override
-  String get reminderComposeExpirationDuration => 'Duration';
+  String get reminderComposeExpirationDuration => 'Gidugayon';
 
   @override
-  String get reminderComposePickDateTime => 'Pick date & time';
+  String get reminderComposePickDateTime => 'Pili-a ang petsa ug oras';
 
   @override
   String get reminderComposeExpirationAfterSend =>
-      'Expiration must be after the send time.';
+      'Ang pag-expire kinahanglan nga human sa oras sa pagpadala.';
 
   @override
-  String get reminderComposeExpireAfter => 'Expire after';
+  String get reminderComposeExpireAfter => 'Mawagtang human sa';
 
   @override
-  String get reminderComposeHours => 'Hours';
+  String get reminderComposeHours => 'Mga Oras';
 
   @override
-  String get reminderComposeMinutes => 'Minutes';
+  String get reminderComposeMinutes => 'Minuto';
 
   @override
   String reminderComposeExpirationDurationSummary(
       String duration, String base, String dateTime) {
-    return '$duration after $base ($dateTime)';
+    return '$duration human sa $base ($dateTime)';
   }
 
   @override
   String reminderComposeExpirationAt(String dateTime) {
-    return 'Expires $dateTime';
+    return 'Mawad-an og bisa $dateTime';
   }
 
   @override
-  String get reminderComposeExpirationBaseScheduled => 'scheduled send';
+  String get reminderComposeExpirationBaseScheduled =>
+      'naka-iskedyul nga pagpadala';
 
   @override
-  String get reminderComposeExpirationBaseSend => 'send';
+  String get reminderComposeExpirationBaseSend => 'ipadala';
 
   @override
   String reminderComposeDurationHours(int count) {
-    return '$count hr';
+    return '$count ka oras';
   }
 
   @override
@@ -1267,604 +1272,614 @@ class AppLocalizationsCeb extends AppLocalizations {
   }
 
   @override
-  String get reminderComposeDurationZeroMin => '0 min';
+  String get reminderComposeDurationZeroMin => '0 ka minuto';
 
   @override
-  String get reminderComposeRequestResponse => 'Request a response';
+  String get reminderComposeRequestResponse => 'Mangayo og tubag';
 
   @override
   String reminderComposeResponseRecipientsCan(String type) {
-    return 'Recipients can respond via $type';
+    return 'Maka-reply ang mga recipient pinaagi sa $type';
   }
 
   @override
-  String get reminderComposeResponseOff => 'Off — no response requested';
+  String get reminderComposeResponseOff =>
+      'Walay tubag — wala’y gikinahanglan nga tubag';
 
   @override
-  String get reminderComposeResponseRequired => 'Response required';
+  String get reminderComposeResponseRequired => 'Kinahanglan ang tubag';
 
   @override
   String get reminderComposeResponseRequiredHint =>
-      'Recipients must respond before they can dismiss the alert';
+      'Kinahanglan nga motubag ang mga nakadawat sa wala pa nila ma-dismiss ang alerto.';
 
   @override
   String get reminderComposeAllowChangingResponses =>
-      'Allow changing responses';
+      'Tugoti ang pag-usab sa mga tubag';
 
   @override
   String get reminderComposeAllowChangingResponsesOn =>
-      'Recipients can update their answer after submitting';
+      'Makahimo ang mga nakadawat sa pag-update sa ilang tubag human sa pag-submit';
 
   @override
   String get reminderComposeAllowChangingResponsesOff =>
-      'Locked after submit — use for votes and one-time polls';
+      'Nakasalalay pagkahuman sa pag-submit — gamita alang sa mga boto ug usa ka higayon nga mga poll';
 
   @override
-  String get reminderComposeResponseFreeText => 'Free text';
+  String get reminderComposeResponseFreeText => 'Libre nga teksto';
 
   @override
-  String get reminderComposeResponseCheckboxes => 'Checkboxes';
+  String get reminderComposeResponseCheckboxes => 'Mga checkbox';
 
   @override
-  String get reminderComposeResponseChoices => 'Choices';
+  String get reminderComposeResponseChoices => 'Mga Kapilian';
 
   @override
-  String get reminderComposeCharacterLimit => 'Character limit';
+  String get reminderComposeCharacterLimit => 'Limit sa karakter';
 
   @override
   String reminderComposeCharactersCount(int count) {
-    return '$count characters';
+    return '$count mga karakter';
   }
 
   @override
-  String get reminderComposeAllowExplanationText => 'Allow explanation text';
+  String get reminderComposeAllowExplanationText =>
+      'Tugoti ang teksto sa pasabot';
 
   @override
   String get reminderComposeAllowExplanationHint =>
-      'Optional text box for comments (e.g. why they cannot attend)';
+      'Opsyonal nga kahon sa teksto para sa mga komento (pananglitan, nganong dili sila makaapil)';
 
   @override
   String reminderComposeValidationCharLimitRange(int min, int max) {
-    return 'Set a character limit between $min and $max.';
+    return 'I-set ang limit sa karakter tali sa $min ug $max.';
   }
 
   @override
-  String get reminderComposeCheckboxOptions => 'Checkbox options';
+  String get reminderComposeCheckboxOptions => 'Mga opsyon sa checkbox';
 
   @override
-  String get reminderComposeAnswerChoices => 'Answer choices';
+  String get reminderComposeAnswerChoices => 'Mga kapilian sa tubag';
 
   @override
   String reminderComposeOptionNumber(int number) {
-    return 'Option $number';
+    return 'Opsyon $number';
   }
 
   @override
-  String get reminderComposeRemoveOption => 'Remove option';
+  String get reminderComposeRemoveOption => 'Kuhaa ang opsyon';
 
   @override
-  String get reminderComposeAddOption => 'Add option';
+  String get reminderComposeAddOption => 'Magdugang og kapilian';
 
   @override
-  String get reminderComposeResponseTypeExplanationSuffix => '+ explanation';
+  String get reminderComposeResponseTypeExplanationSuffix => '+ pasabot';
 
   @override
-  String get commonReject => 'Reject';
+  String get commonReject => 'Dili dawaton';
 
   @override
-  String get commonPublish => 'Publish';
+  String get commonPublish => 'I-publish';
 
   @override
-  String get commonDone => 'Done';
+  String get commonDone => 'Nahuman';
 
   @override
-  String get commonConfirm => 'Confirm';
+  String get commonConfirm => 'Kumpirmaha';
 
   @override
-  String get commonContinue => 'Continue';
+  String get commonContinue => 'Padayon';
 
   @override
-  String get commonNext => 'Next';
+  String get commonNext => 'Sunod';
 
   @override
-  String get commonTitle => 'Title';
+  String get commonTitle => 'Ulohan';
 
   @override
-  String get commonMessage => 'Message';
+  String get commonMessage => 'Mensahe';
 
   @override
-  String get commonDescription => 'Description';
+  String get commonDescription => 'Paglarawan';
 
   @override
-  String get commonUnknown => 'Unknown';
+  String get commonUnknown => 'Wala mahibal-i';
 
   @override
   String commonActionFailed(String error) {
-    return 'Action failed: $error';
+    return 'Nihitabo ang aksyon: $error';
   }
 
   @override
   String commonFailedToLoad(String error) {
-    return 'Failed to load: $error';
+    return 'Nakapakyas sa pag-load: $error';
   }
 
   @override
-  String get commonGrade => 'Grade';
+  String get commonGrade => 'Baitang';
 
   @override
-  String get commonAllGrades => 'All grades';
+  String get commonAllGrades => 'Tanang grado';
 
   @override
-  String get commonNoGradeAssigned => 'No grade assigned';
+  String get commonNoGradeAssigned => 'Walay grado nga gihatag';
 
   @override
-  String get commonGradeLevel => 'Grade level';
+  String get commonGradeLevel => 'Antas sa grado';
 
   @override
-  String get commonStatus => 'Status';
+  String get commonStatus => 'Kahimtang';
 
   @override
-  String get commonReasonOptional => 'Reason (optional)';
+  String get commonReasonOptional => 'Rason (opsyonal)';
 
   @override
-  String get commonNoteOptional => 'Note (optional)';
+  String get commonNoteOptional => 'Nota (opsyonal)';
 
   @override
   String commonByAuthor(String name) {
-    return 'By $name';
+    return 'Ni $name';
   }
 
   @override
   String commonFromGroup(String groupName) {
-    return 'From $groupName';
+    return 'Gikan sa $groupName';
   }
 
   @override
-  String get commonScheduled => 'scheduled';
+  String get commonScheduled => 'naka-iskedyul';
 
   @override
-  String get commonNoReasonProvided => 'No reason provided';
+  String get commonNoReasonProvided => 'Walay gihatag nga rason';
 
   @override
-  String get commonSchoolWide => 'School-wide';
+  String get commonSchoolWide => 'Tibuok eskwelahan';
 
   @override
-  String get commonRegistered => 'Registered';
+  String get commonRegistered => 'Narehistro';
 
   @override
-  String get commonNotRegistered => 'Not registered';
+  String get commonNotRegistered => 'Wala magparehistro';
 
   @override
-  String get commonActive => 'Active';
+  String get commonActive => 'Aktibo';
 
   @override
-  String get commonBlocked => 'Blocked';
+  String get commonBlocked => 'Nablock';
 
   @override
-  String get commonUnenrolled => 'Unenrolled';
+  String get commonUnenrolled => 'Walay rehistro';
 
   @override
-  String get commonAll => 'All';
+  String get commonAll => 'Tanan';
 
   @override
-  String get commonSignedIn => 'Signed In';
+  String get commonSignedIn => 'Nakasulod';
 
   @override
-  String get commonSaving => 'Saving…';
+  String get commonSaving => 'Nagasave…';
 
   @override
   String commonSaveFailed(String error) {
-    return 'Save failed: $error';
+    return 'Nakapakyas sa pag-save: $error';
   }
 
   @override
-  String get commonSection => 'Section';
+  String get commonSection => 'Seksyon';
 
   @override
   String get commonIdLabel => 'ID';
 
   @override
-  String get commonContinueButton => 'Continue';
+  String get commonContinueButton => 'Padayon';
 
   @override
   String get changePasswordIntro =>
-      'Enter your current password, then choose a new password.';
+      'Ibutang ang imong kasamtangang password, unya pilia ang usa ka bag-ong password.';
 
   @override
-  String get changePasswordCurrentLabel => 'Current password';
+  String get changePasswordCurrentLabel => 'Karon nga password';
 
   @override
-  String get changePasswordCurrentHint => 'Your current password';
+  String get changePasswordCurrentHint => 'Ang imong kasamtangang password';
 
   @override
-  String get changePasswordNewLabel => 'New password';
+  String get changePasswordNewLabel => 'Bag-ong password';
 
   @override
-  String get changePasswordNewHint => 'At least 8 characters';
+  String get changePasswordNewHint => 'Dapat labing menos 8 ka karakter';
 
   @override
-  String get changePasswordConfirmLabel => 'Confirm new password';
+  String get changePasswordConfirmLabel => 'Kumpirmaha ang bag-ong password';
 
   @override
-  String get changePasswordConfirmHint => 'Re-enter your new password';
+  String get changePasswordConfirmHint => 'Ibalik ang imong bag-ong password';
 
   @override
-  String get changePasswordUpdateButton => 'Update Password';
+  String get changePasswordUpdateButton => 'I-update ang Password';
 
   @override
   String get changePasswordMustDiffer =>
-      'New password must be different from your current password.';
+      'Ang bag-ong password kinahanglan lahi sa imong kasamtangang password.';
 
   @override
   String get changePasswordFailed =>
-      'Could not change password. Please try again.';
+      'Dili mausab ang password. Palihug sulayi pag-usab.';
 
   @override
-  String get changePasswordSuccess => 'Password updated successfully.';
+  String get changePasswordSuccess => 'Nausab na ang password nga malampuson.';
 
   @override
-  String get pendingApprovalsAnnouncements => 'Announcements';
+  String get pendingApprovalsAnnouncements => 'Mga Anunsyo';
 
   @override
-  String get pendingApprovalsGroupAlerts => 'Group alerts';
+  String get pendingApprovalsGroupAlerts => 'Mga pahibalo sa grupo';
 
   @override
-  String get pendingApprovalsSchoolWide => 'School-wide';
+  String get pendingApprovalsSchoolWide => 'Tibuok eskwelahan';
 
   @override
-  String get pendingApprovalsEmpty => 'Nothing awaiting approval';
+  String get pendingApprovalsEmpty =>
+      'Walay bisan unsang naghulat nga pag-apruba';
 
   @override
   String get pendingApprovalsNoPermission =>
-      'You don\'t have permission to approve content.';
+      'Wala kay permiso aron maaprobahan ang sulod.';
 
   @override
-  String get pendingApprovalsRejectAnnouncement => 'Reject announcement';
+  String get pendingApprovalsRejectAnnouncement => 'Ibalibad ang anunsyo';
 
   @override
-  String get pendingApprovalsRejectReminder => 'Reject reminder';
+  String get pendingApprovalsRejectReminder => 'Pagdumili nga pahimangno';
 
   @override
-  String get pendingApprovalsRejectReasonHint => 'Let the author know why…';
+  String get pendingApprovalsRejectReasonHint =>
+      'Ipahibalo ang awtor kung nganong…';
 
   @override
   String pendingApprovalsLoadFailed(String error) {
-    return 'Failed to load: $error';
+    return 'Nakapakyas sa pag-load: $error';
   }
 
   @override
-  String get composeAnnouncementTitle => 'Post Announcement';
+  String get composeAnnouncementTitle => 'Ibutang ang Anunsyo';
 
   @override
   String get composeAnnouncementNoPermission =>
-      'You do not have permission to post school-wide announcements.';
+      'Wala kay permiso sa pag-post og mga anunsyo sa tibuok eskwelahan.';
 
   @override
   String get composeAnnouncementIntro =>
-      'School-wide announcements are visible to every member.';
+      'Ang mga anunsyo sa tibuok eskwelahan makita sa tanan nga miyembro.';
 
   @override
   String get composeAnnouncementApprovalBanner =>
-      'Your organization requires approval before announcements go live.';
+      'Ang imong organisasyon nagkinahanglan og pag-apruba sa dili pa mag-live ang mga anunsyo.';
 
   @override
-  String get composeAnnouncementTitleHint => 'e.g. Join our club this semester';
+  String get composeAnnouncementTitleHint =>
+      'Pananglitan: Apil sa among club karong semestro';
 
   @override
   String get composeAnnouncementMessageHint =>
-      'Share recruitment info, news, or updates…';
+      'Ibahin ang impormasyon sa pag-recruit, balita, o mga update…';
 
   @override
-  String get composeAnnouncementPinTitle => 'Pin to top of announcements';
+  String get composeAnnouncementPinTitle => 'I-pin sa ibabaw sa mga anunsyo';
 
   @override
   String get composeAnnouncementPinSubtitle =>
-      'Pinned posts appear first for all members';
+      'Ang mga nakapin nga post magpakita una para sa tanan nga mga miyembro';
 
   @override
-  String get composeAnnouncementPublish => 'Publish';
+  String get composeAnnouncementPublish => 'I-publish';
 
   @override
   String get composeAnnouncementSubmitted =>
-      'Announcement submitted for approval.';
+      'Gipasa ang anunsyo alang sa pag-apruba.';
 
   @override
-  String get composeAnnouncementScheduled => 'Announcement scheduled.';
+  String get composeAnnouncementScheduled => 'Naka-iskedyul ang anunsyo.';
 
   @override
-  String get composeAnnouncementPublished => 'Announcement published.';
+  String get composeAnnouncementPublished => 'Nakapagmantala og anunsyo.';
 
   @override
   String composeAnnouncementSendFailed(String error) {
-    return 'Failed to post: $error';
+    return 'Napakyas sa pag-post: $error';
   }
 
   @override
   String get composeAnnouncementImageLoadFailed =>
-      'Could not load that image. Try another photo.';
+      'Dili ma-load ang maong hulagway. Sulayi ang laing litrato.';
 
   @override
   String get composeAnnouncementGroupRequired =>
-      'You must lead a group before posting announcements.';
+      'Kinahanglan ka magdumala og grupo sa dili pa mag-post og mga anunsyo.';
 
   @override
-  String get composeAnnouncementGroupOptional => 'Group (optional)';
+  String get composeAnnouncementGroupOptional => 'Grupo (opsyonal)';
 
   @override
-  String get composeAnnouncementOnBehalfOf => 'On behalf of';
+  String get composeAnnouncementOnBehalfOf => 'Sa ngalan ni';
 
   @override
   String get composeAnnouncementMustLeadGroup =>
-      'You can only post on behalf of groups you lead.';
+      'Makahimo ka lamang og post alang sa mga grupo nga imong gipangulohan.';
 
   @override
   String get composeAnnouncementValidationTitleMin =>
-      'Title must be at least 3 characters.';
+      'Kinahanglan ang titulo nga labing menos 3 ka karakter.';
 
   @override
   String get composeAnnouncementValidationMessageMin =>
-      'Message must be at least 5 characters.';
+      'Ang mensahe kinahanglan nga labing menos 5 ka karakter.';
 
   @override
   String get composeAnnouncementValidationExpiration =>
-      'Set a valid expiration date and time.';
+      'Mag-set ug balido nga petsa ug oras sa pag-expire.';
 
   @override
   String get composeAnnouncementValidationResponse =>
-      'Complete the optional response settings or turn them off.';
+      'Kumpletuhon ang mga opsyonal nga setting sa tubag o i-disable kini.';
 
   @override
   String get schoolGradesIntro =>
-      'Define which grade levels your school uses. These appear in Student Roster and Member Management filters.';
+      'I-define kung unsang mga grado ang gigamit sa imong eskwelahan. Magpakita kini sa Student Roster ug Member Management filters.';
 
   @override
   String get schoolGradesNonSchoolNote =>
-      'Municipalities, barangays, and NGOs do not use grades.';
+      'Ang mga munisipyo, barangay, ug NGO dili mogamit og grado.';
 
   @override
-  String get schoolGradesCurrent => 'Current grades';
+  String get schoolGradesCurrent => 'Kasalukuyang mga grado';
 
   @override
-  String get schoolGradesEmpty => 'No grades configured yet.';
+  String get schoolGradesEmpty => 'Wala pa\'y na-configure nga mga grado.';
 
   @override
   String schoolGradesGradeChip(int level) {
-    return 'Grade $level';
+    return 'Baitang $level';
   }
 
   @override
-  String get schoolGradesAddLabel => 'Add grade level';
+  String get schoolGradesAddLabel => 'Idugang ang lebel sa grado';
 
   @override
-  String get schoolGradesAddHint => 'e.g. 7';
+  String get schoolGradesAddHint => 'sama sa 7';
 
   @override
-  String get schoolGradesAddButton => 'Add grade';
+  String get schoolGradesAddButton => 'Idugang ang grado';
 
   @override
-  String get schoolGradesResetDefault => 'Reset to high school default (7–12)';
+  String get schoolGradesResetDefault =>
+      'I-reset sa default sa high school (7–12)';
 
   @override
-  String get schoolGradesSave => 'Save grades';
+  String get schoolGradesSave => 'I-save ang mga grado';
 
   @override
-  String get schoolGradesSaving => 'Saving…';
+  String get schoolGradesSaving => 'Nag-save…';
 
   @override
   String schoolGradesSaveFailed(String error) {
-    return 'Save failed: $error';
+    return 'Nakapakyas sa pag-save: $error';
   }
 
   @override
-  String get schoolGradesSaveSuccess => 'Grade levels updated';
+  String get schoolGradesSaveSuccess => 'Na-update ang mga grado';
 
   @override
-  String get schoolGradesInvalidNumber => 'Enter a valid grade number';
+  String get schoolGradesInvalidNumber =>
+      'Sulati ang usa ka balido nga numero sa grado';
 
   @override
-  String get schoolGradesSaveDialogTitle => 'Save grade levels?';
+  String get schoolGradesSaveDialogTitle => 'I-save ang mga grado nga lebel?';
 
   @override
   String get schoolGradesSaveDialogBody =>
-      'Students will be filterable and assignable by:';
+      'Ang mga estudyante mahimong ma-filter ug ma-assign pinaagi sa:';
 
   @override
   String get schoolGradesNotSchool =>
-      'Grade levels are only used by school-type organizations. This setting is not available for your organization type.';
+      'Ang mga grado nga lebel gigamit lamang sa mga organisasyon nga tipo sa eskwelahan. Kini nga setting dili magamit para sa imong tipo sa organisasyon.';
 
   @override
   String get schoolGradesNoPermission =>
-      'You do not have permission to manage organization settings.';
+      'Wala kay permiso sa pagdumala sa mga setting sa organisasyon.';
 
   @override
   String schoolGradesLoadFailed(String error) {
-    return 'Failed to load settings: $error';
+    return 'Nakapakyas sa pag-load sa mga setting: $error';
   }
 
   @override
-  String get submitConcernTitle => 'Submit a Concern';
+  String get submitConcernTitle => 'Ipadala ang Usa ka Kab worry';
 
   @override
-  String get submitConcernStepDetails => 'Details';
+  String get submitConcernStepDetails => 'Mga Detalye';
 
   @override
-  String get submitConcernStepPhotos => 'Photos';
+  String get submitConcernStepPhotos => 'Mga Litrato';
 
   @override
-  String get submitConcernStepReview => 'Review';
+  String get submitConcernStepReview => 'Susiha';
 
   @override
-  String get submitConcernCategoryPrompt => 'What type of concern is this?';
+  String get submitConcernCategoryPrompt => 'Unsa nga klase sa kabalaka kini?';
 
   @override
-  String get submitConcernLoadCategoriesFailed => 'Failed to load categories';
+  String get submitConcernLoadCategoriesFailed =>
+      'Nakapakyas sa pag-load sa mga kategorya';
 
   @override
   String get submitConcernTitleHint =>
-      'Brief summary of your concern (min 5 characters)';
+      'Mubo nga buod sa imong kabalaka (min 5 ka karakter)';
 
   @override
-  String get submitConcernDescriptionLabel => 'Description';
+  String get submitConcernDescriptionLabel => 'Deskripsyon';
 
   @override
   String get submitConcernDescriptionHint =>
-      'Describe the concern in detail (min 10 characters)';
+      'Ilaraw ang kabalaka sa detalye (min 10 ka karakter)';
 
   @override
   String get submitConcernTitleMinLength =>
-      'Title must be at least 5 characters';
+      'Kinahanglan nga ang titulo adunay labing menos 5 ka karakter';
 
   @override
   String get submitConcernDescriptionMinLength =>
-      'Description must be at least 10 characters';
+      'Kinahanglan ang deskripsyon nga labing menos 10 ka karakter';
 
   @override
-  String get submitConcernPhotosTitle => 'Attach Photos (optional)';
+  String get submitConcernPhotosTitle => 'Idugang ang mga Litrato (opsyonal)';
 
   @override
   String submitConcernPhotosLimit(int count) {
-    return 'Up to $count photos';
+    return 'Hangtod sa $count ka mga litrato';
   }
 
   @override
-  String get submitConcernAnonymousTitle => 'Submit Anonymously';
+  String get submitConcernAnonymousTitle => 'Ipadala nga Walay Ngalan';
 
   @override
   String get submitConcernAnonymousSubtitle =>
-      'Your name and account will not be linked to this report.';
+      'Ang imong ngalan ug account dili ikonekta sa kini nga report.';
 
   @override
-  String get submitConcernTakePhoto => 'Take a Photo';
+  String get submitConcernTakePhoto => 'Kuhaa ang Litrato';
 
   @override
-  String get submitConcernChooseGallery => 'Choose from Gallery';
+  String get submitConcernChooseGallery => 'Pili-a gikan sa Gallery';
 
   @override
-  String get submitConcernReviewTitle => 'Review Your Report';
+  String get submitConcernReviewTitle => 'Susiha ang Imong Ulat';
 
   @override
-  String get submitConcernReviewCategory => 'Category';
+  String get submitConcernReviewCategory => 'Kategorya';
 
   @override
-  String get submitConcernReviewPhotos => 'Photos';
+  String get submitConcernReviewPhotos => 'Mga Litrato';
 
   @override
-  String get submitConcernReviewSubmittedAs => 'Submitted As';
+  String get submitConcernReviewSubmittedAs => 'Gisumiter ingon nga';
 
   @override
   String get submitConcernReviewAnonymousWarning =>
-      'Anonymous reports cannot be tracked. Save your reference number.';
+      'Ang mga ulat nga wala’y ngalan dili masubay. I-save ang imong numero sa reperensya.';
 
   @override
-  String get submitConcernSubmitButton => 'Submit Report';
+  String get submitConcernSubmitButton => 'Ipadala ang Ulat';
 
   @override
   String get submitConcernStep1Incomplete =>
-      'Please complete Step 1: select a category, title (min 5 chars), and description (min 10 chars).';
+      'Palihug kumpletuhon ang Hakbang 1: pagpili og kategorya, titulo (min 5 ka karakter), ug deskripsyon (min 10 ka karakter).';
 
   @override
   String submitConcernSubmissionFailed(String error) {
-    return 'Submission failed: $error';
+    return 'Nakapag-submit nga wala: $error';
   }
 
   @override
   String submitConcernPhotosAttached(int count) {
-    return '$count attached';
+    return '$count nga nakadugtong';
   }
 
   @override
-  String get adminDashboardJoinApplicationsTooltip => 'Join Applications';
+  String get adminDashboardJoinApplicationsTooltip => 'Apil sa mga Aplikasyon';
 
   @override
-  String get adminDashboardPendingApprovalsTooltip => 'Pending Approvals';
+  String get adminDashboardPendingApprovalsTooltip =>
+      'Mga Naghulat nga Pag-apruba';
 
   @override
-  String get adminDashboardMemberManagementTooltip => 'Member Management';
+  String get adminDashboardMemberManagementTooltip =>
+      'Pagdumala sa mga Miyembro';
 
   @override
-  String get adminDashboardStudentRosterTooltip => 'Student Roster';
+  String get adminDashboardStudentRosterTooltip => 'Listahan sa mga Estudyante';
 
   @override
-  String get adminDashboardSchoolGradesTooltip => 'School Grades';
+  String get adminDashboardSchoolGradesTooltip => 'Mga Grado sa Eskwela';
 
   @override
-  String get adminDashboardRolesTooltip => 'Roles & Permissions';
+  String get adminDashboardRolesTooltip => 'Mga Papel ug Mga Tugot';
 
   @override
-  String get adminDashboardOrgSettingsTooltip => 'Organization Settings';
+  String get adminDashboardOrgSettingsTooltip => 'Mga Setting sa Organisasyon';
 
   @override
-  String get adminDashboardTabAll => 'All';
+  String get adminDashboardTabAll => 'Tanan';
 
   @override
-  String get adminDashboardTabSubmitted => 'Submitted';
+  String get adminDashboardTabSubmitted => 'Gipasa';
 
   @override
-  String get adminDashboardTabUnderReview => 'Under Review';
+  String get adminDashboardTabUnderReview => 'Sa Ilalim sa Repaso';
 
   @override
-  String get adminDashboardTabInProgress => 'In Progress';
+  String get adminDashboardTabInProgress => 'Sa Progreso';
 
   @override
-  String get adminDashboardTabResolved => 'Resolved';
+  String get adminDashboardTabResolved => 'Naresolba';
 
   @override
-  String get adminDashboardTabClosed => 'Closed';
+  String get adminDashboardTabClosed => 'Nagsira';
 
   @override
-  String get adminDashboardStatTotal => 'Total';
+  String get adminDashboardStatTotal => 'Kinatibuk-an';
 
   @override
-  String get adminDashboardStatSubmitted => 'Submitted';
+  String get adminDashboardStatSubmitted => 'Gisumite';
 
   @override
-  String get adminDashboardStatUnderReview => 'Under Review';
+  String get adminDashboardStatUnderReview => 'Sa Ilalim sa Pagsusi';
 
   @override
-  String get adminDashboardStatInProgress => 'In Progress';
+  String get adminDashboardStatInProgress => 'Sa Progreso';
 
   @override
-  String get adminDashboardStatResolved => 'Resolved';
+  String get adminDashboardStatResolved => 'Nasulbad';
 
   @override
-  String get adminDashboardStatClosed => 'Closed';
+  String get adminDashboardStatClosed => 'Nagsira';
 
   @override
   String get adminDashboardSearchHint =>
-      'Search by title or reference number...';
+      'Pangitaa pinaagi sa titulo o numero sa reperensya...';
 
   @override
-  String get adminDashboardLoadingReports => 'Loading reports...';
+  String get adminDashboardLoadingReports => 'Nag-load sa mga report...';
 
   @override
-  String get adminDashboardLoadFailed => 'Failed to load reports';
+  String get adminDashboardLoadFailed => 'Nakapakyas sa pag-load sa mga report';
 
   @override
-  String get adminDashboardNoResults => 'No results';
+  String get adminDashboardNoResults => 'Walay resulta';
 
   @override
-  String get adminDashboardNoReports => 'No reports';
+  String get adminDashboardNoReports => 'Walay mga report';
 
   @override
   String adminDashboardNoReportsMatch(String query) {
-    return 'No reports match \"$query\".';
+    return 'Walay mga report nga nagtugma sa \"$query\".';
   }
 
   @override
   String get adminDashboardNoActiveReports =>
-      'No active reports submitted yet.';
+      'Walay mga aktibong report nga gisumite hangtod karon.';
 
   @override
-  String get adminDashboardNoClosedReports => 'No closed reports.';
+  String get adminDashboardNoClosedReports => 'Walay saradong mga report.';
 
   @override
   String adminDashboardNoTabReports(String tab) {
-    return 'No \"$tab\" reports.';
+    return 'Walay \"$tab\" nga mga report.';
   }
 
   @override
   String adminDashboardUpdateStatusFailed(String error) {
-    return 'Failed to update status: $error';
+    return 'Napalpak ang pag-update sa estado: $error';
   }
 
   @override
@@ -1872,826 +1887,848 @@ class AppLocalizationsCeb extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count reports',
+      other: '$count mga report',
       one: '1 report',
     );
     return '$label: $_temp0';
   }
 
   @override
-  String get adminDashboardReportPriorityLow => 'Low';
+  String get adminDashboardReportPriorityLow => 'Mababa';
 
   @override
-  String get adminDashboardReportPriorityMedium => 'Medium';
+  String get adminDashboardReportPriorityMedium => 'Tunga-tunga';
 
   @override
-  String get adminDashboardReportPriorityHigh => 'High';
+  String get adminDashboardReportPriorityHigh => 'Mataas';
 
   @override
-  String get adminDashboardReportPriorityUrgent => 'Urgent';
+  String get adminDashboardReportPriorityUrgent => 'Dali nga kinahanglanon';
 
   @override
-  String get memberManagementSearchHint => 'Search by name or email…';
+  String get memberManagementSearchHint =>
+      'Pangitaa pinaagi sa ngalan o email…';
 
   @override
   String memberManagementUpdatedCount(int count) {
-    return 'Updated $count member(s)';
+    return 'Na-update ang $count nga miyembro(s)';
   }
 
   @override
-  String get memberManagementUpdated => 'Member updated';
+  String get memberManagementUpdated => 'Nabag-o ang miyembro';
 
   @override
-  String get memberManagementBlocked => 'Member blocked';
+  String get memberManagementBlocked => 'Nablock ang miyembro';
 
   @override
-  String get memberManagementUnblocked => 'Member unblocked';
+  String get memberManagementUnblocked => 'Na-unblock ang miyembro';
 
   @override
   String memberManagementLoadFailed(String error) {
-    return 'Failed to load: $error';
+    return 'Nakapakyas sa pag-load: $error';
   }
 
   @override
-  String get memberManagementEmptyActive => 'No active members found.';
+  String get memberManagementEmptyActive =>
+      'Walay aktibong mga miyembro nga nakit-an.';
 
   @override
-  String get memberManagementEmptyBlocked => 'No blocked members found.';
+  String get memberManagementEmptyBlocked =>
+      'Walay nakablok nga mga miyembro nga nakuha.';
 
   @override
-  String get memberManagementEmptyUnenrolled => 'No unenrolled members found.';
+  String get memberManagementEmptyUnenrolled =>
+      'Walay nakab-ot nga mga miyembro nga wala magparehistro.';
 
   @override
-  String get memberManagementEmptyFiltered => 'No members match your filters.';
+  String get memberManagementEmptyFiltered =>
+      'Walay mga miyembro nga nagtugma sa imong mga filter.';
 
   @override
   String memberManagementSelectedCount(int count) {
-    return '$count selected';
+    return '$count napili';
   }
 
   @override
-  String get memberManagementBulkBlock => 'Block';
+  String get memberManagementBulkBlock => 'I-block';
 
   @override
-  String get memberManagementBulkUnenroll => 'Unenroll';
+  String get memberManagementBulkUnenroll => 'I-unenroll';
 
   @override
-  String get memberManagementBulkReenroll => 'Re-enroll';
+  String get memberManagementBulkReenroll => 'I-re-enroll';
 
   @override
-  String get memberManagementBulkAssignGrade => 'Assign grade';
+  String get memberManagementBulkAssignGrade => 'Ihatag ang grado';
 
   @override
-  String get memberManagementReenroll => 'Re-enroll';
+  String get memberManagementReenroll => 'Mag-re-enroll';
 
   @override
-  String get memberManagementUnblock => 'Unblock';
+  String get memberManagementUnblock => 'I-unblock';
 
   @override
-  String get memberManagementUnenroll => 'Unenroll';
+  String get memberManagementUnenroll => 'Ihawa';
 
   @override
-  String get memberManagementAssignGrade => 'Assign grade';
+  String get memberManagementAssignGrade => 'Ihatag ang grado';
 
   @override
-  String get memberManagementBlock => 'Block';
+  String get memberManagementBlock => 'I-block';
 
   @override
-  String get memberManagementEditProfile => 'Edit profile…';
+  String get memberManagementEditProfile => 'Usba ang profile…';
 
   @override
-  String get memberManagementResetPassword => 'Reset password…';
+  String get memberManagementResetPassword => 'I-reset ang password…';
 
   @override
   String memberManagementBlockDialogTitle(String name) {
-    return 'Block $name?';
+    return 'I-block si $name?';
   }
 
   @override
   String memberManagementUnenrollDialogTitle(String name) {
-    return 'Unenroll $name?';
+    return 'I-unenroll si $name?';
   }
 
   @override
   String memberManagementReenrollDialogTitle(String name) {
-    return 'Re-enroll $name?';
+    return 'I-re-enroll si $name?';
   }
 
   @override
   String memberManagementAssignGradeDialogTitle(String name) {
-    return 'Assign grade to $name';
+    return 'Ihatag ang grado kang $name';
   }
 
   @override
-  String get memberManagementGradeAssigned => 'Grade assigned';
+  String get memberManagementGradeAssigned => 'Nakatakdang grado';
 
   @override
   String get memberManagementNoAccess =>
-      'You do not have permission to manage enrolled members.';
+      'Wala kay permiso sa pagdumala sa mga nakarehistrong miyembro.';
 
   @override
   String get memberManagementBlockReasonHint =>
-      'Why is this account being blocked?';
+      'Ngano nga gi-block ang kini nga account?';
 
   @override
-  String get memberManagementConfirmBlockTitle => 'Confirm block';
+  String get memberManagementConfirmBlockTitle => 'Kumpirmaha ang pag-block';
 
   @override
   String memberManagementConfirmBlockMessage(String name) {
-    return '$name will lose access immediately.';
+    return '$name mawagtang ang access dayon.';
   }
 
   @override
-  String get memberManagementConfirmBlockAction => 'Confirm block';
+  String get memberManagementConfirmBlockAction => 'Kumpirmaha ang pag-block';
 
   @override
   String get memberManagementUnblockMessage =>
-      'This member will regain access to the organization.';
+      'Makaangkon pag-usab ang miyembro nga kini og access sa organisasyon.';
 
   @override
   String memberManagementUnenrollTitleOne(String name) {
-    return 'Unenroll $name?';
+    return 'I-unenroll si $name?';
   }
 
   @override
   String memberManagementUnenrollTitleMany(int count) {
-    return 'Unenroll $count members?';
+    return 'I-unenroll ang $count nga mga miyembro?';
   }
 
   @override
   String get memberManagementUnenrollHint =>
-      'e.g. Graduated, transferred, left the school';
+      'e.g. Nakatapos, nagbalhin, mibiya sa eskwelahan';
 
   @override
-  String get memberManagementConfirmUnenrollTitle => 'Confirm unenrollment';
+  String get memberManagementConfirmUnenrollTitle =>
+      'Kumpirmaha ang pag-undang sa enrollment';
 
   @override
   String get memberManagementConfirmUnenrollMessageOne =>
-      'This member will lose access immediately.';
+      'Mawala ang access sa miyembrong kini dayon.';
 
   @override
   String memberManagementConfirmUnenrollMessageMany(int count) {
-    return '$count members will lose access immediately.';
+    return '$count nga mga miyembro ang mawala sa access dayon.';
   }
 
   @override
-  String get memberManagementConfirmUnenrollAction => 'Confirm unenroll';
+  String get memberManagementConfirmUnenrollAction =>
+      'Kumpirmaha ang pag-undang sa enrollment';
 
   @override
   String memberManagementBulkBlockTitle(int count) {
-    return 'Block $count members?';
+    return 'I-block ang $count nga mga miyembro?';
   }
 
   @override
   String get memberManagementBulkBlockHint =>
-      'Why are these accounts being blocked?';
+      'Ngano nga kini nga mga account gi-block?';
 
   @override
   String memberManagementBulkBlockConfirmMessage(int count) {
-    return '$count member(s) will lose access immediately.';
+    return '$count ka myembro ang mawadan og access dayon.';
   }
 
   @override
   String memberManagementBulkUnblockTitle(int count) {
-    return 'Unblock $count members?';
+    return 'I-unblock ang $count nga mga miyembro?';
   }
 
   @override
   String get memberManagementBulkUnblockMessage =>
-      'These members will regain access to the organization.';
+      'Makaangkon na og access ang mga miyembro sa organisasyon.';
 
   @override
-  String get memberManagementConfirmUnblockAction => 'Confirm unblock';
+  String get memberManagementConfirmUnblockAction =>
+      'Kumpirmaha ang pag-unblock';
 
   @override
   String memberManagementReenrollTitleOne(String name) {
-    return 'Re-enroll $name?';
+    return 'Mag-re-enroll ba ka sa $name?';
   }
 
   @override
   String memberManagementReenrollTitleMany(int count) {
-    return 'Re-enroll $count members?';
+    return 'I-re-enroll ang $count nga mga miyembro?';
   }
 
   @override
   String get memberManagementReenrollMessageOne =>
-      'This member will regain full access to the organization.';
+      'Makaangkon kini nga miyembro og hingpit nga access sa organisasyon.';
 
   @override
   String memberManagementReenrollMessageMany(int count) {
-    return '$count members will regain full access.';
+    return '$count nga mga miyembro ang makabawi sa tibuok nga access.';
   }
 
   @override
-  String get memberManagementConfirmReenrollAction => 'Confirm re-enroll';
+  String get memberManagementConfirmReenrollAction =>
+      'Kumpirmaha ang pag-re-enroll';
 
   @override
-  String get memberManagementConfirmGradeTitle => 'Confirm grade assignment';
+  String get memberManagementConfirmGradeTitle =>
+      'Kumpirmaha ang pag-assign sa grado';
 
   @override
   String memberManagementConfirmGradeOne(String name, int grade) {
-    return 'Set $name to Grade $grade?';
+    return 'I-set si $name sa Baitang $grade?';
   }
 
   @override
   String memberManagementConfirmGradeMany(int count, int grade) {
-    return 'Set $count members to Grade $grade?';
+    return 'I-set ang $count ka mga miyembro sa Baitang $grade?';
   }
 
   @override
   String memberManagementBlockReasonLabel(String reason) {
-    return 'Block reason: $reason';
+    return 'Rason sa pag-block: $reason';
   }
 
   @override
   String memberManagementUnenrollReasonLabel(String reason) {
-    return 'Unenrolled: $reason';
+    return 'Nawala sa enrollment: $reason';
   }
 
   @override
   String memberManagementPreviewAndMore(int count) {
-    return '…and $count more';
+    return '…ug $count pa';
   }
 
   @override
-  String get studentRosterSearchHint => 'Search by name or student ID…';
+  String get studentRosterSearchHint =>
+      'Pangitaa pinaagi sa ngalan o ID sa estudyante…';
 
   @override
-  String get studentRosterAssignSelected => 'Assign grade to selected';
+  String get studentRosterAssignSelected => 'I-assign ang grado sa napili';
 
   @override
-  String get studentRosterAddStudent => 'Add Student';
+  String get studentRosterAddStudent => 'Dugang Estudyante';
 
   @override
-  String get studentRosterAssignGradeTitle => 'Assign grade';
+  String get studentRosterAssignGradeTitle => 'Ihatag ang grado';
 
   @override
   String studentRosterAllSelected(int count) {
-    return 'All $count selected';
+    return 'Tanan $count napili';
   }
 
   @override
   String studentRosterOfficialPhotoTitle(String name) {
-    return 'Official photo — $name';
+    return 'Opisyal nga litrato — $name';
   }
 
   @override
   String studentRosterSectionLabel(String section) {
-    return 'Section: $section';
+    return 'Seksyon: $section';
   }
 
   @override
   String studentRosterAssignFailed(String error) {
-    return 'Failed to assign grades: $error';
+    return 'Nakapakyas sa pag-assign sa mga grado: $error';
   }
 
   @override
   String studentRosterUpdatedCount(int count) {
-    return 'Updated $count student(s)';
+    return 'Na-update ang $count estudyante(s)';
   }
 
   @override
   String studentRosterLoadFailed(String error) {
-    return 'Failed to load: $error';
+    return 'Nakapakyas sa pag-load: $error';
   }
 
   @override
   String get studentRosterNoPermission =>
-      'You do not have permission to manage the student roster.';
+      'Wala kay permiso sa pagdumala sa listahan sa mga estudyante.';
 
   @override
   String get studentRosterNotSchool =>
-      'Student roster and grades are only available for school-type organizations.';
+      'Ang listahan sa mga estudyante ug mga grado kay magamit ra para sa mga organisasyon nga tipo sa eskwelahan.';
 
   @override
   String get studentRosterEmpty =>
-      'No students yet. Tap Add Student to provision an account.';
+      'Wala pa\'y mga estudyante. I-tap ang Add Student aron makahatag og account.';
 
   @override
-  String get studentRosterNoMatch => 'No students match your filters.';
+  String get studentRosterNoMatch =>
+      'Walay estudyante nga nagtugma sa imong mga filter.';
 
   @override
   String studentRosterAssignGradeWhichGroup(int count) {
-    return '$count students are selected. Assign a grade to which group?';
+    return '$count nga estudyante ang napili. Asa nga grupo ang ihatag nga grado?';
   }
 
   @override
   String studentRosterOnlyNamed(String name) {
-    return 'Only $name';
+    return 'Lang $name ra';
   }
 
   @override
-  String get studentRosterOnlyThisStudent => 'Only this student';
+  String get studentRosterOnlyThisStudent => 'Kining estudyante ra';
 
   @override
   String studentRosterAssignGradeToOne(String name) {
-    return 'Assign grade to $name';
+    return 'Ihatag ang grado kang $name';
   }
 
   @override
   String studentRosterAssignGradeToMany(int count) {
-    return 'Assign grade to $count students';
+    return 'I-assign ang grado sa $count nga estudyante';
   }
 
   @override
-  String get studentRosterConfirmGradeTitle => 'Confirm grade assignment';
+  String get studentRosterConfirmGradeTitle =>
+      'Kumpirmaha ang pag-assign sa grado';
 
   @override
   String studentRosterConfirmGradeOne(String name, int grade) {
-    return 'Set $name to Grade $grade?';
+    return 'I-set si $name sa Baitang $grade?';
   }
 
   @override
   String studentRosterConfirmGradeMany(int count, int grade) {
-    return 'Set $count students to Grade $grade?';
+    return 'I-set ang $count nga estudyante sa Baitang $grade?';
   }
 
   @override
   String studentRosterPreviewAndMore(int count) {
-    return '…and $count more';
+    return '…ug $count pa';
   }
 
   @override
-  String get rolesManagementTitle => 'Roles & Permissions';
+  String get rolesManagementTitle => 'Mga Papel ug Mga Tugot';
 
   @override
-  String get rolesAssignments => 'Assignments';
+  String get rolesAssignments => 'Mga Takdang Aralin';
 
   @override
-  String get rolesCapabilities => 'Capabilities';
+  String get rolesCapabilities => 'Mga Kahanas';
 
   @override
-  String get rolesCreateRole => 'Create Role';
+  String get rolesCreateRole => 'Magtukod og Papel';
 
   @override
-  String get rolesSystemRoles => 'System Roles';
+  String get rolesSystemRoles => 'Mga Sistema nga Papel';
 
   @override
-  String get rolesCustomRoles => 'Custom Roles';
+  String get rolesCustomRoles => 'Mga Pasadya nga Papel';
 
   @override
-  String get rolesNoCapabilities => 'No capabilities assigned';
+  String get rolesNoCapabilities => 'Walay mga kakayahan nga gihatag';
 
   @override
   String rolesMoreCapabilities(int count) {
-    return '+$count more';
+    return '+$count pa';
   }
 
   @override
-  String get rolesAssignUsers => 'Assign Users';
+  String get rolesAssignUsers => 'I-assign ang mga Gumagamit';
 
   @override
   String rolesSeedFailed(String error) {
-    return 'Seed failed: $error';
+    return 'Nabigo ang seed: $error';
   }
 
   @override
-  String get rolesSeedSuccess => 'Default roles added successfully';
+  String get rolesSeedSuccess =>
+      'Madalas nga mga papel nga nadugang nga malampuson';
 
   @override
-  String get rolesCreateManually => 'Create Role Manually';
+  String get rolesCreateManually => 'Manually nga Paghimo og Papel';
 
   @override
-  String get rolesNoRolesEmpty => 'No roles defined yet';
+  String get rolesNoRolesEmpty => 'Walay mga papel nga gihimo pa';
 
   @override
-  String get rolesSystemBadge => 'System';
+  String get rolesSystemBadge => 'Sistema';
 
   @override
-  String get rolesSeedDefaultRoles => 'Seed Default Roles';
+  String get rolesSeedDefaultRoles => 'Itanum ang mga Default nga Papel';
 
   @override
-  String get rolesSeeding => 'Seeding…';
+  String get rolesSeeding => 'Nag-seed…';
 
   @override
   String get rolesEmptyDescription =>
-      'Create your first custom role to grant staff\nspecific capabilities within this organisation.';
+      'Magmahi ang imong unang pasadya nga papel aron hatagan ang mga kawani og espesipikong mga kakayahan sulod niining organisasyon.';
 
   @override
   String rolesAllCapabilitiesTitle(String roleName) {
-    return '$roleName — All Capabilities';
+    return '$roleName — Tanang Kakayahan';
   }
 
   @override
-  String get roleAssignmentsTitle => 'User Role Assignments';
+  String get roleAssignmentsTitle => 'Mga Talaan sa Papel sa Gumagamit';
 
   @override
-  String get roleAssignmentsNoUsers => 'No approved users found.';
+  String get roleAssignmentsNoUsers =>
+      'Walay nakaprobahan nga mga tiggamit nga nakit-an.';
 
   @override
-  String get roleAssignmentsNoRoles => 'No roles assigned';
+  String get roleAssignmentsNoRoles => 'Walay gihatag nga mga papel';
 
   @override
   String assignRoleTitle(String roleName) {
-    return 'Assign: $roleName';
+    return 'I-assign: $roleName';
   }
 
   @override
-  String get assignRoleSuccess => 'Role assigned successfully';
+  String get assignRoleSuccess => 'Malampusong na-assign ang papel';
 
   @override
   String assignRoleFailed(String error) {
-    return 'Assignment failed: $error';
+    return 'Nakapakyas ang pag-assign: $error';
   }
 
   @override
-  String get assignRoleScopeType => 'Scope Type';
+  String get assignRoleScopeType => 'Tipo sa Sakop';
 
   @override
-  String get assignRoleRemoveTitle => 'Remove Assignment?';
+  String get assignRoleRemoveTitle => 'Tangtangon ang Asaynment?';
 
   @override
   String assignRoleRemoveConfirm(Object scope) {
-    return 'Remove this role assignment ($scope)? The user will immediately lose the permissions granted by this role.';
+    return 'Ikuha ang tahas nga pag-assign ($scope)? Ang tiggamit dayon mawagtang ang mga katungod nga gihatag sa niini nga tahas.';
   }
 
   @override
-  String get capabilitiesTitle => 'Capabilities';
+  String get capabilitiesTitle => 'Mga Kakayahan';
 
   @override
-  String get capabilitiesTabCustom => 'Custom';
+  String get capabilitiesTabCustom => 'Pasadya';
 
   @override
-  String get capabilitiesTabBuiltins => 'Built-ins';
+  String get capabilitiesTabBuiltins => 'Mga Nakatakdang Kahon';
 
   @override
-  String get capabilitiesDeleteTitle => 'Delete Capability?';
+  String get capabilitiesDeleteTitle => 'I-delete ang Kakayahan?';
 
   @override
   String capabilitiesDeleteBody(String name) {
-    return '\"$name\" will be removed. Roles using it will lose this capability assignment.';
+    return 'Ang \"$name\" kay tangtangon. Ang mga papel nga naggamit niini mawagtang ang kini nga katungdanan.';
   }
 
   @override
-  String get capabilitiesCreateLabel => 'Create Custom Capability';
+  String get capabilitiesCreateLabel => 'Magmahimo og Custom nga Kakayahan';
 
   @override
-  String get capabilitiesBackedByLabel => 'Backed by (built-in action)';
+  String get capabilitiesBackedByLabel =>
+      'Gisuportahan sa (naka-built-in nga aksyon)';
 
   @override
   String get capabilitiesBuiltinsIntro =>
-      'These are the built-in capabilities available across all SpeakUp Connect organisations. They cannot be modified or removed — only custom capability aliases can be created on top of them.';
+      'Kini ang mga nakabuilt-in nga kakayahan nga magamit sa tanang organisasyon sa SpeakUp Connect. Dili kini mausab o matangtang — mahimo lamang maghimo og mga pasikad nga alias sa kakayahan ibabaw niini.';
 
   @override
-  String get roleEditorCreateTitle => 'Create Role';
+  String get roleEditorCreateTitle => 'Magtukod og Papel';
 
   @override
-  String get roleEditorEditTitle => 'Edit Role';
+  String get roleEditorEditTitle => 'Usba ang Papel';
 
   @override
-  String get roleEditorRoleDetails => 'Role Details';
+  String get roleEditorRoleDetails => 'Mga Detalye sa Papel';
 
   @override
-  String get roleEditorRoleName => 'Role Name';
+  String get roleEditorRoleName => 'Ngalan sa Papel';
 
   @override
-  String get roleEditorDescription => 'Description';
+  String get roleEditorDescription => 'Paglaraw';
 
   @override
-  String get roleEditorCapabilities => 'Capabilities';
+  String get roleEditorCapabilities => 'Mga Kakayahan';
 
   @override
-  String get roleEditorManageCustom => 'Manage Custom';
+  String get roleEditorManageCustom => 'Pagdumala sa Custom';
 
   @override
   String get roleEditorCapabilitiesHint =>
-      'Select the built-in capabilities this role grants.';
+      'Pilia ang mga nakabuilt-in nga kakayahan nga gihatag sa kini nga papel.';
 
   @override
-  String get roleEditorCustomCapabilities => 'Custom Capabilities';
+  String get roleEditorCustomCapabilities => 'Mga Pasikaran nga Kahanas';
 
   @override
   String get roleEditorCustomCapabilitiesHint =>
-      'Org-defined capability aliases built on top of built-ins.';
+      'Mga alias sa kakayahan nga gihimo sa org nga gibase sa mga nakabuilt-in.';
 
   @override
-  String get roleEditorNoCustomCaps => 'No custom capabilities yet.';
+  String get roleEditorNoCustomCaps => 'Wala pang mga pasadya nga kakayahan.';
 
   @override
-  String get roleEditorCreateCustomCap => 'Create a custom capability →';
+  String get roleEditorCreateCustomCap => 'Magmahi og custom nga kakayahan';
 
   @override
-  String get roleEditorSaveRole => 'Save Role';
+  String get roleEditorSaveRole => 'I-save ang Papel';
 
   @override
-  String get roleEditorSaving => 'Saving…';
+  String get roleEditorSaving => 'Nag-save…';
 
   @override
-  String get roleEditorSaved => 'Role saved';
+  String get roleEditorSaved => 'Nakatipig na ang papel';
 
   @override
   String roleEditorSaveFailed(String error) {
-    return 'Save failed: $error';
+    return 'Nakapakyas ang pag-save: $error';
   }
 
   @override
-  String get roleEditorAssignUsers => 'Assign Users';
+  String get roleEditorAssignUsers => 'I-assign ang mga Gumagamit';
 
   @override
   String roleEditorBasedOn(String permission) {
-    return 'Based on: $permission';
+    return 'Nakasalig sa: $permission';
   }
 
   @override
-  String get orgSettingsTitle => 'Organization Settings';
+  String get orgSettingsTitle => 'Mga Setting sa Organisasyon';
 
   @override
-  String get orgSettingsDisplayName => 'Display Name';
+  String get orgSettingsDisplayName => 'Ngalan sa Pagpakita';
 
   @override
   String get orgSettingsDisplayNameHint => 'e.g. Riverside High';
 
   @override
-  String get orgSettingsBrandingUpdated => 'Branding updated successfully';
+  String get orgSettingsBrandingUpdated =>
+      'Na-update ang branding nga malampuson';
 
   @override
   String orgSettingsSaveFailed(String error) {
-    return 'Save failed: $error';
+    return 'Nakapakyas sa pag-save: $error';
   }
 
   @override
-  String get orgSettingsContrastWarning => 'Contrast Warning';
+  String get orgSettingsContrastWarning => 'Babag sa Kontrasto';
 
   @override
-  String get orgSettingsSaveAnyway => 'Save Anyway';
+  String get orgSettingsSaveAnyway => 'I-save gihapon';
 
   @override
-  String get orgSettingsAutoAdjustSave => 'Auto-adjust & Save';
+  String get orgSettingsAutoAdjustSave => 'Awto-adjust ug I-save';
 
   @override
   String orgSettingsSeedCategoriesFailed(String error) {
-    return 'Seed failed: $error';
+    return 'Nabigo ang pag-seed: $error';
   }
 
   @override
   String get orgSettingsSeedCategoriesSuccess =>
-      'Default categories added successfully';
+      'Madalas nga mga kategorya nga nadugang nga malampuson';
 
   @override
-  String get orgSettingsChangeOrgTypeTitle => 'Change organization type?';
+  String get orgSettingsChangeOrgTypeTitle => 'Usbon ang tipo sa organisasyon?';
 
   @override
   String orgSettingsChangeOrgTypeConfirm(
       String fromType, String toType, String description) {
-    return 'Change from $fromType to $toType?\n\n$description\n\nThis affects which admin features are available (such as student grades and roster for schools).';
+    return 'Usba gikan sa $fromType ngadto sa $toType?\n\n$description\n\nKini makaapekto sa mga admin nga bahin nga magamit (sama sa mga grado sa estudyante ug roster para sa mga eskwelahan).';
   }
 
   @override
   String orgSettingsOrgTypeSaved(String type) {
-    return 'Organization type set to $type';
+    return 'Nakatakda ang tipo sa organisasyon sa $type';
   }
 
   @override
   String orgSettingsOrgTypeFailed(String error) {
-    return 'Update failed: $error';
+    return 'Nakapakyas ang pag-update: $error';
   }
 
   @override
-  String get orgSettingsTypeLabel => 'Type';
+  String get orgSettingsTypeLabel => 'Tipo';
 
   @override
-  String get orgSettingsSaveType => 'Save type';
+  String get orgSettingsSaveType => 'I-save ang tipo';
 
   @override
-  String get orgSettingsAllowPersonalPhotos => 'Allow personal profile photos';
+  String get orgSettingsAllowPersonalPhotos =>
+      'Tugoti ang mga personal nga litrato sa profile';
 
   @override
-  String get orgSettingsRequireApproval => 'Require approval before publishing';
+  String get orgSettingsRequireApproval =>
+      'Kinahanglan ang pag-apruba sa dili pa ipagawas';
 
   @override
-  String get orgSettingsOrgNameTitle => 'Organization Name';
+  String get orgSettingsOrgNameTitle => 'Ngalan sa Organisasyon';
 
   @override
   String get orgSettingsOrgNameSubtitle =>
-      'Displayed on the splash screen as \"SpeakUp [Name]\".';
+      'Ipakita sa splash screen nga \"SpeakUp [Name]\".';
 
   @override
-  String get orgSettingsBrandColorsTitle => 'Brand Colors';
+  String get orgSettingsBrandColorsTitle => 'Mga Kulay sa Brand';
 
   @override
   String get orgSettingsBrandColorsSubtitle =>
-      'Enter 6-digit hex codes from the organization\'s brand guide (e.g. #1A73E8). Changes apply to all connected devices in real time and are cached locally for instant startup.';
+      'Ibutang ang 6-digit nga hex codes gikan sa brand guide sa organisasyon (pananglitan, #1A73E8). Ang mga kausaban magamit sa tanan nga nakonektang mga device sa tinuod nga oras ug gi-cache lokal alang sa dali nga pagsugod.';
 
   @override
-  String get orgSettingsPrimaryColor => 'Primary Color';
+  String get orgSettingsPrimaryColor => 'Pangunang Kulay';
 
   @override
-  String get orgSettingsSecondaryColor => 'Secondary Color';
+  String get orgSettingsSecondaryColor => 'Ikaduhang Kulay';
 
   @override
   String get orgSettingsColorHint => 'e.g. #1A73E8';
 
   @override
-  String get orgSettingsSecondaryColorHint => 'e.g. #000000';
+  String get orgSettingsSecondaryColorHint => 'pananglitan: #000000';
 
   @override
-  String get orgSettingsSaveBranding => 'Save Branding';
+  String get orgSettingsSaveBranding => 'I-save ang Branding';
 
   @override
-  String get orgSettingsSaving => 'Saving…';
+  String get orgSettingsSaving => 'Nag-save…';
 
   @override
   String get orgSettingsBrandingInfo =>
-      'After saving, the new colors will appear immediately on all connected devices. On this device the branding is also written to local storage, so it loads correctly on the next app launch before Firestore responds.';
+      'Pagkahuman sa pag-save, ang bag-ong mga kolor magpakita dayon sa tanan nga nakonektang mga device. Sa kini nga device, ang branding isulat usab sa lokal nga storage, aron kini ma-load nga husto sa sunod nga paglansad sa app sa wala pa mag-reply ang Firestore.';
 
   @override
-  String get orgSettingsReportCategoriesTitle => 'Report Categories';
+  String get orgSettingsReportCategoriesTitle => 'Mga Kategorya sa Ulat';
 
   @override
   String get orgSettingsReportCategoriesSubtitle =>
-      'Categories are required for users to submit concerns. Tap the button below to populate the default set.';
+      'Kinahanglan ang mga kategorya aron makasumite ang mga tiggamit og mga kabalaka. I-tap ang buton sa ubos aron mapuno ang default nga set.';
 
   @override
   String orgSettingsCategoriesConfigured(int count) {
-    return '$count categories configured';
+    return '$count nga kategorya ang na-configure';
   }
 
   @override
-  String get orgSettingsAddDefaultCategories => 'Add Default Categories';
+  String get orgSettingsAddDefaultCategories =>
+      'Idugang ang mga Default nga Kategorya';
 
   @override
-  String get orgSettingsAddingCategories => 'Adding…';
+  String get orgSettingsAddingCategories => 'Nagdugang…';
 
   @override
-  String get orgSettingsOrgTypeTitle => 'Organization Type';
+  String get orgSettingsOrgTypeTitle => 'Uri sa Organisasyon';
 
   @override
   String get orgSettingsOrgTypeSubtitle =>
-      'Determines which features are available. Schools can use student grades and roster; municipalities and NGOs use member management without grades.';
+      'Nagdeterminar kung unsang mga bahin ang magamit. Ang mga eskwelahan makagamit sa mga grado sa estudyante ug roster; ang mga munisipyo ug NGO maggamit sa pagdumala sa mga miyembro nga walay mga grado.';
 
   @override
-  String get orgSettingsMemberPhotosTitle => 'Member Profile Photos';
+  String get orgSettingsMemberPhotosTitle =>
+      'Mga Larawan sa Profile sa Miyembro';
 
   @override
   String get orgSettingsMemberPhotosSubtitle =>
-      'When enabled, students may upload a personal badge in Settings. Official school photos uploaded by staff remain a separate permanent record and are never overwritten.';
+      'Kung nakabukas, ang mga estudyante mahimong mag-upload og personal nga badge sa Settings. Ang opisyal nga mga litrato sa eskwelahan nga gi-upload sa mga kawani magpabilin nga usa ka lahi nga permanente nga rekord ug dili gayud mapulihan.';
 
   @override
   String get orgSettingsMemberPhotosOn =>
-      'Currently ON — members can add a personal badge in Settings';
+      'Karon NAKA-ON — ang mga miyembro makadugang og personal nga badge sa Mga Setting';
 
   @override
   String get orgSettingsMemberPhotosOff =>
-      'Currently OFF — only official school photos are shown';
+      'Karon NAKA-OFF — ang mga opisyal nga litrato sa eskwelahan ra ang ipakita';
 
   @override
   String get orgSettingsMemberPhotosEnabled =>
-      'Members can now upload personal profile photos';
+      'Ang mga miyembro makapadugang na og personal nga mga litrato sa profile.';
 
   @override
   String get orgSettingsMemberPhotosDisabled =>
-      'Personal profile photos are disabled for members';
+      'Gidisable ang personal nga profile photos para sa mga miyembro';
 
   @override
-  String get orgSettingsReminderApprovalTitle => 'Reminder Approval';
+  String get orgSettingsReminderApprovalTitle => 'Pahimangno sa Pag-apruba';
 
   @override
   String get orgSettingsReminderApprovalSubtitle =>
-      'When enabled, members who can broadcast reminders but cannot approve them must submit reminders for review before they are published.';
+      'Kung nakabukas, ang mga miyembro nga makapadala og mga pahimangno apan dili makapapprove niini kinahanglan mag-submit og mga pahimangno alang sa pagrepaso sa dili pa kini ipagawas.';
 
   @override
   String get orgSettingsReminderApprovalOn =>
-      'Currently ON — reminders from non-approvers are held for review';
+      'Karon NAKA-ON — ang mga pahimangno gikan sa mga dili mag-aproba gipugngan alang sa pagrepaso';
 
   @override
   String get orgSettingsReminderApprovalOff =>
-      'Currently OFF — reminders publish immediately';
+      'Karon OFF — ang mga pahimangno gipagawas dayon';
 
   @override
   String get orgSettingsReminderApprovalEnabled =>
-      'Reminders now require approval before publishing';
+      'Ang mga pahimangno karon nagkinahanglan og pag-apruba sa dili pa ipagawas.';
 
   @override
   String get orgSettingsReminderApprovalDisabled =>
-      'Reminders now publish directly';
+      'Ang mga pahimangno karon direkta nang gipagawas';
 
   @override
   String get orgSettingsPermissionDenied =>
-      'You do not have permission to change this setting.';
+      'Wala kay permiso sa pag-usab niining settinga.';
 
   @override
-  String get orgSettingsPrimarySwatch => 'Primary';
+  String get orgSettingsPrimarySwatch => 'Panguna';
 
   @override
-  String get orgSettingsSecondarySwatch => 'Secondary';
+  String get orgSettingsSecondarySwatch => 'Ikaduhang';
 
   @override
-  String get orgSettingsRequired => 'Required';
+  String get orgSettingsRequired => 'Kinahanglanon';
 
   @override
   String get orgSettingsHexInvalid =>
-      'Enter a valid 6-digit hex (e.g. #1A73E8)';
+      'Isulod ang balido nga 6-digit nga hex (pananglitan, #1A73E8)';
 
   @override
   String get orgSettingsPrimaryHexInvalid =>
-      'Primary color must be a valid 6-digit hex (e.g. #1A73E8).';
+      'Ang pangunang kolor kinahanglan usa ka balido nga 6-digit nga hex (pananglitan #1A73E8).';
 
   @override
   String get orgSettingsSecondaryHexInvalid =>
-      'Secondary color must be a valid 6-digit hex (e.g. #000000).';
+      'Ang ikaduhang kolor kinahanglan usa ka balido nga 6-digit nga hex (sama sa #000000).';
 
   @override
-  String get orgSettingsContrastLightBackgrounds => 'light backgrounds';
+  String get orgSettingsContrastLightBackgrounds => 'hayag nga mga background';
 
   @override
-  String get orgSettingsContrastDarkBackgrounds => 'dark backgrounds';
+  String get orgSettingsContrastDarkBackgrounds =>
+      'madulong nga mga background';
 
   @override
   String get orgSettingsContrastLightAndDarkBackgrounds =>
-      'light and dark backgrounds';
+      'hayag ug ngitngit nga mga background';
 
   @override
   String orgSettingsContrastSecondaryFallback(
       String primary, String secondary, String surfaces) {
-    return 'Your primary color ($primary) isn\'t visible enough on $surfaces — it will blend into the background.\n\nYour secondary color ($secondary) will be used as a fallback for buttons and icons, but you may want a more suitable primary.\n\nYou can save anyway or let the app shift the primary to the nearest contrast-safe shade.';
+    return 'Ang imong pangunahing kolor ($primary) dili igo nga makita sa $surfaces — kini maghiusa sa background.\n\nAng imong sekondaryang kolor ($secondary) gamiton isip fallback para sa mga buton ug mga icon, apan mahimo nimong gustohon ang mas angay nga pangunahing kolor.\n\nMakahimo ka gihapon sa pag-save o pasagdan ang app nga ilisan ang pangunahing kolor ngadto sa labing duol nga ligtas nga shade sa contrast.';
   }
 
   @override
   String orgSettingsContrastNeither(
       String primary, String secondary, String surfaces) {
-    return 'Neither your primary ($primary) nor secondary ($secondary) color provides enough contrast against $surfaces. Buttons, links, and icons may be hard to see.\n\nYou can save anyway, or let the app shift the primary color to the nearest contrast-safe shade.';
+    return 'Wala’y bisan unsa sa imong panguna ($primary) o sekondarya ($secondary) nga kolor nga naghatag og igo nga ka-kontra batok sa $surfaces. Ang mga butones, link, ug icon mahimong lisod makita.\n\nMahimo ka magtipig bisan unsa, o pasagdan ang app nga ibalhin ang pangunang kolor sa labing duol nga luwas nga anino sa ka-kontra.';
   }
 
   @override
   String get orgSettingsProfilePhotoSaveFailed =>
-      'Profile photo setting did not save.';
+      'Wala masulod ang setting sa profile photo.';
 
   @override
   String get orgSettingsReminderApprovalSaveFailed =>
-      'Reminder approval setting did not save.';
+      'Wala masulod ang setting sa pag-apruba sa pahimangno.';
 
   @override
-  String get orgTypeAdminSchool => 'School';
+  String get orgTypeAdminSchool => 'Eskwela';
 
   @override
-  String get orgTypeAdminUniversity => 'University';
+  String get orgTypeAdminUniversity => 'Unibersidad';
 
   @override
-  String get orgTypeAdminLgu => 'Municipality / LGU';
+  String get orgTypeAdminLgu => 'Munisipyo / LGU';
 
   @override
   String get orgTypeAdminNgo => 'NGO';
 
   @override
-  String get orgTypeAdminChurch => 'Church';
+  String get orgTypeAdminChurch => 'Simbahan';
 
   @override
-  String get orgTypeAdminCorporation => 'Corporation';
+  String get orgTypeAdminCorporation => 'Korporasyon';
 
   @override
-  String get orgTypeAdminOther => 'Other';
+  String get orgTypeAdminOther => 'Uban pa';
 
   @override
   String get orgTypeAdminSchoolDesc =>
-      'Enables student grades, roster, and class-based features.';
+      'Nag-enable sa mga grado sa estudyante, roster, ug mga feature nga nakabase sa klase.';
 
   @override
   String get orgTypeAdminUniversityDesc =>
-      'Enables student grades, roster, and class-based features.';
+      'Nag-enable sa mga grado sa estudyante, roster, ug mga feature nga nakabase sa klase.';
 
   @override
   String get orgTypeAdminLguDesc =>
-      'For municipalities, barangays, and local government units.';
+      'Para sa mga munisipyo, barangay, ug mga yunit sa lokal nga gobyerno.';
 
   @override
   String get orgTypeAdminNgoDesc =>
-      'For non-profit and community organizations.';
+      'Para sa mga non-profit ug mga organisasyon sa komunidad.';
 
   @override
   String get orgTypeAdminChurchDesc =>
-      'For churches and faith-based communities.';
+      'Para sa mga simbahan ug mga komunidad nga nakabase sa pagtuo.';
 
   @override
   String get orgTypeAdminCorporationDesc =>
-      'For companies and workplace communities.';
+      'Para sa mga kumpanya ug mga komunidad sa trabaho.';
 
   @override
   String get orgTypeAdminOtherDesc =>
-      'Generic organization without type-specific features.';
+      'Heneral nga organisasyon nga walay mga bahin nga espesipiko sa tipo.';
 
   @override
-  String get commonClose => 'Close';
+  String get commonClose => 'Isira';
 
   @override
-  String get commonEdit => 'Edit';
+  String get commonEdit => 'Usba';
 
   @override
-  String get commonRequired => 'Required';
+  String get commonRequired => 'Kinahanglanon';
 
   @override
   String commonErrorPrefix(String error) {
-    return 'Error: $error';
+    return 'Sayup: $error';
   }
 
   @override
-  String get commonRole => 'Role';
+  String get commonRole => 'Papel';
 
   @override
-  String get commonNameRequired => 'Name is required';
+  String get commonNameRequired => 'Kinahanglan ang ngalan';
 
   @override
   String adminDashboardAnonymousDate(String date) {
-    return 'Anonymous · $date';
+    return 'Walay ngalan · $date';
   }
 
   @override
@@ -2700,103 +2737,107 @@ class AppLocalizationsCeb extends AppLocalizations {
   }
 
   @override
-  String get rolesEdit => 'Edit';
+  String get rolesEdit => 'Usba';
 
   @override
-  String get roleEditorNameHint => 'e.g. Guidance Counselor';
+  String get roleEditorNameHint => 'e.g. Tagapayo sa mga Estudyante';
 
   @override
   String get roleEditorDescriptionHint =>
-      'Briefly describe who this role is for';
+      'Ilaraw ang hinungdan kung kinsa kini nga papel.';
 
   @override
-  String get assignRoleSelectUser => 'Select User';
+  String get assignRoleSelectUser => 'Pili-a ang Gumagamit';
 
   @override
-  String get assignRoleSearchHint => 'Search by name or student ID';
+  String get assignRoleSearchHint =>
+      'Pangitaa pinaagi sa ngalan o ID sa estudyante';
 
   @override
-  String get assignRoleConfirmAssignment => 'Confirm Assignment';
+  String get assignRoleConfirmAssignment => 'Kumpirmahi ang Pag-assign';
 
   @override
-  String get assignRoleAssigning => 'Assigning…';
+  String get assignRoleAssigning => 'Nag-assign…';
 
   @override
-  String get assignRoleNoUsersFound => 'No users found.';
+  String get assignRoleNoUsersFound => 'Walay nakitang mga gumagamit.';
 
   @override
-  String get assignRoleScopeTitle => 'Role Scope';
+  String get assignRoleScopeTitle => 'Sakop sa Papel';
 
   @override
   String get assignRoleScopeSubtitle =>
-      'Define how broadly this role applies for this user.';
+      'I-define kung unsa ka lapad ang pag-aplikar sa kini nga papel alang sa kini nga tiggamit.';
 
   @override
-  String get assignRoleScopeOptionOrg => 'Org-wide';
+  String get assignRoleScopeOptionOrg => 'Tibuok Org';
 
   @override
-  String get assignRoleScopeOptionTag => 'Specific tag';
+  String get assignRoleScopeOptionTag => 'Espesipikong tag';
 
   @override
-  String get assignRoleScopeOptionClass => 'Specific class / section';
+  String get assignRoleScopeOptionClass => 'Espesipikong klase / seksyon';
 
   @override
-  String get assignRoleScopeOptionGroup => 'Specific group / club';
+  String get assignRoleScopeOptionGroup => 'Espesipikong grupo / klub';
 
   @override
-  String get assignRoleScopeOptionDepartment => 'Specific department';
+  String get assignRoleScopeOptionDepartment => 'Espesipikong departamento';
 
   @override
-  String get assignRoleScopeOptionBarangay => 'Specific barangay';
+  String get assignRoleScopeOptionBarangay => 'Espesipikong barangay';
 
   @override
   String get assignRoleScopeFieldTag => 'Tag';
 
   @override
-  String get assignRoleScopeFieldClassId => 'Class ID';
+  String get assignRoleScopeFieldClassId => 'ID sa Klase';
 
   @override
-  String get assignRoleScopeFieldGroupId => 'Group ID';
+  String get assignRoleScopeFieldGroupId => 'ID sa Grupo';
 
   @override
-  String get assignRoleScopeFieldDepartmentId => 'Department ID';
+  String get assignRoleScopeFieldDepartmentId => 'ID sa Departamento';
 
   @override
-  String get assignRoleScopeFieldBarangayId => 'Barangay ID';
+  String get assignRoleScopeFieldBarangayId => 'ID sa Barangay';
 
   @override
-  String get assignRoleScopeHintTag => 'e.g. guidance';
+  String get assignRoleScopeHintTag => 'panudlo';
 
   @override
-  String get assignRoleScopeHintClass => 'Firestore class document ID';
+  String get assignRoleScopeHintClass =>
+      'ID sa dokumento sa klase sa Firestore';
 
   @override
-  String get assignRoleScopeHintGroup => 'Firestore group document ID';
+  String get assignRoleScopeHintGroup =>
+      'ID sa dokumento sa grupo sa Firestore';
 
   @override
   String get assignRoleScopeHintDepartment =>
-      'Firestore department document ID';
+      'ID sa dokumento sa departamento sa Firestore';
 
   @override
-  String get assignRoleScopeHintBarangay => 'Firestore barangay document ID';
+  String get assignRoleScopeHintBarangay =>
+      'ID sa dokumento sa barangay sa Firestore';
 
   @override
-  String get assignRoleScopeChipOrg => 'Org-wide';
+  String get assignRoleScopeChipOrg => 'Tibuok organisaasyon';
 
   @override
   String get assignRoleScopeChipTag => 'Tag';
 
   @override
-  String get assignRoleScopeChipClass => 'Class';
+  String get assignRoleScopeChipClass => 'Klase';
 
   @override
-  String get assignRoleScopeChipGroup => 'Group';
+  String get assignRoleScopeChipGroup => 'Grupo';
 
   @override
-  String get assignRoleScopeChipDepartment => 'Department';
+  String get assignRoleScopeChipDepartment => 'Departamento';
 
   @override
-  String get assignRoleScopeChipDept => 'Dept';
+  String get assignRoleScopeChipDept => 'Departamento';
 
   @override
   String get assignRoleScopeChipBarangay => 'Barangay';
@@ -2808,17 +2849,17 @@ class AppLocalizationsCeb extends AppLocalizations {
 
   @override
   String assignRoleScopeValueClass(String id) {
-    return 'Class: $id';
+    return 'Klase: $id';
   }
 
   @override
   String assignRoleScopeValueGroup(String id) {
-    return 'Group: $id';
+    return 'Grupo: $id';
   }
 
   @override
   String assignRoleScopeValueDepartment(String id) {
-    return 'Department: $id';
+    return 'Departamento: $id';
   }
 
   @override
@@ -2827,18 +2868,19 @@ class AppLocalizationsCeb extends AppLocalizations {
   }
 
   @override
-  String get assignRoleCurrentAssignments => 'Current Assignments';
+  String get assignRoleCurrentAssignments => 'Kasalukuyang mga Takdang Aralin';
 
   @override
   String assignRoleAssignedDate(String date) {
-    return 'Assigned $date';
+    return 'Gipahimutang $date';
   }
 
   @override
-  String get assignRoleRemoveTooltip => 'Remove assignment';
+  String get assignRoleRemoveTooltip => 'Tangtanga ang tahas';
 
   @override
-  String get assignRoleRevokeHint => 'Tap − to revoke an existing assignment.';
+  String get assignRoleRevokeHint =>
+      'I-tap ang − aron kuhaon ang kasamtangang tahas.';
 
   @override
   String assignRoleRoleChip(String role, String scope) {
@@ -2847,114 +2889,124 @@ class AppLocalizationsCeb extends AppLocalizations {
 
   @override
   String capabilitiesLoadFailed(String error) {
-    return 'Could not load custom capabilities:\n$error';
+    return 'Dili ma-load ang mga custom nga kakayahan: $error';
   }
 
   @override
-  String get capabilitiesDeleteTooltip => 'Delete';
+  String get capabilitiesDeleteTooltip => 'I-delete';
 
   @override
-  String get capabilitiesNewCustomTitle => 'New Custom Capability';
+  String get capabilitiesNewCustomTitle => 'Bag-ong Custom nga Kakayahan';
 
   @override
-  String get capabilitiesNameLabel => 'Capability Name';
+  String get capabilitiesNameLabel => 'Ngalan sa Kakayahan';
 
   @override
-  String get capabilitiesNameHint => 'e.g. Review Guidance Referral';
+  String get capabilitiesNameHint => 'Halimbawa: Pagsusi sa Giya sa Referral';
 
   @override
-  String get capabilitiesNameRequired => 'Name is required';
+  String get capabilitiesNameRequired => 'Kinahanglan ang ngalan';
 
   @override
-  String get capabilitiesDescriptionLabel => 'Description (optional)';
+  String get capabilitiesDescriptionLabel => 'Paglaraw (opsyonal)';
 
   @override
-  String get capabilitiesSelectBacking => 'Select a backing action';
+  String get capabilitiesSelectBacking => 'Pili-a ang aksyon nga suportado';
 
   @override
-  String get capabilitiesRestrictTagLabel => 'Restrict to tag (optional)';
+  String get capabilitiesRestrictTagLabel => 'Limitahi sa tag (opsyonal)';
 
   @override
-  String get capabilitiesRestrictTagHint => 'e.g. guidance';
+  String get capabilitiesRestrictTagHint => 'panudlo';
 
   @override
   String get capabilitiesRestrictTagHelper =>
-      'Leave empty to apply to all content with this action.';
+      'Biyaan nga walay sulod aron maaplikar sa tanan nga sulod nga adunay kini nga aksyon.';
 
   @override
-  String get capabilitiesCreating => 'Creating…';
+  String get capabilitiesCreating => 'Naghimo…';
 
   @override
-  String get capabilitiesNoCustomYet => 'No custom capabilities yet';
+  String get capabilitiesNoCustomYet =>
+      'Wala pay mga pasilidad nga na-customize.';
 
   @override
   String get capabilitiesNoCustomDescription =>
-      'Create a capability alias to give school-specific names to built-in actions.';
+      'Magtukod og alias sa kakayahan aron hatagan og ngalan nga espesipiko sa eskwelahan ang mga nakabuilt-in nga aksyon.';
 
   @override
-  String get permissionViewAllReports => 'View all org reports';
+  String get permissionViewAllReports => 'Tan-awa ang tanan nga report sa org';
 
   @override
-  String get permissionViewGroupReports => 'View reports in assigned groups';
+  String get permissionViewGroupReports =>
+      'Tan-awa ang mga report sa gihatag nga mga grupo';
 
   @override
-  String get permissionApproveReport => 'Approve / close reports';
+  String get permissionApproveReport => 'Aprobahi / isira ang mga report';
 
   @override
-  String get permissionManageReports => 'Update status, escalate & add notes';
+  String get permissionManageReports =>
+      'I-update ang estado, i-escalate & magdugang og mga nota';
 
   @override
-  String get permissionPostBulletinOrgWide => 'Post bulletins org-wide';
+  String get permissionPostBulletinOrgWide =>
+      'Mag-post og mga bulletin sa tibuok organisasyon';
 
   @override
-  String get permissionPostBulletinToGroup => 'Post bulletins to own groups';
+  String get permissionPostBulletinToGroup =>
+      'Mag-post og mga bulletin sa kaugalingong grupo';
 
   @override
-  String get permissionBroadcastReminders => 'Broadcast reminders';
+  String get permissionBroadcastReminders => 'Ipadala ang mga pahimangno';
 
   @override
-  String get permissionApproveReminders => 'Approve / reject reminders';
+  String get permissionApproveReminders =>
+      'Aprobahi / i-reject ang mga pahimangno';
 
   @override
-  String get permissionManageGroupRoster => 'Manage own group roster';
+  String get permissionManageGroupRoster =>
+      'Pagdumala sa kaugalingong grupo nga listahan';
 
   @override
-  String get permissionManageClassRoster => 'Manage class roster (school only)';
+  String get permissionManageClassRoster =>
+      'Pagdumala sa listahan sa klase (eskwelahan ra)';
 
   @override
-  String get permissionApproveApplications => 'Approve join applications';
+  String get permissionApproveApplications =>
+      'Aprobahi ang mga aplikasyon sa pag-apil';
 
   @override
-  String get permissionBlockUsers => 'Suspend or block users';
+  String get permissionBlockUsers => 'I-suspend o i-block ang mga gumagamit';
 
   @override
   String get permissionManageOrganizationSettings =>
-      'Manage org settings & branding';
+      'Pagdumala sa mga setting sa organisasyon ug branding';
 
   @override
-  String get permissionManageRoles => 'Manage roles & assign permissions';
+  String get permissionManageRoles =>
+      'Pagdumala sa mga papel ug pag-assign sa mga permiso';
 
   @override
   String get permissionManageTranslations =>
-      'Translation moderator (edit UI strings)';
+      'Moderator sa hubad (edit UI strings)';
 
   @override
-  String get permissionViewAuditLogs => 'View audit logs';
+  String get permissionViewAuditLogs => 'Tan-awa ang mga audit log';
 
   @override
-  String get permissionGroupReports => 'Reports';
+  String get permissionGroupReports => 'Mga report';
 
   @override
-  String get permissionGroupBulletins => 'Bulletins & News';
+  String get permissionGroupBulletins => 'Mga Bulletin ug Balita';
 
   @override
-  String get permissionGroupReminders => 'Reminders';
+  String get permissionGroupReminders => 'Mga pahimangno';
 
   @override
-  String get permissionGroupRosterUsers => 'Roster & Users';
+  String get permissionGroupRosterUsers => 'Lista ug mga Gumagamit';
 
   @override
-  String get permissionGroupAdministration => 'Administration';
+  String get permissionGroupAdministration => 'Administrasyon';
 
   @override
   String get translationSearchHint =>
