@@ -2,7 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:speakup_connect/core/utils/validators.dart';
+import 'package:speakup_connect/core/l10n/app_localizations_extension.dart';
 import 'package:speakup_connect/features/organization/presentation/providers/roster_provider.dart';
 import 'package:speakup_connect/shared/widgets/app_text_field.dart';
 
@@ -186,7 +186,7 @@ class _ResetMemberPasswordDialogState extends State<_ResetMemberPasswordDialog> 
                   prefixIcon: Icons.lock_outline,
                   obscureText: _obscurePassword,
                   textInputAction: TextInputAction.next,
-                  validator: Validators.loginPassword,
+                  validator: (v) => context.l10n.validateLoginPassword(v),
                   suffixIcon: IconButton(
                     tooltip: _obscurePassword
                         ? 'Show password'
@@ -208,7 +208,7 @@ class _ResetMemberPasswordDialogState extends State<_ResetMemberPasswordDialog> 
                   prefixIcon: Icons.lock_outline,
                   obscureText: _obscurePassword,
                   textInputAction: TextInputAction.done,
-                  validator: (v) => Validators.confirmPassword(
+                  validator: (v) => context.l10n.validateConfirmPassword(
                     v,
                     _passwordController.text,
                   ),

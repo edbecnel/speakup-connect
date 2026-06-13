@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:speakup_connect/core/utils/validators.dart';
+import 'package:speakup_connect/core/l10n/app_localizations_extension.dart';
 import 'package:speakup_connect/features/organization/domain/entities/user_profile_entity.dart';
 import 'package:speakup_connect/features/organization/presentation/providers/user_profile_provider.dart';
 import 'package:speakup_connect/shared/widgets/app_text_field.dart';
@@ -219,7 +219,7 @@ class _EditContactEmailDialogState extends State<_EditContactEmailDialog> {
                   prefixIcon: Icons.email_outlined,
                   keyboardType: TextInputType.emailAddress,
                   textInputAction: TextInputAction.done,
-                  validator: Validators.optionalEmail,
+                  validator: (v) => context.l10n.validateOptionalEmail(v),
                 ),
               ],
             ),

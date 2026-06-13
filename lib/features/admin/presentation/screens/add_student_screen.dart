@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:speakup_connect/core/utils/validators.dart';
+import 'package:speakup_connect/core/l10n/app_localizations_extension.dart';
 import 'package:speakup_connect/features/organization/presentation/providers/organization_provider.dart';
 import 'package:speakup_connect/features/organization/presentation/providers/roster_provider.dart';
 import 'package:speakup_connect/shared/widgets/app_button.dart';
@@ -93,7 +93,10 @@ class _AddStudentScreenState extends ConsumerState<AddStudentScreen> {
               prefixIcon: Icons.person_outline,
               textInputAction: TextInputAction.next,
               autofocus: true,
-              validator: (v) => Validators.required(v, fieldName: 'Full name'),
+              validator: (v) => context.l10n.validateRequired(
+                v,
+                fieldName: 'Full name',
+              ),
             ),
             const SizedBox(height: 16),
             AppTextField(
@@ -102,7 +105,7 @@ class _AddStudentScreenState extends ConsumerState<AddStudentScreen> {
               hint: 'School-issued ID (min. 6 characters)',
               prefixIcon: Icons.badge_outlined,
               textInputAction: TextInputAction.next,
-              validator: Validators.studentId,
+              validator: (v) => context.l10n.validateStudentId(v),
             ),
             const SizedBox(height: 16),
             AppTextField(
@@ -112,7 +115,7 @@ class _AddStudentScreenState extends ConsumerState<AddStudentScreen> {
               prefixIcon: Icons.email_outlined,
               keyboardType: TextInputType.emailAddress,
               textInputAction: TextInputAction.next,
-              validator: Validators.optionalEmail,
+              validator: (v) => context.l10n.validateOptionalEmail(v),
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<int>(

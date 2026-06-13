@@ -409,4 +409,62 @@ class AppLocalizationsEn extends AppLocalizations {
   String helpLoadFailedDetail(String error) {
     return 'Could not load guide for your organization.\n$error';
   }
+
+  @override
+  String get validationEmailRequired => 'Email is required';
+
+  @override
+  String get validationEmailInvalid => 'Please enter a valid email address';
+
+  @override
+  String validationFieldRequired(String fieldName) {
+    return '$fieldName is required';
+  }
+
+  @override
+  String get validationPasswordRequired => 'Password is required';
+
+  @override
+  String get validationPasswordMin8 => 'Password must be at least 8 characters';
+
+  @override
+  String get validationPasswordMin6 => 'Password must be at least 6 characters';
+
+  @override
+  String get validationLoginIdentifierRequired =>
+      'Email or student ID is required';
+
+  @override
+  String get validationStudentIdRequired => 'Student ID is required';
+
+  @override
+  String get validationStudentIdMin6 =>
+      'Student ID must be at least 6 characters';
+
+  @override
+  String get validationStudentIdInvalidChars =>
+      'Use letters, numbers, and hyphens only';
+
+  @override
+  String get validationConfirmPasswordRequired =>
+      'Please confirm your password';
+
+  @override
+  String get validationPasswordsDoNotMatch => 'Passwords do not match';
+
+  @override
+  String validationMaxLength(String fieldName, int maxLength) {
+    return '$fieldName must be $maxLength characters or fewer';
+  }
+
+  @override
+  String validationMinLength(String fieldName, int minLength) {
+    return '$fieldName must be at least $minLength characters';
+  }
+
+  @override
+  String get validationReportTitleField => 'Title';
+
+  @override
+  String get validationReportDescriptionField => 'Description';
 }

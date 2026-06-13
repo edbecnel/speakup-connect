@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:speakup_connect/config/app_config.dart';
 import 'package:speakup_connect/core/constants/route_constants.dart';
 import 'package:speakup_connect/core/extensions/context_extensions.dart';
-import 'package:speakup_connect/core/utils/validators.dart';
+import 'package:speakup_connect/core/l10n/app_localizations_extension.dart';
 import 'package:speakup_connect/features/auth/presentation/providers/auth_provider.dart';
 import 'package:speakup_connect/features/organization/presentation/providers/organization_provider.dart';
 import 'package:speakup_connect/features/organization/presentation/providers/user_profile_provider.dart';
@@ -150,7 +150,7 @@ class _ApplyToJoinScreenState extends ConsumerState<ApplyToJoinScreen> {
                       prefixIcon: Icons.person_outline,
                       keyboardType: TextInputType.name,
                       textInputAction: TextInputAction.next,
-                      validator: (v) => Validators.required(
+                      validator: (v) => context.l10n.validateRequired(
                         v,
                         fieldName: 'Full name',
                       ),

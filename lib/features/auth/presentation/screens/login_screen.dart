@@ -5,7 +5,6 @@ import 'package:speakup_connect/core/constants/route_constants.dart';
 import 'package:speakup_connect/core/errors/failure.dart';
 import 'package:speakup_connect/core/extensions/context_extensions.dart';
 import 'package:speakup_connect/core/l10n/app_localizations_extension.dart';
-import 'package:speakup_connect/core/utils/validators.dart';
 import 'package:speakup_connect/features/auth/presentation/providers/auth_provider.dart';
 import 'package:speakup_connect/features/organization/presentation/providers/organization_provider.dart';
 import 'package:speakup_connect/shared/widgets/app_button.dart';
@@ -268,7 +267,7 @@ class _LoginForm extends StatelessWidget {
             prefixIcon: Icons.person_outline_rounded,
             keyboardType: TextInputType.text,
             textInputAction: TextInputAction.next,
-            validator: Validators.loginIdentifier,
+            validator: (v) => l10n.validateLoginIdentifier(v),
           ),
           const SizedBox(height: 16),
           AppTextField(
@@ -278,7 +277,7 @@ class _LoginForm extends StatelessWidget {
             prefixIcon: Icons.lock_outline_rounded,
             obscureText: !passwordVisible,
             textInputAction: TextInputAction.done,
-            validator: Validators.loginPassword,
+            validator: (v) => l10n.validateLoginPassword(v),
             suffixIcon: IconButton(
               icon: Icon(
                 passwordVisible ? Icons.visibility_off_outlined : Icons.visibility_outlined,
@@ -354,7 +353,7 @@ class _RegisterForm extends StatelessWidget {
             hint: l10n.authFullNameHint,
             prefixIcon: Icons.person_outline_rounded,
             textInputAction: TextInputAction.next,
-            validator: (v) => Validators.required(v, fieldName: l10n.authFullName),
+            validator: (v) => l10n.validateRequired(v, fieldName: l10n.authFullName),
           ),
           const SizedBox(height: 12),
           AppTextField(
@@ -364,7 +363,7 @@ class _RegisterForm extends StatelessWidget {
             prefixIcon: Icons.email_outlined,
             keyboardType: TextInputType.emailAddress,
             textInputAction: TextInputAction.next,
-            validator: Validators.email,
+            validator: (v) => l10n.validateEmail(v),
           ),
           const SizedBox(height: 12),
           AppTextField(
@@ -374,7 +373,7 @@ class _RegisterForm extends StatelessWidget {
             prefixIcon: Icons.lock_outline_rounded,
             obscureText: !passwordVisible,
             textInputAction: TextInputAction.next,
-            validator: Validators.password,
+            validator: (v) => l10n.validatePassword(v),
             suffixIcon: IconButton(
               icon: Icon(
                 passwordVisible ? Icons.visibility_off_outlined : Icons.visibility_outlined,
@@ -390,7 +389,7 @@ class _RegisterForm extends StatelessWidget {
             prefixIcon: Icons.lock_outline_rounded,
             obscureText: !confirmPasswordVisible,
             textInputAction: TextInputAction.done,
-            validator: (v) => Validators.confirmPassword(v, passwordController.text),
+            validator: (v) => l10n.validateConfirmPassword(v, passwordController.text),
             suffixIcon: IconButton(
               icon: Icon(
                 confirmPasswordVisible

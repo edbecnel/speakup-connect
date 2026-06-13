@@ -793,6 +793,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not load guide for your organization.\n{error}'**
   String helpLoadFailedDetail(String error);
+
+  /// No description provided for @validationEmailRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Email is required'**
+  String get validationEmailRequired;
+
+  /// No description provided for @validationEmailInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid email address'**
+  String get validationEmailInvalid;
+
+  /// No description provided for @validationFieldRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'{fieldName} is required'**
+  String validationFieldRequired(String fieldName);
+
+  /// No description provided for @validationPasswordRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Password is required'**
+  String get validationPasswordRequired;
+
+  /// No description provided for @validationPasswordMin8.
+  ///
+  /// In en, this message translates to:
+  /// **'Password must be at least 8 characters'**
+  String get validationPasswordMin8;
+
+  /// No description provided for @validationPasswordMin6.
+  ///
+  /// In en, this message translates to:
+  /// **'Password must be at least 6 characters'**
+  String get validationPasswordMin6;
+
+  /// No description provided for @validationLoginIdentifierRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Email or student ID is required'**
+  String get validationLoginIdentifierRequired;
+
+  /// No description provided for @validationStudentIdRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Student ID is required'**
+  String get validationStudentIdRequired;
+
+  /// No description provided for @validationStudentIdMin6.
+  ///
+  /// In en, this message translates to:
+  /// **'Student ID must be at least 6 characters'**
+  String get validationStudentIdMin6;
+
+  /// No description provided for @validationStudentIdInvalidChars.
+  ///
+  /// In en, this message translates to:
+  /// **'Use letters, numbers, and hyphens only'**
+  String get validationStudentIdInvalidChars;
+
+  /// No description provided for @validationConfirmPasswordRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please confirm your password'**
+  String get validationConfirmPasswordRequired;
+
+  /// No description provided for @validationPasswordsDoNotMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Passwords do not match'**
+  String get validationPasswordsDoNotMatch;
+
+  /// No description provided for @validationMaxLength.
+  ///
+  /// In en, this message translates to:
+  /// **'{fieldName} must be {maxLength} characters or fewer'**
+  String validationMaxLength(String fieldName, int maxLength);
+
+  /// No description provided for @validationMinLength.
+  ///
+  /// In en, this message translates to:
+  /// **'{fieldName} must be at least {minLength} characters'**
+  String validationMinLength(String fieldName, int minLength);
+
+  /// No description provided for @validationReportTitleField.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get validationReportTitleField;
+
+  /// No description provided for @validationReportDescriptionField.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get validationReportDescriptionField;
 }
 
 class _AppLocalizationsDelegate

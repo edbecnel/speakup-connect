@@ -178,5 +178,39 @@
     "placeholders": {
       "error": { "type": "String" }
     }
-  }
+  },
+
+  "validationEmailRequired": "Email is required",
+  "validationEmailInvalid": "Please enter a valid email address",
+  "validationFieldRequired": "{fieldName} is required",
+  "@validationFieldRequired": {
+    "placeholders": {
+      "fieldName": { "type": "String" }
+    }
+  },
+  "validationPasswordRequired": "Password is required",
+  "validationPasswordMin8": "Password must be at least 8 characters",
+  "validationPasswordMin6": "Password must be at least 6 characters",
+  "validationLoginIdentifierRequired": "Email or student ID is required",
+  "validationStudentIdRequired": "Student ID is required",
+  "validationStudentIdMin6": "Student ID must be at least 6 characters",
+  "validationStudentIdInvalidChars": "Use letters, numbers, and hyphens only",
+  "validationConfirmPasswordRequired": "Please confirm your password",
+  "validationPasswordsDoNotMatch": "Passwords do not match",
+  "validationMaxLength": "{fieldName} must be {maxLength} characters or fewer",
+  "@validationMaxLength": {
+    "placeholders": {
+      "fieldName": { "type": "String" },
+      "maxLength": { "type": "int" }
+    }
+  },
+  "validationMinLength": "{fieldName} must be at least {minLength} characters",
+  "@validationMinLength": {
+    "placeholders": {
+      "fieldName": { "type": "String" },
+      "minLength": { "type": "int" }
+    }
+  },
+  "validationReportTitleField": "Title",
+  "validationReportDescriptionField": "Description"
 }

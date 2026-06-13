@@ -137,6 +137,21 @@ class _MyGroupCard extends ConsumerWidget {
     }
   }
 
+  Future<void> _cancelLeaveRequest(BuildContext context, WidgetRef ref) async {
+    final ok = await ref
+        .read(groupMembershipActionsProvider.notifier)
+        .withdrawLeaveRequest(groupId: entry.group.groupId);
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            ok ? 'Leave request cancelled' : 'Could not cancel request',
+          ),
+        ),
+      );
+    }
+  }
+
   Future<void> _requestLeave(BuildContext context, WidgetRef ref) async {
     final reason = await showDialog<String>(
       context: context,
@@ -319,8 +334,15 @@ class _MyGroupCard extends ConsumerWidget {
                       Routes.composeAnnouncementForGroupPath(group.groupId),
                     ),
                   ),
-                if (!leavePending &&
-                    group.memberLeavePolicy == MemberLeavePolicy.voluntary)
+                if (leavePending)
+                  AppButton.secondary(
+                    label: 'Cancel leave request',
+                    icon: Icons.close,
+                    isLoading: isBusy,
+                    onPressed:
+                        isBusy ? null : () => _cancelLeaveRequest(context, ref),
+                  )
+                else if (group.memberLeavePolicy == MemberLeavePolicy.voluntary)
                   AppButton.secondary(
                     label: 'Leave group',
                     icon: Icons.logout,
@@ -328,9 +350,9 @@ class _MyGroupCard extends ConsumerWidget {
                     onPressed: isBusy
                         ? null
                         : () => _leaveVoluntarily(context, ref),
-                  ),
-                if (!leavePending &&
-                    group.memberLeavePolicy == MemberLeavePolicy.requestRequired)
+                  )
+                else if (group.memberLeavePolicy ==
+                    MemberLeavePolicy.requestRequired)
                   AppButton.secondary(
                     label: 'Request to leave',
                     icon: Icons.exit_to_app,
