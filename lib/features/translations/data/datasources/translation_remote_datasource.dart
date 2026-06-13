@@ -73,11 +73,36 @@ class TranslationRemoteDataSource {
 
   Future<Map<String, dynamic>> batchDraft({
     required String targetLocale,
-  }) =>
-      _call('batchDraftTranslations', _orgPayload({
+  }) async {
+    var totalSucceeded = 0;
+    var totalProcessed = 0;
+    final allResults = <Map<String, dynamic>>[];
+    var hasMore = true;
+
+    while (hasMore) {
+      final data = await _call('batchDraftTranslations', _orgPayload({
         'targetLocale': targetLocale,
         'onlyMissing': true,
       }));
+      final total = (data['total'] as num?)?.toInt() ?? 0;
+      final succeeded = (data['succeeded'] as num?)?.toInt() ?? 0;
+      totalProcessed += total;
+      totalSucceeded += succeeded;
+      final results = data['results'];
+      if (results is List) {
+        allResults.addAll(results.cast<Map<String, dynamic>>());
+      }
+      if (total == 0) break;
+      hasMore = data['hasMore'] == true;
+    }
+
+    return {
+      'ok': true,
+      'total': totalProcessed,
+      'succeeded': totalSucceeded,
+      'results': allResults,
+    };
+  }
 
   Future<Map<String, dynamic>> exportArb({
     required String targetLocale,

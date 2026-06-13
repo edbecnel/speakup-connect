@@ -2180,5 +2180,6 @@ export {
   draftTranslation,
   batchDraftTranslations,
   batchApproveSavedTranslations,
+  batchSaveAiDrafts,
   exportTranslationArb,
 } from './translation_helper';

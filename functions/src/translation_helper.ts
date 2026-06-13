@@ -13,6 +13,8 @@ const db = admin.firestore();
 
 const BATCH_CHUNK_SIZE = 25;
 const BATCH_DELAY_MS = 400;
+/** Keeps each callable under the timeout when OpenAI + Firestore run sequentially. */
+const MAX_BATCH_KEYS_PER_CALL = 15;
 
 export type TranslationStatus =
   | 'missing'
@@ -351,7 +353,9 @@ export const draftTranslation = onCall(async (request) => {
     }
 });
 
-export const batchDraftTranslations = onCall(async (request) => {
+export const batchDraftTranslations = onCall(
+  { timeoutSeconds: 300, memory: '512MiB' },
+  async (request) => {
     const targetLocale = request.data?.['targetLocale'] as string | undefined;
     await resolveTranslationAccess(request, {
       targetLocale,
@@ -382,11 +386,31 @@ export const batchDraftTranslations = onCall(async (request) => {
     }
 
     if (keys.length === 0) {
-      return { ok: true, total: 0, succeeded: 0, results: [] };
+      return {
+        ok: true,
+        total: 0,
+        succeeded: 0,
+        results: [],
+        hasMore: false,
+        pendingCount: 0,
+      };
+    }
+
+    const pendingCount = keys.length;
+    const hasMore = pendingCount > MAX_BATCH_KEYS_PER_CALL;
+    if (hasMore) {
+      keys = keys.slice(0, MAX_BATCH_KEYS_PER_CALL);
     }
 
     const results: Array<{ stringKey: string; ok: boolean; error?: string }> = [];
-    const ai = getTranslationAiConfig();
+    let ai;
+    try {
+      ai = getTranslationAiConfig();
+    } catch (err) {
+      if (err instanceof HttpsError) throw err;
+      const message = err instanceof Error ? err.message : String(err);
+      throw new HttpsError('internal', message);
+    }
 
     for (let i = 0; i < keys.length; i += BATCH_CHUNK_SIZE) {
       const chunk = keys.slice(i, i + BATCH_CHUNK_SIZE);
@@ -459,11 +483,21 @@ export const batchDraftTranslations = onCall(async (request) => {
       targetLocale,
       total: results.length,
       succeeded,
+      hasMore,
+      pendingCount,
     });
-    return { ok: true, total: results.length, succeeded, results };
-});
+    return {
+      ok: true,
+      total: results.length,
+      succeeded,
+      results,
+      hasMore,
+      pendingCount: pendingCount - results.length,
+    };
+  },
+);
 
-/** Approve all strings in `in_review` with a non-empty saved target value. */
+/** Approve all strings in `in_review` with saved target text (or AI draft to promote). */
 export const batchApproveSavedTranslations = onCall(async (request) => {
   const targetLocale = request.data?.['targetLocale'] as string | undefined;
   const access = await resolveTranslationAccess(request, { targetLocale });
@@ -474,15 +508,22 @@ export const batchApproveSavedTranslations = onCall(async (request) => {
   }
 
   const snap = await stringsRef(targetLocale).get();
-  const toApprove = snap.docs.filter((doc) => {
+  const toApprove: Array<{
+    ref: admin.firestore.DocumentReference;
+    targetValue: string;
+  }> = [];
+
+  for (const doc of snap.docs) {
     const data = doc.data();
-    const target = data['targetValue'];
-    return (
-      data['status'] === 'in_review' &&
-      typeof target === 'string' &&
-      target.trim().length > 0
-    );
-  });
+    if (data['status'] !== 'in_review') continue;
+    const saved = (data['targetValue'] as string | undefined)?.trim() ?? '';
+    const draft = (data['aiDraft'] as string | undefined)?.trim() ?? '';
+    const finalTarget = saved || draft;
+    if (!finalTarget) continue;
+    const sourceValue = (data['sourceValue'] as string) ?? '';
+    if (!placeholdersMatch(sourceValue, finalTarget)) continue;
+    toApprove.push({ ref: doc.ref, targetValue: finalTarget });
+  }
 
   if (toApprove.length === 0) {
     return { ok: true, total: 0, approved: 0 };
@@ -494,9 +535,10 @@ export const batchApproveSavedTranslations = onCall(async (request) => {
   for (let i = 0; i < toApprove.length; i += 500) {
     const batch = db.batch();
     const chunk = toApprove.slice(i, i + 500);
-    for (const doc of chunk) {
+    for (const item of chunk) {
       const patch: Record<string, unknown> = {
         status: 'approved',
+        targetValue: item.targetValue,
         reviewedBy: uid,
         lastEditedBy: uid,
         updatedAt: now,
@@ -504,7 +546,7 @@ export const batchApproveSavedTranslations = onCall(async (request) => {
       if (access.organizationId) {
         patch['lastEditedByOrgId'] = access.organizationId;
       }
-      batch.set(doc.ref, patch, { merge: true });
+      batch.set(item.ref, patch, { merge: true });
     }
     await batch.commit();
     approved += chunk.length;
@@ -513,6 +555,82 @@ export const batchApproveSavedTranslations = onCall(async (request) => {
   await updateLocaleMetadata(targetLocale);
   logger.info('batchApproveSavedTranslations', { targetLocale, approved });
   return { ok: true, total: toApprove.length, approved };
+});
+
+/** Copy every `ai_draft` into `targetValue` as `in_review` for human review. */
+export const batchSaveAiDrafts = onCall(async (request) => {
+  const targetLocale = request.data?.['targetLocale'] as string | undefined;
+  const access = await resolveTranslationAccess(request, { targetLocale });
+  const uid = access.uid;
+
+  if (!targetLocale) {
+    throw new HttpsError('invalid-argument', 'targetLocale is required.');
+  }
+
+  const snap = await stringsRef(targetLocale).get();
+  const toSave: Array<{
+    ref: admin.firestore.DocumentReference;
+    aiDraft: string;
+  }> = [];
+
+  for (const doc of snap.docs) {
+    const data = doc.data();
+    if (data['status'] !== 'ai_draft') continue;
+    const aiDraft = (data['aiDraft'] as string | undefined)?.trim();
+    if (!aiDraft) continue;
+    const sourceValue = (data['sourceValue'] as string) ?? '';
+    if (!placeholdersMatch(sourceValue, aiDraft)) continue;
+    toSave.push({ ref: doc.ref, aiDraft });
+  }
+
+  if (toSave.length === 0) {
+    let skipped = 0;
+    for (const doc of snap.docs) {
+      const data = doc.data();
+      if (data['status'] !== 'ai_draft') continue;
+      const aiDraft = (data['aiDraft'] as string | undefined)?.trim();
+      if (!aiDraft) continue;
+      const sourceValue = (data['sourceValue'] as string) ?? '';
+      if (!placeholdersMatch(sourceValue, aiDraft)) skipped++;
+    }
+    return { ok: true, total: 0, saved: 0, skipped };
+  }
+
+  let skipped = 0;
+  for (const doc of snap.docs) {
+    const data = doc.data();
+    if (data['status'] !== 'ai_draft') continue;
+    const aiDraft = (data['aiDraft'] as string | undefined)?.trim();
+    if (!aiDraft) continue;
+    const sourceValue = (data['sourceValue'] as string) ?? '';
+    if (!placeholdersMatch(sourceValue, aiDraft)) skipped++;
+  }
+
+  let saved = 0;
+  const now = admin.firestore.FieldValue.serverTimestamp();
+
+  for (let i = 0; i < toSave.length; i += 500) {
+    const batch = db.batch();
+    const chunk = toSave.slice(i, i + 500);
+    for (const item of chunk) {
+      const patch: Record<string, unknown> = {
+        targetValue: item.aiDraft,
+        status: 'in_review',
+        lastEditedBy: uid,
+        updatedAt: now,
+      };
+      if (access.organizationId) {
+        patch['lastEditedByOrgId'] = access.organizationId;
+      }
+      batch.set(item.ref, patch, { merge: true });
+    }
+    await batch.commit();
+    saved += chunk.length;
+  }
+
+  await updateLocaleMetadata(targetLocale);
+  logger.info('batchSaveAiDrafts', { targetLocale, saved, skipped });
+  return { ok: true, total: toSave.length, saved, skipped };
 });
 
 export const exportTranslationArb = onCall(async (request) => {

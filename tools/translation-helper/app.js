@@ -50,6 +50,7 @@ const els = {
   importArb: document.getElementById('import-arb'),
   refreshBtn: document.getElementById('refresh-btn'),
   approveAllSavedBtn: document.getElementById('approve-all-saved-btn'),
+  saveAllAiDraftsBtn: document.getElementById('save-all-ai-drafts-btn'),
   batchAiBtn: document.getElementById('batch-ai-btn'),
   exportBtn: document.getElementById('export-btn'),
   meta: document.getElementById('meta'),
@@ -131,6 +132,12 @@ function setWorkspaceStatus(text, kind = '') {
 function formatError(err) {
   const code = err?.code;
   const message = err?.message ?? String(err);
+  if (code === 'functions/internal' && /internal error/i.test(message)) {
+    return (
+      `${code}: ${message} — batch may have timed out. Redeploy ` +
+      'batchDraftTranslations, hard-refresh this page, and try again.'
+    );
+  }
   return code ? `${code}: ${message}` : message;
 }
 
@@ -138,6 +145,20 @@ function countMissingEntries() {
   return entries.filter(
     (e) => e.status === 'missing' || e.status === 'ai_draft_failed',
   ).length;
+}
+
+function countAiDraftEntries() {
+  return entries.filter(
+    (e) => e.status === 'ai_draft' && String(e.aiDraft ?? '').trim(),
+  ).length;
+}
+
+function effectiveTargetText(entry) {
+  return String(entry.targetValue ?? entry.aiDraft ?? '').trim();
+}
+
+function entryReadyToApprove(entry) {
+  return entry.status === 'in_review' && Boolean(effectiveTargetText(entry));
 }
 
 function parseFeature(key) {
@@ -332,33 +353,65 @@ async function batchDraft() {
   );
 
   try {
-    const { data } = await call('batchDraftTranslations')(orgPayload({
-      targetLocale: els.targetLocale.value,
-      onlyMissing: true,
-    }));
-    const total = data.total ?? 0;
-    const succeeded = data.succeeded ?? 0;
-    const failed = (data.results ?? []).filter((r) => !r.ok);
+    let totalSucceeded = 0;
+    let totalProcessed = 0;
+    const allFailed = [];
+    let batchNum = 0;
+    let hasMore = true;
 
-    if (total === 0) {
+    while (hasMore) {
+      batchNum += 1;
+      const { data } = await call('batchDraftTranslations')(orgPayload({
+        targetLocale: els.targetLocale.value,
+        onlyMissing: true,
+      }));
+      const total = data.total ?? 0;
+      const succeeded = data.succeeded ?? 0;
+      const failed = (data.results ?? []).filter((r) => !r.ok);
+
+      totalProcessed += total;
+      totalSucceeded += succeeded;
+      allFailed.push(...failed);
+
+      if (total === 0) {
+        if (batchNum === 1) {
+          setWorkspaceStatus(
+            'Server found no missing strings. Try Refresh, then filter status “missing”.',
+            'ok',
+          );
+        }
+        break;
+      }
+
+      hasMore = data.hasMore === true;
+      els.batchAiBtn.textContent = hasMore
+        ? `Translating… (${totalSucceeded} done, more pending)`
+        : `Translating ${missing}…`;
       setWorkspaceStatus(
-        'Server found no missing strings. Try Refresh, then filter status “missing”.',
-        'ok',
+        hasMore
+          ? `Batch ${batchNum}: ${succeeded} of ${total} succeeded. Continuing with remaining strings…`
+          : `Batch ${batchNum}: ${succeeded} of ${total} succeeded.`,
       );
-    } else if (failed.length === 0) {
+
+      if (!hasMore) break;
+    }
+
+    if (totalProcessed === 0) {
+      // status already set above
+    } else if (allFailed.length === 0) {
       setWorkspaceStatus(
-        `AI batch complete: ${succeeded} of ${total} succeeded.`,
+        `AI batch complete: ${totalSucceeded} of ${totalProcessed} succeeded.`,
         'ok',
       );
     } else {
-      const sample = failed
+      const sample = allFailed
         .slice(0, 3)
         .map((r) => `${r.stringKey}: ${r.error ?? 'failed'}`)
         .join(' · ');
-      const suffix = failed.length > 3 ? ` (+${failed.length - 3} more)` : '';
+      const suffix = allFailed.length > 3 ? ` (+${allFailed.length - 3} more)` : '';
       setWorkspaceStatus(
-        `AI batch: ${succeeded} of ${total} succeeded. Failed: ${sample}${suffix}`,
-        succeeded === 0 ? 'error' : 'ok',
+        `AI batch: ${totalSucceeded} of ${totalProcessed} succeeded. Failed: ${sample}${suffix}`,
+        totalSucceeded === 0 ? 'error' : 'ok',
       );
     }
   } catch (err) {
@@ -378,6 +431,7 @@ async function approveAllSavedViaSaveEntry(toApprove) {
       orgPayload({
         targetLocale: els.targetLocale.value,
         stringKey: entry.stringKey,
+        targetValue: effectiveTargetText(entry),
         status: 'approved',
       }),
     );
@@ -387,13 +441,17 @@ async function approveAllSavedViaSaveEntry(toApprove) {
 }
 
 async function approveAllSaved() {
-  const toApprove = entries.filter(
-    (e) => e.status === 'in_review' && String(e.targetValue ?? '').trim(),
-  );
+  const toApprove = entries.filter(entryReadyToApprove);
   const inReviewCount = toApprove.length;
   if (inReviewCount === 0) {
+    const inReviewOnly = entries.filter((e) => e.status === 'in_review');
+    const needsSave = inReviewOnly.filter(
+      (e) => !effectiveTargetText(e),
+    ).length;
     setWorkspaceStatus(
-      'No saved/in-review strings to approve. Use Save on rows first.',
+      needsSave > 0
+        ? `${needsSave} in-review row${needsSave === 1 ? '' : 's'} ha${needsSave === 1 ? 's' : 've'} no saved text — use Save on the row first.`
+        : 'No saved/in-review strings to approve. Use Save on rows first.',
       'ok',
     );
     return;
@@ -462,6 +520,127 @@ async function approveAllSaved() {
   await loadEntries();
 }
 
+async function saveAllAiDraftsViaSaveEntry(toSave) {
+  let saved = 0;
+  const failed = [];
+  for (const entry of toSave) {
+    try {
+      await call('saveTranslationEntry')(
+        orgPayload({
+          targetLocale: els.targetLocale.value,
+          stringKey: entry.stringKey,
+          targetValue: entry.aiDraft,
+          status: 'in_review',
+        }),
+      );
+      saved++;
+    } catch (err) {
+      failed.push({
+        stringKey: entry.stringKey,
+        error: formatError(err),
+      });
+    }
+  }
+  return { saved, failed };
+}
+
+async function saveAllAiDrafts() {
+  const toSave = entries.filter(
+    (e) => e.status === 'ai_draft' && String(e.aiDraft ?? '').trim(),
+  );
+  const draftCount = toSave.length;
+  if (draftCount === 0) {
+    setWorkspaceStatus(
+      'No AI drafts to save. Run Translate missing (AI) or AI draft on rows first.',
+      'ok',
+    );
+    return;
+  }
+
+  if (
+    !window.confirm(
+      `Save ${draftCount} AI draft${draftCount === 1 ? '' : 's'} as in review?`,
+    )
+  ) {
+    return;
+  }
+
+  const prevLabel = els.saveAllAiDraftsBtn.textContent;
+  els.saveAllAiDraftsBtn.disabled = true;
+  els.approveAllSavedBtn.disabled = true;
+  els.batchAiBtn.disabled = true;
+  els.saveAllAiDraftsBtn.classList.add('busy');
+  els.saveAllAiDraftsBtn.textContent = `Saving ${draftCount}…`;
+  setWorkspaceStatus(`Saving ${draftCount} AI draft${draftCount === 1 ? '' : 's'} as in review…`);
+
+  try {
+    let saved = 0;
+    let total = draftCount;
+    let skipped = 0;
+    const failed = [];
+    try {
+      const { data } = await call('batchSaveAiDrafts')(
+        orgPayload({ targetLocale: els.targetLocale.value }),
+      );
+      saved = data.saved ?? 0;
+      total = data.total ?? 0;
+      skipped = data.skipped ?? 0;
+    } catch (err) {
+      const code = err?.code ?? '';
+      const useFallback =
+        code === 'functions/not-found' ||
+        code === 'not-found' ||
+        code === 'functions/unavailable' ||
+        code === 'functions/internal';
+      if (useFallback) {
+        setWorkspaceStatus(
+          `Batch save unavailable — saving ${draftCount} AI draft${draftCount === 1 ? '' : 's'} one at a time…`,
+        );
+        const result = await saveAllAiDraftsViaSaveEntry(toSave);
+        saved = result.saved;
+        failed.push(...result.failed);
+      } else {
+        throw err;
+      }
+    }
+
+    if (total === 0 && saved === 0 && failed.length === 0) {
+      setWorkspaceStatus(
+        'No AI drafts to save. Run Translate missing (AI) or AI draft on rows first.',
+        'ok',
+      );
+    } else if (skipped > 0 || failed.length > 0) {
+      const sample = failed
+        .slice(0, 3)
+        .map((r) => `${r.stringKey}: ${r.error}`)
+        .join(' · ');
+      const failCount = skipped + failed.length;
+      const suffix = failCount > 3 ? ` (+${failCount - 3} more)` : '';
+      setWorkspaceStatus(
+        `Saved ${saved} of ${draftCount} AI draft${draftCount === 1 ? '' : 's'} as in review.` +
+          (failCount > 0
+            ? ` Failed/skipped ${failCount}${sample ? `: ${sample}${suffix}` : ''}.`
+            : ''),
+        saved === 0 ? 'error' : 'ok',
+      );
+    } else {
+      setWorkspaceStatus(
+        `Saved ${saved} AI draft${saved === 1 ? '' : 's'} as in review.`,
+        'ok',
+      );
+    }
+  } catch (err) {
+    setWorkspaceStatus(formatError(err), 'error');
+  } finally {
+    els.saveAllAiDraftsBtn.disabled = false;
+    els.approveAllSavedBtn.disabled = false;
+    els.batchAiBtn.disabled = false;
+    els.saveAllAiDraftsBtn.classList.remove('busy');
+    els.saveAllAiDraftsBtn.textContent = prevLabel;
+  }
+  await loadEntries();
+}
+
 async function exportArb() {
   setWorkspaceStatus('Exporting ARB…');
   try {
@@ -508,6 +687,9 @@ els.clearFiltersBtn.disabled = true;
 els.refreshBtn.addEventListener('click', () => loadEntries().catch(showError));
 els.approveAllSavedBtn.addEventListener('click', () =>
   approveAllSaved().catch(showError),
+);
+els.saveAllAiDraftsBtn.addEventListener('click', () =>
+  saveAllAiDrafts().catch(showError),
 );
 els.batchAiBtn.addEventListener('click', () => batchDraft().catch(showError));
 els.exportBtn.addEventListener('click', () => exportArb().catch(showError));
