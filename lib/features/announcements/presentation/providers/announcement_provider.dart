@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:speakup_connect/l10n/app_localizations.dart';
 import 'package:uuid/uuid.dart';
 import 'package:speakup_connect/config/app_config.dart';
 import 'package:speakup_connect/core/permissions/app_permission.dart';
@@ -123,17 +124,31 @@ class ComposeAnnouncementState {
   final ReminderResponseConfig responseConfig;
   final String? imagePath;
 
-  bool get isValid => validationMessage == null;
-
-  String? get validationMessage {
-    if (title.trim().length < 3) return 'Title must be at least 3 characters.';
-    if (body.trim().length < 5) return 'Message must be at least 5 characters.';
+  bool get isValid {
+    if (title.trim().length < 3) return false;
+    if (body.trim().length < 5) return false;
     if (expiration.isEnabled &&
         !expiration.isValid(scheduledAt: scheduledAt)) {
-      return 'Set a valid expiration date and time.';
+      return false;
     }
-    if (!responseConfig.isValid) {
-      return 'Complete the optional response settings or turn them off.';
+    if (responseConfig.enabled && !responseConfig.isValid) return false;
+    return true;
+  }
+
+  /// Human-readable reason the compose form cannot be submitted yet.
+  String? validationMessage(AppLocalizations l10n) {
+    if (title.trim().length < 3) {
+      return l10n.composeAnnouncementValidationTitleMin;
+    }
+    if (body.trim().length < 5) {
+      return l10n.composeAnnouncementValidationMessageMin;
+    }
+    if (expiration.isEnabled &&
+        !expiration.isValid(scheduledAt: scheduledAt)) {
+      return l10n.composeAnnouncementValidationExpiration;
+    }
+    if (responseConfig.enabled && !responseConfig.isValid) {
+      return l10n.composeAnnouncementValidationResponse;
     }
     return null;
   }

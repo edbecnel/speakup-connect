@@ -41,12 +41,10 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
 
     final current = _currentPasswordController.text;
     final newPassword = _newPasswordController.text;
+    final l10n = context.l10n;
 
     if (newPassword == current) {
-      context.showSnackBar(
-        'New password must be different from your current password.',
-        isError: true,
-      );
+      context.showSnackBar(l10n.changePasswordMustDiffer, isError: true);
       return;
     }
 
@@ -61,19 +59,19 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
     final authState = ref.watch(authProvider);
     final isLoading = authState.isLoading;
     final theme = Theme.of(context);
+    final l10n = context.l10n;
 
     ref.listen(authProvider, (previous, next) {
       if (next is AsyncError) {
         final error = next.error;
-        final message = error is Failure
-            ? error.message
-            : 'Could not change password. Please try again.';
+        final message =
+            error is Failure ? error.message : l10n.changePasswordFailed;
         context.showSnackBar(message, isError: true);
         return;
       }
 
       if (previous?.isLoading == true && next is AsyncData) {
-        context.showSnackBar('Password updated successfully.');
+        context.showSnackBar(l10n.changePasswordSuccess);
         if (context.mounted) {
           context.pop();
         }
@@ -83,7 +81,7 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
     return Scaffold(
       appBar: AppBar(
         leading: BackButton(onPressed: () => context.go(Routes.settings)),
-        title: const Text('Change Password'),
+        title: Text(l10n.settingsChangePassword),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -94,7 +92,7 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
-                  'Enter your current password, then choose a new password.',
+                  l10n.changePasswordIntro,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                     height: 1.4,
@@ -103,8 +101,8 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
                 const SizedBox(height: 24),
                 AppTextField(
                   controller: _currentPasswordController,
-                  label: 'Current password',
-                  hint: 'Your current password',
+                  label: l10n.changePasswordCurrentLabel,
+                  hint: l10n.changePasswordCurrentHint,
                   prefixIcon: Icons.lock_outline_rounded,
                   obscureText: !_currentPasswordVisible,
                   textInputAction: TextInputAction.next,
@@ -123,8 +121,8 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
                 const SizedBox(height: 16),
                 AppTextField(
                   controller: _newPasswordController,
-                  label: 'New password',
-                  hint: 'At least 8 characters',
+                  label: l10n.changePasswordNewLabel,
+                  hint: l10n.changePasswordNewHint,
                   prefixIcon: Icons.lock_reset_rounded,
                   obscureText: !_newPasswordVisible,
                   textInputAction: TextInputAction.next,
@@ -143,8 +141,8 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
                 const SizedBox(height: 16),
                 AppTextField(
                   controller: _confirmPasswordController,
-                  label: 'Confirm new password',
-                  hint: 'Re-enter your new password',
+                  label: l10n.changePasswordConfirmLabel,
+                  hint: l10n.changePasswordConfirmHint,
                   prefixIcon: Icons.lock_outline_rounded,
                   obscureText: !_confirmPasswordVisible,
                   textInputAction: TextInputAction.done,
@@ -167,7 +165,7 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
                 ),
                 const SizedBox(height: 32),
                 AppButton.primary(
-                  label: 'Update Password',
+                  label: l10n.changePasswordUpdateButton,
                   onPressed: _onSubmit,
                   isLoading: isLoading,
                 ),

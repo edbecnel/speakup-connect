@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:speakup_connect/core/l10n/app_localizations_extension.dart';
 import 'package:speakup_connect/core/utils/picked_image_file.dart';
 import 'package:speakup_connect/core/permissions/providers/permission_provider.dart';
 import 'package:speakup_connect/features/announcements/domain/entities/bulletin_entity.dart';
@@ -45,6 +46,7 @@ class _ComposeAnnouncementScreenState
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
     final canPost = ref.watch(canPostAnnouncementsProvider);
     final leaderOnly = ref.watch(isGroupLeaderOnlyAnnouncementComposerProvider);
     final isAdmin = ref.watch(userProfileProvider).value?.isAdmin == true;
@@ -85,7 +87,7 @@ class _ComposeAnnouncementScreenState
       if (prev?.isLoading == true && !next.isLoading) {
         if (next.hasError) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text('Failed to post: ${next.error}'),
+            content: Text(l10n.composeAnnouncementSendFailed('${next.error}')),
             backgroundColor: theme.colorScheme.error,
           ));
         } else if (next.asData?.value != null) {
@@ -93,10 +95,10 @@ class _ComposeAnnouncementScreenState
           final isPending = result.status == BulletinStatus.pending;
           final isScheduled = result.bulletin.isScheduled;
           final msg = isPending
-              ? 'Announcement submitted for approval.'
+              ? l10n.composeAnnouncementSubmitted
               : isScheduled
-                  ? 'Announcement scheduled.'
-                  : 'Announcement published.';
+                  ? l10n.composeAnnouncementScheduled
+                  : l10n.composeAnnouncementPublished;
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text(msg),
             backgroundColor: Colors.green.shade700,
@@ -109,12 +111,12 @@ class _ComposeAnnouncementScreenState
 
     if (!canPost) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Post Announcement')),
-        body: const Center(
+        appBar: AppBar(title: Text(l10n.composeAnnouncementTitle)),
+        body: Center(
           child: Padding(
-            padding: EdgeInsets.all(24),
+            padding: const EdgeInsets.all(24),
             child: Text(
-              'You do not have permission to post school-wide announcements.',
+              l10n.composeAnnouncementNoPermission,
               textAlign: TextAlign.center,
             ),
           ),
@@ -125,7 +127,7 @@ class _ComposeAnnouncementScreenState
     return Scaffold(
       appBar: AppBar(
         leading: BackButton(onPressed: () => context.pop()),
-        title: const Text('Post Announcement'),
+        title: Text(l10n.composeAnnouncementTitle),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
@@ -133,7 +135,7 @@ class _ComposeAnnouncementScreenState
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              'School-wide announcements are visible to every member.',
+              l10n.composeAnnouncementIntro,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
                 height: 1.4,
@@ -142,9 +144,7 @@ class _ComposeAnnouncementScreenState
             if (willNeedApproval) ...[
               const SizedBox(height: 12),
               MaterialBanner(
-                content: const Text(
-                  'Your organization requires approval before announcements go live.',
-                ),
+                content: Text(l10n.composeAnnouncementApprovalBanner),
                 leading: const Icon(Icons.fact_check_outlined),
                 backgroundColor:
                     theme.colorScheme.secondaryContainer.withValues(alpha: 0.5),
@@ -166,8 +166,8 @@ class _ComposeAnnouncementScreenState
             ],
             AppTextField(
               controller: _titleCtrl,
-              label: 'Title',
-              hint: 'e.g. Join our club this semester',
+              label: l10n.commonTitle,
+              hint: l10n.composeAnnouncementTitleHint,
               prefixIcon: Icons.title_rounded,
               textInputAction: TextInputAction.next,
               onChanged: notifier.setTitle,
@@ -175,8 +175,8 @@ class _ComposeAnnouncementScreenState
             const SizedBox(height: 16),
             AppTextField(
               controller: _bodyCtrl,
-              label: 'Message',
-              hint: 'Share recruitment info, news, or updates…',
+              label: l10n.commonMessage,
+              hint: l10n.composeAnnouncementMessageHint,
               prefixIcon: Icons.notes_rounded,
               maxLines: 6,
               textInputAction: TextInputAction.newline,
@@ -209,16 +209,16 @@ class _ComposeAnnouncementScreenState
               const SizedBox(height: 12),
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
-                title: const Text('Pin to top of announcements'),
-                subtitle: const Text('Pinned posts appear first for all members'),
+                title: Text(l10n.composeAnnouncementPinTitle),
+                subtitle: Text(l10n.composeAnnouncementPinSubtitle),
                 value: form.isPinned,
                 onChanged: notifier.setPinned,
               ),
             ],
-            if (!form.isValid && form.validationMessage != null) ...[
+            if (!form.isValid && form.validationMessage(l10n) != null) ...[
               const SizedBox(height: 12),
               Text(
-                form.validationMessage!,
+                form.validationMessage(l10n)!,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.error,
                 ),
@@ -226,7 +226,9 @@ class _ComposeAnnouncementScreenState
             ],
             const SizedBox(height: 28),
             AppButton.primary(
-              label: willNeedApproval ? 'Submit for Approval' : 'Publish',
+              label: willNeedApproval
+                  ? l10n.reminderComposeSubmitForApproval
+                  : l10n.composeAnnouncementPublish,
               onPressed: form.isValid
                   ? () => ref.read(submitAnnouncementProvider.notifier).submit(
                         imagePath: _previewImagePath ?? form.imagePath,
@@ -266,9 +268,7 @@ class _ComposeAnnouncementScreenState
       if (!mounted) return;
       if (path == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Could not load that image. Try another photo.'),
-          ),
+          SnackBar(content: Text(context.l10n.composeAnnouncementImageLoadFailed)),
         );
         return;
       }
@@ -302,12 +302,11 @@ class _GroupPicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
 
     if (memberships.isEmpty) {
       return Text(
-        required
-            ? 'You must lead a group before posting announcements.'
-            : 'Optional: post on behalf of a group you lead.',
+        l10n.composeAnnouncementGroupRequired,
         style: theme.textTheme.bodySmall?.copyWith(
           color: theme.colorScheme.error,
         ),
@@ -318,7 +317,9 @@ class _GroupPicker extends StatelessWidget {
       isExpanded: true,
       value: selectedId ?? memberships.first.group.groupId,
       decoration: InputDecoration(
-        labelText: required ? 'On behalf of' : 'Group (optional)',
+        labelText: required
+            ? l10n.composeAnnouncementOnBehalfOf
+            : l10n.composeAnnouncementGroupOptional,
         prefixIcon: const Icon(Icons.groups_outlined),
       ),
       items: memberships

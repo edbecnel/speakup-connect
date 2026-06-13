@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:speakup_connect/core/constants/route_constants.dart';
+import 'package:speakup_connect/core/l10n/app_localizations_extension.dart';
 import 'package:speakup_connect/core/permissions/app_permission.dart';
+import 'package:speakup_connect/core/permissions/permission_l10n.dart';
 import 'package:speakup_connect/features/roles/domain/entities/custom_capability_entity.dart';
 import 'package:speakup_connect/features/roles/domain/entities/role_entity.dart';
 import 'package:speakup_connect/features/roles/presentation/providers/roles_provider.dart';
@@ -97,6 +99,7 @@ class _RoleEditorScreenState extends ConsumerState<RoleEditorScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     final writerState = ref.watch(roleWriterProvider);
 
@@ -106,13 +109,13 @@ class _RoleEditorScreenState extends ConsumerState<RoleEditorScreen> {
         if (next.hasError) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Save failed: ${next.error}'),
+              content: Text(l10n.roleEditorSaveFailed('${next.error}')),
               backgroundColor: theme.colorScheme.error,
             ),
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Role saved')),
+            SnackBar(content: Text(l10n.roleEditorSaved)),
           );
           if (context.canPop()) context.pop();
         }
@@ -134,7 +137,11 @@ class _RoleEditorScreenState extends ConsumerState<RoleEditorScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.isNewRole ? 'Create Role' : 'Edit Role'),
+        title: Text(
+          widget.isNewRole
+              ? l10n.roleEditorCreateTitle
+              : l10n.roleEditorEditTitle,
+        ),
         actions: [
           if (!widget.isNewRole)
             TextButton.icon(
@@ -142,7 +149,7 @@ class _RoleEditorScreenState extends ConsumerState<RoleEditorScreen> {
                 Routes.adminRoleAssignPath(widget.roleId!),
               ),
               icon: const Icon(Icons.person_add_outlined),
-              label: const Text('Assign Users'),
+              label: Text(l10n.roleEditorAssignUsers),
             ),
         ],
       ),
@@ -152,20 +159,22 @@ class _RoleEditorScreenState extends ConsumerState<RoleEditorScreen> {
           padding: const EdgeInsets.all(16),
           children: [
             // ── Basic details ─────────────────────────────────────────────
-            _SectionTitle(title: 'Role Details'),
+            _SectionTitle(title: l10n.roleEditorRoleDetails),
             const SizedBox(height: 12),
             AppTextField(
               controller: _nameCtrl,
-              label: 'Role Name',
-              hint: 'e.g. Guidance Counselor',
+              label: l10n.roleEditorRoleName,
+              hint: l10n.roleEditorNameHint,
               validator: (v) =>
-                  (v == null || v.trim().isEmpty) ? 'Name is required' : null,
+                  (v == null || v.trim().isEmpty)
+                      ? l10n.commonNameRequired
+                      : null,
             ),
             const SizedBox(height: 12),
             AppTextField(
               controller: _descCtrl,
-              label: 'Description',
-              hint: 'Briefly describe who this role is for',
+              label: l10n.roleEditorDescription,
+              hint: l10n.roleEditorDescriptionHint,
               maxLines: 3,
             ),
 
@@ -175,11 +184,11 @@ class _RoleEditorScreenState extends ConsumerState<RoleEditorScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _SectionTitle(title: 'Capabilities'),
+                _SectionTitle(title: l10n.roleEditorCapabilities),
                 TextButton.icon(
                   onPressed: () => context.push(Routes.adminCapabilities),
                   icon: const Icon(Icons.tune_outlined, size: 16),
-                  label: const Text('Manage Custom'),
+                  label: Text(l10n.roleEditorManageCustom),
                   style: TextButton.styleFrom(
                     visualDensity: VisualDensity.compact,
                   ),
@@ -188,7 +197,7 @@ class _RoleEditorScreenState extends ConsumerState<RoleEditorScreen> {
             ),
             const SizedBox(height: 4),
             Text(
-              'Select the built-in capabilities this role grants.',
+              l10n.roleEditorCapabilitiesHint,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
@@ -208,10 +217,10 @@ class _RoleEditorScreenState extends ConsumerState<RoleEditorScreen> {
             const SizedBox(height: 24),
 
             // ── Custom capabilities ───────────────────────────────────────
-            _SectionTitle(title: 'Custom Capabilities'),
+            _SectionTitle(title: l10n.roleEditorCustomCapabilities),
             const SizedBox(height: 4),
             Text(
-              'Org-defined capability aliases built on top of built-ins.',
+              l10n.roleEditorCustomCapabilitiesHint,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
@@ -245,7 +254,9 @@ class _RoleEditorScreenState extends ConsumerState<RoleEditorScreen> {
 
             // ── Save button ───────────────────────────────────────────────
             AppButton.primary(
-              label: writerState.isLoading ? 'Saving…' : 'Save Role',
+              label: writerState.isLoading
+                  ? l10n.roleEditorSaving
+                  : l10n.roleEditorSaveRole,
               onPressed: writerState.isLoading ? null : _save,
             ),
             const SizedBox(height: 16),
@@ -270,12 +281,15 @@ class _CapabilityChecklist extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
 
     // Build group → [AppPermission] map while preserving insertion order.
     final Map<String, List<AppPermission>> grouped = {};
     for (final p in AppPermission.values) {
-      grouped.putIfAbsent(p.groupLabel, () => []).add(p);
+      grouped
+          .putIfAbsent(localizedPermissionGroup(l10n, p), () => [])
+          .add(p);
     }
 
     return Column(
@@ -299,7 +313,7 @@ class _CapabilityChecklist extends StatelessWidget {
                 value: selected.contains(perm.key),
                 onChanged: (v) => onChanged(perm.key, v ?? false),
                 title: Text(
-                  perm.displayName,
+                  localizedPermissionName(l10n, perm),
                   style: theme.textTheme.bodyMedium,
                 ),
                 dense: true,
@@ -330,6 +344,7 @@ class _CustomCapChecklist extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     return Column(
       children: caps.map((cap) {
@@ -340,7 +355,9 @@ class _CustomCapChecklist extends StatelessWidget {
           title: Text(cap.displayName, style: theme.textTheme.bodyMedium),
           subtitle: resolvedPerm != null
               ? Text(
-                  'Based on: ${resolvedPerm.displayName}',
+                  l10n.roleEditorBasedOn(
+                    localizedPermissionName(l10n, resolvedPerm),
+                  ),
                   style: theme.textTheme.labelSmall?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
@@ -379,6 +396,7 @@ class _NoCustomCapsHint extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.all(16),
@@ -389,7 +407,7 @@ class _NoCustomCapsHint extends StatelessWidget {
       child: Column(
         children: [
           Text(
-            'No custom capabilities yet.',
+            l10n.roleEditorNoCustomCaps,
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
@@ -397,7 +415,7 @@ class _NoCustomCapsHint extends StatelessWidget {
           const SizedBox(height: 8),
           TextButton(
             onPressed: onCreateTap,
-            child: const Text('Create a custom capability →'),
+            child: Text(l10n.roleEditorCreateCustomCap),
           ),
         ],
       ),

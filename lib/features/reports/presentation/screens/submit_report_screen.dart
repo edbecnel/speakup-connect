@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:speakup_connect/core/constants/app_constants.dart';
 import 'package:speakup_connect/core/constants/route_constants.dart';
+import 'package:speakup_connect/core/l10n/app_localizations_extension.dart';
 import 'package:speakup_connect/features/reports/domain/entities/report_category_entity.dart';
 import 'package:speakup_connect/features/reports/presentation/providers/report_provider.dart';
 import 'package:speakup_connect/shared/widgets/app_button.dart';
@@ -51,16 +52,11 @@ class _SubmitReportScreenState extends ConsumerState<SubmitReportScreen> {
   }
 
   Future<void> _submit() async {
-    // Guard: surface form-validation failures that would otherwise be silent.
+    final l10n = context.l10n;
     final formState = ref.read(submitReportFormProvider);
     if (!formState.isStep1Valid) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Please complete Step 1: select a category, '
-            'title (min 5 chars), and description (min 10 chars).',
-          ),
-        ),
+        SnackBar(content: Text(l10n.submitConcernStep1Incomplete)),
       );
       return;
     }
@@ -76,12 +72,13 @@ class _SubmitReportScreenState extends ConsumerState<SubmitReportScreen> {
     final formState = ref.watch(submitReportFormProvider);
     final submitState = ref.watch(submitReportProvider);
     final theme = Theme.of(context);
+    final l10n = context.l10n;
 
     ref.listen(submitReportProvider, (_, next) {
       if (next is AsyncError) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Submission failed: ${next.error}'),
+            content: Text(l10n.submitConcernSubmissionFailed('${next.error}')),
             backgroundColor: theme.colorScheme.error,
           ),
         );
@@ -91,13 +88,11 @@ class _SubmitReportScreenState extends ConsumerState<SubmitReportScreen> {
     return Scaffold(
       appBar: AppBar(
         leading: BackButton(onPressed: () => context.pop()),
-        title: const Text('Submit a Concern'),
+        title: Text(l10n.submitConcernTitle),
       ),
       body: Column(
         children: [
-          // --- Step Progress Indicator ---
           _StepProgressIndicator(currentStep: _currentStep),
-
           Expanded(
             child: IndexedStack(
               index: _currentStep,
@@ -117,14 +112,11 @@ class _SubmitReportScreenState extends ConsumerState<SubmitReportScreen> {
               ],
             ),
           ),
-
-          // --- Nav Buttons ---
           _WizardNavBar(
             currentStep: _currentStep,
             isLoading: submitState.isLoading,
             canProceedStep1: () {
               if (!_step1FormKey.currentState!.validate()) return false;
-              // sync title/description into provider
               ref.read(submitReportFormProvider.notifier)
                   .updateTitle(_titleController.text.trim());
               ref.read(submitReportFormProvider.notifier)
@@ -143,8 +135,6 @@ class _SubmitReportScreenState extends ConsumerState<SubmitReportScreen> {
   }
 }
 
-// --- Step 1: Category & Details ---
-
 class _Step1CategoryDetails extends ConsumerWidget {
   const _Step1CategoryDetails({
     required this.formKey,
@@ -161,6 +151,7 @@ class _Step1CategoryDetails extends ConsumerWidget {
     final categoriesAsync = ref.watch(reportCategoriesProvider);
     final formState = ref.watch(submitReportFormProvider);
     final theme = Theme.of(context);
+    final l10n = context.l10n;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -170,16 +161,14 @@ class _Step1CategoryDetails extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'What type of concern is this?',
+              l10n.submitConcernCategoryPrompt,
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 12),
-
-            // Category chips
             categoriesAsync.when(
               loading: () => const AppLoadingIndicator(),
               error: (e, _) => AppErrorWidget(
-                message: 'Failed to load categories',
+                message: l10n.submitConcernLoadCategoriesFailed,
                 onRetry: () => ref.invalidate(reportCategoriesProvider),
               ),
               data: (categories) => Wrap(
@@ -208,17 +197,16 @@ class _Step1CategoryDetails extends ConsumerWidget {
                 }).toList(),
               ),
             ),
-
             const SizedBox(height: 24),
             AppTextField(
               controller: titleController,
-              label: 'Title',
-              hint: 'Brief summary of your concern (min 5 characters)',
+              label: l10n.commonTitle,
+              hint: l10n.submitConcernTitleHint,
               prefixIcon: Icons.title_rounded,
               textInputAction: TextInputAction.next,
               validator: (v) {
                 if (v == null || v.trim().length < 5) {
-                  return 'Title must be at least 5 characters';
+                  return l10n.submitConcernTitleMinLength;
                 }
                 return null;
               },
@@ -226,13 +214,13 @@ class _Step1CategoryDetails extends ConsumerWidget {
             const SizedBox(height: 16),
             AppTextField(
               controller: descriptionController,
-              label: 'Description',
-              hint: 'Describe the concern in detail (min 10 characters)',
+              label: l10n.submitConcernDescriptionLabel,
+              hint: l10n.submitConcernDescriptionHint,
               prefixIcon: Icons.description_outlined,
               maxLines: 5,
               validator: (v) {
                 if (v == null || v.trim().length < 10) {
-                  return 'Description must be at least 10 characters';
+                  return l10n.submitConcernDescriptionMinLength;
                 }
                 return null;
               },
@@ -244,8 +232,6 @@ class _Step1CategoryDetails extends ConsumerWidget {
   }
 }
 
-// --- Step 2: Photos & Anonymous ---
-
 class _Step2PhotosAnonymous extends ConsumerWidget {
   const _Step2PhotosAnonymous({required this.onPickImage});
 
@@ -256,6 +242,7 @@ class _Step2PhotosAnonymous extends ConsumerWidget {
     final formState = ref.watch(submitReportFormProvider);
     final notifier = ref.read(submitReportFormProvider.notifier);
     final theme = Theme.of(context);
+    final l10n = context.l10n;
     final canAddMore = formState.photoPaths.length < AppConstants.maxPhotosPerReport;
 
     return SingleChildScrollView(
@@ -264,18 +251,16 @@ class _Step2PhotosAnonymous extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Attach Photos (optional)',
+            l10n.submitConcernPhotosTitle,
             style: theme.textTheme.titleMedium,
           ),
           Text(
-            'Up to ${AppConstants.maxPhotosPerReport} photos',
+            l10n.submitConcernPhotosLimit(AppConstants.maxPhotosPerReport),
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
           const SizedBox(height: 12),
-
-          // Photo previews
           Wrap(
             spacing: 8,
             runSpacing: 8,
@@ -310,7 +295,6 @@ class _Step2PhotosAnonymous extends ConsumerWidget {
                   ],
                 );
               }),
-
               if (canAddMore)
                 GestureDetector(
                   onTap: () => _showImageSourceSheet(context),
@@ -333,19 +317,14 @@ class _Step2PhotosAnonymous extends ConsumerWidget {
                 ),
             ],
           ),
-
           const SizedBox(height: 32),
           const Divider(),
           const SizedBox(height: 16),
-
-          // Anonymous toggle
           SwitchListTile.adaptive(
             value: formState.isAnonymous,
             onChanged: (v) => notifier.updateIsAnonymous(v),
-            title: const Text('Submit Anonymously'),
-            subtitle: const Text(
-              'Your name and account will not be linked to this report.',
-            ),
+            title: Text(l10n.submitConcernAnonymousTitle),
+            subtitle: Text(l10n.submitConcernAnonymousSubtitle),
             secondary: const Icon(Icons.visibility_off_outlined),
             contentPadding: EdgeInsets.zero,
           ),
@@ -355,6 +334,7 @@ class _Step2PhotosAnonymous extends ConsumerWidget {
   }
 
   void _showImageSourceSheet(BuildContext context) {
+    final l10n = context.l10n;
     showModalBottomSheet<void>(
       context: context,
       builder: (_) => SafeArea(
@@ -363,7 +343,7 @@ class _Step2PhotosAnonymous extends ConsumerWidget {
           children: [
             ListTile(
               leading: const Icon(Icons.photo_camera_outlined),
-              title: const Text('Take a Photo'),
+              title: Text(l10n.submitConcernTakePhoto),
               onTap: () {
                 Navigator.pop(context);
                 onPickImage(ImageSource.camera);
@@ -371,7 +351,7 @@ class _Step2PhotosAnonymous extends ConsumerWidget {
             ),
             ListTile(
               leading: const Icon(Icons.photo_library_outlined),
-              title: const Text('Choose from Gallery'),
+              title: Text(l10n.submitConcernChooseGallery),
               onTap: () {
                 Navigator.pop(context);
                 onPickImage(ImageSource.gallery);
@@ -383,8 +363,6 @@ class _Step2PhotosAnonymous extends ConsumerWidget {
     );
   }
 }
-
-// --- Step 3: Review ---
 
 class _Step3Review extends ConsumerWidget {
   const _Step3Review({
@@ -400,33 +378,46 @@ class _Step3Review extends ConsumerWidget {
     final formState = ref.watch(submitReportFormProvider);
     final categoriesAsync = ref.watch(reportCategoriesProvider);
     final theme = Theme.of(context);
+    final l10n = context.l10n;
 
     final categoryLabel = categoriesAsync.value
         ?.firstWhere(
           (c) => c.categoryId == formState.categoryId,
           orElse: () => const ReportCategoryEntity(
             categoryId: '',
-            label: 'Unknown',
+            label: '',
             iconName: 'report',
             sortOrder: 0,
           ),
         )
-        .label ?? '—';
+        .label;
+    final resolvedCategory =
+        (categoryLabel == null || categoryLabel.isEmpty)
+            ? l10n.commonUnknown
+            : categoryLabel;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Review Your Report', style: theme.textTheme.titleMedium),
+          Text(l10n.submitConcernReviewTitle, style: theme.textTheme.titleMedium),
           const SizedBox(height: 16),
-          _ReviewRow(label: 'Category', value: categoryLabel),
-          _ReviewRow(label: 'Title', value: titleController.text),
-          _ReviewRow(label: 'Description', value: descriptionController.text),
-          _ReviewRow(label: 'Photos', value: '${formState.photoPaths.length} attached'),
+          _ReviewRow(label: l10n.submitConcernReviewCategory, value: resolvedCategory),
+          _ReviewRow(label: l10n.commonTitle, value: titleController.text),
           _ReviewRow(
-            label: 'Submitted As',
-            value: formState.isAnonymous ? 'Anonymous' : 'Signed In',
+            label: l10n.commonDescription,
+            value: descriptionController.text,
+          ),
+          _ReviewRow(
+            label: l10n.submitConcernReviewPhotos,
+            value: l10n.submitConcernPhotosAttached(formState.photoPaths.length),
+          ),
+          _ReviewRow(
+            label: l10n.submitConcernReviewSubmittedAs,
+            value: formState.isAnonymous
+                ? l10n.settingsAnonymous
+                : l10n.commonSignedIn,
           ),
           if (formState.isAnonymous)
             Container(
@@ -442,7 +433,7 @@ class _Step3Review extends ConsumerWidget {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'Anonymous reports cannot be tracked. Save your reference number.',
+                      l10n.submitConcernReviewAnonymousWarning,
                       style: theme.textTheme.bodySmall,
                     ),
                   ),
@@ -487,8 +478,6 @@ class _ReviewRow extends StatelessWidget {
   }
 }
 
-// --- Step Progress Indicator ---
-
 class _StepProgressIndicator extends StatelessWidget {
   const _StepProgressIndicator({required this.currentStep});
 
@@ -497,7 +486,12 @@ class _StepProgressIndicator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    const labels = ['Details', 'Photos', 'Review'];
+    final l10n = context.l10n;
+    final labels = [
+      l10n.submitConcernStepDetails,
+      l10n.submitConcernStepPhotos,
+      l10n.submitConcernStepReview,
+    ];
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
@@ -566,8 +560,6 @@ class _StepProgressIndicator extends StatelessWidget {
   }
 }
 
-// --- Wizard Nav Bar ---
-
 class _WizardNavBar extends StatelessWidget {
   const _WizardNavBar({
     required this.currentStep,
@@ -587,6 +579,7 @@ class _WizardNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
       child: Row(
@@ -594,7 +587,7 @@ class _WizardNavBar extends StatelessWidget {
           if (currentStep > 0)
             Expanded(
               child: AppButton.secondary(
-                label: 'Back',
+                label: l10n.commonBack,
                 onPressed: onBack,
               ),
             ),
@@ -603,14 +596,14 @@ class _WizardNavBar extends StatelessWidget {
             flex: 2,
             child: currentStep < 2
                 ? AppButton.primary(
-                    label: 'Next',
+                    label: l10n.commonNext,
                     onPressed: () {
                       if (currentStep == 0 && !canProceedStep1()) return;
                       onNext();
                     },
                   )
                 : AppButton.primary(
-                    label: 'Submit Report',
+                    label: l10n.submitConcernSubmitButton,
                     onPressed: onSubmit,
                     isLoading: isLoading,
                   ),
@@ -620,4 +613,3 @@ class _WizardNavBar extends StatelessWidget {
     );
   }
 }
-

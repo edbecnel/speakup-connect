@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:speakup_connect/core/l10n/app_localizations_extension.dart';
 import 'package:speakup_connect/features/reminders/domain/entities/reminder_response_config.dart';
+import 'package:speakup_connect/features/reminders/presentation/l10n/reminder_compose_l10n.dart';
+import 'package:speakup_connect/l10n/app_localizations.dart';
 import 'package:uuid/uuid.dart';
 
 /// Admin UI for optionally configuring recipient responses on a broadcast.
@@ -16,16 +19,19 @@ class ResponseConfigSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SwitchListTile(
           contentPadding: EdgeInsets.zero,
-          title: const Text('Request a response'),
+          title: Text(l10n.reminderComposeRequestResponse),
           subtitle: Text(
             value.enabled
-                ? 'Recipients can respond via ${value.typeLabel.toLowerCase()}'
-                : 'Off — no response requested',
+                ? l10n.reminderComposeResponseRecipientsCan(
+                    localizedReminderResponseTypeSummary(l10n, value),
+                  )
+                : l10n.reminderComposeResponseOff,
           ),
           value: value.enabled,
           onChanged: (on) {
@@ -52,21 +58,19 @@ class ResponseConfigSection extends StatelessWidget {
         if (value.enabled) ...[
           SwitchListTile(
             contentPadding: EdgeInsets.zero,
-            title: const Text('Response required'),
-            subtitle: const Text(
-              'Recipients must respond before they can dismiss the alert',
-            ),
+            title: Text(l10n.reminderComposeResponseRequired),
+            subtitle: Text(l10n.reminderComposeResponseRequiredHint),
             value: value.responseRequired,
             onChanged: (on) =>
                 onChanged(value.copyWith(responseRequired: on)),
           ),
           SwitchListTile(
             contentPadding: EdgeInsets.zero,
-            title: const Text('Allow changing responses'),
+            title: Text(l10n.reminderComposeAllowChangingResponses),
             subtitle: Text(
               value.allowResponseUpdates
-                  ? 'Recipients can update their answer after submitting'
-                  : 'Locked after submit — use for votes and one-time polls',
+                  ? l10n.reminderComposeAllowChangingResponsesOn
+                  : l10n.reminderComposeAllowChangingResponsesOff,
             ),
             value: value.allowResponseUpdates,
             onChanged: (on) =>
@@ -74,21 +78,21 @@ class ResponseConfigSection extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           SegmentedButton<ReminderResponseType>(
-            segments: const [
+            segments: [
               ButtonSegment(
                 value: ReminderResponseType.freeText,
-                label: Text('Free text'),
-                icon: Icon(Icons.notes_outlined, size: 18),
+                label: Text(l10n.reminderComposeResponseFreeText),
+                icon: const Icon(Icons.notes_outlined, size: 18),
               ),
               ButtonSegment(
                 value: ReminderResponseType.checkbox,
-                label: Text('Checkboxes'),
-                icon: Icon(Icons.check_box_outlined, size: 18),
+                label: Text(l10n.reminderComposeResponseCheckboxes),
+                icon: const Icon(Icons.check_box_outlined, size: 18),
               ),
               ButtonSegment(
                 value: ReminderResponseType.multipleChoice,
-                label: Text('Choices'),
-                icon: Icon(Icons.radio_button_checked_outlined, size: 18),
+                label: Text(l10n.reminderComposeResponseChoices),
+                icon: const Icon(Icons.radio_button_checked_outlined, size: 18),
               ),
             ],
             selected: {value.type},
@@ -116,11 +120,13 @@ class ResponseConfigSection extends StatelessWidget {
           const SizedBox(height: 12),
           if (value.type == ReminderResponseType.freeText)
             _FreeTextLimitPicker(
+              l10n: l10n,
               maxLength: value.maxTextLength,
               onChanged: (n) => onChanged(value.copyWith(maxTextLength: n)),
             )
           else ...[
             _OptionsEditor(
+              l10n: l10n,
               key: ValueKey('${value.type}-${value.options.length}'),
               type: value.type,
               options: value.options,
@@ -129,10 +135,8 @@ class ResponseConfigSection extends StatelessWidget {
             const SizedBox(height: 8),
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
-              title: const Text('Allow explanation text'),
-              subtitle: const Text(
-                'Optional text box for comments (e.g. why they cannot attend)',
-              ),
+              title: Text(l10n.reminderComposeAllowExplanationText),
+              subtitle: Text(l10n.reminderComposeAllowExplanationHint),
               value: value.allowAdditionalText,
               onChanged: (on) =>
                   onChanged(value.copyWith(allowAdditionalText: on)),
@@ -141,6 +145,7 @@ class ResponseConfigSection extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(top: 4),
                 child: _FreeTextLimitPicker(
+                  l10n: l10n,
                   maxLength: value.maxTextLength,
                   onChanged: (n) => onChanged(value.copyWith(maxTextLength: n)),
                 ),
@@ -151,12 +156,13 @@ class ResponseConfigSection extends StatelessWidget {
               padding: const EdgeInsets.only(top: 8),
               child: Text(
                 value.type == ReminderResponseType.freeText
-                    ? 'Set a character limit between '
-                        '${AppReminderResponseLimits.minMaxTextLength} and '
-                        '${AppReminderResponseLimits.maxMaxTextLength}.'
+                    ? l10n.reminderComposeValidationCharLimitRange(
+                        AppReminderResponseLimits.minMaxTextLength,
+                        AppReminderResponseLimits.maxMaxTextLength,
+                      )
                     : value.type == ReminderResponseType.checkbox
-                        ? 'Add at least one checkbox option with a label.'
-                        : 'Add at least 2 answer choices with labels.',
+                        ? l10n.reminderComposeValidationCheckboxOptions
+                        : l10n.reminderComposeValidationChoiceOptions,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.error,
                 ),
@@ -179,10 +185,12 @@ class ResponseConfigSection extends StatelessWidget {
 
 class _FreeTextLimitPicker extends StatelessWidget {
   const _FreeTextLimitPicker({
+    required this.l10n,
     required this.maxLength,
     required this.onChanged,
   });
 
+  final AppLocalizations l10n;
   final int maxLength;
   final ValueChanged<int> onChanged;
 
@@ -192,17 +200,22 @@ class _FreeTextLimitPicker extends StatelessWidget {
   Widget build(BuildContext context) {
     final value = _limits.contains(maxLength) ? maxLength : 500;
     return InputDecorator(
-      decoration: const InputDecoration(
-        labelText: 'Character limit',
-        border: OutlineInputBorder(),
-        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      decoration: InputDecoration(
+        labelText: l10n.reminderComposeCharacterLimit,
+        border: const OutlineInputBorder(),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<int>(
           isExpanded: true,
           value: value,
           items: _limits
-              .map((n) => DropdownMenuItem(value: n, child: Text('$n characters')))
+              .map(
+                (n) => DropdownMenuItem(
+                  value: n,
+                  child: Text(l10n.reminderComposeCharactersCount(n)),
+                ),
+              )
               .toList(),
           onChanged: (v) {
             if (v != null) onChanged(v);
@@ -215,12 +228,14 @@ class _FreeTextLimitPicker extends StatelessWidget {
 
 class _OptionsEditor extends StatefulWidget {
   const _OptionsEditor({
+    required this.l10n,
     required this.type,
     required this.options,
     required this.onChanged,
     super.key,
   });
 
+  final AppLocalizations l10n;
   final ReminderResponseType type;
   final List<ReminderResponseOption> options;
   final ValueChanged<List<ReminderResponseOption>> onChanged;
@@ -274,9 +289,10 @@ class _OptionsEditorState extends State<_OptionsEditor> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = widget.l10n;
     final label = widget.type == ReminderResponseType.checkbox
-        ? 'Checkbox options'
-        : 'Answer choices';
+        ? l10n.reminderComposeCheckboxOptions
+        : l10n.reminderComposeAnswerChoices;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -309,7 +325,7 @@ class _OptionsEditorState extends State<_OptionsEditor> {
                   child: TextField(
                     controller: _controllers[index],
                     decoration: InputDecoration(
-                      labelText: 'Option ${index + 1}',
+                      labelText: l10n.reminderComposeOptionNumber(index + 1),
                       border: const OutlineInputBorder(),
                       isDense: true,
                     ),
@@ -320,7 +336,7 @@ class _OptionsEditorState extends State<_OptionsEditor> {
                   width: 40,
                   child: canRemove
                       ? IconButton(
-                          tooltip: 'Remove option',
+                          tooltip: l10n.reminderComposeRemoveOption,
                           padding: EdgeInsets.zero,
                           constraints: const BoxConstraints(
                             minWidth: 40,
@@ -352,7 +368,7 @@ class _OptionsEditorState extends State<_OptionsEditor> {
                 ]);
               },
               icon: const Icon(Icons.add, size: 18),
-              label: const Text('Add option'),
+              label: Text(l10n.reminderComposeAddOption),
             ),
           ),
       ],

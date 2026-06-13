@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:speakup_connect/core/l10n/app_localizations_extension.dart';
 import 'package:speakup_connect/features/reminders/presentation/widgets/expiration_picker_section.dart';
 
 /// Toggle and date/time picker for scheduling a broadcast for later.
@@ -36,17 +37,18 @@ class ScheduleForLaterSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
     final scheduled = scheduledAt != null;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SwitchListTile(
           contentPadding: EdgeInsets.zero,
-          title: const Text('Schedule for later'),
+          title: Text(l10n.reminderComposeScheduleForLater),
           subtitle: Text(
             scheduled
                 ? formatDateTime(scheduledAt!)
-                : 'Off — send immediately',
+                : l10n.reminderComposeScheduleOff,
           ),
           value: scheduled,
           onChanged: (on) {
@@ -64,7 +66,7 @@ class ScheduleForLaterSection extends StatelessWidget {
               onPressed: () => _pick(context),
               icon: const Icon(Icons.edit_calendar_outlined, size: 18),
               label: Text(
-                'Change time',
+                l10n.reminderComposeChangeTime,
                 style: TextStyle(color: theme.colorScheme.primary),
               ),
             ),

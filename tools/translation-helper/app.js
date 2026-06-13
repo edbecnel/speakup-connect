@@ -21,13 +21,20 @@ if (!config?.apiKey || config.apiKey === 'YOUR_API_KEY') {
 
 const app = initializeApp(config);
 const auth = getAuth(app);
-const functions = getFunctions(app);
+const functions = getFunctions(app, 'us-central1');
 
-if (
-  window.USE_FUNCTIONS_EMULATOR === true &&
-  (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
-) {
-  connectFunctionsEmulator(functions, '127.0.0.1', 5001);
+if (window.USE_FUNCTIONS_EMULATOR === true) {
+  const localHost =
+    location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+  if (localHost) {
+    connectFunctionsEmulator(functions, '127.0.0.1', 5001);
+  } else {
+    console.warn(
+      'USE_FUNCTIONS_EMULATOR is true but the page is not on localhost — ' +
+        'calls will fail. Set USE_FUNCTIONS_EMULATOR = false in firebase-config.js ' +
+        'or open http://localhost:5050 on this machine.',
+    );
+  }
 }
 
 const call = (name) => httpsCallable(functions, name);
@@ -38,6 +45,7 @@ const els = {
   authStatus: document.getElementById('auth-status'),
   email: document.getElementById('email'),
   password: document.getElementById('password'),
+  passwordToggleBtn: document.getElementById('password-toggle-btn'),
   signInBtn: document.getElementById('sign-in-btn'),
   signOutBtn: document.getElementById('sign-out-btn'),
   targetLocale: document.getElementById('target-locale'),
@@ -81,6 +89,24 @@ function orgPayload(extra = {}) {
   return { organizationId: orgId, ...extra };
 }
 
+async function callPayload(extra = {}) {
+  const user = auth.currentUser;
+  if (user) {
+    const token = await user.getIdTokenResult();
+    if (token.claims.role === 'super_admin') {
+      return { ...extra };
+    }
+  }
+  return orgPayload(extra);
+}
+
+async function ensureFreshAuthToken() {
+  const user = auth.currentUser;
+  if (user) {
+    await user.getIdToken(true);
+  }
+}
+
 function applyWorkspaceCapabilities() {
   els.importArb.closest('label')?.classList.toggle(
     'hidden',
@@ -105,8 +131,9 @@ function applyHelpVisibility() {
 }
 
 async function refreshAccess() {
+  await ensureFreshAuthToken();
   const { data } = await call('getTranslationWorkspaceAccess')(
-    orgPayload({ targetLocale: els.targetLocale.value }),
+    await callPayload({ targetLocale: els.targetLocale.value }),
   );
   workspaceAccess = {
     isPlatformSuperAdmin: data.isPlatformSuperAdmin === true,
@@ -132,11 +159,24 @@ function setWorkspaceStatus(text, kind = '') {
 function formatError(err) {
   const code = err?.code;
   const message = err?.message ?? String(err);
-  if (code === 'functions/internal' && /internal error/i.test(message)) {
-    return (
-      `${code}: ${message} — batch may have timed out. Redeploy ` +
-      'batchDraftTranslations, hard-refresh this page, and try again.'
-    );
+  const details = err?.details;
+  const detailText =
+    typeof details === 'string'
+      ? details
+      : details != null
+        ? JSON.stringify(details)
+        : '';
+  if (code === 'functions/internal') {
+    const serverHint =
+      message && message !== 'internal' ? message : detailText;
+    const hint =
+      /internal error/i.test(message) || message === 'internal'
+        ? (serverHint
+            ? ` ${serverHint}`
+            : ' Check Firebase Functions logs (listTranslationEntries / getTranslationWorkspaceAccess / importTranslationSource).') +
+          ' Hard-refresh this page, sign out/in, and confirm USE_FUNCTIONS_EMULATOR is false.'
+        : '';
+    return `${code}: ${message}${hint}`;
   }
   return code ? `${code}: ${message}` : message;
 }
@@ -270,14 +310,24 @@ function escapeHtml(s) {
 
 async function loadEntries() {
   setStatus('Loading…');
-  await refreshAccess();
-  const { data } = await call('listTranslationEntries')(orgPayload({
-    targetLocale: els.targetLocale.value,
-  }));
-  entries = data.entries ?? [];
-  updateFeatureFilter();
-  renderTable();
-  setStatus(`Signed in as ${auth.currentUser?.email}`, 'ok');
+  const targetLocale = els.targetLocale.value;
+  if (!targetLocale) {
+    throw new Error('Select a target locale first.');
+  }
+  try {
+    await refreshAccess();
+    const { data } = await call('listTranslationEntries')(
+      await callPayload({ targetLocale }),
+    );
+    entries = data.entries ?? [];
+    updateFeatureFilter();
+    renderTable();
+    setStatus(`Signed in as ${auth.currentUser?.email}`, 'ok');
+    setWorkspaceStatus('', '');
+  } catch (err) {
+    console.error('loadEntries failed', err);
+    throw err;
+  }
 }
 
 async function importArbFile(file) {
@@ -289,7 +339,7 @@ async function importArbFile(file) {
 
   setWorkspaceStatus(`Importing ${entriesToImport.length} keys…`);
   try {
-    const { data } = await call('importTranslationSource')(orgPayload({
+    const { data } = await call('importTranslationSource')(await callPayload({
       targetLocale: els.targetLocale.value,
       entries: entriesToImport,
     }));
@@ -307,7 +357,7 @@ async function importArbFile(file) {
 async function saveEntry(stringKey, approve = false) {
   const textarea = els.entriesBody.querySelector(`textarea[data-key="${stringKey}"]`);
   const targetValue = textarea?.value?.trim() ?? '';
-  await call('saveTranslationEntry')(orgPayload({
+  await call('saveTranslationEntry')(await callPayload({
     targetLocale: els.targetLocale.value,
     stringKey,
     targetValue,
@@ -320,7 +370,7 @@ async function draftOne(stringKey) {
   setWorkspaceStatus(`AI drafting ${stringKey}…`);
   els.batchAiBtn.disabled = true;
   try {
-    await call('draftTranslation')(orgPayload({
+    await call('draftTranslation')(await callPayload({
       targetLocale: els.targetLocale.value,
       stringKey,
     }));
@@ -361,7 +411,7 @@ async function batchDraft() {
 
     while (hasMore) {
       batchNum += 1;
-      const { data } = await call('batchDraftTranslations')(orgPayload({
+      const { data } = await call('batchDraftTranslations')(await callPayload({
         targetLocale: els.targetLocale.value,
         onlyMissing: true,
       }));
@@ -428,7 +478,7 @@ async function approveAllSavedViaSaveEntry(toApprove) {
   let approved = 0;
   for (const entry of toApprove) {
     await call('saveTranslationEntry')(
-      orgPayload({
+      await callPayload({
         targetLocale: els.targetLocale.value,
         stringKey: entry.stringKey,
         targetValue: effectiveTargetText(entry),
@@ -477,7 +527,7 @@ async function approveAllSaved() {
     let total = inReviewCount;
     try {
       const { data } = await call('batchApproveSavedTranslations')(
-        orgPayload({ targetLocale: els.targetLocale.value }),
+        await callPayload({ targetLocale: els.targetLocale.value }),
       );
       approved = data.approved ?? 0;
       total = data.total ?? 0;
@@ -526,7 +576,7 @@ async function saveAllAiDraftsViaSaveEntry(toSave) {
   for (const entry of toSave) {
     try {
       await call('saveTranslationEntry')(
-        orgPayload({
+        await callPayload({
           targetLocale: els.targetLocale.value,
           stringKey: entry.stringKey,
           targetValue: entry.aiDraft,
@@ -580,7 +630,7 @@ async function saveAllAiDrafts() {
     const failed = [];
     try {
       const { data } = await call('batchSaveAiDrafts')(
-        orgPayload({ targetLocale: els.targetLocale.value }),
+        await callPayload({ targetLocale: els.targetLocale.value }),
       );
       saved = data.saved ?? 0;
       total = data.total ?? 0;
@@ -644,7 +694,7 @@ async function saveAllAiDrafts() {
 async function exportArb() {
   setWorkspaceStatus('Exporting ARB…');
   try {
-    const { data } = await call('exportTranslationArb')(orgPayload({
+    const { data } = await call('exportTranslationArb')(await callPayload({
       targetLocale: els.targetLocale.value,
       includeEnglishFallback: true,
     }));
@@ -669,6 +719,19 @@ els.signInBtn.addEventListener('click', async () => {
   } catch (err) {
     setStatus(err.message ?? String(err), 'error');
   }
+});
+
+els.passwordToggleBtn?.addEventListener('click', () => {
+  const hidden = els.password.type === 'password';
+  els.password.type = hidden ? 'text' : 'password';
+  els.passwordToggleBtn.setAttribute('aria-pressed', hidden ? 'true' : 'false');
+  els.passwordToggleBtn.setAttribute(
+    'aria-label',
+    hidden ? 'Hide password' : 'Show password',
+  );
+  els.passwordToggleBtn.title = hidden ? 'Hide password' : 'Show password';
+  els.passwordToggleBtn.querySelector('.icon-eye')?.classList.toggle('hidden', hidden);
+  els.passwordToggleBtn.querySelector('.icon-eye-off')?.classList.toggle('hidden', !hidden);
 });
 
 els.signOutBtn.addEventListener('click', () => signOut(auth));
@@ -754,7 +817,11 @@ onAuthStateChanged(auth, async (user) => {
   els.workspace.classList.remove('hidden');
   els.signOutBtn.classList.remove('hidden');
   els.helpToggleBtn?.classList.remove('hidden');
-  await loadEntries();
+  try {
+    await loadEntries();
+  } catch (err) {
+    showError(err);
+  }
 });
 
 els.helpToggleBtn?.addEventListener('click', () => {

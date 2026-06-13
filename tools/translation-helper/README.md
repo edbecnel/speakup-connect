@@ -416,11 +416,13 @@ See **[INTERNATIONALIZATION.md §11 — Phase E–G](../docs/INTERNATIONALIZATIO
 |-------|-----|
 | `Secret Manager API... disabled` (403) on deploy | Pull latest code — translation functions use `functions/.env`, not Secret Manager. Redeploy after `git pull`. |
 | `TRANSLATION_AI_API_KEY is not set` when using AI draft | Copy `functions/.env.example` → `functions/.env`, add your key, redeploy (see Step 2 Option B follow-up) |
+| AI batch stops or fails with quota / 429 errors | OpenAI Platform prepaid balance is empty. Add credits at https://platform.openai.com/settings/organization/billing/overview (not ChatGPT Plus). Check usage at https://platform.openai.com/usage. Minimum top-up is typically $5. Enable auto-recharge in Billing settings for long batch jobs. |
 | `firebase` / command not found | Use `npx firebase-tools` instead of `firebase` (see Step 1) |
 | `ENOENT ... service-account.json` on seed | Complete **Step 3a** — download key and save as `scripts\service-account.json` |
 | Access denied on web sign-in | Complete Step 3, set `ORGANIZATION_ID` in `firebase-config.js`, sign out/in after role assignment |
 | No **Import `app_en.arb`** after Step 3d | Sign out/in on web tool; confirm `assign_super_admin.js` succeeded; use app Firebase Auth password |
 | **Translate missing (AI)** seems to do nothing | Hard-refresh http://localhost:5050. Status now appears **below the toolbar** (green/red banner). Ensure `USE_FUNCTIONS_EMULATOR = false` in `firebase-config.js` unless the emulator is running. Redeploy functions if you see `TRANSLATION_AI_API_KEY is not set`. |
+| `functions/internal` on **Refresh** | Hard-refresh http://localhost:5050 (Ctrl+Shift+R). Sign out/in so JWT picks up `super_admin`. Confirm `USE_FUNCTIONS_EMULATOR = false` in `firebase-config.js`. Open the tool at **http://localhost:5050** on the same machine running `npx serve` (not another device IP unless emulator is off). Redeploy `listTranslationEntries` and `getTranslationWorkspaceAccess` if logs show a server error. |
 | `Missing firebase-config.js` or `YOUR_API_KEY` in browser | Complete Step 4 — use Firebase `apiKey` (`AIzaSy…`), not OpenAI (`sk-…`) |
 
 ---

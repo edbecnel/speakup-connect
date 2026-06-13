@@ -483,6 +483,1020 @@
 
   "commonSave": "Save",
 
+  "reminderComposeTitle": "Compose Reminder",
+  "reminderComposeSendGroupAlertTitle": "Send Group Alert",
+  "reminderComposeSendFailed": "Failed to send: {error}",
+  "@reminderComposeSendFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "reminderComposeSubmittedForApproval": "Reminder submitted for approval.",
+  "reminderComposeScheduled": "Reminder scheduled.",
+  "reminderComposePublished": "Reminder published.",
+  "reminderComposeSubmitForApproval": "Submit for Approval",
+  "reminderComposeSendReminder": "Send Reminder",
+  "reminderComposeGroupOnlyHint": "This alert will be sent only to members of the group you select.",
+  "reminderComposeTitleLabel": "Title",
+  "reminderComposeTitleHint": "e.g. Early dismissal Friday",
+  "reminderComposeMessageLabel": "Message",
+  "reminderComposeMessageHint": "Write the reminder details…",
+  "reminderComposeAudienceLabel": "Audience",
+  "reminderComposeAudienceEveryone": "Everyone",
+  "reminderComposeAudienceGroup": "Group",
+  "reminderComposeAudienceRole": "Role",
+  "reminderComposeLoadGroupsFailed": "Could not load groups: {error}",
+  "@reminderComposeLoadGroupsFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "reminderComposeNoGroupsYet": "No groups exist yet. Create a group first.",
+  "reminderComposeSelectGroup": "Select group",
+  "reminderComposeLoadRolesFailed": "Could not load roles: {error}",
+  "@reminderComposeLoadRolesFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "reminderComposeNoRolesYet": "No roles defined yet.",
+  "reminderComposeSelectRole": "Select role",
+  "reminderComposeNoPermission": "You don't have permission to broadcast reminders.",
+  "reminderComposeApprovalBanner": "Your organization requires reminders to be approved. This will be submitted for review before it is published.",
+  "reminderComposeValidationTitleMin": "Title must be at least 3 characters.",
+  "reminderComposeValidationMessageMin": "Message must be at least 5 characters.",
+  "reminderComposeValidationSelectGroup": "Select a group for this alert.",
+  "reminderComposeValidationSelectAudience": "Select an audience for this reminder.",
+  "reminderComposeValidationExpiration": "Set a valid expiration date and time.",
+  "reminderComposeValidationCheckboxOptions": "Add at least one checkbox option with a label.",
+  "reminderComposeValidationChoiceOptions": "Add at least 2 answer choices with labels.",
+  "reminderComposeValidationCharLimit": "Set a valid character limit for responses.",
+  "reminderComposeScheduleForLater": "Schedule for later",
+  "reminderComposeScheduleOff": "Off — send immediately",
+  "reminderComposeChangeTime": "Change time",
+  "reminderComposeSetExpiration": "Set expiration",
+  "reminderComposeExpirationOff": "Off — stays until manually deleted",
+  "reminderComposeSetExpirationBelow": "Set expiration below",
+  "reminderComposeExpirationDateTime": "Date & time",
+  "reminderComposeExpirationDuration": "Duration",
+  "reminderComposePickDateTime": "Pick date & time",
+  "reminderComposeExpirationAfterSend": "Expiration must be after the send time.",
+  "reminderComposeExpireAfter": "Expire after",
+  "reminderComposeHours": "Hours",
+  "reminderComposeMinutes": "Minutes",
+  "reminderComposeExpirationDurationSummary": "{duration} after {base} ({dateTime})",
+  "@reminderComposeExpirationDurationSummary": {
+    "placeholders": {
+      "duration": { "type": "String" },
+      "base": { "type": "String" },
+      "dateTime": { "type": "String" }
+    }
+  },
+  "reminderComposeExpirationAt": "Expires {dateTime}",
+  "@reminderComposeExpirationAt": {
+    "placeholders": {
+      "dateTime": { "type": "String" }
+    }
+  },
+  "reminderComposeExpirationBaseScheduled": "scheduled send",
+  "reminderComposeExpirationBaseSend": "send",
+  "reminderComposeDurationHours": "{count} hr",
+  "@reminderComposeDurationHours": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "reminderComposeDurationMinutes": "{count} min",
+  "@reminderComposeDurationMinutes": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "reminderComposeDurationZeroMin": "0 min",
+  "reminderComposeRequestResponse": "Request a response",
+  "reminderComposeResponseRecipientsCan": "Recipients can respond via {type}",
+  "@reminderComposeResponseRecipientsCan": {
+    "placeholders": {
+      "type": { "type": "String" }
+    }
+  },
+  "reminderComposeResponseOff": "Off — no response requested",
+  "reminderComposeResponseRequired": "Response required",
+  "reminderComposeResponseRequiredHint": "Recipients must respond before they can dismiss the alert",
+  "reminderComposeAllowChangingResponses": "Allow changing responses",
+  "reminderComposeAllowChangingResponsesOn": "Recipients can update their answer after submitting",
+  "reminderComposeAllowChangingResponsesOff": "Locked after submit — use for votes and one-time polls",
+  "reminderComposeResponseFreeText": "Free text",
+  "reminderComposeResponseCheckboxes": "Checkboxes",
+  "reminderComposeResponseChoices": "Choices",
+  "reminderComposeCharacterLimit": "Character limit",
+  "reminderComposeCharactersCount": "{count} characters",
+  "@reminderComposeCharactersCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "reminderComposeAllowExplanationText": "Allow explanation text",
+  "reminderComposeAllowExplanationHint": "Optional text box for comments (e.g. why they cannot attend)",
+  "reminderComposeValidationCharLimitRange": "Set a character limit between {min} and {max}.",
+  "@reminderComposeValidationCharLimitRange": {
+    "placeholders": {
+      "min": { "type": "int" },
+      "max": { "type": "int" }
+    }
+  },
+  "reminderComposeCheckboxOptions": "Checkbox options",
+  "reminderComposeAnswerChoices": "Answer choices",
+  "reminderComposeOptionNumber": "Option {number}",
+  "@reminderComposeOptionNumber": {
+    "placeholders": {
+      "number": { "type": "int" }
+    }
+  },
+  "reminderComposeRemoveOption": "Remove option",
+  "reminderComposeAddOption": "Add option",
+  "reminderComposeResponseTypeExplanationSuffix": "+ explanation",
+
+  "commonReject": "Reject",
+  "commonPublish": "Publish",
+  "commonDone": "Done",
+  "commonConfirm": "Confirm",
+  "commonContinue": "Continue",
+  "commonNext": "Next",
+  "commonTitle": "Title",
+  "commonMessage": "Message",
+  "commonDescription": "Description",
+  "commonUnknown": "Unknown",
+  "commonActionFailed": "Action failed: {error}",
+  "@commonActionFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "commonFailedToLoad": "Failed to load: {error}",
+  "@commonFailedToLoad": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "commonGrade": "Grade",
+  "commonAllGrades": "All grades",
+  "commonNoGradeAssigned": "No grade assigned",
+  "commonGradeLevel": "Grade level",
+  "commonStatus": "Status",
+  "commonReasonOptional": "Reason (optional)",
+  "commonNoteOptional": "Note (optional)",
+  "commonByAuthor": "By {name}",
+  "@commonByAuthor": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "commonFromGroup": "From {groupName}",
+  "@commonFromGroup": {
+    "placeholders": {
+      "groupName": { "type": "String" }
+    }
+  },
+  "commonScheduled": "scheduled",
+  "commonNoReasonProvided": "No reason provided",
+  "commonSchoolWide": "School-wide",
+  "commonRegistered": "Registered",
+  "commonNotRegistered": "Not registered",
+  "commonActive": "Active",
+  "commonBlocked": "Blocked",
+  "commonUnenrolled": "Unenrolled",
+  "commonAll": "All",
+  "commonSignedIn": "Signed In",
+  "commonSaving": "Saving…",
+  "commonSaveFailed": "Save failed: {error}",
+  "@commonSaveFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "commonSection": "Section",
+  "commonIdLabel": "ID",
+  "commonContinueButton": "Continue",
+
+  "changePasswordIntro": "Enter your current password, then choose a new password.",
+  "changePasswordCurrentLabel": "Current password",
+  "changePasswordCurrentHint": "Your current password",
+  "changePasswordNewLabel": "New password",
+  "changePasswordNewHint": "At least 8 characters",
+  "changePasswordConfirmLabel": "Confirm new password",
+  "changePasswordConfirmHint": "Re-enter your new password",
+  "changePasswordUpdateButton": "Update Password",
+  "changePasswordMustDiffer": "New password must be different from your current password.",
+  "changePasswordFailed": "Could not change password. Please try again.",
+  "changePasswordSuccess": "Password updated successfully.",
+
+  "pendingApprovalsAnnouncements": "Announcements",
+  "pendingApprovalsGroupAlerts": "Group alerts",
+  "pendingApprovalsSchoolWide": "School-wide",
+  "pendingApprovalsEmpty": "Nothing awaiting approval",
+  "pendingApprovalsNoPermission": "You don't have permission to approve content.",
+  "pendingApprovalsRejectAnnouncement": "Reject announcement",
+  "pendingApprovalsRejectReminder": "Reject reminder",
+  "pendingApprovalsRejectReasonHint": "Let the author know why…",
+  "pendingApprovalsLoadFailed": "Failed to load: {error}",
+  "@pendingApprovalsLoadFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+
+  "composeAnnouncementTitle": "Post Announcement",
+  "composeAnnouncementNoPermission": "You do not have permission to post school-wide announcements.",
+  "composeAnnouncementIntro": "School-wide announcements are visible to every member.",
+  "composeAnnouncementApprovalBanner": "Your organization requires approval before announcements go live.",
+  "composeAnnouncementTitleHint": "e.g. Join our club this semester",
+  "composeAnnouncementMessageHint": "Share recruitment info, news, or updates…",
+  "composeAnnouncementPinTitle": "Pin to top of announcements",
+  "composeAnnouncementPinSubtitle": "Pinned posts appear first for all members",
+  "composeAnnouncementPublish": "Publish",
+  "composeAnnouncementSubmitted": "Announcement submitted for approval.",
+  "composeAnnouncementScheduled": "Announcement scheduled.",
+  "composeAnnouncementPublished": "Announcement published.",
+  "composeAnnouncementSendFailed": "Failed to post: {error}",
+  "@composeAnnouncementSendFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "composeAnnouncementImageLoadFailed": "Could not load that image. Try another photo.",
+  "composeAnnouncementGroupRequired": "You must lead a group before posting announcements.",
+  "composeAnnouncementGroupOptional": "Group (optional)",
+  "composeAnnouncementOnBehalfOf": "On behalf of",
+  "composeAnnouncementMustLeadGroup": "You can only post on behalf of groups you lead.",
+  "composeAnnouncementValidationTitleMin": "Title must be at least 3 characters.",
+  "composeAnnouncementValidationMessageMin": "Message must be at least 5 characters.",
+  "composeAnnouncementValidationExpiration": "Set a valid expiration date and time.",
+  "composeAnnouncementValidationResponse": "Complete the optional response settings or turn them off.",
+
+  "schoolGradesIntro": "Define which grade levels your school uses. These appear in Student Roster and Member Management filters.",
+  "schoolGradesNonSchoolNote": "Municipalities, barangays, and NGOs do not use grades.",
+  "schoolGradesCurrent": "Current grades",
+  "schoolGradesEmpty": "No grades configured yet.",
+  "schoolGradesGradeChip": "Grade {level}",
+  "@schoolGradesGradeChip": {
+    "placeholders": {
+      "level": { "type": "int" }
+    }
+  },
+  "schoolGradesAddLabel": "Add grade level",
+  "schoolGradesAddHint": "e.g. 7",
+  "schoolGradesAddButton": "Add grade",
+  "schoolGradesResetDefault": "Reset to high school default (7–12)",
+  "schoolGradesSave": "Save grades",
+  "schoolGradesSaving": "Saving…",
+  "schoolGradesSaveFailed": "Save failed: {error}",
+  "@schoolGradesSaveFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "schoolGradesSaveSuccess": "Grade levels updated",
+  "schoolGradesInvalidNumber": "Enter a valid grade number",
+  "schoolGradesSaveDialogTitle": "Save grade levels?",
+  "schoolGradesSaveDialogBody": "Students will be filterable and assignable by:",
+  "schoolGradesNotSchool": "Grade levels are only used by school-type organizations. This setting is not available for your organization type.",
+  "schoolGradesNoPermission": "You do not have permission to manage organization settings.",
+  "schoolGradesLoadFailed": "Failed to load settings: {error}",
+  "@schoolGradesLoadFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+
+  "submitConcernTitle": "Submit a Concern",
+  "submitConcernStepDetails": "Details",
+  "submitConcernStepPhotos": "Photos",
+  "submitConcernStepReview": "Review",
+  "submitConcernCategoryPrompt": "What type of concern is this?",
+  "submitConcernLoadCategoriesFailed": "Failed to load categories",
+  "submitConcernTitleHint": "Brief summary of your concern (min 5 characters)",
+  "submitConcernDescriptionLabel": "Description",
+  "submitConcernDescriptionHint": "Describe the concern in detail (min 10 characters)",
+  "submitConcernTitleMinLength": "Title must be at least 5 characters",
+  "submitConcernDescriptionMinLength": "Description must be at least 10 characters",
+  "submitConcernPhotosTitle": "Attach Photos (optional)",
+  "submitConcernPhotosLimit": "Up to {count} photos",
+  "@submitConcernPhotosLimit": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "submitConcernAnonymousTitle": "Submit Anonymously",
+  "submitConcernAnonymousSubtitle": "Your name and account will not be linked to this report.",
+  "submitConcernTakePhoto": "Take a Photo",
+  "submitConcernChooseGallery": "Choose from Gallery",
+  "submitConcernReviewTitle": "Review Your Report",
+  "submitConcernReviewCategory": "Category",
+  "submitConcernReviewPhotos": "Photos",
+  "submitConcernReviewSubmittedAs": "Submitted As",
+  "submitConcernReviewAnonymousWarning": "Anonymous reports cannot be tracked. Save your reference number.",
+  "submitConcernSubmitButton": "Submit Report",
+  "submitConcernStep1Incomplete": "Please complete Step 1: select a category, title (min 5 chars), and description (min 10 chars).",
+  "submitConcernSubmissionFailed": "Submission failed: {error}",
+  "@submitConcernSubmissionFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "submitConcernPhotosAttached": "{count} attached",
+  "@submitConcernPhotosAttached": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
+  "adminDashboardJoinApplicationsTooltip": "Join Applications",
+  "adminDashboardPendingApprovalsTooltip": "Pending Approvals",
+  "adminDashboardMemberManagementTooltip": "Member Management",
+  "adminDashboardStudentRosterTooltip": "Student Roster",
+  "adminDashboardSchoolGradesTooltip": "School Grades",
+  "adminDashboardRolesTooltip": "Roles & Permissions",
+  "adminDashboardOrgSettingsTooltip": "Organization Settings",
+  "adminDashboardTabAll": "All",
+  "adminDashboardTabSubmitted": "Submitted",
+  "adminDashboardTabUnderReview": "Under Review",
+  "adminDashboardTabInProgress": "In Progress",
+  "adminDashboardTabResolved": "Resolved",
+  "adminDashboardTabClosed": "Closed",
+  "adminDashboardStatTotal": "Total",
+  "adminDashboardStatSubmitted": "Submitted",
+  "adminDashboardStatUnderReview": "Under Review",
+  "adminDashboardStatInProgress": "In Progress",
+  "adminDashboardStatResolved": "Resolved",
+  "adminDashboardStatClosed": "Closed",
+  "adminDashboardSearchHint": "Search by title or reference number...",
+  "adminDashboardLoadingReports": "Loading reports...",
+  "adminDashboardLoadFailed": "Failed to load reports",
+  "adminDashboardNoResults": "No results",
+  "adminDashboardNoReports": "No reports",
+  "adminDashboardNoReportsMatch": "No reports match \"{query}\".",
+  "@adminDashboardNoReportsMatch": {
+    "placeholders": {
+      "query": { "type": "String" }
+    }
+  },
+  "adminDashboardNoActiveReports": "No active reports submitted yet.",
+  "adminDashboardNoClosedReports": "No closed reports.",
+  "adminDashboardNoTabReports": "No \"{tab}\" reports.",
+  "@adminDashboardNoTabReports": {
+    "placeholders": {
+      "tab": { "type": "String" }
+    }
+  },
+  "adminDashboardUpdateStatusFailed": "Failed to update status: {error}",
+  "@adminDashboardUpdateStatusFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "adminDashboardReportsCount": "{label}: {count, plural, =1{1 report} other{{count} reports}}",
+  "@adminDashboardReportsCount": {
+    "placeholders": {
+      "label": { "type": "String" },
+      "count": { "type": "int" }
+    }
+  },
+  "adminDashboardReportPriorityLow": "Low",
+  "adminDashboardReportPriorityMedium": "Medium",
+  "adminDashboardReportPriorityHigh": "High",
+  "adminDashboardReportPriorityUrgent": "Urgent",
+
+  "memberManagementSearchHint": "Search by name or email…",
+  "memberManagementUpdatedCount": "Updated {count} member(s)",
+  "@memberManagementUpdatedCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "memberManagementUpdated": "Member updated",
+  "memberManagementBlocked": "Member blocked",
+  "memberManagementUnblocked": "Member unblocked",
+  "memberManagementLoadFailed": "Failed to load: {error}",
+  "@memberManagementLoadFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "memberManagementEmptyActive": "No active members found.",
+  "memberManagementEmptyBlocked": "No blocked members found.",
+  "memberManagementEmptyUnenrolled": "No unenrolled members found.",
+  "memberManagementEmptyFiltered": "No members match your filters.",
+  "memberManagementSelectedCount": "{count} selected",
+  "@memberManagementSelectedCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "memberManagementBulkBlock": "Block",
+  "memberManagementBulkUnenroll": "Unenroll",
+  "memberManagementBulkReenroll": "Re-enroll",
+  "memberManagementBulkAssignGrade": "Assign grade",
+  "memberManagementReenroll": "Re-enroll",
+  "memberManagementUnblock": "Unblock",
+  "memberManagementUnenroll": "Unenroll",
+  "memberManagementAssignGrade": "Assign grade",
+  "memberManagementBlock": "Block",
+  "memberManagementEditProfile": "Edit profile…",
+  "memberManagementResetPassword": "Reset password…",
+  "memberManagementBlockDialogTitle": "Block {name}?",
+  "@memberManagementBlockDialogTitle": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "memberManagementUnenrollDialogTitle": "Unenroll {name}?",
+  "@memberManagementUnenrollDialogTitle": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "memberManagementReenrollDialogTitle": "Re-enroll {name}?",
+  "@memberManagementReenrollDialogTitle": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "memberManagementAssignGradeDialogTitle": "Assign grade to {name}",
+  "@memberManagementAssignGradeDialogTitle": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "memberManagementGradeAssigned": "Grade assigned",
+  "memberManagementNoAccess": "You do not have permission to manage enrolled members.",
+  "memberManagementBlockReasonHint": "Why is this account being blocked?",
+  "memberManagementConfirmBlockTitle": "Confirm block",
+  "memberManagementConfirmBlockMessage": "{name} will lose access immediately.",
+  "@memberManagementConfirmBlockMessage": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "memberManagementConfirmBlockAction": "Confirm block",
+  "memberManagementUnblockMessage": "This member will regain access to the organization.",
+  "memberManagementUnenrollTitleOne": "Unenroll {name}?",
+  "@memberManagementUnenrollTitleOne": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "memberManagementUnenrollTitleMany": "Unenroll {count} members?",
+  "@memberManagementUnenrollTitleMany": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "memberManagementUnenrollHint": "e.g. Graduated, transferred, left the school",
+  "memberManagementConfirmUnenrollTitle": "Confirm unenrollment",
+  "memberManagementConfirmUnenrollMessageOne": "This member will lose access immediately.",
+  "memberManagementConfirmUnenrollMessageMany": "{count} members will lose access immediately.",
+  "@memberManagementConfirmUnenrollMessageMany": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "memberManagementConfirmUnenrollAction": "Confirm unenroll",
+  "memberManagementBulkBlockTitle": "Block {count} members?",
+  "@memberManagementBulkBlockTitle": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "memberManagementBulkBlockHint": "Why are these accounts being blocked?",
+  "memberManagementBulkBlockConfirmMessage": "{count} member(s) will lose access immediately.",
+  "@memberManagementBulkBlockConfirmMessage": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "memberManagementBulkUnblockTitle": "Unblock {count} members?",
+  "@memberManagementBulkUnblockTitle": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "memberManagementBulkUnblockMessage": "These members will regain access to the organization.",
+  "memberManagementConfirmUnblockAction": "Confirm unblock",
+  "memberManagementReenrollTitleOne": "Re-enroll {name}?",
+  "@memberManagementReenrollTitleOne": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "memberManagementReenrollTitleMany": "Re-enroll {count} members?",
+  "@memberManagementReenrollTitleMany": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "memberManagementReenrollMessageOne": "This member will regain full access to the organization.",
+  "memberManagementReenrollMessageMany": "{count} members will regain full access.",
+  "@memberManagementReenrollMessageMany": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "memberManagementConfirmReenrollAction": "Confirm re-enroll",
+  "memberManagementConfirmGradeTitle": "Confirm grade assignment",
+  "memberManagementConfirmGradeOne": "Set {name} to Grade {grade}?",
+  "@memberManagementConfirmGradeOne": {
+    "placeholders": {
+      "name": { "type": "String" },
+      "grade": { "type": "int" }
+    }
+  },
+  "memberManagementConfirmGradeMany": "Set {count} members to Grade {grade}?",
+  "@memberManagementConfirmGradeMany": {
+    "placeholders": {
+      "count": { "type": "int" },
+      "grade": { "type": "int" }
+    }
+  },
+  "memberManagementBlockReasonLabel": "Block reason: {reason}",
+  "@memberManagementBlockReasonLabel": {
+    "placeholders": {
+      "reason": { "type": "String" }
+    }
+  },
+  "memberManagementUnenrollReasonLabel": "Unenrolled: {reason}",
+  "@memberManagementUnenrollReasonLabel": {
+    "placeholders": {
+      "reason": { "type": "String" }
+    }
+  },
+  "memberManagementPreviewAndMore": "…and {count} more",
+  "@memberManagementPreviewAndMore": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
+  "studentRosterSearchHint": "Search by name or student ID…",
+  "studentRosterAssignSelected": "Assign grade to selected",
+  "studentRosterAddStudent": "Add Student",
+  "studentRosterAssignGradeTitle": "Assign grade",
+  "studentRosterAllSelected": "All {count} selected",
+  "@studentRosterAllSelected": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "studentRosterOfficialPhotoTitle": "Official photo — {name}",
+  "@studentRosterOfficialPhotoTitle": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "studentRosterSectionLabel": "Section: {section}",
+  "@studentRosterSectionLabel": {
+    "placeholders": {
+      "section": { "type": "String" }
+    }
+  },
+  "studentRosterAssignFailed": "Failed to assign grades: {error}",
+  "@studentRosterAssignFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "studentRosterUpdatedCount": "Updated {count} student(s)",
+  "@studentRosterUpdatedCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "studentRosterLoadFailed": "Failed to load: {error}",
+  "@studentRosterLoadFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "studentRosterNoPermission": "You do not have permission to manage the student roster.",
+  "studentRosterNotSchool": "Student roster and grades are only available for school-type organizations.",
+  "studentRosterEmpty": "No students yet. Tap Add Student to provision an account.",
+  "studentRosterNoMatch": "No students match your filters.",
+  "studentRosterAssignGradeWhichGroup": "{count} students are selected. Assign a grade to which group?",
+  "@studentRosterAssignGradeWhichGroup": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "studentRosterOnlyNamed": "Only {name}",
+  "@studentRosterOnlyNamed": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "studentRosterOnlyThisStudent": "Only this student",
+  "studentRosterAssignGradeToOne": "Assign grade to {name}",
+  "@studentRosterAssignGradeToOne": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "studentRosterAssignGradeToMany": "Assign grade to {count} students",
+  "@studentRosterAssignGradeToMany": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "studentRosterConfirmGradeTitle": "Confirm grade assignment",
+  "studentRosterConfirmGradeOne": "Set {name} to Grade {grade}?",
+  "@studentRosterConfirmGradeOne": {
+    "placeholders": {
+      "name": { "type": "String" },
+      "grade": { "type": "int" }
+    }
+  },
+  "studentRosterConfirmGradeMany": "Set {count} students to Grade {grade}?",
+  "@studentRosterConfirmGradeMany": {
+    "placeholders": {
+      "count": { "type": "int" },
+      "grade": { "type": "int" }
+    }
+  },
+  "studentRosterPreviewAndMore": "…and {count} more",
+  "@studentRosterPreviewAndMore": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
+  "rolesManagementTitle": "Roles & Permissions",
+  "rolesAssignments": "Assignments",
+  "rolesCapabilities": "Capabilities",
+  "rolesCreateRole": "Create Role",
+  "rolesSystemRoles": "System Roles",
+  "rolesCustomRoles": "Custom Roles",
+  "rolesNoCapabilities": "No capabilities assigned",
+  "rolesMoreCapabilities": "+{count} more",
+  "@rolesMoreCapabilities": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "rolesAssignUsers": "Assign Users",
+  "rolesSeedFailed": "Seed failed: {error}",
+  "@rolesSeedFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "rolesSeedSuccess": "Default roles added successfully",
+  "rolesCreateManually": "Create Role Manually",
+  "rolesNoRolesEmpty": "No roles defined yet",
+  "rolesSystemBadge": "System",
+  "rolesSeedDefaultRoles": "Seed Default Roles",
+  "rolesSeeding": "Seeding…",
+  "rolesEmptyDescription": "Create your first custom role to grant staff\nspecific capabilities within this organisation.",
+  "rolesAllCapabilitiesTitle": "{roleName} — All Capabilities",
+  "@rolesAllCapabilitiesTitle": {
+    "placeholders": {
+      "roleName": { "type": "String" }
+    }
+  },
+
+  "roleAssignmentsTitle": "User Role Assignments",
+  "roleAssignmentsNoUsers": "No approved users found.",
+  "roleAssignmentsNoRoles": "No roles assigned",
+
+  "assignRoleTitle": "Assign: {roleName}",
+  "@assignRoleTitle": {
+    "placeholders": {
+      "roleName": { "type": "String" }
+    }
+  },
+  "assignRoleSuccess": "Role assigned successfully",
+  "assignRoleFailed": "Assignment failed: {error}",
+  "@assignRoleFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "assignRoleScopeType": "Scope Type",
+  "assignRoleRemoveTitle": "Remove Assignment?",
+  "assignRoleRemoveConfirm": "Remove this role assignment ({scope})? The user will immediately lose the permissions granted by this role.",
+
+  "capabilitiesTitle": "Capabilities",
+  "capabilitiesTabCustom": "Custom",
+  "capabilitiesTabBuiltins": "Built-ins",
+  "capabilitiesDeleteTitle": "Delete Capability?",
+  "capabilitiesDeleteBody": "\"{name}\" will be removed. Roles using it will lose this capability assignment.",
+  "@capabilitiesDeleteBody": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "capabilitiesCreateLabel": "Create Custom Capability",
+  "capabilitiesBackedByLabel": "Backed by (built-in action)",
+  "capabilitiesBuiltinsIntro": "These are the built-in capabilities available across all SpeakUp Connect organisations. They cannot be modified or removed — only custom capability aliases can be created on top of them.",
+
+  "roleEditorCreateTitle": "Create Role",
+  "roleEditorEditTitle": "Edit Role",
+  "roleEditorRoleDetails": "Role Details",
+  "roleEditorRoleName": "Role Name",
+  "roleEditorDescription": "Description",
+  "roleEditorCapabilities": "Capabilities",
+  "roleEditorManageCustom": "Manage Custom",
+  "roleEditorCapabilitiesHint": "Select the built-in capabilities this role grants.",
+  "roleEditorCustomCapabilities": "Custom Capabilities",
+  "roleEditorCustomCapabilitiesHint": "Org-defined capability aliases built on top of built-ins.",
+  "roleEditorNoCustomCaps": "No custom capabilities yet.",
+  "roleEditorCreateCustomCap": "Create a custom capability →",
+  "roleEditorSaveRole": "Save Role",
+  "roleEditorSaving": "Saving…",
+  "roleEditorSaved": "Role saved",
+  "roleEditorSaveFailed": "Save failed: {error}",
+  "@roleEditorSaveFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "roleEditorAssignUsers": "Assign Users",
+  "roleEditorBasedOn": "Based on: {permission}",
+  "@roleEditorBasedOn": {
+    "placeholders": {
+      "permission": { "type": "String" }
+    }
+  },
+
+  "orgSettingsTitle": "Organization Settings",
+  "orgSettingsDisplayName": "Display Name",
+  "orgSettingsDisplayNameHint": "e.g. Riverside High",
+  "orgSettingsBrandingUpdated": "Branding updated successfully",
+  "orgSettingsSaveFailed": "Save failed: {error}",
+  "@orgSettingsSaveFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "orgSettingsContrastWarning": "Contrast Warning",
+  "orgSettingsSaveAnyway": "Save Anyway",
+  "orgSettingsAutoAdjustSave": "Auto-adjust & Save",
+  "orgSettingsSeedCategoriesFailed": "Seed failed: {error}",
+  "@orgSettingsSeedCategoriesFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "orgSettingsSeedCategoriesSuccess": "Default categories added successfully",
+  "orgSettingsChangeOrgTypeTitle": "Change organization type?",
+  "orgSettingsChangeOrgTypeConfirm": "Change from {fromType} to {toType}?\n\n{description}\n\nThis affects which admin features are available (such as student grades and roster for schools).",
+  "@orgSettingsChangeOrgTypeConfirm": {
+    "placeholders": {
+      "fromType": { "type": "String" },
+      "toType": { "type": "String" },
+      "description": { "type": "String" }
+    }
+  },
+  "orgSettingsOrgTypeSaved": "Organization type set to {type}",
+  "@orgSettingsOrgTypeSaved": {
+    "placeholders": {
+      "type": { "type": "String" }
+    }
+  },
+  "orgSettingsOrgTypeFailed": "Update failed: {error}",
+  "@orgSettingsOrgTypeFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "orgSettingsTypeLabel": "Type",
+  "orgSettingsSaveType": "Save type",
+  "orgSettingsAllowPersonalPhotos": "Allow personal profile photos",
+  "orgSettingsRequireApproval": "Require approval before publishing",
+  "orgSettingsOrgNameTitle": "Organization Name",
+  "orgSettingsOrgNameSubtitle": "Displayed on the splash screen as \"SpeakUp [Name]\".",
+  "orgSettingsBrandColorsTitle": "Brand Colors",
+  "orgSettingsBrandColorsSubtitle": "Enter 6-digit hex codes from the organization's brand guide (e.g. #1A73E8). Changes apply to all connected devices in real time and are cached locally for instant startup.",
+  "orgSettingsPrimaryColor": "Primary Color",
+  "orgSettingsSecondaryColor": "Secondary Color",
+  "orgSettingsColorHint": "e.g. #1A73E8",
+  "orgSettingsSecondaryColorHint": "e.g. #000000",
+  "orgSettingsSaveBranding": "Save Branding",
+  "orgSettingsSaving": "Saving…",
+  "orgSettingsBrandingInfo": "After saving, the new colors will appear immediately on all connected devices. On this device the branding is also written to local storage, so it loads correctly on the next app launch before Firestore responds.",
+  "orgSettingsReportCategoriesTitle": "Report Categories",
+  "orgSettingsReportCategoriesSubtitle": "Categories are required for users to submit concerns. Tap the button below to populate the default set.",
+  "orgSettingsCategoriesConfigured": "{count} categories configured",
+  "@orgSettingsCategoriesConfigured": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "orgSettingsAddDefaultCategories": "Add Default Categories",
+  "orgSettingsAddingCategories": "Adding…",
+  "orgSettingsOrgTypeTitle": "Organization Type",
+  "orgSettingsOrgTypeSubtitle": "Determines which features are available. Schools can use student grades and roster; municipalities and NGOs use member management without grades.",
+  "orgSettingsMemberPhotosTitle": "Member Profile Photos",
+  "orgSettingsMemberPhotosSubtitle": "When enabled, students may upload a personal badge in Settings. Official school photos uploaded by staff remain a separate permanent record and are never overwritten.",
+  "orgSettingsMemberPhotosOn": "Currently ON — members can add a personal badge in Settings",
+  "orgSettingsMemberPhotosOff": "Currently OFF — only official school photos are shown",
+  "orgSettingsMemberPhotosEnabled": "Members can now upload personal profile photos",
+  "orgSettingsMemberPhotosDisabled": "Personal profile photos are disabled for members",
+  "orgSettingsReminderApprovalTitle": "Reminder Approval",
+  "orgSettingsReminderApprovalSubtitle": "When enabled, members who can broadcast reminders but cannot approve them must submit reminders for review before they are published.",
+  "orgSettingsReminderApprovalOn": "Currently ON — reminders from non-approvers are held for review",
+  "orgSettingsReminderApprovalOff": "Currently OFF — reminders publish immediately",
+  "orgSettingsReminderApprovalEnabled": "Reminders now require approval before publishing",
+  "orgSettingsReminderApprovalDisabled": "Reminders now publish directly",
+  "orgSettingsPermissionDenied": "You do not have permission to change this setting.",
+  "orgSettingsPrimarySwatch": "Primary",
+  "orgSettingsSecondarySwatch": "Secondary",
+  "orgSettingsRequired": "Required",
+  "orgSettingsHexInvalid": "Enter a valid 6-digit hex (e.g. #1A73E8)",
+  "orgSettingsPrimaryHexInvalid": "Primary color must be a valid 6-digit hex (e.g. #1A73E8).",
+  "orgSettingsSecondaryHexInvalid": "Secondary color must be a valid 6-digit hex (e.g. #000000).",
+  "orgSettingsContrastLightBackgrounds": "light backgrounds",
+  "orgSettingsContrastDarkBackgrounds": "dark backgrounds",
+  "orgSettingsContrastLightAndDarkBackgrounds": "light and dark backgrounds",
+  "orgSettingsContrastSecondaryFallback": "Your primary color ({primary}) isn't visible enough on {surfaces} — it will blend into the background.\n\nYour secondary color ({secondary}) will be used as a fallback for buttons and icons, but you may want a more suitable primary.\n\nYou can save anyway or let the app shift the primary to the nearest contrast-safe shade.",
+  "@orgSettingsContrastSecondaryFallback": {
+    "placeholders": {
+      "primary": { "type": "String" },
+      "secondary": { "type": "String" },
+      "surfaces": { "type": "String" }
+    }
+  },
+  "orgSettingsContrastNeither": "Neither your primary ({primary}) nor secondary ({secondary}) color provides enough contrast against {surfaces}. Buttons, links, and icons may be hard to see.\n\nYou can save anyway, or let the app shift the primary color to the nearest contrast-safe shade.",
+  "@orgSettingsContrastNeither": {
+    "placeholders": {
+      "primary": { "type": "String" },
+      "secondary": { "type": "String" },
+      "surfaces": { "type": "String" }
+    }
+  },
+  "orgSettingsProfilePhotoSaveFailed": "Profile photo setting did not save.",
+  "orgSettingsReminderApprovalSaveFailed": "Reminder approval setting did not save.",
+  "orgTypeAdminSchool": "School",
+  "orgTypeAdminUniversity": "University",
+  "orgTypeAdminLgu": "Municipality / LGU",
+  "orgTypeAdminNgo": "NGO",
+  "orgTypeAdminChurch": "Church",
+  "orgTypeAdminCorporation": "Corporation",
+  "orgTypeAdminOther": "Other",
+  "orgTypeAdminSchoolDesc": "Enables student grades, roster, and class-based features.",
+  "orgTypeAdminUniversityDesc": "Enables student grades, roster, and class-based features.",
+  "orgTypeAdminLguDesc": "For municipalities, barangays, and local government units.",
+  "orgTypeAdminNgoDesc": "For non-profit and community organizations.",
+  "orgTypeAdminChurchDesc": "For churches and faith-based communities.",
+  "orgTypeAdminCorporationDesc": "For companies and workplace communities.",
+  "orgTypeAdminOtherDesc": "Generic organization without type-specific features.",
+
+  "commonClose": "Close",
+  "commonEdit": "Edit",
+  "commonRequired": "Required",
+  "commonErrorPrefix": "Error: {error}",
+  "@commonErrorPrefix": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "commonRole": "Role",
+  "commonNameRequired": "Name is required",
+  "adminDashboardAnonymousDate": "Anonymous · {date}",
+  "@adminDashboardAnonymousDate": {
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
+  "adminDashboardSubmitterDate": "{name} · {date}",
+  "@adminDashboardSubmitterDate": {
+    "placeholders": {
+      "name": { "type": "String" },
+      "date": { "type": "String" }
+    }
+  },
+
+  "rolesEdit": "Edit",
+  "roleEditorNameHint": "e.g. Guidance Counselor",
+  "roleEditorDescriptionHint": "Briefly describe who this role is for",
+
+  "assignRoleSelectUser": "Select User",
+  "assignRoleSearchHint": "Search by name or student ID",
+  "assignRoleConfirmAssignment": "Confirm Assignment",
+  "assignRoleAssigning": "Assigning…",
+  "assignRoleNoUsersFound": "No users found.",
+  "assignRoleScopeTitle": "Role Scope",
+  "assignRoleScopeSubtitle": "Define how broadly this role applies for this user.",
+  "assignRoleScopeOptionOrg": "Org-wide",
+  "assignRoleScopeOptionTag": "Specific tag",
+  "assignRoleScopeOptionClass": "Specific class / section",
+  "assignRoleScopeOptionGroup": "Specific group / club",
+  "assignRoleScopeOptionDepartment": "Specific department",
+  "assignRoleScopeOptionBarangay": "Specific barangay",
+  "assignRoleScopeFieldTag": "Tag",
+  "assignRoleScopeFieldClassId": "Class ID",
+  "assignRoleScopeFieldGroupId": "Group ID",
+  "assignRoleScopeFieldDepartmentId": "Department ID",
+  "assignRoleScopeFieldBarangayId": "Barangay ID",
+  "assignRoleScopeHintTag": "e.g. guidance",
+  "assignRoleScopeHintClass": "Firestore class document ID",
+  "assignRoleScopeHintGroup": "Firestore group document ID",
+  "assignRoleScopeHintDepartment": "Firestore department document ID",
+  "assignRoleScopeHintBarangay": "Firestore barangay document ID",
+  "assignRoleScopeChipOrg": "Org-wide",
+  "assignRoleScopeChipTag": "Tag",
+  "assignRoleScopeChipClass": "Class",
+  "assignRoleScopeChipGroup": "Group",
+  "assignRoleScopeChipDepartment": "Department",
+  "assignRoleScopeChipDept": "Dept",
+  "assignRoleScopeChipBarangay": "Barangay",
+  "assignRoleScopeValueTag": "Tag: {id}",
+  "@assignRoleScopeValueTag": {
+    "placeholders": {
+      "id": { "type": "String" }
+    }
+  },
+  "assignRoleScopeValueClass": "Class: {id}",
+  "@assignRoleScopeValueClass": {
+    "placeholders": {
+      "id": { "type": "String" }
+    }
+  },
+  "assignRoleScopeValueGroup": "Group: {id}",
+  "@assignRoleScopeValueGroup": {
+    "placeholders": {
+      "id": { "type": "String" }
+    }
+  },
+  "assignRoleScopeValueDepartment": "Department: {id}",
+  "@assignRoleScopeValueDepartment": {
+    "placeholders": {
+      "id": { "type": "String" }
+    }
+  },
+  "assignRoleScopeValueBarangay": "Barangay: {id}",
+  "@assignRoleScopeValueBarangay": {
+    "placeholders": {
+      "id": { "type": "String" }
+    }
+  },
+  "assignRoleCurrentAssignments": "Current Assignments",
+  "assignRoleAssignedDate": "Assigned {date}",
+  "@assignRoleAssignedDate": {
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
+  "assignRoleRemoveTooltip": "Remove assignment",
+  "assignRoleRevokeHint": "Tap − to revoke an existing assignment.",
+  "assignRoleRoleChip": "{role} · {scope}",
+  "@assignRoleRoleChip": {
+    "placeholders": {
+      "role": { "type": "String" },
+      "scope": { "type": "String" }
+    }
+  },
+
+  "capabilitiesLoadFailed": "Could not load custom capabilities:\n{error}",
+  "@capabilitiesLoadFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "capabilitiesDeleteTooltip": "Delete",
+  "capabilitiesNewCustomTitle": "New Custom Capability",
+  "capabilitiesNameLabel": "Capability Name",
+  "capabilitiesNameHint": "e.g. Review Guidance Referral",
+  "capabilitiesNameRequired": "Name is required",
+  "capabilitiesDescriptionLabel": "Description (optional)",
+  "capabilitiesSelectBacking": "Select a backing action",
+  "capabilitiesRestrictTagLabel": "Restrict to tag (optional)",
+  "capabilitiesRestrictTagHint": "e.g. guidance",
+  "capabilitiesRestrictTagHelper": "Leave empty to apply to all content with this action.",
+  "capabilitiesCreating": "Creating…",
+  "capabilitiesNoCustomYet": "No custom capabilities yet",
+  "capabilitiesNoCustomDescription": "Create a capability alias to give school-specific names to built-in actions.",
+
+  "permissionViewAllReports": "View all org reports",
+  "permissionViewGroupReports": "View reports in assigned groups",
+  "permissionApproveReport": "Approve / close reports",
+  "permissionManageReports": "Update status, escalate & add notes",
+  "permissionPostBulletinOrgWide": "Post bulletins org-wide",
+  "permissionPostBulletinToGroup": "Post bulletins to own groups",
+  "permissionBroadcastReminders": "Broadcast reminders",
+  "permissionApproveReminders": "Approve / reject reminders",
+  "permissionManageGroupRoster": "Manage own group roster",
+  "permissionManageClassRoster": "Manage class roster (school only)",
+  "permissionApproveApplications": "Approve join applications",
+  "permissionBlockUsers": "Suspend or block users",
+  "permissionManageOrganizationSettings": "Manage org settings & branding",
+  "permissionManageRoles": "Manage roles & assign permissions",
+  "permissionManageTranslations": "Translation moderator (edit UI strings)",
+  "permissionViewAuditLogs": "View audit logs",
+  "permissionGroupReports": "Reports",
+  "permissionGroupBulletins": "Bulletins & News",
+  "permissionGroupReminders": "Reminders",
+  "permissionGroupRosterUsers": "Roster & Users",
+  "permissionGroupAdministration": "Administration",
+
   "translationSearchHint": "Search keys or English text",
   "translationBatchAi": "Translate missing (AI)",
   "translationBatchAiNoneMissing": "No missing strings to translate.",

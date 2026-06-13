@@ -15,6 +15,7 @@ tools/translation-helper/firebase-config.js
 .obsidian/
 migrate_working_dir/
 All .md files.md
+**/node_modules/
 
 # Temporary / backup files
 *~

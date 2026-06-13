@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:speakup_connect/core/l10n/app_localizations_extension.dart';
 import 'package:speakup_connect/core/permissions/app_permission.dart';
+import 'package:speakup_connect/core/permissions/permission_l10n.dart';
 import 'package:speakup_connect/features/roles/domain/entities/custom_capability_entity.dart';
 import 'package:speakup_connect/features/roles/presentation/providers/roles_provider.dart';
 import 'package:speakup_connect/shared/widgets/app_button.dart';
@@ -20,15 +22,16 @@ class CapabilitiesScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     return DefaultTabController(
       length: 2,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Capabilities'),
-          bottom: const TabBar(
+          title: Text(l10n.capabilitiesTitle),
+          bottom: TabBar(
             tabs: [
-              Tab(text: 'Custom'),
-              Tab(text: 'Built-ins'),
+              Tab(text: l10n.capabilitiesTabCustom),
+              Tab(text: l10n.capabilitiesTabBuiltins),
             ],
           ),
         ),
@@ -56,7 +59,7 @@ class _CustomCapabilitiesTab extends ConsumerWidget {
       skipLoadingOnRefresh: false,
       loading: () => const AppLoadingIndicator(),
       error: (e, _) => AppErrorWidget(
-        message: 'Could not load custom capabilities:\n$e',
+        message: context.l10n.capabilitiesLoadFailed('$e'),
         onRetry: () => ref.invalidate(customCapabilitiesProvider),
       ),
       data: (caps) => _CustomCapsList(caps: caps),
@@ -71,6 +74,7 @@ class _CustomCapsList extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     return Column(
       children: [
         Expanded(
@@ -88,7 +92,7 @@ class _CustomCapsList extends ConsumerWidget {
         Padding(
           padding: const EdgeInsets.all(16),
           child: AppButton.primary(
-            label: 'Create Custom Capability',
+            label: l10n.capabilitiesCreateLabel,
             onPressed: () => _showCreateSheet(context, ref),
           ),
         ),
@@ -121,6 +125,7 @@ class _CustomCapTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef widgetRef) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     final resolvedPerm = AppPermission.fromKey(cap.resolvedAction);
 
@@ -137,7 +142,7 @@ class _CustomCapTile extends ConsumerWidget {
               spacing: 4,
               children: [
                 _MiniChip(
-                  label: resolvedPerm.displayName,
+                  label: localizedPermissionName(l10n, resolvedPerm),
                   icon: Icons.bolt_outlined,
                 ),
                 if (cap.tagScope != null)
@@ -152,7 +157,7 @@ class _CustomCapTile extends ConsumerWidget {
       isThreeLine: true,
       trailing: IconButton(
         icon: Icon(Icons.delete_outline, color: theme.colorScheme.error),
-        tooltip: 'Delete',
+        tooltip: l10n.capabilitiesDeleteTooltip,
         onPressed: () => _confirmDelete(context, widgetRef),
       ),
     );
@@ -162,19 +167,18 @@ class _CustomCapTile extends ConsumerWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('Delete Capability?'),
+        title: Text(context.l10n.capabilitiesDeleteTitle),
         content: Text(
-          '"${cap.displayName}" will be removed. Roles using it will '
-          'lose this capability assignment.',
+          context.l10n.capabilitiesDeleteBody(cap.displayName),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
+            child: Text(context.l10n.commonCancel),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Delete'),
+            child: Text(context.l10n.commonRemove),
           ),
         ],
       ),
@@ -228,8 +232,9 @@ class _CreateCapabilitySheetState
 
     final state = ref.read(customCapabilityWriterProvider);
     if (state.hasError && mounted) {
+      final l10n = context.l10n;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: ${state.error}')),
+        SnackBar(content: Text(l10n.commonErrorPrefix('${state.error}'))),
       );
     } else if (!state.hasError && mounted) {
       ref.invalidate(customCapabilitiesProvider);
@@ -239,6 +244,7 @@ class _CreateCapabilitySheetState
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     final saving = ref.watch(customCapabilityWriterProvider).isLoading;
 
@@ -256,55 +262,56 @@ class _CreateCapabilitySheetState
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              'New Custom Capability',
+              l10n.capabilitiesNewCustomTitle,
               style: theme.textTheme.titleMedium
                   ?.copyWith(fontWeight: FontWeight.w700),
             ),
             const SizedBox(height: 16),
             AppTextField(
               controller: _nameCtrl,
-              label: 'Capability Name',
-              hint: 'e.g. Review Guidance Referral',
+              label: l10n.capabilitiesNameLabel,
+              hint: l10n.capabilitiesNameHint,
               validator: (v) => (v == null || v.trim().isEmpty)
-                  ? 'Name is required'
+                  ? l10n.capabilitiesNameRequired
                   : null,
             ),
             const SizedBox(height: 12),
             AppTextField(
               controller: _descCtrl,
-              label: 'Description (optional)',
+              label: l10n.capabilitiesDescriptionLabel,
               maxLines: 2,
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<AppPermission>(
               value: _selectedAction,
-              decoration: const InputDecoration(
-                labelText: 'Backed by (built-in action)',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: l10n.capabilitiesBackedByLabel,
+                border: const OutlineInputBorder(),
               ),
               items: AppPermission.values
                   .map(
                     (p) => DropdownMenuItem(
                       value: p,
-                      child: Text(p.displayName),
+                      child: Text(localizedPermissionName(l10n, p)),
                     ),
                   )
                   .toList(),
               onChanged: (v) => setState(() => _selectedAction = v),
               validator: (v) =>
-                  v == null ? 'Select a backing action' : null,
+                  v == null ? l10n.capabilitiesSelectBacking : null,
             ),
             const SizedBox(height: 12),
             AppTextField(
               controller: _tagCtrl,
-              label: 'Restrict to tag (optional)',
-              hint: 'e.g. guidance',
-              helperText:
-                  'Leave empty to apply to all content with this action.',
+              label: l10n.capabilitiesRestrictTagLabel,
+              hint: l10n.capabilitiesRestrictTagHint,
+              helperText: l10n.capabilitiesRestrictTagHelper,
             ),
             const SizedBox(height: 20),
             AppButton.primary(
-              label: saving ? 'Creating…' : 'Create Capability',
+              label: saving
+                  ? l10n.capabilitiesCreating
+                  : l10n.capabilitiesCreateLabel,
               onPressed: saving ? null : _submit,
             ),
           ],
@@ -321,12 +328,15 @@ class _BuiltInsTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
 
     // Build group map.
     final Map<String, List<AppPermission>> grouped = {};
     for (final p in AppPermission.values) {
-      grouped.putIfAbsent(p.groupLabel, () => []).add(p);
+      grouped
+          .putIfAbsent(localizedPermissionGroup(l10n, p), () => [])
+          .add(p);
     }
 
     return ListView(
@@ -335,10 +345,7 @@ class _BuiltInsTab extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: Text(
-            'These are the built-in capabilities available across '
-            'all SpeakUp Connect organisations. They cannot be modified '
-            'or removed — only custom capability aliases can be created '
-            'on top of them.',
+            l10n.capabilitiesBuiltinsIntro,
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
@@ -362,7 +369,7 @@ class _BuiltInsTab extends StatelessWidget {
               ...entry.value.map(
                 (p) => ListTile(
                   leading: const Icon(Icons.bolt_outlined, size: 20),
-                  title: Text(p.displayName),
+                  title: Text(localizedPermissionName(l10n, p)),
                   subtitle: Text(
                     p.key,
                     style: theme.textTheme.labelSmall?.copyWith(
@@ -411,6 +418,7 @@ class _EmptyCustomCapsPlaceholder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     return Center(
       child: Padding(
@@ -425,13 +433,12 @@ class _EmptyCustomCapsPlaceholder extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              'No custom capabilities yet',
+              l10n.capabilitiesNoCustomYet,
               style: theme.textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
             Text(
-              'Create a capability alias to give school-specific names '
-              'to built-in actions.',
+              l10n.capabilitiesNoCustomDescription,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),

@@ -3,13 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:speakup_connect/config/app_config.dart';
 import 'package:speakup_connect/core/constants/app_constants.dart';
+import 'package:speakup_connect/core/l10n/app_localizations_extension.dart';
 import 'package:speakup_connect/core/permissions/org_scope_type.dart';
 import 'package:speakup_connect/features/organization/data/models/user_profile_model.dart';
 import 'package:speakup_connect/features/organization/domain/entities/user_profile_entity.dart';
 import 'package:speakup_connect/features/roles/data/models/role_assignment_model.dart';
 import 'package:speakup_connect/features/roles/domain/entities/role_assignment_entity.dart';
 import 'package:speakup_connect/features/roles/domain/entities/role_entity.dart';
+import 'package:speakup_connect/features/roles/presentation/l10n/roles_ui_l10n.dart';
 import 'package:speakup_connect/features/roles/presentation/providers/roles_provider.dart';
+import 'package:speakup_connect/l10n/app_localizations.dart';
 import 'package:speakup_connect/shared/widgets/app_error_widget.dart';
 import 'package:speakup_connect/shared/widgets/app_loading_indicator.dart';
 
@@ -55,16 +58,17 @@ class UserAssignmentsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final usersAsync = ref.watch(_usersProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('User Role Assignments')),
+      appBar: AppBar(title: Text(l10n.roleAssignmentsTitle)),
       body: usersAsync.when(
         loading: () => const AppLoadingIndicator(),
         error: (e, _) => AppErrorWidget(message: e.toString()),
         data: (users) {
           if (users.isEmpty) {
-            return const Center(child: Text('No approved users found.'));
+            return Center(child: Text(l10n.roleAssignmentsNoUsers));
           }
           return ListView.separated(
             padding: const EdgeInsets.symmetric(vertical: 8),
@@ -87,6 +91,7 @@ class _UserAssignmentRow extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     final assignmentsAsync = ref.watch(_userAssignmentsProvider(user.userId));
     final rolesAsync = ref.watch(rolesProvider);
@@ -126,7 +131,7 @@ class _UserAssignmentRow extends ConsumerWidget {
                     child: CircularProgressIndicator(strokeWidth: 2),
                   ),
                   error: (e, _) => Text(
-                    'Error: $e',
+                    l10n.commonErrorPrefix('$e'),
                     style: TextStyle(
                       color: theme.colorScheme.error,
                       fontSize: 11,
@@ -135,7 +140,7 @@ class _UserAssignmentRow extends ConsumerWidget {
                   data: (assignments) {
                     if (assignments.isEmpty) {
                       return Text(
-                        'No roles assigned',
+                        l10n.roleAssignmentsNoRoles,
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: theme.colorScheme.onSurfaceVariant,
                           fontStyle: FontStyle.italic,
@@ -179,25 +184,21 @@ class _RoleChip extends StatelessWidget {
     return assignment.roleId;
   }
 
-  String get _scopeLabel {
-    if (assignment.scopeType == OrgScopeType.org) return 'Org-wide';
-    final prefix = switch (assignment.scopeType) {
-      OrgScopeType.tag => 'Tag',
-      OrgScopeType.classUnit => 'Class',
-      OrgScopeType.group => 'Group',
-      OrgScopeType.department => 'Dept',
-      OrgScopeType.barangay => 'Barangay',
-      OrgScopeType.org => '',
-    };
-    return '$prefix: ${assignment.scopeId ?? ''}';
+  String _scopeLabel(AppLocalizations l10n) {
+    return localizedOrgScopeAssignmentLabel(
+      l10n,
+      assignment.scopeType,
+      scopeId: assignment.scopeId,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     return Chip(
       avatar: const Icon(Icons.shield_outlined, size: 14),
-      label: Text('$_roleName · $_scopeLabel'),
+      label: Text(l10n.assignRoleRoleChip(_roleName, _scopeLabel(l10n))),
       labelStyle: theme.textTheme.labelSmall,
       visualDensity: VisualDensity.compact,
       side: BorderSide(color: theme.colorScheme.primary.withOpacity(0.4)),

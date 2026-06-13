@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:speakup_connect/core/constants/route_constants.dart';
+import 'package:speakup_connect/core/l10n/app_localizations_extension.dart';
 import 'package:speakup_connect/core/permissions/app_permission.dart';
 import 'package:speakup_connect/core/permissions/providers/permission_provider.dart';
 import 'package:speakup_connect/features/organization/domain/entities/roster_entry_entity.dart';
@@ -47,6 +48,7 @@ class _RosterManagementScreenState
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     final rosterAsync = ref.watch(rosterEntriesProvider);
     final entries = ref.watch(rosterViewEntriesProvider);
@@ -61,13 +63,19 @@ class _RosterManagementScreenState
       if (prev?.isLoading == true && !next.isLoading) {
         if (next.hasError) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text('Failed to assign grades: ${next.error}'),
+            content: Text(
+              l10n.studentRosterAssignFailed('${next.error}'),
+            ),
             backgroundColor: theme.colorScheme.error,
           ));
         } else if (next.hasValue && next.value != null) {
           setState(_selectedIds.clear);
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Updated ${next.value} student(s)')),
+            SnackBar(
+              content: Text(
+                l10n.studentRosterUpdatedCount(next.value!),
+              ),
+            ),
           );
         }
       }
@@ -76,11 +84,11 @@ class _RosterManagementScreenState
     return Scaffold(
       appBar: AppBar(
         leading: BackButton(onPressed: () => context.pop()),
-        title: const Text('Student Roster'),
+        title: Text(l10n.settingsStudentRoster),
         actions: [
           if (_isOrgAdmin)
             IconButton(
-              tooltip: 'Add student',
+              tooltip: l10n.studentRosterAddStudent,
               icon: const Icon(Icons.person_add_alt_1_outlined),
               onPressed: busy ? null : () => context.push(Routes.addStudent),
             ),
@@ -99,7 +107,9 @@ class _RosterManagementScreenState
                           );
                         }
                       }),
-              child: Text(allSelected ? 'Clear all' : 'Select all'),
+              child: Text(
+                allSelected ? l10n.commonClearAll : l10n.commonSelectAll,
+              ),
             ),
         ],
       ),
@@ -115,10 +125,10 @@ class _RosterManagementScreenState
                     children: [
                       TextField(
                         controller: _searchController,
-                        decoration: const InputDecoration(
-                          hintText: 'Search by name or student ID…',
-                          prefixIcon: Icon(Icons.search),
-                          border: OutlineInputBorder(),
+                        decoration: InputDecoration(
+                          hintText: l10n.studentRosterSearchHint,
+                          prefixIcon: const Icon(Icons.search),
+                          border: const OutlineInputBorder(),
                           isDense: true,
                         ),
                         onChanged: (v) =>
@@ -127,25 +137,25 @@ class _RosterManagementScreenState
                       const SizedBox(height: 8),
                       DropdownButtonFormField<int?>(
                         initialValue: _gradeFilter,
-                        decoration: const InputDecoration(
-                          labelText: 'Grade',
-                          border: OutlineInputBorder(),
+                        decoration: InputDecoration(
+                          labelText: l10n.commonGrade,
+                          border: const OutlineInputBorder(),
                           isDense: true,
                         ),
                         items: [
-                          const DropdownMenuItem(
+                          DropdownMenuItem(
                             value: null,
-                            child: Text('All grades'),
+                            child: Text(l10n.commonAllGrades),
                           ),
                           ...gradeLevels.map(
                             (g) => DropdownMenuItem(
                               value: g,
-                              child: Text('Grade $g'),
+                              child: Text(l10n.schoolGradesGradeChip(g)),
                             ),
                           ),
-                          const DropdownMenuItem(
+                          DropdownMenuItem(
                             value: _noGradeFilter,
-                            child: Text('No grade assigned'),
+                            child: Text(l10n.commonNoGradeAssigned),
                           ),
                         ],
                         onChanged: busy
@@ -170,7 +180,7 @@ class _RosterManagementScreenState
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           Text(
-                            '${_selectedIds.length} selected',
+                            l10n.memberManagementSelectedCount(_selectedIds.length),
                             style: theme.textTheme.titleSmall,
                           ),
                           const SizedBox(height: 8),
@@ -185,7 +195,7 @@ class _RosterManagementScreenState
                                     : () => _confirmAssignGrade(
                                           _selectedEntries(filtered),
                                         ),
-                                child: const Text('Assign grade to selected'),
+                                child: Text(l10n.studentRosterAssignSelected),
                               ),
                             ],
                           ),
@@ -200,7 +210,7 @@ class _RosterManagementScreenState
           ? FloatingActionButton.extended(
               onPressed: busy ? null : () => context.push(Routes.addStudent),
               icon: const Icon(Icons.person_add_alt_1_outlined),
-              label: const Text('Add Student'),
+              label: Text(l10n.studentRosterAddStudent),
             )
           : null,
     );
@@ -233,14 +243,19 @@ class _RosterManagementScreenState
       return const Center(child: CircularProgressIndicator());
     }
     if (rosterAsync.hasError && !rosterAsync.hasValue) {
-      return Center(child: Text('Failed to load: ${rosterAsync.error}'));
+      return Center(
+        child: Text(
+          context.l10n.studentRosterLoadFailed('${rosterAsync.error}'),
+        ),
+      );
     }
     if (filtered.isEmpty) {
+      final l10n = context.l10n;
       return Center(
         child: Text(
           _query.isEmpty && _gradeFilter == null
-              ? 'No students yet. Tap Add Student to provision an account.'
-              : 'No students match your filters.',
+              ? l10n.studentRosterEmpty
+              : l10n.studentRosterNoMatch,
         ),
       );
     }
@@ -287,26 +302,26 @@ class _RosterManagementScreenState
       return;
     }
 
+    final l10n = context.l10n;
     final action = await showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Assign grade'),
+        title: Text(l10n.studentRosterAssignGradeTitle),
         content: Text(
-          '${selected.length} students are selected. Assign a grade to '
-          'which group?',
+          l10n.studentRosterAssignGradeWhichGroup(selected.length),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop('one'),
             child: Text(
               entry.fullName.isNotEmpty
-                  ? 'Only ${entry.fullName}'
-                  : 'Only this student',
+                  ? l10n.studentRosterOnlyNamed(entry.fullName)
+                  : l10n.studentRosterOnlyThisStudent,
             ),
           ),
           FilledButton(
             onPressed: () => Navigator.of(ctx).pop('selected'),
-            child: Text('All ${selected.length} selected'),
+            child: Text(l10n.studentRosterAllSelected(selected.length)),
           ),
         ],
       ),
@@ -324,21 +339,22 @@ class _RosterManagementScreenState
 
   Future<void> _confirmAssignGrade(List<RosterEntryEntity> entries) async {
     if (entries.isEmpty) return;
+    final l10n = context.l10n;
 
     final grade = await _showGradePickerDialog(
       title: entries.length == 1
-          ? 'Assign grade to ${entries.first.fullName}'
-          : 'Assign grade to ${entries.length} students',
+          ? l10n.studentRosterAssignGradeToOne(entries.first.fullName)
+          : l10n.studentRosterAssignGradeToMany(entries.length),
       previewNames: entries.map((e) => e.fullName).toList(),
       initialGrade: _initialGradeForEntries(entries),
     );
     if (grade == null) return;
 
     final confirmed = await _showConfirmDialog(
-      title: 'Confirm grade assignment',
+      title: l10n.studentRosterConfirmGradeTitle,
       message: entries.length == 1
-          ? 'Set ${entries.first.fullName} to Grade $grade?'
-          : 'Set ${entries.length} students to Grade $grade?',
+          ? l10n.studentRosterConfirmGradeOne(entries.first.fullName, grade)
+          : l10n.studentRosterConfirmGradeMany(entries.length, grade),
     );
     if (confirmed != true) return;
 
@@ -371,6 +387,7 @@ class _RosterManagementScreenState
     List<String> previewNames = const [],
     int? initialGrade,
   }) {
+    final l10n = context.l10n;
     final gradeLevels = ref.read(orgGradeLevelsProvider);
     int? selectedGrade = initialGrade != null && gradeLevels.contains(initialGrade)
         ? initialGrade
@@ -393,15 +410,15 @@ class _RosterManagementScreenState
                 ],
                 DropdownButtonFormField<int>(
                   initialValue: selectedGrade,
-                  decoration: const InputDecoration(
-                    labelText: 'Grade level',
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    labelText: l10n.commonGradeLevel,
+                    border: const OutlineInputBorder(),
                   ),
                   items: gradeLevels
                       .map(
                         (g) => DropdownMenuItem(
                           value: g,
-                          child: Text('Grade $g'),
+                          child: Text(l10n.schoolGradesGradeChip(g)),
                         ),
                       )
                       .toList(),
@@ -413,13 +430,13 @@ class _RosterManagementScreenState
           actions: [
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(),
-              child: const Text('Cancel'),
+              child: Text(l10n.commonCancel),
             ),
             FilledButton(
               onPressed: selectedGrade == null
                   ? null
                   : () => Navigator.of(ctx).pop(selectedGrade),
-              child: const Text('Continue'),
+              child: Text(l10n.commonContinue),
             ),
           ],
         ),
@@ -431,6 +448,7 @@ class _RosterManagementScreenState
     required String title,
     required String message,
   }) {
+    final l10n = context.l10n;
     return showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -442,11 +460,11 @@ class _RosterManagementScreenState
             children: [
               TextButton(
                 onPressed: () => Navigator.of(ctx).pop(false),
-                child: const Text('Cancel'),
+                child: Text(l10n.commonCancel),
               ),
               FilledButton(
                 onPressed: () => Navigator.of(ctx).pop(true),
-                child: const Text('Confirm'),
+                child: Text(l10n.commonConfirm),
               ),
             ],
           ),
@@ -456,19 +474,21 @@ class _RosterManagementScreenState
   }
 
   String _previewLabel(List<String> names) {
+    final l10n = context.l10n;
     const max = 5;
     if (names.length <= max) return names.join('\n');
     final shown = names.take(max).join('\n');
-    return '$shown\n…and ${names.length - max} more';
+    return '$shown\n${l10n.studentRosterPreviewAndMore(names.length - max)}';
   }
 
   Future<void> _showOfficialPhotoDialog(RosterEntryEntity entry) async {
+    final l10n = context.l10n;
     final name =
         entry.fullName.isNotEmpty ? entry.fullName : entry.studentId;
     await showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('Official photo — $name'),
+        title: Text(l10n.studentRosterOfficialPhotoTitle(name)),
         content: SingleChildScrollView(
           child: OfficialPhotoSection(
             displayName: name,
@@ -480,7 +500,7 @@ class _RosterManagementScreenState
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Done'),
+            child: Text(l10n.commonDone),
           ),
         ],
       ),
@@ -507,10 +527,13 @@ class _RosterTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
-    final gradeLabel =
-        entry.gradeLevel != null ? 'Grade ${entry.gradeLevel}' : 'No grade';
-    final statusLabel = entry.isRegistered ? 'Registered' : 'Not registered';
+    final gradeLabel = entry.gradeLevel != null
+        ? l10n.schoolGradesGradeChip(entry.gradeLevel!)
+        : l10n.commonNoGradeAssigned;
+    final statusLabel =
+        entry.isRegistered ? l10n.commonRegistered : l10n.commonNotRegistered;
 
     final displayName =
         entry.fullName.isNotEmpty ? entry.fullName : entry.studentId;
@@ -545,13 +568,14 @@ class _RosterTile extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('$gradeLabel · $statusLabel'),
-            Text('ID: ${entry.studentId}'),
-            if (entry.section != null) Text('Section: ${entry.section}'),
+            Text('${l10n.commonIdLabel}: ${entry.studentId}'),
+            if (entry.section != null)
+              Text(l10n.studentRosterSectionLabel(entry.section!)),
           ],
         ),
         isThreeLine: entry.section != null,
         trailing: IconButton(
-          tooltip: 'Assign grade',
+          tooltip: l10n.studentRosterAssignGradeTitle,
           onPressed: busy ? null : onAssignGrade,
           icon: const Icon(Icons.school_outlined),
         ),
@@ -565,11 +589,11 @@ class _NoAccessPlaceholder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
+    return Center(
       child: Padding(
-        padding: EdgeInsets.all(32),
+        padding: const EdgeInsets.all(32),
         child: Text(
-          'You do not have permission to manage the student roster.',
+          context.l10n.studentRosterNoPermission,
           textAlign: TextAlign.center,
         ),
       ),
@@ -582,12 +606,11 @@ class _NotSchoolPlaceholder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
+    return Center(
       child: Padding(
-        padding: EdgeInsets.all(32),
+        padding: const EdgeInsets.all(32),
         child: Text(
-          'Student roster and grades are only available for school-type '
-          'organizations.',
+          context.l10n.studentRosterNotSchool,
           textAlign: TextAlign.center,
         ),
       ),

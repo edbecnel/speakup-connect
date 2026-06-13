@@ -44,6 +44,16 @@ class AppButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final effectiveOnPressed = isLoading ? null : onPressed;
+    final isCompact = minimumWidth == 0;
+
+    Widget buildLabel() {
+      return Text(
+        label,
+        maxLines: isCompact ? 2 : 1,
+        overflow: TextOverflow.ellipsis,
+        textAlign: TextAlign.center,
+      );
+    }
 
     final child = isLoading
         ? const SizedBox(
@@ -60,32 +70,48 @@ class AppButton extends StatelessWidget {
                 children: [
                   Icon(icon, size: 18),
                   const SizedBox(width: 8),
-                  Text(label),
+                  Flexible(child: buildLabel()),
                 ],
               )
-            : Text(label);
+            : buildLabel();
 
-    final minSize = minimumWidth != null
-        ? Size(minimumWidth!, 52)
-        : const Size(double.infinity, 52);
+    final fullWidthMinSize = Size(minimumWidth ?? double.infinity, 52);
+    final compactMinSize = const Size(0, 0);
+    final compactPadding =
+        const EdgeInsets.symmetric(horizontal: 12, vertical: 10);
 
     switch (_variant) {
       case _ButtonVariant.primary:
         return ElevatedButton(
           onPressed: effectiveOnPressed,
-          style: ElevatedButton.styleFrom(minimumSize: minSize),
+          style: ElevatedButton.styleFrom(
+            minimumSize: isCompact ? compactMinSize : fullWidthMinSize,
+            tapTargetSize:
+                isCompact ? MaterialTapTargetSize.shrinkWrap : null,
+            padding: isCompact ? compactPadding : null,
+          ),
           child: child,
         );
       case _ButtonVariant.secondary:
         return OutlinedButton(
           onPressed: effectiveOnPressed,
-          style: OutlinedButton.styleFrom(minimumSize: minSize),
+          style: OutlinedButton.styleFrom(
+            minimumSize: isCompact ? compactMinSize : fullWidthMinSize,
+            tapTargetSize:
+                isCompact ? MaterialTapTargetSize.shrinkWrap : null,
+            padding: isCompact ? compactPadding : null,
+          ),
           child: child,
         );
       case _ButtonVariant.text:
         return TextButton(
           onPressed: effectiveOnPressed,
-          style: TextButton.styleFrom(minimumSize: minSize),
+          style: TextButton.styleFrom(
+            minimumSize: isCompact ? compactMinSize : fullWidthMinSize,
+            tapTargetSize:
+                isCompact ? MaterialTapTargetSize.shrinkWrap : null,
+            padding: isCompact ? compactPadding : null,
+          ),
           child: child,
         );
     }

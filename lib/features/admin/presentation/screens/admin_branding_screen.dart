@@ -3,8 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:speakup_connect/config/app_config.dart';
 import 'package:speakup_connect/core/errors/app_exception.dart';
+import 'package:speakup_connect/core/l10n/app_localizations_extension.dart';
 import 'package:speakup_connect/core/theme/app_theme.dart';
 import 'package:speakup_connect/features/admin/presentation/providers/admin_branding_provider.dart';
+import 'package:speakup_connect/features/roles/presentation/l10n/roles_ui_l10n.dart';
 import 'package:speakup_connect/features/organization/domain/entities/organization_config_entity.dart';
 import 'package:speakup_connect/features/organization/presentation/providers/organization_provider.dart';
 import 'package:speakup_connect/features/reports/presentation/providers/report_provider.dart';
@@ -55,6 +57,7 @@ class _AdminBrandingScreenState extends ConsumerState<AdminBrandingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     final savingState = ref.watch(adminBrandingProvider);
     final isSaving = savingState.isLoading;
@@ -65,14 +68,14 @@ class _AdminBrandingScreenState extends ConsumerState<AdminBrandingScreen> {
         if (next.hasError) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Save failed: ${next.error}'),
+              content: Text(l10n.orgSettingsSaveFailed('${next.error}')),
               backgroundColor: theme.colorScheme.error,
             ),
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: const Text('Branding updated successfully'),
+              content: Text(l10n.orgSettingsBrandingUpdated),
               backgroundColor: Colors.green.shade700,
             ),
           );
@@ -83,7 +86,7 @@ class _AdminBrandingScreenState extends ConsumerState<AdminBrandingScreen> {
     return Scaffold(
       appBar: AppBar(
         leading: BackButton(onPressed: () => context.pop()),
-        title: const Text('Organization Settings'),
+        title: Text(l10n.orgSettingsTitle),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
@@ -96,42 +99,40 @@ class _AdminBrandingScreenState extends ConsumerState<AdminBrandingScreen> {
               const SizedBox(height: 32),
               _SectionHeader(
                 icon: Icons.business_outlined,
-                title: 'Organization Name',
-                subtitle:
-                    'Displayed on the splash screen as "SpeakUp [Name]".',
+                title: l10n.orgSettingsOrgNameTitle,
+                subtitle: l10n.orgSettingsOrgNameSubtitle,
               ),
               const SizedBox(height: 12),
               TextFormField(
                 controller: _nameCtrl,
-                decoration: const InputDecoration(
-                  labelText: 'Display Name',
-                  hintText: 'e.g. Riverside High',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: l10n.orgSettingsDisplayName,
+                  hintText: l10n.orgSettingsDisplayNameHint,
+                  border: const OutlineInputBorder(),
                 ),
                 textCapitalization: TextCapitalization.characters,
                 validator: (v) =>
-                    (v == null || v.trim().isEmpty) ? 'Required' : null,
+                    (v == null || v.trim().isEmpty)
+                        ? context.l10n.orgSettingsRequired
+                        : null,
               ),
               const SizedBox(height: 32),
               _SectionHeader(
                 icon: Icons.palette_outlined,
-                title: 'Brand Colors',
-                subtitle:
-                    'Enter 6-digit hex codes from the organization\'s brand guide '
-                    '(e.g. #1A73E8). Changes apply to all connected devices in '
-                    'real time and are cached locally for instant startup.',
+                title: l10n.orgSettingsBrandColorsTitle,
+                subtitle: l10n.orgSettingsBrandColorsSubtitle,
               ),
               const SizedBox(height: 16),
               _ColorField(
                 controller: _primaryCtrl,
-                label: 'Primary Color',
-                hint: 'e.g. #1A73E8',
+                label: l10n.orgSettingsPrimaryColor,
+                hint: l10n.orgSettingsColorHint,
               ),
               const SizedBox(height: 16),
               _ColorField(
                 controller: _secondaryCtrl,
-                label: 'Secondary Color',
-                hint: 'e.g. #000000',
+                label: l10n.orgSettingsSecondaryColor,
+                hint: l10n.orgSettingsSecondaryColorHint,
               ),
               const SizedBox(height: 16),
               _ColorPreviewRow(
@@ -154,17 +155,11 @@ class _AdminBrandingScreenState extends ConsumerState<AdminBrandingScreen> {
                           ),
                         )
                       : const Icon(Icons.save_outlined),
-                  label: Text(isSaving ? 'Saving…' : 'Save Branding'),
+                  label: Text(isSaving ? l10n.orgSettingsSaving : l10n.orgSettingsSaveBranding),
                 ),
               ),
               const SizedBox(height: 24),
-              _InfoBox(
-                message:
-                    'After saving, the new colors will appear immediately on '
-                    'all connected devices. On this device the branding is '
-                    'also written to local storage, so it loads correctly on '
-                    'the next app launch before Firestore responds.',
-              ),
+              _InfoBox(message: l10n.orgSettingsBrandingInfo),
               const SizedBox(height: 32),
               _SetupCategoriesCard(),
               const SizedBox(height: 32),
@@ -185,11 +180,11 @@ class _AdminBrandingScreenState extends ConsumerState<AdminBrandingScreen> {
     final secondaryHex = _normalizeHex(_secondaryCtrl.text.trim());
 
     if (primaryHex == null) {
-      _showFieldError('Primary color must be a valid 6-digit hex (e.g. #1A73E8).');
+      _showFieldError(context.l10n.orgSettingsPrimaryHexInvalid);
       return;
     }
     if (secondaryHex == null) {
-      _showFieldError('Secondary color must be a valid 6-digit hex (e.g. #000000).');
+      _showFieldError(context.l10n.orgSettingsSecondaryHexInvalid);
       return;
     }
 
@@ -240,43 +235,43 @@ class _AdminBrandingScreenState extends ConsumerState<AdminBrandingScreen> {
     required bool darkIssue,
     required bool secondaryCanResolve,
   }) {
+    final l10n = context.l10n;
     final surfaces = [
-      if (lightIssue) 'light',
-      if (darkIssue) 'dark',
+      if (lightIssue) l10n.orgSettingsContrastLightBackgrounds,
+      if (darkIssue) l10n.orgSettingsContrastDarkBackgrounds,
     ];
     final surfaceLabel = surfaces.length == 1
-        ? '${surfaces[0]} backgrounds'
-        : 'light and dark backgrounds';
+        ? surfaces[0]
+        : l10n.orgSettingsContrastLightAndDarkBackgrounds;
 
     final message = secondaryCanResolve
-        ? 'Your primary color ($primaryHex) isn\'t visible enough on '
-          '$surfaceLabel — it will blend into the background.\n\n'
-          'Your secondary color ($secondaryHex) will be used as a fallback '
-          'for buttons and icons, but you may want a more suitable primary.\n\n'
-          'You can save anyway or let the app shift the primary to the '
-          'nearest contrast-safe shade.'
-        : 'Neither your primary ($primaryHex) nor secondary ($secondaryHex) '
-          'color provides enough contrast against $surfaceLabel. '
-          'Buttons, links, and icons may be hard to see.\n\n'
-          'You can save anyway, or let the app shift the primary color to '
-          'the nearest contrast-safe shade.';
+        ? l10n.orgSettingsContrastSecondaryFallback(
+            primaryHex,
+            secondaryHex,
+            surfaceLabel,
+          )
+        : l10n.orgSettingsContrastNeither(
+            primaryHex,
+            secondaryHex,
+            surfaceLabel,
+          );
 
     showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Contrast Warning'),
+        title: Text(context.l10n.orgSettingsContrastWarning),
         content: Text(message),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Cancel'),
+            child: Text(context.l10n.commonCancel),
           ),
           TextButton(
             onPressed: () {
               Navigator.of(ctx).pop();
               _performSave(primaryHex, secondaryHex);
             },
-            child: const Text('Save Anyway'),
+            child: Text(context.l10n.orgSettingsSaveAnyway),
           ),
           FilledButton(
             onPressed: () {
@@ -293,7 +288,7 @@ class _AdminBrandingScreenState extends ConsumerState<AdminBrandingScreen> {
               setState(() => _primaryCtrl.text = adjustedHex);
               _performSave(adjustedHex, secondaryHex);
             },
-            child: const Text('Auto-adjust & Save'),
+            child: Text(context.l10n.orgSettingsAutoAdjustSave),
           ),
         ],
       ),
@@ -339,6 +334,7 @@ class _SectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -395,6 +391,7 @@ class _ColorFieldState extends State<_ColorField> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final preview = _preview;
     return TextFormField(
       controller: widget.controller,
@@ -418,10 +415,10 @@ class _ColorFieldState extends State<_ColorField> {
       autocorrect: false,
       textCapitalization: TextCapitalization.characters,
       validator: (v) {
-        if (v == null || v.trim().isEmpty) return 'Required';
+        if (v == null || v.trim().isEmpty) return l10n.orgSettingsRequired;
         final clean = v.replaceFirst('#', '').trim();
         if (clean.length != 6 || !RegExp(r'^[0-9A-Fa-f]{6}$').hasMatch(clean)) {
-          return 'Enter a valid 6-digit hex (e.g. #1A73E8)';
+          return l10n.orgSettingsHexInvalid;
         }
         return null;
       },
@@ -440,6 +437,7 @@ class _ColorPreviewRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final primary = _fromHex(primaryHex);
     final secondary = _fromHex(secondaryHex);
 
@@ -448,10 +446,11 @@ class _ColorPreviewRow extends StatelessWidget {
     return Row(
       children: [
         if (primary != null) ...[
-          _Swatch(color: primary, label: 'Primary'),
+          _Swatch(color: primary, label: l10n.orgSettingsPrimarySwatch),
           const SizedBox(width: 12),
         ],
-        if (secondary != null) _Swatch(color: secondary, label: 'Secondary'),
+        if (secondary != null)
+          _Swatch(color: secondary, label: l10n.orgSettingsSecondarySwatch),
       ],
     );
   }
@@ -503,6 +502,7 @@ class _InfoBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.all(12),
@@ -534,6 +534,7 @@ class _InfoBox extends StatelessWidget {
 class _SetupCategoriesCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     final categoriesAsync = ref.watch(reportCategoriesProvider);
     final seedState = ref.watch(seedCategoriesProvider);
@@ -542,14 +543,16 @@ class _SetupCategoriesCard extends ConsumerWidget {
       if (!next.isLoading && prev?.isLoading == true) {
         if (next.hasError) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text('Seed failed: ${next.error}'),
+            content: Text(
+              l10n.orgSettingsSeedCategoriesFailed('${next.error}'),
+            ),
             backgroundColor: theme.colorScheme.error,
           ));
         } else {
           // Refresh category list after seeding.
           ref.invalidate(reportCategoriesProvider);
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text('Default categories added successfully'),
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(l10n.orgSettingsSeedCategoriesSuccess),
             backgroundColor: Colors.green,
           ));
         }
@@ -561,10 +564,8 @@ class _SetupCategoriesCard extends ConsumerWidget {
       children: [
         _SectionHeader(
           icon: Icons.category_outlined,
-          title: 'Report Categories',
-          subtitle:
-              'Categories are required for users to submit concerns. '
-              'Tap the button below to populate the default set.',
+          title: l10n.orgSettingsReportCategoriesTitle,
+          subtitle: l10n.orgSettingsReportCategoriesSubtitle,
         ),
         const SizedBox(height: 12),
         categoriesAsync.when(
@@ -577,7 +578,7 @@ class _SetupCategoriesCard extends ConsumerWidget {
                   const Icon(Icons.check_circle, color: Colors.green, size: 20),
                   const SizedBox(width: 8),
                   Text(
-                    '${cats.length} categories configured',
+                    l10n.orgSettingsCategoriesConfigured(cats.length),
                     style: theme.textTheme.bodyMedium
                         ?.copyWith(color: Colors.green.shade700),
                   ),
@@ -598,7 +599,9 @@ class _SetupCategoriesCard extends ConsumerWidget {
                       )
                     : const Icon(Icons.add_circle_outline),
                 label: Text(
-                  seedState.isLoading ? 'Adding…' : 'Add Default Categories',
+                  seedState.isLoading
+                      ? l10n.orgSettingsAddingCategories
+                      : l10n.orgSettingsAddDefaultCategories,
                 ),
               ),
             );
@@ -630,22 +633,22 @@ class _OrganizationTypeCardState extends ConsumerState<_OrganizationTypeCard> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Change organization type?'),
+        title: Text(context.l10n.orgSettingsChangeOrgTypeTitle),
         content: Text(
-          'Change from ${currentType.adminDisplayName} to '
-          '${nextType.adminDisplayName}?\n\n'
-          '${nextType.adminDescription}\n\n'
-          'This affects which admin features are available (such as student '
-          'grades and roster for schools).',
+          context.l10n.orgSettingsChangeOrgTypeConfirm(
+            localizedOrganizationTypeName(context.l10n, currentType),
+            localizedOrganizationTypeName(context.l10n, nextType),
+            localizedOrganizationTypeDescription(context.l10n, nextType),
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Cancel'),
+            child: Text(context.l10n.commonCancel),
           ),
           FilledButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Confirm'),
+            child: Text(context.l10n.commonConfirm),
           ),
         ],
       ),
@@ -662,7 +665,11 @@ class _OrganizationTypeCardState extends ConsumerState<_OrganizationTypeCard> {
         setState(() => _selectedType = null);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Organization type set to ${nextType.adminDisplayName}'),
+            content: Text(
+              context.l10n.orgSettingsOrgTypeSaved(
+                localizedOrganizationTypeName(context.l10n, nextType),
+              ),
+            ),
             backgroundColor: Colors.green.shade700,
           ),
         );
@@ -671,7 +678,9 @@ class _OrganizationTypeCardState extends ConsumerState<_OrganizationTypeCard> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Update failed: $e'),
+            content: Text(
+              context.l10n.orgSettingsOrgTypeFailed('$e'),
+            ),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
@@ -683,6 +692,7 @@ class _OrganizationTypeCardState extends ConsumerState<_OrganizationTypeCard> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     final orgAsync = ref.watch(organizationConfigProvider);
     final currentType =
@@ -695,24 +705,21 @@ class _OrganizationTypeCardState extends ConsumerState<_OrganizationTypeCard> {
       children: [
         _SectionHeader(
           icon: Icons.apartment_outlined,
-          title: 'Organization Type',
-          subtitle:
-              'Determines which features are available. Schools can use '
-              'student grades and roster; municipalities and NGOs use '
-              'member management without grades.',
+          title: l10n.orgSettingsOrgTypeTitle,
+          subtitle: l10n.orgSettingsOrgTypeSubtitle,
         ),
         const SizedBox(height: 12),
         DropdownButtonFormField<OrganizationType>(
           initialValue: selectedType,
-          decoration: const InputDecoration(
-            labelText: 'Type',
-            border: OutlineInputBorder(),
+          decoration: InputDecoration(
+            labelText: l10n.orgSettingsTypeLabel,
+            border: const OutlineInputBorder(),
           ),
           items: OrganizationType.values
               .map(
                 (type) => DropdownMenuItem(
                   value: type,
-                  child: Text(type.adminDisplayName),
+                  child: Text(localizedOrganizationTypeName(l10n, type)),
                 ),
               )
               .toList(),
@@ -722,7 +729,7 @@ class _OrganizationTypeCardState extends ConsumerState<_OrganizationTypeCard> {
         ),
         const SizedBox(height: 8),
         Text(
-          selectedType.adminDescription,
+          localizedOrganizationTypeDescription(l10n, selectedType),
           style: theme.textTheme.bodySmall?.copyWith(
             color: theme.colorScheme.onSurfaceVariant,
           ),
@@ -743,7 +750,7 @@ class _OrganizationTypeCardState extends ConsumerState<_OrganizationTypeCard> {
                       color: Colors.white,
                     ),
                   )
-                : const Text('Save type'),
+                : Text(l10n.orgSettingsSaveType),
           ),
         ),
       ],
@@ -767,6 +774,7 @@ class _MemberProfilePhotosCardState
   bool? _localOverride;
 
   Future<void> _toggle(bool value) async {
+    final l10n = context.l10n;
     setState(() {
       _saving = true;
       _localOverride = value;
@@ -780,7 +788,7 @@ class _MemberProfilePhotosCardState
           .read(organizationConfigProvider.notifier)
           .refreshFromServer();
       if (config.allowMemberProfilePhotos != value) {
-        throw StateError('Profile photo setting did not save.');
+        throw StateError(context.l10n.orgSettingsProfilePhotoSaveFailed);
       }
       if (mounted) {
         setState(() => _localOverride = null);
@@ -788,8 +796,8 @@ class _MemberProfilePhotosCardState
           SnackBar(
             content: Text(
               value
-                  ? 'Members can now upload personal profile photos'
-                  : 'Personal profile photos are disabled for members',
+                  ? l10n.orgSettingsMemberPhotosEnabled
+                  : l10n.orgSettingsMemberPhotosDisabled,
             ),
             backgroundColor: Colors.green.shade700,
           ),
@@ -799,8 +807,8 @@ class _MemberProfilePhotosCardState
       if (mounted) {
         setState(() => _localOverride = null);
         final message = e is PermissionException
-            ? 'You do not have permission to change this setting.'
-            : 'Update failed: $e';
+            ? l10n.orgSettingsPermissionDenied
+            : context.l10n.orgSettingsOrgTypeFailed('$e');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(message),
@@ -815,6 +823,7 @@ class _MemberProfilePhotosCardState
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     final orgAsync = ref.watch(organizationConfigProvider);
     final remoteValue =
@@ -837,20 +846,17 @@ class _MemberProfilePhotosCardState
       children: [
         _SectionHeader(
           icon: Icons.account_circle_outlined,
-          title: 'Member Profile Photos',
-          subtitle:
-              'When enabled, students may upload a personal badge in Settings. '
-              'Official school photos uploaded by staff remain a separate '
-              'permanent record and are never overwritten.',
+          title: l10n.orgSettingsMemberPhotosTitle,
+          subtitle: l10n.orgSettingsMemberPhotosSubtitle,
         ),
         const SizedBox(height: 4),
         SwitchListTile(
           contentPadding: EdgeInsets.zero,
-          title: const Text('Allow personal profile photos'),
+          title: Text(l10n.orgSettingsAllowPersonalPhotos),
           subtitle: Text(
             allowed
-                ? 'Currently ON — members can add a personal badge in Settings'
-                : 'Currently OFF — only official school photos are shown',
+                ? l10n.orgSettingsMemberPhotosOn
+                : l10n.orgSettingsMemberPhotosOff,
             style: theme.textTheme.bodySmall?.copyWith(
               color: allowed
                   ? theme.colorScheme.primary
@@ -886,6 +892,7 @@ class _ReminderApprovalCardState extends ConsumerState<_ReminderApprovalCard> {
   bool? _localOverride;
 
   Future<void> _toggle(bool value) async {
+    final l10n = context.l10n;
     setState(() {
       _saving = true;
       _localOverride = value;
@@ -899,7 +906,7 @@ class _ReminderApprovalCardState extends ConsumerState<_ReminderApprovalCard> {
           .read(organizationConfigProvider.notifier)
           .refreshFromServer();
       if (config.requireReminderApproval != value) {
-        throw StateError('Reminder approval setting did not save.');
+        throw StateError(context.l10n.orgSettingsReminderApprovalSaveFailed);
       }
       if (mounted) {
         setState(() => _localOverride = null);
@@ -907,8 +914,8 @@ class _ReminderApprovalCardState extends ConsumerState<_ReminderApprovalCard> {
           SnackBar(
             content: Text(
               value
-                  ? 'Reminders now require approval before publishing'
-                  : 'Reminders now publish directly',
+                  ? l10n.orgSettingsReminderApprovalEnabled
+                  : l10n.orgSettingsReminderApprovalDisabled,
             ),
             backgroundColor: Colors.green.shade700,
           ),
@@ -918,8 +925,8 @@ class _ReminderApprovalCardState extends ConsumerState<_ReminderApprovalCard> {
       if (mounted) {
         setState(() => _localOverride = null);
         final message = e is PermissionException
-            ? 'You do not have permission to change this setting.'
-            : 'Update failed: $e';
+            ? l10n.orgSettingsPermissionDenied
+            : context.l10n.orgSettingsOrgTypeFailed('$e');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(message),
@@ -934,6 +941,7 @@ class _ReminderApprovalCardState extends ConsumerState<_ReminderApprovalCard> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     final orgAsync = ref.watch(organizationConfigProvider);
     final remoteValue =
@@ -956,20 +964,17 @@ class _ReminderApprovalCardState extends ConsumerState<_ReminderApprovalCard> {
       children: [
         _SectionHeader(
           icon: Icons.fact_check_outlined,
-          title: 'Reminder Approval',
-          subtitle:
-              'When enabled, members who can broadcast reminders but cannot '
-              'approve them must submit reminders for review before they are '
-              'published.',
+          title: l10n.orgSettingsReminderApprovalTitle,
+          subtitle: l10n.orgSettingsReminderApprovalSubtitle,
         ),
         const SizedBox(height: 4),
         SwitchListTile(
           contentPadding: EdgeInsets.zero,
-          title: const Text('Require approval before publishing'),
+          title: Text(l10n.orgSettingsRequireApproval),
           subtitle: Text(
             requireApproval
-                ? 'Currently ON — reminders from non-approvers are held for review'
-                : 'Currently OFF — reminders publish immediately',
+                ? l10n.orgSettingsReminderApprovalOn
+                : l10n.orgSettingsReminderApprovalOff,
             style: theme.textTheme.bodySmall?.copyWith(
               color: requireApproval
                   ? theme.colorScheme.primary

@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:speakup_connect/core/constants/route_constants.dart';
+import 'package:speakup_connect/core/l10n/app_localizations_extension.dart';
 import 'package:speakup_connect/core/permissions/app_permission.dart';
 import 'package:speakup_connect/core/permissions/providers/permission_provider.dart';
+import 'package:speakup_connect/features/admin/presentation/l10n/admin_ui_l10n.dart';
 import 'package:speakup_connect/features/auth/presentation/providers/auth_provider.dart';
 import 'package:speakup_connect/features/organization/domain/entities/enrolled_member.dart';
 import 'package:speakup_connect/features/organization/domain/entities/user_profile_entity.dart';
@@ -38,6 +40,7 @@ class _EnrolledUsersScreenState extends ConsumerState<EnrolledUsersScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     final profile = ref.watch(userProfileProvider).value;
     final currentUser = ref.watch(currentUserProvider);
@@ -61,13 +64,17 @@ class _EnrolledUsersScreenState extends ConsumerState<EnrolledUsersScreen> {
       if (prev?.isLoading == true && !next.isLoading) {
         if (next.hasError) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text('Action failed: ${next.error}'),
+            content: Text(l10n.commonActionFailed('${next.error}')),
             backgroundColor: theme.colorScheme.error,
           ));
         } else if (next.hasValue && next.value != null) {
           setState(_selectedIds.clear);
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Updated ${next.value} member(s)')),
+            SnackBar(
+              content: Text(
+                l10n.memberManagementUpdatedCount(next.value!),
+              ),
+            ),
           );
         }
       }
@@ -77,13 +84,13 @@ class _EnrolledUsersScreenState extends ConsumerState<EnrolledUsersScreen> {
       if (prev?.isLoading == true && !next.isLoading) {
         if (next.hasError) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text('Action failed: ${next.error}'),
+            content: Text(l10n.commonActionFailed('${next.error}')),
             backgroundColor: theme.colorScheme.error,
           ));
         } else if (next.hasValue) {
           setState(_selectedIds.clear);
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Member updated')),
+            SnackBar(content: Text(l10n.memberManagementUpdated)),
           );
         }
       }
@@ -92,7 +99,7 @@ class _EnrolledUsersScreenState extends ConsumerState<EnrolledUsersScreen> {
     return Scaffold(
       appBar: AppBar(
         leading: BackButton(onPressed: () => context.pop()),
-        title: const Text('Member Management'),
+        title: Text(l10n.settingsMemberManagement),
         actions: [
           if (canManage && selectable.isNotEmpty)
             TextButton(
@@ -109,7 +116,9 @@ class _EnrolledUsersScreenState extends ConsumerState<EnrolledUsersScreen> {
                           );
                         }
                       }),
-              child: Text(allSelected ? 'Clear all' : 'Select all'),
+              child: Text(
+                allSelected ? l10n.commonClearAll : l10n.commonSelectAll,
+              ),
             ),
         ],
       ),
@@ -123,10 +132,10 @@ class _EnrolledUsersScreenState extends ConsumerState<EnrolledUsersScreen> {
                     children: [
                       TextField(
                         controller: _searchController,
-                        decoration: const InputDecoration(
-                          hintText: 'Search by name or email…',
-                          prefixIcon: Icon(Icons.search),
-                          border: OutlineInputBorder(),
+                        decoration: InputDecoration(
+                          hintText: l10n.memberManagementSearchHint,
+                          prefixIcon: const Icon(Icons.search),
+                          border: const OutlineInputBorder(),
                           isDense: true,
                         ),
                         onChanged: (v) =>
@@ -138,7 +147,9 @@ class _EnrolledUsersScreenState extends ConsumerState<EnrolledUsersScreen> {
                             .map(
                               (f) => ButtonSegment(
                                 value: f,
-                                label: Text(f.label),
+                                label: Text(
+                                  localizedMemberStatusFilter(l10n, f),
+                                ),
                               ),
                             )
                             .toList(),
@@ -154,25 +165,25 @@ class _EnrolledUsersScreenState extends ConsumerState<EnrolledUsersScreen> {
                         const SizedBox(height: 8),
                         DropdownButtonFormField<int?>(
                           initialValue: _gradeFilter,
-                          decoration: const InputDecoration(
-                            labelText: 'Grade',
-                            border: OutlineInputBorder(),
+                          decoration: InputDecoration(
+                            labelText: l10n.commonGrade,
+                            border: const OutlineInputBorder(),
                             isDense: true,
                           ),
                           items: [
-                            const DropdownMenuItem(
+                            DropdownMenuItem(
                               value: null,
-                              child: Text('All grades'),
+                              child: Text(l10n.commonAllGrades),
                             ),
                             ...gradeLevels.map(
                               (g) => DropdownMenuItem(
                                 value: g,
-                                child: Text('Grade $g'),
+                                child: Text(l10n.schoolGradesGradeChip(g)),
                               ),
                             ),
-                            const DropdownMenuItem(
+                            DropdownMenuItem(
                               value: _noGradeFilter,
-                              child: Text('No grade assigned'),
+                              child: Text(l10n.commonNoGradeAssigned),
                             ),
                           ],
                           onChanged: busy
@@ -252,7 +263,11 @@ class _EnrolledUsersScreenState extends ConsumerState<EnrolledUsersScreen> {
       return const Center(child: CircularProgressIndicator());
     }
     if (membersAsync.hasError && !membersAsync.hasValue) {
-      return Center(child: Text('Failed to load: ${membersAsync.error}'));
+      return Center(
+        child: Text(
+          context.l10n.memberManagementLoadFailed('${membersAsync.error}'),
+        ),
+      );
     }
     if (filtered.isEmpty) {
       return Center(
@@ -312,18 +327,19 @@ class _EnrolledUsersScreenState extends ConsumerState<EnrolledUsersScreen> {
   }
 
   Future<void> _confirmBlock(EnrolledMember member) async {
+    final l10n = context.l10n;
     final reason = await _showReasonDialog(
-      title: 'Block ${member.user.fullName}?',
-      actionLabel: 'Continue',
+      title: l10n.memberManagementBlockDialogTitle(member.user.fullName),
+      actionLabel: l10n.commonContinue,
       required: true,
-      hint: 'Why is this account being blocked?',
+      hint: l10n.memberManagementBlockReasonHint,
     );
     if (reason == null || reason.isEmpty) return;
 
     final confirmed = await _showConfirmDialog(
-      title: 'Confirm block',
-      message: '${member.user.fullName} will lose access immediately.',
-      actionLabel: 'Confirm block',
+      title: l10n.memberManagementConfirmBlockTitle,
+      message: l10n.memberManagementConfirmBlockMessage(member.user.fullName),
+      actionLabel: l10n.memberManagementConfirmBlockAction,
       isDestructive: true,
     );
     if (confirmed != true) return;
@@ -334,16 +350,17 @@ class _EnrolledUsersScreenState extends ConsumerState<EnrolledUsersScreen> {
         );
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Member blocked')),
+        SnackBar(content: Text(l10n.memberManagementBlocked)),
       );
     }
   }
 
   Future<void> _confirmUnblock(EnrolledMember member) async {
+    final l10n = context.l10n;
     final confirmed = await _showConfirmDialog(
-      title: 'Unblock ${member.user.fullName}?',
-      message: 'This member will regain access to the organization.',
-      actionLabel: 'Unblock',
+      title: l10n.memberManagementUnblock,
+      message: l10n.memberManagementUnblockMessage,
+      actionLabel: l10n.memberManagementUnblock,
     );
     if (confirmed != true) return;
     await ref.read(userBlockActionProvider.notifier).unblock(
@@ -351,30 +368,31 @@ class _EnrolledUsersScreenState extends ConsumerState<EnrolledUsersScreen> {
         );
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Member unblocked')),
+        SnackBar(content: Text(l10n.memberManagementUnblocked)),
       );
     }
   }
 
   Future<void> _confirmUnenroll(List<EnrolledMember> members) async {
     if (members.isEmpty) return;
+    final l10n = context.l10n;
     final reason = await _showReasonDialog(
       title: members.length == 1
-          ? 'Unenroll ${members.first.user.fullName}?'
-          : 'Unenroll ${members.length} members?',
-      actionLabel: 'Unenroll',
+          ? l10n.memberManagementUnenrollTitleOne(members.first.user.fullName)
+          : l10n.memberManagementUnenrollTitleMany(members.length),
+      actionLabel: l10n.memberManagementUnenroll,
       required: true,
-      hint: 'e.g. Graduated, transferred, left the school',
+      hint: l10n.memberManagementUnenrollHint,
       previewNames: members.map((m) => m.user.fullName).toList(),
     );
     if (reason == null || reason.isEmpty) return;
 
     final confirmed = await _showConfirmDialog(
-      title: 'Confirm unenrollment',
+      title: l10n.memberManagementConfirmUnenrollTitle,
       message: members.length == 1
-          ? 'This member will lose access immediately.'
-          : '${members.length} members will lose access immediately.',
-      actionLabel: 'Confirm unenroll',
+          ? l10n.memberManagementConfirmUnenrollMessageOne
+          : l10n.memberManagementConfirmUnenrollMessageMany(members.length),
+      actionLabel: l10n.memberManagementConfirmUnenrollAction,
       isDestructive: true,
     );
     if (confirmed != true) return;
@@ -386,22 +404,23 @@ class _EnrolledUsersScreenState extends ConsumerState<EnrolledUsersScreen> {
   }
 
   Future<void> _confirmBulkBlock(List<EnrolledMember> members) async {
+    final l10n = context.l10n;
     final active = members.where((m) => !m.user.isBlocked).toList();
     if (active.isEmpty) return;
 
     final reason = await _showReasonDialog(
-      title: 'Block ${active.length} members?',
-      actionLabel: 'Block',
+      title: l10n.memberManagementBulkBlockTitle(active.length),
+      actionLabel: l10n.memberManagementBlock,
       required: true,
-      hint: 'Why are these accounts being blocked?',
+      hint: l10n.memberManagementBulkBlockHint,
       previewNames: active.map((m) => m.user.fullName).toList(),
     );
     if (reason == null || reason.isEmpty) return;
 
     final confirmed = await _showConfirmDialog(
-      title: 'Confirm block',
-      message: '${active.length} member(s) will lose access immediately.',
-      actionLabel: 'Confirm block',
+      title: l10n.memberManagementConfirmBlockTitle,
+      message: l10n.memberManagementBulkBlockConfirmMessage(active.length),
+      actionLabel: l10n.memberManagementConfirmBlockAction,
       isDestructive: true,
     );
     if (confirmed != true) return;
@@ -421,10 +440,11 @@ class _EnrolledUsersScreenState extends ConsumerState<EnrolledUsersScreen> {
         members.where((m) => m.user.isApproved && m.user.isBlocked).toList();
     if (blocked.isEmpty) return;
 
+    final l10n = context.l10n;
     final confirmed = await _showConfirmDialog(
-      title: 'Unblock ${blocked.length} members?',
-      message: 'These members will regain access to the organization.',
-      actionLabel: 'Confirm unblock',
+      title: l10n.memberManagementBulkUnblockTitle(blocked.length),
+      message: l10n.memberManagementBulkUnblockMessage,
+      actionLabel: l10n.memberManagementConfirmUnblockAction,
     );
     if (confirmed != true) return;
 
@@ -437,14 +457,17 @@ class _EnrolledUsersScreenState extends ConsumerState<EnrolledUsersScreen> {
     final unenrolled = members.where((m) => m.user.isUnenrolled).toList();
     if (unenrolled.isEmpty) return;
 
+    final l10n = context.l10n;
     final confirmed = await _showConfirmDialog(
       title: unenrolled.length == 1
-          ? 'Re-enroll ${unenrolled.first.user.fullName}?'
-          : 'Re-enroll ${unenrolled.length} members?',
+          ? l10n.memberManagementReenrollTitleOne(
+              unenrolled.first.user.fullName,
+            )
+          : l10n.memberManagementReenrollTitleMany(unenrolled.length),
       message: unenrolled.length == 1
-          ? 'This member will regain full access to the organization.'
-          : '${unenrolled.length} members will regain full access.',
-      actionLabel: 'Confirm re-enroll',
+          ? l10n.memberManagementReenrollMessageOne
+          : l10n.memberManagementReenrollMessageMany(unenrolled.length),
+      actionLabel: l10n.memberManagementConfirmReenrollAction,
     );
     if (confirmed != true) return;
 
@@ -458,35 +481,44 @@ class _EnrolledUsersScreenState extends ConsumerState<EnrolledUsersScreen> {
   }
 
   String _emptyStateMessage() {
+    final l10n = context.l10n;
     if (_query.isNotEmpty || _gradeFilter != null) {
-      return 'No members match your filters.';
+      return l10n.memberManagementEmptyFiltered;
     }
     return switch (_statusFilter) {
-      MemberStatusFilter.active => 'No active members found.',
-      MemberStatusFilter.blocked => 'No blocked members found.',
-      MemberStatusFilter.unenrolled => 'No unenrolled members found.',
-      MemberStatusFilter.all => 'No members found.',
+      MemberStatusFilter.active => l10n.memberManagementEmptyActive,
+      MemberStatusFilter.blocked => l10n.memberManagementEmptyBlocked,
+      MemberStatusFilter.unenrolled => l10n.memberManagementEmptyUnenrolled,
+      MemberStatusFilter.all => l10n.memberManagementEmptyFiltered,
     };
   }
 
   Future<void> _confirmAssignGrade(List<EnrolledMember> members) async {
     if (members.isEmpty) return;
+    final l10n = context.l10n;
 
     final grade = await _showGradePickerDialog(
       title: members.length == 1
-          ? 'Assign grade to ${members.first.user.fullName}'
-          : 'Assign grade to ${members.length} members',
+          ? l10n.memberManagementAssignGradeDialogTitle(
+              members.first.user.fullName,
+            )
+          : l10n.memberManagementAssignGradeDialogTitle(
+              '${members.length} members',
+            ),
       previewNames: members.map((m) => m.user.fullName).toList(),
       initialGrade: _initialGradeForMembers(members),
     );
     if (grade == null) return;
 
     final confirmed = await _showConfirmDialog(
-      title: 'Confirm grade assignment',
+      title: l10n.memberManagementConfirmGradeTitle,
       message: members.length == 1
-          ? 'Set ${members.first.user.fullName} to Grade $grade?'
-          : 'Set ${members.length} members to Grade $grade?',
-      actionLabel: 'Confirm',
+          ? l10n.memberManagementConfirmGradeOne(
+              members.first.user.fullName,
+              grade,
+            )
+          : l10n.memberManagementConfirmGradeMany(members.length, grade),
+      actionLabel: l10n.commonConfirm,
     );
     if (confirmed != true) return;
 
@@ -517,6 +549,7 @@ class _EnrolledUsersScreenState extends ConsumerState<EnrolledUsersScreen> {
     List<String> previewNames = const [],
     int? initialGrade,
   }) {
+    final l10n = context.l10n;
     final gradeLevels = ref.read(orgGradeLevelsProvider);
     int? selectedGrade = initialGrade != null && gradeLevels.contains(initialGrade)
         ? initialGrade
@@ -539,15 +572,15 @@ class _EnrolledUsersScreenState extends ConsumerState<EnrolledUsersScreen> {
                 ],
                 DropdownButtonFormField<int>(
                   initialValue: selectedGrade,
-                  decoration: const InputDecoration(
-                    labelText: 'Grade level',
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    labelText: l10n.commonGradeLevel,
+                    border: const OutlineInputBorder(),
                   ),
                   items: gradeLevels
                       .map(
                         (g) => DropdownMenuItem(
                           value: g,
-                          child: Text('Grade $g'),
+                          child: Text(l10n.schoolGradesGradeChip(g)),
                         ),
                       )
                       .toList(),
@@ -562,13 +595,13 @@ class _EnrolledUsersScreenState extends ConsumerState<EnrolledUsersScreen> {
               children: [
                 TextButton(
                   onPressed: () => Navigator.of(ctx).pop(),
-                  child: const Text('Cancel'),
+                  child: Text(l10n.commonCancel),
                 ),
                 FilledButton(
                   onPressed: selectedGrade == null
                       ? null
                       : () => Navigator.of(ctx).pop(selectedGrade),
-                  child: const Text('Continue'),
+                  child: Text(l10n.commonContinue),
                 ),
               ],
             ),
@@ -585,6 +618,7 @@ class _EnrolledUsersScreenState extends ConsumerState<EnrolledUsersScreen> {
     required String hint,
     List<String> previewNames = const [],
   }) async {
+    final l10n = context.l10n;
     final ctrl = TextEditingController();
     return showDialog<String>(
       context: context,
@@ -605,7 +639,9 @@ class _EnrolledUsersScreenState extends ConsumerState<EnrolledUsersScreen> {
                 autofocus: true,
                 maxLines: 3,
                 decoration: InputDecoration(
-                  labelText: required ? 'Reason (required)' : 'Note (optional)',
+                  labelText: required
+                      ? l10n.commonReasonOptional
+                      : l10n.commonNoteOptional,
                   hintText: hint,
                   border: const OutlineInputBorder(),
                 ),
@@ -619,7 +655,7 @@ class _EnrolledUsersScreenState extends ConsumerState<EnrolledUsersScreen> {
             children: [
               TextButton(
                 onPressed: () => Navigator.of(ctx).pop(),
-                child: const Text('Cancel'),
+                child: Text(l10n.commonCancel),
               ),
               FilledButton(
                 onPressed: () {
@@ -642,6 +678,7 @@ class _EnrolledUsersScreenState extends ConsumerState<EnrolledUsersScreen> {
     required String actionLabel,
     bool isDestructive = false,
   }) {
+    final l10n = context.l10n;
     return showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -653,7 +690,7 @@ class _EnrolledUsersScreenState extends ConsumerState<EnrolledUsersScreen> {
             children: [
               TextButton(
                 onPressed: () => Navigator.of(ctx).pop(false),
-                child: const Text('Cancel'),
+                child: Text(l10n.commonCancel),
               ),
               FilledButton(
                 onPressed: () => Navigator.of(ctx).pop(true),
@@ -673,10 +710,11 @@ class _EnrolledUsersScreenState extends ConsumerState<EnrolledUsersScreen> {
   }
 
   String _previewLabel(List<String> names) {
+    final l10n = context.l10n;
     const max = 5;
     if (names.length <= max) return names.join('\n');
     final shown = names.take(max).join('\n');
-    return '$shown\n…and ${names.length - max} more';
+    return '$shown\n${l10n.memberManagementPreviewAndMore(names.length - max)}';
   }
 }
 
@@ -705,6 +743,7 @@ class _BulkActionBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     final active = selected
         .where((m) => m.user.isApproved && !m.user.isBlocked)
@@ -720,19 +759,19 @@ class _BulkActionBar extends StatelessWidget {
           onPressed: busy || unenrolled.isEmpty
               ? null
               : () => onReEnroll(unenrolled),
-          child: const Text('Re-enroll'),
+          child: Text(l10n.memberManagementReenroll),
         ),
       if (statusFilter == MemberStatusFilter.blocked ||
           (statusFilter == MemberStatusFilter.all && blocked.isNotEmpty)) ...[
         TextButton(
           onPressed:
               busy || blocked.isEmpty ? null : () => onUnblock(blocked),
-          child: const Text('Unblock'),
+          child: Text(l10n.memberManagementUnblock),
         ),
         TextButton(
           onPressed:
               busy || blocked.isEmpty ? null : () => onUnenroll(blocked),
-          child: const Text('Unenroll'),
+          child: Text(l10n.memberManagementUnenroll),
         ),
       ],
       if (supportsGrades &&
@@ -742,19 +781,19 @@ class _BulkActionBar extends StatelessWidget {
         TextButton(
           onPressed:
               busy || active.isEmpty ? null : () => onAssignGrade(active),
-          child: const Text('Assign grade'),
+          child: Text(l10n.memberManagementAssignGrade),
         ),
         TextButton(
           onPressed:
               busy || active.isEmpty ? null : () => onUnenroll(active),
-          child: const Text('Unenroll'),
+          child: Text(l10n.memberManagementUnenroll),
         ),
         TextButton(
           onPressed: busy || active.isEmpty ? null : () => onBlock(active),
           style: TextButton.styleFrom(
             foregroundColor: theme.colorScheme.error,
           ),
-          child: const Text('Block'),
+          child: Text(l10n.memberManagementBlock),
         ),
       ],
     ];
@@ -767,7 +806,7 @@ class _BulkActionBar extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              '${selected.length} selected',
+              l10n.memberManagementSelectedCount(selected.length),
               style: theme.textTheme.titleSmall,
             ),
             if (actions.isNotEmpty) ...[
@@ -817,11 +856,12 @@ class _MemberTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     final user = member.user;
     final gradeLabel = member.gradeLevel != null
-        ? 'Grade ${member.gradeLevel}'
-        : 'No grade';
+        ? l10n.schoolGradesGradeChip(member.gradeLevel!)
+        : l10n.commonNoGradeAssigned;
 
     return Card(
       margin: EdgeInsets.zero,
@@ -849,21 +889,22 @@ class _MemberTile extends StatelessWidget {
           children: [
             Text(
               onAssignGrade != null
-                  ? '$gradeLabel · ${user.managementStatusLabel}'
-                  : user.managementStatusLabel,
+                  ? '$gradeLabel · ${localizedMemberManagementStatus(l10n, user)}'
+                  : localizedMemberManagementStatus(l10n, user),
             ),
             if (user.email != null) Text(user.email!),
-            if (user.studentId != null) Text('ID: ${user.studentId}'),
+            if (user.studentId != null)
+              Text('${l10n.commonIdLabel}: ${user.studentId}'),
             if (user.isBlocked && user.blockReason != null)
               Text(
-                'Block reason: ${user.blockReason}',
+                l10n.memberManagementBlockReasonLabel(user.blockReason!),
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.error,
                 ),
               ),
             if (user.isUnenrolled && user.unenrollReason != null)
               Text(
-                'Unenrolled: ${user.unenrollReason}',
+                l10n.memberManagementUnenrollReasonLabel(user.unenrollReason!),
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
@@ -896,54 +937,54 @@ class _MemberTile extends StatelessWidget {
                   if (user.isUnenrolled) {
                     return [
                       if (onEdit != null)
-                        const PopupMenuItem(
+                        PopupMenuItem(
                           value: 'edit',
-                          child: Text('Edit profile…'),
+                          child: Text(l10n.memberManagementEditProfile),
                         ),
                       if (onResetPassword != null)
-                        const PopupMenuItem(
+                        PopupMenuItem(
                           value: 'resetPassword',
-                          child: Text('Reset password…'),
+                          child: Text(l10n.memberManagementResetPassword),
                         ),
-                      const PopupMenuItem(
+                      PopupMenuItem(
                         value: 'reEnroll',
-                        child: Text('Re-enroll…'),
+                        child: Text(l10n.memberManagementReenroll),
                       ),
                     ];
                   }
                   return [
                     if (onEdit != null)
-                      const PopupMenuItem(
+                      PopupMenuItem(
                         value: 'edit',
-                        child: Text('Edit profile…'),
+                        child: Text(l10n.memberManagementEditProfile),
                       ),
                     if (onResetPassword != null)
-                      const PopupMenuItem(
+                      PopupMenuItem(
                         value: 'resetPassword',
-                        child: Text('Reset password…'),
+                        child: Text(l10n.memberManagementResetPassword),
                       ),
                     if (!user.isBlocked) ...[
                       if (onAssignGrade != null)
-                        const PopupMenuItem(
+                        PopupMenuItem(
                           value: 'grade',
-                          child: Text('Assign grade…'),
+                          child: Text(l10n.memberManagementAssignGrade),
                         ),
-                      const PopupMenuItem(
+                      PopupMenuItem(
                         value: 'unenroll',
-                        child: Text('Unenroll…'),
+                        child: Text(l10n.memberManagementUnenroll),
                       ),
-                      const PopupMenuItem(
+                      PopupMenuItem(
                         value: 'block',
-                        child: Text('Block…'),
+                        child: Text(l10n.memberManagementBlock),
                       ),
                     ] else ...[
-                      const PopupMenuItem(
+                      PopupMenuItem(
                         value: 'unblock',
-                        child: Text('Unblock…'),
+                        child: Text(l10n.memberManagementUnblock),
                       ),
-                      const PopupMenuItem(
+                      PopupMenuItem(
                         value: 'unenroll',
-                        child: Text('Unenroll…'),
+                        child: Text(l10n.memberManagementUnenroll),
                       ),
                     ],
                   ];
@@ -960,11 +1001,11 @@ class _NoAccessPlaceholder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
+    return Center(
       child: Padding(
-        padding: EdgeInsets.all(32),
+        padding: const EdgeInsets.all(32),
         child: Text(
-          'You do not have permission to manage enrolled members.',
+          context.l10n.memberManagementNoAccess,
           textAlign: TextAlign.center,
         ),
       ),

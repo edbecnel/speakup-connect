@@ -194,6 +194,16 @@ Platform operators import the English source key list. School staff focus on rev
 
 3. **Optional — AI draft:** set Firebase secret `TRANSLATION_AI_API_KEY` for OpenAI (or configured provider). Manual edit and approve work without it; AI buttons fail until the secret is set.
 
+   **OpenAI API credits (if you run out during batch translation):** AI draft and **Translate missing (AI)** use the key in `functions/.env` (`TRANSLATION_AI_API_KEY`). That key bills against **OpenAI Platform** prepaid balance — **not** a ChatGPT Plus subscription ([chatgpt.com](https://chatgpt.com) and [platform.openai.com](https://platform.openai.com) are billed separately).
+
+   | Resource | URL |
+   |----------|-----|
+   | Add credits / billing overview | https://platform.openai.com/settings/organization/billing/overview |
+   | Usage (spend and tokens) | https://platform.openai.com/usage |
+   | API keys | https://platform.openai.com/api-keys |
+
+   To top up: sign in at [platform.openai.com](https://platform.openai.com) → **Settings → Billing** → add a payment method if needed → **Add to balance** / **Buy credits** (minimum is typically **$5**). Consider **auto-recharge** and a **monthly spending limit** so large batch runs do not stop mid-job. If balance is zero, AI callables fail (often `429` or `insufficient_quota` in Firebase logs); manual edit, save, and approve still work.
+
 4. **Import English source (platform `super_admin` only):** use the web **Translation Helper** (`tools/translation-helper/`) or call `importTranslationSource` — upload `lib/l10n/app_en.arb` so target-language rows exist before moderators edit.
 
 5. **Web Translation Helper config:** copy `firebase-config.example.js` → `firebase-config.js`, add the Firebase web app config, and set `ORGANIZATION_ID` for the tenant (e.g. `monhs-ph-001`).

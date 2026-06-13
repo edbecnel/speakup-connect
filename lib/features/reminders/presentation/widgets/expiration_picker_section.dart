@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:speakup_connect/core/l10n/app_localizations_extension.dart';
+import 'package:speakup_connect/l10n/app_localizations.dart';
 
 /// How the user specifies when a broadcast should expire.
 enum ExpirationMode { off, dateTime, duration }
@@ -46,21 +48,24 @@ class ExpirationPickerValue {
     return true;
   }
 
-  String summary({DateTime? scheduledAt}) {
+  String summary(AppLocalizations l10n, {DateTime? scheduledAt}) {
     if (mode == ExpirationMode.off) {
-      return 'Off — stays until manually deleted';
+      return l10n.reminderComposeExpirationOff;
     }
     final resolved = resolve(scheduledAt: scheduledAt);
-    if (resolved == null) return 'Set expiration below';
+    if (resolved == null) return l10n.reminderComposeSetExpirationBelow;
     if (mode == ExpirationMode.duration) {
       final baseLabel = scheduledAt != null &&
               scheduledAt.isAfter(DateTime.now())
-          ? 'scheduled send'
-          : 'send';
-      return '${_formatDuration(durationHours, durationMinutes)} after $baseLabel '
-          '(${formatDateTime(resolved)})';
+          ? l10n.reminderComposeExpirationBaseScheduled
+          : l10n.reminderComposeExpirationBaseSend;
+      return l10n.reminderComposeExpirationDurationSummary(
+        _formatDuration(l10n, durationHours, durationMinutes),
+        baseLabel,
+        formatDateTime(resolved),
+      );
     }
-    return 'Expires ${formatDateTime(resolved)}';
+    return l10n.reminderComposeExpirationAt(formatDateTime(resolved));
   }
 
   ExpirationPickerValue copyWith({
@@ -131,6 +136,7 @@ class ExpirationPickerSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
     final enabled = value.isEnabled;
 
     return Column(
@@ -138,8 +144,8 @@ class ExpirationPickerSection extends StatelessWidget {
       children: [
         SwitchListTile(
           contentPadding: EdgeInsets.zero,
-          title: const Text('Set expiration'),
-          subtitle: Text(value.summary(scheduledAt: scheduledAt)),
+          title: Text(l10n.reminderComposeSetExpiration),
+          subtitle: Text(value.summary(l10n, scheduledAt: scheduledAt)),
           value: enabled,
           onChanged: (on) {
             if (on) {
@@ -157,16 +163,16 @@ class ExpirationPickerSection extends StatelessWidget {
         if (enabled) ...[
           const SizedBox(height: 4),
           SegmentedButton<ExpirationMode>(
-            segments: const [
+            segments: [
               ButtonSegment(
                 value: ExpirationMode.dateTime,
-                label: Text('Date & time'),
-                icon: Icon(Icons.event_outlined, size: 18),
+                label: Text(l10n.reminderComposeExpirationDateTime),
+                icon: const Icon(Icons.event_outlined, size: 18),
               ),
               ButtonSegment(
                 value: ExpirationMode.duration,
-                label: Text('Duration'),
-                icon: Icon(Icons.timelapse_outlined, size: 18),
+                label: Text(l10n.reminderComposeExpirationDuration),
+                icon: const Icon(Icons.timelapse_outlined, size: 18),
               ),
             ],
             selected: {value.mode},
@@ -196,12 +202,13 @@ class ExpirationPickerSection extends StatelessWidget {
                 label: Text(
                   value.expiresAt != null
                       ? formatDateTime(value.expiresAt!)
-                      : 'Pick date & time',
+                      : l10n.reminderComposePickDateTime,
                 ),
               ),
             )
           else
             _DurationPickers(
+              l10n: l10n,
               hours: value.durationHours,
               minutes: value.durationMinutes,
               onChanged: (hours, minutes) => onChanged(
@@ -215,7 +222,7 @@ class ExpirationPickerSection extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(top: 8),
               child: Text(
-                'Expiration must be after the send time.',
+                l10n.reminderComposeExpirationAfterSend,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.error,
                 ),
@@ -229,11 +236,13 @@ class ExpirationPickerSection extends StatelessWidget {
 
 class _DurationPickers extends StatelessWidget {
   const _DurationPickers({
+    required this.l10n,
     required this.hours,
     required this.minutes,
     required this.onChanged,
   });
 
+  final AppLocalizations l10n;
   final int hours;
   final int minutes;
   final void Function(int hours, int minutes) onChanged;
@@ -248,7 +257,7 @@ class _DurationPickers extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Expire after',
+          l10n.reminderComposeExpireAfter,
           style: theme.textTheme.labelLarge,
         ),
         const SizedBox(height: 8),
@@ -256,9 +265,9 @@ class _DurationPickers extends StatelessWidget {
           children: [
             Expanded(
               child: InputDecorator(
-                decoration: const InputDecoration(
-                  labelText: 'Hours',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: l10n.reminderComposeHours,
+                  border: const OutlineInputBorder(),
                   contentPadding:
                       EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                 ),
@@ -284,9 +293,9 @@ class _DurationPickers extends StatelessWidget {
             const SizedBox(width: 12),
             Expanded(
               child: InputDecorator(
-                decoration: const InputDecoration(
-                  labelText: 'Minutes',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: l10n.reminderComposeMinutes,
+                  border: const OutlineInputBorder(),
                   contentPadding:
                       EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                 ),
@@ -316,11 +325,11 @@ class _DurationPickers extends StatelessWidget {
   }
 }
 
-String _formatDuration(int hours, int minutes) {
+String _formatDuration(AppLocalizations l10n, int hours, int minutes) {
   final parts = <String>[];
-  if (hours > 0) parts.add('$hours hr');
-  if (minutes > 0) parts.add('$minutes min');
-  return parts.isEmpty ? '0 min' : parts.join(' ');
+  if (hours > 0) parts.add(l10n.reminderComposeDurationHours(hours));
+  if (minutes > 0) parts.add(l10n.reminderComposeDurationMinutes(minutes));
+  return parts.isEmpty ? l10n.reminderComposeDurationZeroMin : parts.join(' ');
 }
 
 String formatDateTime(DateTime dt) {

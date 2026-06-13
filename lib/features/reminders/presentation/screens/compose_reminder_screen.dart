@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:speakup_connect/core/l10n/app_localizations_extension.dart';
 import 'package:speakup_connect/core/permissions/app_permission.dart';
 import 'package:speakup_connect/core/permissions/providers/permission_provider.dart';
 import 'package:speakup_connect/features/groups/domain/entities/my_group_membership.dart';
@@ -13,6 +14,7 @@ import 'package:speakup_connect/features/reminders/presentation/widgets/response
 import 'package:speakup_connect/features/roles/presentation/providers/roles_provider.dart';
 import 'package:speakup_connect/shared/widgets/app_button.dart';
 import 'package:speakup_connect/shared/widgets/schedule_for_later_section.dart';
+import 'package:speakup_connect/l10n/app_localizations.dart';
 
 /// Compose Reminder screen — lets authorized members broadcast a reminder to
 /// the whole org, a group, or a role, now or at a scheduled time.
@@ -46,6 +48,7 @@ class _ComposeReminderScreenState extends ConsumerState<ComposeReminderScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
     final canBroadcast = ref.watch(canComposeRemindersProvider);
     final leaderOnly = ref.watch(isGroupLeaderOnlyComposerProvider);
     final form = ref.watch(composeReminderProvider);
@@ -85,7 +88,9 @@ class _ComposeReminderScreenState extends ConsumerState<ComposeReminderScreen> {
       if (prev?.isLoading == true && !next.isLoading) {
         if (next.hasError) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text('Failed to send: ${next.error}'),
+            content: Text(
+              l10n.reminderComposeSendFailed('${next.error}'),
+            ),
             backgroundColor: theme.colorScheme.error,
           ));
         } else if (next.asData?.value != null) {
@@ -93,10 +98,10 @@ class _ComposeReminderScreenState extends ConsumerState<ComposeReminderScreen> {
           final isPending = result.status == ReminderStatus.pending;
           final isScheduled = result.reminder.isScheduled;
           final msg = isPending
-              ? 'Reminder submitted for approval.'
+              ? l10n.reminderComposeSubmittedForApproval
               : isScheduled
-                  ? 'Reminder scheduled.'
-                  : 'Reminder published.';
+                  ? l10n.reminderComposeScheduled
+                  : l10n.reminderComposePublished;
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text(msg),
             backgroundColor: Colors.green.shade700,
@@ -108,7 +113,7 @@ class _ComposeReminderScreenState extends ConsumerState<ComposeReminderScreen> {
 
     if (!canBroadcast) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Compose Reminder')),
+        appBar: AppBar(title: Text(l10n.reminderComposeTitle)),
         body: const _NoAccessPlaceholder(),
       );
     }
@@ -117,21 +122,26 @@ class _ComposeReminderScreenState extends ConsumerState<ComposeReminderScreen> {
       return _buildScaffold(
         context: context,
         theme: theme,
+        l10n: l10n,
         form: form,
         notifier: notifier,
         submitState: submitState,
-        submitLabel: willNeedApproval ? 'Submit for Approval' : 'Send Reminder',
+        submitLabel: willNeedApproval
+            ? l10n.reminderComposeSubmitForApproval
+            : l10n.reminderComposeSendReminder,
         leaderOnly: true,
         willNeedApproval: willNeedApproval,
       );
     }
 
-    final submitLabel =
-        willNeedApproval ? 'Submit for Approval' : 'Send Reminder';
+    final submitLabel = willNeedApproval
+        ? l10n.reminderComposeSubmitForApproval
+        : l10n.reminderComposeSendReminder;
 
     return _buildScaffold(
       context: context,
       theme: theme,
+      l10n: l10n,
       form: form,
       notifier: notifier,
       submitState: submitState,
@@ -200,6 +210,7 @@ class _ComposeReminderScreenState extends ConsumerState<ComposeReminderScreen> {
   Widget _buildScaffold({
     required BuildContext context,
     required ThemeData theme,
+    required AppLocalizations l10n,
     required ComposeReminderState form,
     required ComposeReminderNotifier notifier,
     required AsyncValue<SubmitReminderResult?> submitState,
@@ -210,7 +221,11 @@ class _ComposeReminderScreenState extends ConsumerState<ComposeReminderScreen> {
     return Scaffold(
       appBar: AppBar(
         leading: BackButton(onPressed: () => context.pop()),
-        title: Text(leaderOnly ? 'Send Group Alert' : 'Compose Reminder'),
+        title: Text(
+          leaderOnly
+              ? l10n.reminderComposeSendGroupAlertTitle
+              : l10n.reminderComposeTitle,
+        ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -221,22 +236,22 @@ class _ComposeReminderScreenState extends ConsumerState<ComposeReminderScreen> {
               Padding(
                 padding: const EdgeInsets.only(bottom: 12),
                 child: Text(
-                  'This alert will be sent only to members of the group you select.',
+                  l10n.reminderComposeGroupOnlyHint,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
               ),
-            if (willNeedApproval) _ApprovalBanner(),
+            if (willNeedApproval) _ApprovalBanner(l10n: l10n),
             TextField(
               controller: _titleCtrl,
               onChanged: notifier.setTitle,
               textCapitalization: TextCapitalization.sentences,
               maxLength: 80,
-              decoration: const InputDecoration(
-                labelText: 'Title',
-                hintText: 'e.g. Early dismissal Friday',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: l10n.reminderComposeTitleLabel,
+                hintText: l10n.reminderComposeTitleHint,
+                border: const OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: 12),
@@ -246,20 +261,21 @@ class _ComposeReminderScreenState extends ConsumerState<ComposeReminderScreen> {
               textCapitalization: TextCapitalization.sentences,
               maxLines: 5,
               maxLength: 500,
-              decoration: const InputDecoration(
-                labelText: 'Message',
-                hintText: 'Write the reminder details…',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: l10n.reminderComposeMessageLabel,
+                hintText: l10n.reminderComposeMessageHint,
+                border: const OutlineInputBorder(),
                 alignLabelWithHint: true,
               ),
             ),
             const SizedBox(height: 8),
-            Text('Audience', style: theme.textTheme.titleSmall),
+            Text(l10n.reminderComposeAudienceLabel, style: theme.textTheme.titleSmall),
             const SizedBox(height: 8),
             if (leaderOnly)
               _GroupPicker(form: form, notifier: notifier)
             else ...[
               _AudienceSelector(
+                l10n: l10n,
                 selected: form.audienceType,
                 onChanged: notifier.setAudienceType,
               ),
@@ -286,11 +302,11 @@ class _ComposeReminderScreenState extends ConsumerState<ComposeReminderScreen> {
               onChanged: notifier.setResponseConfig,
             ),
             const SizedBox(height: 28),
-            if (!form.isValid && form.validationMessage != null)
+            if (!form.isValid && form.validationMessage(l10n) != null)
               Padding(
                 padding: const EdgeInsets.only(bottom: 12),
                 child: Text(
-                  form.validationMessage!,
+                  form.validationMessage(l10n)!,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.error,
                   ),
@@ -298,7 +314,7 @@ class _ComposeReminderScreenState extends ConsumerState<ComposeReminderScreen> {
               ),
             AppButton.primary(
               label: submitLabel,
-              icon: submitLabel.contains('Approval')
+              icon: willNeedApproval
                   ? Icons.send_outlined
                   : Icons.campaign_outlined,
               isLoading: submitState.isLoading,
@@ -314,6 +330,10 @@ class _ComposeReminderScreenState extends ConsumerState<ComposeReminderScreen> {
 }
 
 class _ApprovalBanner extends StatelessWidget {
+  const _ApprovalBanner({required this.l10n});
+
+  final AppLocalizations l10n;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -331,8 +351,7 @@ class _ApprovalBanner extends StatelessWidget {
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              'Your organization requires reminders to be approved. This will '
-              'be submitted for review before it is published.',
+              l10n.reminderComposeApprovalBanner,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSecondaryContainer,
               ),
@@ -345,29 +364,34 @@ class _ApprovalBanner extends StatelessWidget {
 }
 
 class _AudienceSelector extends StatelessWidget {
-  const _AudienceSelector({required this.selected, required this.onChanged});
+  const _AudienceSelector({
+    required this.l10n,
+    required this.selected,
+    required this.onChanged,
+  });
 
+  final AppLocalizations l10n;
   final ReminderAudienceType selected;
   final ValueChanged<ReminderAudienceType> onChanged;
 
   @override
   Widget build(BuildContext context) {
     return SegmentedButton<ReminderAudienceType>(
-      segments: const [
+      segments: [
         ButtonSegment(
           value: ReminderAudienceType.all,
-          label: Text('Everyone'),
-          icon: Icon(Icons.groups_outlined),
+          label: Text(l10n.reminderComposeAudienceEveryone),
+          icon: const Icon(Icons.groups_outlined),
         ),
         ButtonSegment(
           value: ReminderAudienceType.group,
-          label: Text('Group'),
-          icon: Icon(Icons.diversity_3_outlined),
+          label: Text(l10n.reminderComposeAudienceGroup),
+          icon: const Icon(Icons.diversity_3_outlined),
         ),
         ButtonSegment(
           value: ReminderAudienceType.role,
-          label: Text('Role'),
-          icon: Icon(Icons.badge_outlined),
+          label: Text(l10n.reminderComposeAudienceRole),
+          icon: const Icon(Icons.badge_outlined),
         ),
       ],
       selected: {selected},
@@ -384,13 +408,14 @@ class _GroupPicker extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final groupsAsync = ref.watch(audienceGroupsProvider);
     return groupsAsync.when(
       loading: () => const LinearProgressIndicator(),
-      error: (e, _) => Text('Could not load groups: $e'),
+      error: (e, _) => Text(l10n.reminderComposeLoadGroupsFailed('$e')),
       data: (groups) {
         if (groups.isEmpty) {
-          return const Text('No groups exist yet. Create a group first.');
+          return Text(l10n.reminderComposeNoGroupsYet);
         }
         final selectedId = form.targetId != null &&
                 groups.any((g) => g.id == form.targetId)
@@ -399,9 +424,9 @@ class _GroupPicker extends ConsumerWidget {
         return DropdownButtonFormField<String>(
           isExpanded: true,
           value: selectedId,
-          decoration: const InputDecoration(
-            labelText: 'Select group',
-            border: OutlineInputBorder(),
+          decoration: InputDecoration(
+            labelText: l10n.reminderComposeSelectGroup,
+            border: const OutlineInputBorder(),
           ),
           items: groups
               .map(
@@ -446,20 +471,21 @@ class _RolePicker extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final rolesAsync = ref.watch(rolesProvider);
     return rolesAsync.when(
       loading: () => const LinearProgressIndicator(),
-      error: (e, _) => Text('Could not load roles: $e'),
+      error: (e, _) => Text(l10n.reminderComposeLoadRolesFailed('$e')),
       data: (roles) {
         if (roles.isEmpty) {
-          return const Text('No roles defined yet.');
+          return Text(l10n.reminderComposeNoRolesYet);
         }
         return DropdownButtonFormField<String>(
           isExpanded: true,
           initialValue: form.targetId,
-          decoration: const InputDecoration(
-            labelText: 'Select role',
-            border: OutlineInputBorder(),
+          decoration: InputDecoration(
+            labelText: l10n.reminderComposeSelectRole,
+            border: const OutlineInputBorder(),
           ),
           items: roles
               .map(
@@ -502,6 +528,7 @@ class _NoAccessPlaceholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -512,7 +539,7 @@ class _NoAccessPlaceholder extends StatelessWidget {
                 size: 48, color: theme.colorScheme.onSurfaceVariant),
             const SizedBox(height: 12),
             Text(
-              'You don\'t have permission to broadcast reminders.',
+              l10n.reminderComposeNoPermission,
               textAlign: TextAlign.center,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,

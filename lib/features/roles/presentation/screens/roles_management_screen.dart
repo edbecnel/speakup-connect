@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:speakup_connect/core/constants/route_constants.dart';
+import 'package:speakup_connect/core/l10n/app_localizations_extension.dart';
 import 'package:speakup_connect/core/permissions/app_permission.dart';
+import 'package:speakup_connect/core/permissions/permission_l10n.dart';
 import 'package:speakup_connect/core/permissions/providers/permission_provider.dart';
 import 'package:speakup_connect/features/roles/domain/entities/role_entity.dart';
 import 'package:speakup_connect/features/roles/presentation/providers/roles_provider.dart';
@@ -20,24 +22,24 @@ class RolesManagementScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final rolesAsync = ref.watch(rolesProvider);
     final canManageRoles =
         ref.watch(hasPermissionProvider(AppPermission.manageRoles));
-    final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Roles & Permissions'),
+        title: Text(l10n.rolesManagementTitle),
         actions: [
           TextButton.icon(
             onPressed: () => context.push(Routes.adminUserAssignments),
             icon: const Icon(Icons.people_outlined),
-            label: const Text('Assignments'),
+            label: Text(l10n.rolesAssignments),
           ),
           TextButton.icon(
             onPressed: () => context.push(Routes.adminCapabilities),
             icon: const Icon(Icons.tune_outlined),
-            label: const Text('Capabilities'),
+            label: Text(l10n.rolesCapabilities),
           ),
         ],
       ),
@@ -45,7 +47,7 @@ class RolesManagementScreen extends ConsumerWidget {
           ? FloatingActionButton.extended(
               onPressed: () => context.push(Routes.adminRoleNew),
               icon: const Icon(Icons.add),
-              label: const Text('Create Role'),
+              label: Text(l10n.rolesCreateRole),
               shape: const StadiumBorder(),
             )
           : null,
@@ -74,7 +76,7 @@ class _RolesList extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
+    final l10n = context.l10n;
 
     // Partition into system vs custom.
     final system = roles.where((r) => r.isSystemRole).toList();
@@ -84,11 +86,11 @@ class _RolesList extends ConsumerWidget {
       padding: const EdgeInsets.only(bottom: 96),
       children: [
         if (system.isNotEmpty) ...[
-          _SectionHeader(title: 'System Roles', count: system.length),
+          _SectionHeader(title: l10n.rolesSystemRoles, count: system.length),
           ...system.map((r) => _RoleCard(role: r)),
         ],
         if (custom.isNotEmpty) ...[
-          _SectionHeader(title: 'Custom Roles', count: custom.length),
+          _SectionHeader(title: l10n.rolesCustomRoles, count: custom.length),
           ...custom.map((r) => _RoleCard(role: r)),
         ],
         if (system.isEmpty && custom.isEmpty)
@@ -149,6 +151,7 @@ class _RoleCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final canManageRoles =
         ref.watch(hasPermissionProvider(AppPermission.manageRoles));
     final theme = Theme.of(context);
@@ -192,7 +195,7 @@ class _RoleCard extends ConsumerWidget {
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
-                      'System',
+                      l10n.rolesSystemBadge,
                       style: theme.textTheme.labelSmall?.copyWith(
                         color: theme.colorScheme.onSecondaryContainer,
                       ),
@@ -223,7 +226,7 @@ class _RoleCard extends ConsumerWidget {
                 children: [
                   ...visibleCaps.map(
                     (p) => Chip(
-                      label: Text(p.displayName),
+                      label: Text(localizedPermissionName(l10n, p)),
                       labelStyle: theme.textTheme.labelSmall,
                       visualDensity: VisualDensity.compact,
                       side: BorderSide(
@@ -235,7 +238,7 @@ class _RoleCard extends ConsumerWidget {
                   ),
                   if (overflow > 0)
                     ActionChip(
-                      label: Text('+$overflow more'),
+                      label: Text(l10n.rolesMoreCapabilities(overflow)),
                       labelStyle: theme.textTheme.labelSmall?.copyWith(
                         color: theme.colorScheme.primary,
                       ),
@@ -248,8 +251,9 @@ class _RoleCard extends ConsumerWidget {
                         showDialog<void>(
                           context: context,
                           builder: (dialogCtx) => AlertDialog(
-                            title:
-                                Text('${role.displayName} — All Capabilities'),
+                            title: Text(
+                              l10n.rolesAllCapabilitiesTitle(role.displayName),
+                            ),
                             content: SingleChildScrollView(
                               child: Wrap(
                                 spacing: 6,
@@ -257,7 +261,9 @@ class _RoleCard extends ConsumerWidget {
                                 children: resolvedCaps
                                     .map(
                                       (p) => Chip(
-                                        label: Text(p.displayName),
+                                        label: Text(
+                                          localizedPermissionName(l10n, p),
+                                        ),
                                         labelStyle:
                                             theme.textTheme.labelSmall,
                                         visualDensity: VisualDensity.compact,
@@ -276,7 +282,7 @@ class _RoleCard extends ConsumerWidget {
                               TextButton(
                                 onPressed: () =>
                                     Navigator.of(dialogCtx).pop(),
-                                child: const Text('Close'),
+                                child: Text(l10n.commonClose),
                               ),
                             ],
                           ),
@@ -288,7 +294,7 @@ class _RoleCard extends ConsumerWidget {
             ] else ...[
               const SizedBox(height: 8),
               Text(
-                'No capabilities assigned',
+                l10n.rolesNoCapabilities,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                   fontStyle: FontStyle.italic,
@@ -307,11 +313,11 @@ class _RoleCard extends ConsumerWidget {
                       Routes.adminRoleAssignPath(role.id),
                     ),
                     icon: const Icon(Icons.person_add_outlined, size: 18),
-                    label: const Text('Assign Users'),
+                    label: Text(l10n.rolesAssignUsers),
                   ),
                   const SizedBox(width: 8),
                   AppButton.secondary(
-                    label: 'Edit',
+                    label: l10n.rolesEdit,
                     minimumWidth: 80,
                     onPressed: () => context.push(
                       Routes.adminRoleEditPath(role.id),
@@ -336,6 +342,7 @@ class _EmptyRolesPlaceholder extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     final seedState = ref.watch(seedRolesProvider);
     final canManageRoles =
@@ -345,12 +352,12 @@ class _EmptyRolesPlaceholder extends ConsumerWidget {
       if (!next.isLoading && prev?.isLoading == true) {
         if (next.hasError) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text('Seed failed: ${next.error}'),
+            content: Text(l10n.rolesSeedFailed('${next.error}')),
             backgroundColor: theme.colorScheme.error,
           ));
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text('Default roles added successfully'),
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(l10n.rolesSeedSuccess),
             backgroundColor: Colors.green,
           ));
         }
@@ -370,12 +377,12 @@ class _EmptyRolesPlaceholder extends ConsumerWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              'No roles defined yet',
+              l10n.rolesNoRolesEmpty,
               style: theme.textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
             Text(
-              'Create your first custom role to grant staff\nspecific capabilities within this organisation.',
+              l10n.rolesEmptyDescription,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
@@ -400,7 +407,9 @@ class _EmptyRolesPlaceholder extends ConsumerWidget {
                         )
                       : const Icon(Icons.auto_fix_high_outlined),
                   label: Text(
-                    seedState.isLoading ? 'Seeding…' : 'Seed Default Roles',
+                    seedState.isLoading
+                        ? l10n.rolesSeeding
+                        : l10n.rolesSeedDefaultRoles,
                   ),
                 ),
               ),
@@ -410,7 +419,7 @@ class _EmptyRolesPlaceholder extends ConsumerWidget {
                 child: OutlinedButton.icon(
                   onPressed: seedState.isLoading ? null : onCreateTap,
                   icon: const Icon(Icons.add),
-                  label: const Text('Create Role Manually'),
+                  label: Text(l10n.rolesCreateManually),
                 ),
               ),
             ],

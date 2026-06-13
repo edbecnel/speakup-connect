@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:speakup_connect/config/app_config.dart';
 import 'package:speakup_connect/core/constants/route_constants.dart';
+import 'package:speakup_connect/core/l10n/app_localizations_extension.dart';
+import 'package:speakup_connect/features/admin/presentation/l10n/admin_ui_l10n.dart';
 import 'package:speakup_connect/features/admin/presentation/widgets/admin_filter_bar.dart';
 import 'package:speakup_connect/features/auth/presentation/providers/auth_provider.dart';
 import 'package:speakup_connect/features/organization/presentation/providers/organization_provider.dart';
@@ -22,6 +25,7 @@ class AdminDashboardScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final pendingCount = ref.watch(pendingMemberApplicationCountProvider);
     final pendingReminderCount = ref.watch(pendingReminderCountProvider);
     final supportsGrades = ref.watch(orgSupportsStudentGradesProvider);
@@ -39,10 +43,10 @@ class AdminDashboardScreen extends ConsumerWidget {
               }
             },
           ),
-          title: const Text('Admin Dashboard'),
+          title: Text(l10n.settingsAdminDashboard),
           actions: [
             IconButton(
-              tooltip: 'Join Applications',
+              tooltip: l10n.adminDashboardJoinApplicationsTooltip,
               onPressed: () => context.push(Routes.memberApprovals),
               icon: NotificationBadgeIcon(
                 icon: Icons.person_add_alt_1_outlined,
@@ -50,7 +54,7 @@ class AdminDashboardScreen extends ConsumerWidget {
               ),
             ),
             IconButton(
-              tooltip: 'Reminder Approvals',
+              tooltip: l10n.adminDashboardPendingApprovalsTooltip,
               onPressed: () => context.push(Routes.reminderApprovals),
               icon: NotificationBadgeIcon(
                 icon: Icons.fact_check_outlined,
@@ -58,52 +62,52 @@ class AdminDashboardScreen extends ConsumerWidget {
               ),
             ),
             IconButton(
-              tooltip: 'Member Management',
+              tooltip: l10n.adminDashboardMemberManagementTooltip,
               onPressed: () => context.push(Routes.enrolledUsers),
               icon: const Icon(Icons.people_outline),
             ),
             if (supportsGrades) ...[
               IconButton(
-                tooltip: 'Student Roster',
+                tooltip: l10n.adminDashboardStudentRosterTooltip,
                 onPressed: () => context.push(Routes.rosterManagement),
                 icon: const Icon(Icons.school_outlined),
               ),
               IconButton(
-                tooltip: 'School Grades',
+                tooltip: l10n.adminDashboardSchoolGradesTooltip,
                 onPressed: () => context.push(Routes.schoolGradesSettings),
                 icon: const Icon(Icons.format_list_numbered_outlined),
               ),
             ],
             IconButton(
               icon: const Icon(Icons.manage_accounts_outlined),
-              tooltip: 'Roles & Permissions',
+              tooltip: l10n.adminDashboardRolesTooltip,
               onPressed: () => context.push(Routes.adminRoles),
             ),
             IconButton(
               icon: const Icon(Icons.settings_outlined),
-              tooltip: 'Organization Settings',
+              tooltip: l10n.adminDashboardOrgSettingsTooltip,
               onPressed: () => context.push(Routes.adminSettings),
             ),
           ],
-          bottom: const TabBar(
+          bottom: TabBar(
             isScrollable: true,
             tabAlignment: TabAlignment.start,
             tabs: [
-              Tab(text: 'All'),
-              Tab(text: 'Submitted'),
-              Tab(text: 'Under Review'),
-              Tab(text: 'In Progress'),
-              Tab(text: 'Resolved'),
-              Tab(text: 'Closed'),
+              Tab(text: l10n.adminDashboardTabAll),
+              Tab(text: l10n.adminDashboardTabSubmitted),
+              Tab(text: l10n.adminDashboardTabUnderReview),
+              Tab(text: l10n.adminDashboardTabInProgress),
+              Tab(text: l10n.adminDashboardTabResolved),
+              Tab(text: l10n.adminDashboardTabClosed),
             ],
           ),
         ),
-        body: const Column(
+        body: Column(
           children: [
-            _QuickStatsHeader(),
-            _SearchBar(),
-            AdminFilterBar(),
-            Divider(height: 1),
+            const _QuickStatsHeader(),
+            const _SearchBar(),
+            const AdminFilterBar(),
+            const Divider(height: 1),
             Expanded(
               child: TabBarView(
                 children: [
@@ -128,6 +132,7 @@ class _QuickStatsHeader extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final allAsync = ref.watch(allReportsProvider(AdminReportsTab.allActive));
     final theme = Theme.of(context);
 
@@ -168,7 +173,10 @@ class _QuickStatsHeader extends ConsumerWidget {
                 child: Row(
                   children: [
                     _StatChip(
-                      label: 'Total',
+                      label: localizedAdminReportsStatLabel(
+                        l10n,
+                        AdminReportsTab.allActive,
+                      ),
                       count: total,
                       color: theme.colorScheme.primary,
                       selected: selectedTab == AdminReportsTab.allActive.tabIndex,
@@ -176,7 +184,10 @@ class _QuickStatsHeader extends ConsumerWidget {
                     ),
                     const SizedBox(width: 8),
                     _StatChip(
-                      label: 'Submitted',
+                      label: localizedAdminReportsStatLabel(
+                        l10n,
+                        AdminReportsTab.submitted,
+                      ),
                       count: submitted,
                       color: const Color(0xFF1565C0),
                       selected:
@@ -185,7 +196,10 @@ class _QuickStatsHeader extends ConsumerWidget {
                     ),
                     const SizedBox(width: 8),
                     _StatChip(
-                      label: 'Under Review',
+                      label: localizedAdminReportsStatLabel(
+                        l10n,
+                        AdminReportsTab.underReview,
+                      ),
                       count: underReview,
                       color: const Color(0xFFF9A825),
                       selected:
@@ -194,7 +208,10 @@ class _QuickStatsHeader extends ConsumerWidget {
                     ),
                     const SizedBox(width: 8),
                     _StatChip(
-                      label: 'In Progress',
+                      label: localizedAdminReportsStatLabel(
+                        l10n,
+                        AdminReportsTab.inProgress,
+                      ),
                       count: inProgress,
                       color: const Color(0xFFF57F17),
                       selected:
@@ -203,7 +220,10 @@ class _QuickStatsHeader extends ConsumerWidget {
                     ),
                     const SizedBox(width: 8),
                     _StatChip(
-                      label: 'Resolved',
+                      label: localizedAdminReportsStatLabel(
+                        l10n,
+                        AdminReportsTab.resolved,
+                      ),
                       count: resolved,
                       color: const Color(0xFF2E7D32),
                       selected:
@@ -212,7 +232,10 @@ class _QuickStatsHeader extends ConsumerWidget {
                     ),
                     const SizedBox(width: 8),
                     _StatChip(
-                      label: 'Closed',
+                      label: localizedAdminReportsStatLabel(
+                        l10n,
+                        AdminReportsTab.closed,
+                      ),
                       count: closed,
                       color: theme.colorScheme.onSurfaceVariant,
                       selected: selectedTab == AdminReportsTab.closed.tabIndex,
@@ -246,9 +269,10 @@ class _StatChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Semantics(
       button: true,
-      label: '$label: $count reports',
+      label: l10n.adminDashboardReportsCount(label, count),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
@@ -302,13 +326,14 @@ class _SearchBar extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final query = ref.watch(adminSearchQueryProvider);
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
       child: TextField(
         decoration: InputDecoration(
-          hintText: 'Search by title or reference number...',
+          hintText: l10n.adminDashboardSearchHint,
           prefixIcon: const Icon(Icons.search, size: 20),
           suffixIcon: query.isNotEmpty
               ? IconButton(
@@ -335,12 +360,14 @@ class _AdminReportsList extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final allReportsAsync = ref.watch(allReportsProvider(tab));
 
     return allReportsAsync.when(
-      loading: () => const AppLoadingIndicator(message: 'Loading reports...'),
+      loading: () =>
+          AppLoadingIndicator(message: l10n.adminDashboardLoadingReports),
       error: (e, _) => AppErrorWidget(
-        message: 'Failed to load reports',
+        message: l10n.adminDashboardLoadFailed,
         onRetry: () => ref.invalidate(allReportsProvider(tab)),
       ),
       data: (reports) {
@@ -366,14 +393,18 @@ class _AdminReportsList extends ConsumerWidget {
         if (filtered.isEmpty) {
           return AppEmptyState(
             icon: Icons.assignment_outlined,
-            message: searchQuery.isNotEmpty ? 'No results' : 'No reports',
+            message: searchQuery.isNotEmpty
+                ? l10n.adminDashboardNoResults
+                : l10n.adminDashboardNoReports,
             subtitle: searchQuery.isNotEmpty
-                ? 'No reports match "$searchQuery".'
+                ? l10n.adminDashboardNoReportsMatch(searchQuery)
                 : switch (tab) {
                     AdminReportsTab.allActive =>
-                      'No active reports submitted yet.',
-                    AdminReportsTab.closed => 'No closed reports.',
-                    _ => 'No "${tab.label}" reports.',
+                      l10n.adminDashboardNoActiveReports,
+                    AdminReportsTab.closed => l10n.adminDashboardNoClosedReports,
+                    _ => l10n.adminDashboardNoTabReports(
+                        localizedAdminReportsTab(l10n, tab),
+                      ),
                   },
           );
         }
@@ -395,13 +426,10 @@ class _AdminReportCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
-    final months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-    ];
     final dt = report.createdAt;
-    final dateLabel = '${months[dt.month - 1]} ${dt.day}, ${dt.year}';
+    final dateLabel = DateFormat.yMMMd().format(dt);
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
@@ -441,8 +469,11 @@ class _AdminReportCard extends ConsumerWidget {
             const SizedBox(height: 4),
             Text(
               report.isAnonymous
-                  ? 'Anonymous · $dateLabel'
-                  : '${report.submitterDisplayName ?? 'Unknown'} · $dateLabel',
+                  ? l10n.adminDashboardAnonymousDate(dateLabel)
+                  : l10n.adminDashboardSubmitterDate(
+                      report.submitterDisplayName ?? l10n.commonUnknown,
+                      dateLabel,
+                    ),
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
@@ -470,17 +501,23 @@ class _StatusDropdown extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final user = ref.read(currentUserProvider);
 
     return DropdownButtonFormField<ReportStatus>(
       initialValue: report.status,
-      decoration: const InputDecoration(
-        labelText: 'Status',
-        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: InputDecoration(
+        labelText: l10n.commonStatus,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         isDense: true,
       ),
       items: ReportStatus.values
-          .map((s) => DropdownMenuItem(value: s, child: Text(s.label)))
+          .map(
+            (s) => DropdownMenuItem(
+              value: s,
+              child: Text(localizedReportStatus(l10n, s)),
+            ),
+          )
           .toList(),
       onChanged: (newStatus) async {
         if (newStatus == null || newStatus == report.status) return;
@@ -494,7 +531,9 @@ class _StatusDropdown extends ConsumerWidget {
         } catch (e) {
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Failed to update status: $e')),
+              SnackBar(
+                content: Text(l10n.adminDashboardUpdateStatusFailed('$e')),
+              ),
             );
           }
         }
@@ -510,6 +549,7 @@ class _PriorityBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final (color, bg) = switch (priority) {
       ReportPriority.low => (const Color(0xFF37474F), const Color(0xFFECEFF1)),
       ReportPriority.medium => (const Color(0xFF1565C0), const Color(0xFFE3F2FD)),
@@ -524,7 +564,7 @@ class _PriorityBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
-        priority.label,
+        localizedReportPriority(l10n, priority),
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
               color: color,
               fontWeight: FontWeight.w600,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:speakup_connect/core/l10n/app_localizations_extension.dart';
 import 'package:speakup_connect/core/permissions/providers/permission_provider.dart';
 import 'package:speakup_connect/features/announcements/domain/entities/bulletin_entity.dart';
 import 'package:speakup_connect/features/announcements/presentation/providers/announcement_provider.dart';
@@ -17,6 +18,7 @@ class ReminderApprovalQueueScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
     final canApprove = ref.watch(canReviewPendingRemindersProvider);
     final pendingRemindersAsync = ref.watch(pendingRemindersProvider);
     final pendingBulletinsAsync = ref.watch(pendingBulletinsProvider);
@@ -24,7 +26,7 @@ class ReminderApprovalQueueScreen extends ConsumerWidget {
     ref.listen(reminderReviewProvider, (prev, next) {
       if (prev?.isLoading == true && !next.isLoading && next.hasError) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('Action failed: ${next.error}'),
+          content: Text(l10n.commonActionFailed('${next.error}')),
           backgroundColor: theme.colorScheme.error,
         ));
       }
@@ -33,7 +35,7 @@ class ReminderApprovalQueueScreen extends ConsumerWidget {
     ref.listen(bulletinReviewProvider, (prev, next) {
       if (prev?.isLoading == true && !next.isLoading && next.hasError) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('Action failed: ${next.error}'),
+          content: Text(l10n.commonActionFailed('${next.error}')),
           backgroundColor: theme.colorScheme.error,
         ));
       }
@@ -42,7 +44,7 @@ class ReminderApprovalQueueScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         leading: BackButton(onPressed: () => context.pop()),
-        title: const Text('Pending Approvals'),
+        title: Text(l10n.settingsPendingApprovals),
       ),
       body: !canApprove
           ? const _NoAccessPlaceholder()
@@ -65,14 +67,20 @@ class _PendingApprovalsBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     if (remindersAsync.isLoading || bulletinsAsync.isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
     if (remindersAsync.hasError) {
-      return Center(child: Text('Failed to load: ${remindersAsync.error}'));
+      return Center(
+        child: Text(l10n.pendingApprovalsLoadFailed('${remindersAsync.error}')),
+      );
     }
     if (bulletinsAsync.hasError) {
-      return Center(child: Text('Failed to load: ${bulletinsAsync.error}'));
+      return Center(
+        child: Text(l10n.pendingApprovalsLoadFailed('${bulletinsAsync.error}')),
+      );
     }
 
     final reminders = remindersAsync.value ?? const [];
@@ -85,7 +93,7 @@ class _PendingApprovalsBody extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       children: [
         if (bulletins.isNotEmpty) ...[
-          const _SectionLabel('Announcements'),
+          _SectionLabel(l10n.pendingApprovalsAnnouncements),
           ...bulletins.map(
             (b) => Padding(
               padding: const EdgeInsets.only(bottom: 12),
@@ -95,7 +103,7 @@ class _PendingApprovalsBody extends StatelessWidget {
         ],
         if (reminders.isNotEmpty) ...[
           if (bulletins.isNotEmpty) const SizedBox(height: 8),
-          const _SectionLabel('Group alerts'),
+          _SectionLabel(l10n.pendingApprovalsGroupAlerts),
           ...reminders.map(
             (r) => Padding(
               padding: const EdgeInsets.only(bottom: 12),
@@ -136,6 +144,7 @@ class _PendingBulletinCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
     final reviewState = ref.watch(bulletinReviewProvider);
     final busy = reviewState.isLoading;
 
@@ -157,7 +166,7 @@ class _PendingBulletinCard extends ConsumerWidget {
                 ),
                 Chip(
                   avatar: const Icon(Icons.campaign_outlined, size: 16),
-                  label: const Text('School-wide'),
+                  label: Text(l10n.pendingApprovalsSchoolWide),
                   visualDensity: VisualDensity.compact,
                   materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 ),
@@ -168,7 +177,7 @@ class _PendingBulletinCard extends ConsumerWidget {
             if (bulletin.sourceGroupName?.isNotEmpty == true) ...[
               const SizedBox(height: 8),
               Text(
-                'From ${bulletin.sourceGroupName}',
+                l10n.commonFromGroup(bulletin.sourceGroupName!),
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.primary,
                 ),
@@ -195,7 +204,7 @@ class _PendingBulletinCard extends ConsumerWidget {
             ],
             const SizedBox(height: 12),
             Text(
-              'By ${bulletin.authorName ?? 'Unknown'}',
+              l10n.commonByAuthor(bulletin.authorName ?? l10n.commonUnknown),
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
@@ -210,7 +219,7 @@ class _PendingBulletinCard extends ConsumerWidget {
                       ? null
                       : () => _confirmRejectBulletin(context, ref),
                   icon: const Icon(Icons.close, size: 18),
-                  label: const Text('Reject'),
+                  label: Text(l10n.commonReject),
                   style: TextButton.styleFrom(
                     foregroundColor: theme.colorScheme.error,
                   ),
@@ -222,7 +231,7 @@ class _PendingBulletinCard extends ConsumerWidget {
                           .read(bulletinReviewProvider.notifier)
                           .approve(bulletin.bulletinId),
                   icon: const Icon(Icons.check, size: 18),
-                  label: const Text('Approve'),
+                  label: Text(l10n.commonApprove),
                 ),
               ],
             ),
@@ -236,28 +245,29 @@ class _PendingBulletinCard extends ConsumerWidget {
     BuildContext context,
     WidgetRef ref,
   ) async {
+    final l10n = context.l10n;
     final ctrl = TextEditingController();
     final reason = await showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Reject announcement'),
+        title: Text(l10n.pendingApprovalsRejectAnnouncement),
         content: TextField(
           controller: ctrl,
           autofocus: true,
           maxLines: 3,
-          decoration: const InputDecoration(
-            labelText: 'Reason (optional)',
-            border: OutlineInputBorder(),
+          decoration: InputDecoration(
+            labelText: l10n.commonReasonOptional,
+            border: const OutlineInputBorder(),
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Cancel'),
+            child: Text(l10n.commonCancel),
           ),
           FilledButton(
             onPressed: () => Navigator.of(ctx).pop(ctrl.text.trim()),
-            child: const Text('Reject'),
+            child: Text(l10n.commonReject),
           ),
         ],
       ),
@@ -265,7 +275,7 @@ class _PendingBulletinCard extends ConsumerWidget {
     if (reason == null) return;
     await ref.read(bulletinReviewProvider.notifier).reject(
           bulletin.bulletinId,
-          reason.isEmpty ? 'No reason provided' : reason,
+          reason.isEmpty ? l10n.commonNoReasonProvided : reason,
         );
   }
 }
@@ -278,8 +288,14 @@ class _PendingReminderCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
     final reviewState = ref.watch(reminderReviewProvider);
     final busy = reviewState.isLoading;
+    final authorLine = l10n.commonByAuthor(
+      reminder.createdByName ?? l10n.commonUnknown,
+    );
+    final scheduledSuffix =
+        reminder.isScheduled ? ' · ${l10n.commonScheduled}' : '';
 
     return Card(
       margin: EdgeInsets.zero,
@@ -315,8 +331,7 @@ class _PendingReminderCard extends ConsumerWidget {
                 const SizedBox(width: 4),
                 Expanded(
                   child: Text(
-                    'By ${reminder.createdByName ?? 'Unknown'}'
-                    '${reminder.isScheduled ? ' · scheduled' : ''}',
+                    '$authorLine$scheduledSuffix',
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
@@ -350,7 +365,7 @@ class _PendingReminderCard extends ConsumerWidget {
                   onPressed:
                       busy ? null : () => _confirmReject(context, ref),
                   icon: const Icon(Icons.close, size: 18),
-                  label: const Text('Reject'),
+                  label: Text(l10n.commonReject),
                   style: TextButton.styleFrom(
                     foregroundColor: theme.colorScheme.error,
                   ),
@@ -362,7 +377,7 @@ class _PendingReminderCard extends ConsumerWidget {
                           .read(reminderReviewProvider.notifier)
                           .approve(reminder.reminderId),
                   icon: const Icon(Icons.check, size: 18),
-                  label: const Text('Approve'),
+                  label: Text(l10n.commonApprove),
                 ),
               ],
             ),
@@ -373,37 +388,38 @@ class _PendingReminderCard extends ConsumerWidget {
   }
 
   Future<void> _confirmReject(BuildContext context, WidgetRef ref) async {
+    final l10n = context.l10n;
     final ctrl = TextEditingController();
     final reason = await showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Reject reminder'),
+        title: Text(l10n.pendingApprovalsRejectReminder),
         content: TextField(
           controller: ctrl,
           autofocus: true,
           maxLines: 3,
-          decoration: const InputDecoration(
-            labelText: 'Reason (optional)',
-            hintText: 'Let the author know why…',
-            border: OutlineInputBorder(),
+          decoration: InputDecoration(
+            labelText: l10n.commonReasonOptional,
+            hintText: l10n.pendingApprovalsRejectReasonHint,
+            border: const OutlineInputBorder(),
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Cancel'),
+            child: Text(l10n.commonCancel),
           ),
           FilledButton(
             onPressed: () => Navigator.of(ctx).pop(ctrl.text.trim()),
-            child: const Text('Reject'),
+            child: Text(l10n.commonReject),
           ),
         ],
       ),
     );
-    if (reason == null) return; // cancelled
+    if (reason == null) return;
     await ref.read(reminderReviewProvider.notifier).reject(
           reminder.reminderId,
-          reason.isEmpty ? 'No reason provided' : reason,
+          reason.isEmpty ? l10n.commonNoReasonProvided : reason,
         );
   }
 }
@@ -437,6 +453,7 @@ class _EmptyQueue extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -445,7 +462,7 @@ class _EmptyQueue extends StatelessWidget {
               size: 56, color: theme.colorScheme.onSurfaceVariant),
           const SizedBox(height: 12),
           Text(
-            'Nothing awaiting approval',
+            l10n.pendingApprovalsEmpty,
             style: theme.textTheme.titleMedium
                 ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
           ),
@@ -461,6 +478,7 @@ class _NoAccessPlaceholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -471,7 +489,7 @@ class _NoAccessPlaceholder extends StatelessWidget {
                 size: 48, color: theme.colorScheme.onSurfaceVariant),
             const SizedBox(height: 12),
             Text(
-              'You don\'t have permission to approve content.',
+              l10n.pendingApprovalsNoPermission,
               textAlign: TextAlign.center,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,

@@ -3,12 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:speakup_connect/config/app_config.dart';
 import 'package:speakup_connect/core/constants/app_constants.dart';
+import 'package:speakup_connect/core/l10n/app_localizations_extension.dart';
 import 'package:speakup_connect/core/permissions/org_scope_type.dart';
 import 'package:speakup_connect/features/organization/data/models/user_profile_model.dart';
 import 'package:speakup_connect/features/organization/domain/entities/user_profile_entity.dart';
 import 'package:speakup_connect/features/roles/data/models/role_assignment_model.dart';
 import 'package:speakup_connect/features/roles/domain/entities/role_assignment_entity.dart';
 import 'package:speakup_connect/features/roles/domain/entities/role_entity.dart';
+import 'package:speakup_connect/features/roles/presentation/l10n/roles_ui_l10n.dart';
+import 'package:speakup_connect/l10n/app_localizations.dart';
 import 'package:speakup_connect/features/roles/presentation/providers/roles_provider.dart';
 import 'package:speakup_connect/shared/widgets/app_button.dart';
 import 'package:speakup_connect/shared/widgets/app_error_widget.dart';
@@ -98,6 +101,7 @@ class _AssignRoleScreenState extends ConsumerState<AssignRoleScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     final roleAsync = ref.watch(roleByIdProvider(widget.roleId));
     final writerState = ref.watch(roleAssignmentWriterProvider);
@@ -107,7 +111,7 @@ class _AssignRoleScreenState extends ConsumerState<AssignRoleScreen> {
         if (next.hasError) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Assignment failed: ${next.error}'),
+              content: Text(l10n.assignRoleFailed('${next.error}')),
               backgroundColor: theme.colorScheme.error,
             ),
           );
@@ -118,17 +122,17 @@ class _AssignRoleScreenState extends ConsumerState<AssignRoleScreen> {
             _scopeType = OrgScopeType.org;
           });
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Role assigned successfully')),
+            SnackBar(content: Text(l10n.assignRoleSuccess)),
           );
         }
       }
     });
 
-    final roleName = roleAsync.asData?.value?.displayName ?? 'Role';
+    final roleName = roleAsync.asData?.value?.displayName ?? l10n.commonRole;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Assign: $roleName'),
+        title: Text(l10n.assignRoleTitle(roleName)),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
@@ -146,14 +150,14 @@ class _AssignRoleScreenState extends ConsumerState<AssignRoleScreen> {
 
           // ── User search ────────────────────────────────────────────────
           Text(
-            'Select User',
+            l10n.assignRoleSelectUser,
             style: theme.textTheme.titleSmall
                 ?.copyWith(fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 8),
           AppTextField(
             controller: _searchCtrl,
-            label: 'Search by name or student ID',
+            label: l10n.assignRoleSearchHint,
             prefixIcon: Icons.search,
             onChanged: (v) => setState(() => _filter = v.toLowerCase()),
           ),
@@ -186,7 +190,9 @@ class _AssignRoleScreenState extends ConsumerState<AssignRoleScreen> {
             ),
             const SizedBox(height: 24),
             AppButton.primary(
-              label: writerState.isLoading ? 'Assigning…' : 'Confirm Assignment',
+              label: writerState.isLoading
+                  ? l10n.assignRoleAssigning
+                  : l10n.assignRoleConfirmAssignment,
               onPressed: writerState.isLoading ? null : _assign,
             ),
           ],
@@ -283,10 +289,11 @@ class _UserPickerList extends ConsumerWidget {
                 .toList();
 
         if (filtered.isEmpty) {
+          final l10n = context.l10n;
           return Padding(
             padding: const EdgeInsets.symmetric(vertical: 12),
             child: Text(
-              'No users found.',
+              l10n.assignRoleNoUsersFound,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
@@ -355,6 +362,7 @@ class _AssignmentForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     final needsScopeId = scopeType != OrgScopeType.org;
 
@@ -398,13 +406,13 @@ class _AssignmentForm extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         Text(
-          'Role Scope',
+          l10n.assignRoleScopeTitle,
           style: theme.textTheme.titleSmall
               ?.copyWith(fontWeight: FontWeight.w700),
         ),
         const SizedBox(height: 4),
         Text(
-          'Define how broadly this role applies for this user.',
+          l10n.assignRoleScopeSubtitle,
           style: theme.textTheme.bodySmall?.copyWith(
             color: theme.colorScheme.onSurfaceVariant,
           ),
@@ -412,15 +420,15 @@ class _AssignmentForm extends StatelessWidget {
         const SizedBox(height: 12),
         DropdownButtonFormField<OrgScopeType>(
           value: scopeType,
-          decoration: const InputDecoration(
-            labelText: 'Scope Type',
-            border: OutlineInputBorder(),
+          decoration: InputDecoration(
+            labelText: l10n.assignRoleScopeType,
+            border: const OutlineInputBorder(),
           ),
           items: OrgScopeType.values
               .map(
                 (s) => DropdownMenuItem(
                   value: s,
-                  child: Text(_scopeLabel(s)),
+                  child: Text(localizedOrgScopeDropdownLabel(l10n, s)),
                 ),
               )
               .toList(),
@@ -432,40 +440,13 @@ class _AssignmentForm extends StatelessWidget {
           const SizedBox(height: 12),
           AppTextField(
             controller: scopeIdCtrl,
-            label: _scopeIdLabel(scopeType),
-            hint: _scopeIdHint(scopeType),
+            label: localizedOrgScopeIdFieldLabel(l10n, scopeType),
+            hint: localizedOrgScopeIdHint(l10n, scopeType),
           ),
         ],
       ],
     );
   }
-
-  String _scopeLabel(OrgScopeType t) => switch (t) {
-        OrgScopeType.org => 'Org-wide',
-        OrgScopeType.tag => 'Specific tag',
-        OrgScopeType.classUnit => 'Specific class / section',
-        OrgScopeType.group => 'Specific group / club',
-        OrgScopeType.department => 'Specific department',
-        OrgScopeType.barangay => 'Specific barangay',
-      };
-
-  String _scopeIdLabel(OrgScopeType t) => switch (t) {
-        OrgScopeType.tag => 'Tag',
-        OrgScopeType.classUnit => 'Class ID',
-        OrgScopeType.group => 'Group ID',
-        OrgScopeType.department => 'Department ID',
-        OrgScopeType.barangay => 'Barangay ID',
-        OrgScopeType.org => '',
-      };
-
-  String _scopeIdHint(OrgScopeType t) => switch (t) {
-        OrgScopeType.tag => 'e.g. guidance',
-        OrgScopeType.classUnit => 'Firestore class document ID',
-        OrgScopeType.group => 'Firestore group document ID',
-        OrgScopeType.department => 'Firestore department document ID',
-        OrgScopeType.barangay => 'Firestore barangay document ID',
-        OrgScopeType.org => '',
-      };
 }
 
 // ── Current Assignments Section ───────────────────────────────────────────────
@@ -482,17 +463,8 @@ class _CurrentAssignmentsSection extends ConsumerWidget {
   final String userId;
   final String roleId;
 
-  String _scopeDescription(RoleAssignmentEntity a) {
-    if (a.scopeType == OrgScopeType.org) return 'Org-wide';
-    final label = switch (a.scopeType) {
-      OrgScopeType.tag => 'Tag',
-      OrgScopeType.classUnit => 'Class',
-      OrgScopeType.group => 'Group',
-      OrgScopeType.department => 'Department',
-      OrgScopeType.barangay => 'Barangay',
-      OrgScopeType.org => '',
-    };
-    return '$label: ${a.scopeId ?? ''}';
+  String _scopeDescription(RoleAssignmentEntity a, AppLocalizations l10n) {
+    return localizedOrgScopeAssignmentLabelFromEntity(l10n, a);
   }
 
   Future<void> _confirmRemove(
@@ -503,20 +475,24 @@ class _CurrentAssignmentsSection extends ConsumerWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('Remove Assignment?'),
+        title: Text(context.l10n.assignRoleRemoveTitle),
         content: Text(
-          'Remove this role assignment (${_scopeDescription(assignment)})? '
-          'The user will immediately lose the permissions granted by this role.',
+          context.l10n.assignRoleRemoveConfirm(
+            localizedOrgScopeAssignmentLabelFromEntity(
+              context.l10n,
+              assignment,
+            ),
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
+            child: Text(context.l10n.commonCancel),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
             child: Text(
-              'Remove',
+              context.l10n.commonRemove,
               style: TextStyle(
                   color: Theme.of(context).colorScheme.error),
             ),
@@ -534,6 +510,7 @@ class _CurrentAssignmentsSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     final assignmentsAsync = ref.watch(
       _userRoleAssignmentsProvider((userId: userId, roleId: roleId)),
@@ -549,7 +526,7 @@ class _CurrentAssignmentsSection extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Current Assignments',
+              l10n.assignRoleCurrentAssignments,
               style: theme.textTheme.titleSmall
                   ?.copyWith(fontWeight: FontWeight.w700),
             ),
@@ -572,9 +549,11 @@ class _CurrentAssignmentsSection extends ConsumerWidget {
                     ListTile(
                       dense: true,
                       leading: const Icon(Icons.shield_outlined, size: 18),
-                      title: Text(_scopeDescription(assignments[i])),
+                      title: Text(_scopeDescription(assignments[i], l10n)),
                       subtitle: Text(
-                        'Assigned ${_formatDate(assignments[i].assignedAt)}',
+                        l10n.assignRoleAssignedDate(
+                          _formatDate(assignments[i].assignedAt),
+                        ),
                         style: theme.textTheme.labelSmall?.copyWith(
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
@@ -584,7 +563,7 @@ class _CurrentAssignmentsSection extends ConsumerWidget {
                           Icons.remove_circle_outline,
                           color: theme.colorScheme.error,
                         ),
-                        tooltip: 'Remove assignment',
+                        tooltip: l10n.assignRoleRemoveTooltip,
                         onPressed: () => _confirmRemove(
                           context,
                           ref,
@@ -598,7 +577,7 @@ class _CurrentAssignmentsSection extends ConsumerWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              'Tap \u2212 to revoke an existing assignment.',
+              l10n.assignRoleRevokeHint,
               style: theme.textTheme.labelSmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),

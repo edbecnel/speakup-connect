@@ -15,6 +15,10 @@ const BATCH_CHUNK_SIZE = 25;
 const BATCH_DELAY_MS = 400;
 /** Keeps each callable under the timeout when OpenAI + Firestore run sequentially. */
 const MAX_BATCH_KEYS_PER_CALL = 15;
+/** Firestore limits: 500 writes per batch, 100 docs per getAll(). */
+const FIRESTORE_BATCH_WRITE_LIMIT = 450;
+const FIRESTORE_GETALL_LIMIT = 100;
+const IMPORT_ENTRIES_PER_ROUND = 200;
 
 export type TranslationStatus =
   | 'missing'
@@ -74,6 +78,39 @@ function entryFromSnap(
   };
 }
 
+/** JSON-safe payload for callable responses (avoids Timestamp serialization issues). */
+function serializeTimestamp(
+  value: admin.firestore.Timestamp | null | undefined,
+): string | null {
+  if (!value) return null;
+  if (typeof value.toDate === 'function') {
+    return value.toDate().toISOString();
+  }
+  const raw = value as { seconds?: number; _seconds?: number };
+  const seconds = raw.seconds ?? raw._seconds;
+  if (typeof seconds === 'number') {
+    return new Date(seconds * 1000).toISOString();
+  }
+  return null;
+}
+
+function entryForClient(entry: TranslationEntry) {
+  return {
+    stringKey: entry.stringKey,
+    sourceLocale: entry.sourceLocale,
+    sourceValue: entry.sourceValue,
+    targetValue: entry.targetValue,
+    aiDraft: entry.aiDraft,
+    aiModel: entry.aiModel,
+    aiDraftedAt: serializeTimestamp(entry.aiDraftedAt),
+    aiDraftError: entry.aiDraftError,
+    status: entry.status,
+    context: entry.context,
+    reviewedBy: entry.reviewedBy,
+    updatedAt: serializeTimestamp(entry.updatedAt) ?? new Date().toISOString(),
+  };
+}
+
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -98,121 +135,203 @@ async function updateLocaleMetadata(locale: string): Promise<void> {
 }
 
 export const getTranslationWorkspaceAccess = onCall(async (request) => {
-  const targetLocale = request.data?.['targetLocale'] as string | undefined;
-  const access = await resolveTranslationAccess(request, { targetLocale });
+  try {
+    const targetLocale = request.data?.['targetLocale'] as string | undefined;
+    const access = await resolveTranslationAccess(request, { targetLocale });
 
-  return {
-    allowedLocales: access.allowedLocales,
-    organizationId: access.organizationId,
-    isPlatformSuperAdmin: access.isPlatformSuperAdmin,
-    canImportSource: access.canImportSource,
-    canExportArb: access.canExportArb,
-    canBatchAi: access.canBatchAi,
-  };
+    return {
+      allowedLocales: access.allowedLocales,
+      organizationId: access.organizationId,
+      isPlatformSuperAdmin: access.isPlatformSuperAdmin,
+      canImportSource: access.canImportSource,
+      canExportArb: access.canExportArb,
+      canBatchAi: access.canBatchAi,
+    };
+  } catch (err) {
+    if (err instanceof HttpsError) throw err;
+    const message = err instanceof Error ? err.message : String(err);
+    logger.error('getTranslationWorkspaceAccess failed', { message, err });
+    throw new HttpsError('internal', message);
+  }
 });
 
-export const importTranslationSource = onCall(async (request) => {
-  const targetLocale = request.data?.['targetLocale'] as string | undefined;
-  await resolveTranslationAccess(request, {
-    targetLocale,
-    requireImport: true,
-  });
-  const entries = request.data?.['entries'] as
-    | Array<{ key: string; sourceValue: string; context?: string }>
-    | undefined;
-
-  if (!targetLocale || !Array.isArray(entries) || entries.length === 0) {
-    throw new HttpsError(
-      'invalid-argument',
-      'targetLocale and entries[] are required.',
-    );
-  }
-
-  let imported = 0;
-  let updated = 0;
-  const batch = db.batch();
-  const now = admin.firestore.FieldValue.serverTimestamp();
-
-  for (const entry of entries) {
-    const key = entry.key?.trim();
-    if (!key || key.startsWith('@') || !entry.sourceValue) continue;
-
-    const ref = stringDocRef(targetLocale, key);
-    const existing = await ref.get();
-    if (existing.exists) {
-      const data = existing.data() ?? {};
-      batch.set(
-        ref,
-        {
-          sourceLocale: 'en',
-          sourceValue: entry.sourceValue,
-          context: entry.context ?? data['context'] ?? null,
-          updatedAt: now,
-        },
-        { merge: true },
-      );
-      updated++;
-    } else {
-      batch.set(ref, {
-        stringKey: key,
-        sourceLocale: 'en',
-        sourceValue: entry.sourceValue,
-        targetValue: null,
-        aiDraft: null,
-        aiModel: null,
-        aiDraftedAt: null,
-        aiDraftError: null,
-        status: 'missing',
-        context: entry.context ?? null,
-        reviewedBy: null,
-        updatedAt: now,
+export const importTranslationSource = onCall(
+  { timeoutSeconds: 300, memory: '512MiB' },
+  async (request) => {
+    try {
+      const targetLocale = request.data?.['targetLocale'] as string | undefined;
+      await resolveTranslationAccess(request, {
+        targetLocale,
+        requireImport: true,
       });
-      imported++;
+      const entries = request.data?.['entries'] as
+        | Array<{ key: string; sourceValue: string; context?: string }>
+        | undefined;
+
+      if (!targetLocale || !Array.isArray(entries) || entries.length === 0) {
+        throw new HttpsError(
+          'invalid-argument',
+          'targetLocale and entries[] are required.',
+        );
+      }
+
+      const validEntries: Array<{
+        key: string;
+        sourceValue: string;
+        context?: string;
+      }> = [];
+      for (const entry of entries) {
+        const key = entry.key?.trim();
+        if (!key || key.startsWith('@') || !entry.sourceValue) continue;
+        validEntries.push({
+          key,
+          sourceValue: entry.sourceValue,
+          context: entry.context,
+        });
+      }
+
+      if (validEntries.length === 0) {
+        throw new HttpsError('invalid-argument', 'No valid ARB entries to import.');
+      }
+
+      let imported = 0;
+      let updated = 0;
+      const now = admin.firestore.FieldValue.serverTimestamp();
+
+      for (
+        let round = 0;
+        round < validEntries.length;
+        round += IMPORT_ENTRIES_PER_ROUND
+      ) {
+        const slice = validEntries.slice(round, round + IMPORT_ENTRIES_PER_ROUND);
+        const refs = slice.map((entry) => stringDocRef(targetLocale, entry.key));
+        const existingByKey = new Map<string, admin.firestore.DocumentSnapshot>();
+
+        for (let i = 0; i < refs.length; i += FIRESTORE_GETALL_LIMIT) {
+          const refSlice = refs.slice(i, i + FIRESTORE_GETALL_LIMIT);
+          const snaps = await db.getAll(...refSlice);
+          for (const snap of snaps) {
+            existingByKey.set(snap.id, snap);
+          }
+        }
+
+        let batch = db.batch();
+        let batchOps = 0;
+
+        const flushBatch = async () => {
+          if (batchOps === 0) return;
+          await batch.commit();
+          batch = db.batch();
+          batchOps = 0;
+        };
+
+        for (const entry of slice) {
+          const ref = stringDocRef(targetLocale, entry.key);
+          const existing = existingByKey.get(entry.key);
+          if (existing?.exists) {
+            const data = existing.data() ?? {};
+            batch.set(
+              ref,
+              {
+                sourceLocale: 'en',
+                sourceValue: entry.sourceValue,
+                context: entry.context ?? data['context'] ?? null,
+                updatedAt: now,
+              },
+              { merge: true },
+            );
+            updated++;
+          } else {
+            batch.set(ref, {
+              stringKey: entry.key,
+              sourceLocale: 'en',
+              sourceValue: entry.sourceValue,
+              targetValue: null,
+              aiDraft: null,
+              aiModel: null,
+              aiDraftedAt: null,
+              aiDraftError: null,
+              status: 'missing',
+              context: entry.context ?? null,
+              reviewedBy: null,
+              updatedAt: now,
+            });
+            imported++;
+          }
+          batchOps++;
+          if (batchOps >= FIRESTORE_BATCH_WRITE_LIMIT) {
+            await flushBatch();
+          }
+        }
+        await flushBatch();
+      }
+
+      await updateLocaleMetadata(targetLocale);
+
+      logger.info('importTranslationSource', {
+        targetLocale,
+        imported,
+        updated,
+        requested: validEntries.length,
+      });
+      return { ok: true, imported, updated, total: imported + updated };
+    } catch (err) {
+      if (err instanceof HttpsError) throw err;
+      const message = err instanceof Error ? err.message : String(err);
+      logger.error('importTranslationSource failed', { message, err });
+      throw new HttpsError('internal', message);
     }
-  }
-
-  await batch.commit();
-  await updateLocaleMetadata(targetLocale);
-
-  logger.info('importTranslationSource', { targetLocale, imported, updated });
-  return { ok: true, imported, updated, total: imported + updated };
-});
+  },
+);
 
 export const listTranslationEntries = onCall(async (request) => {
-  const targetLocale = request.data?.['targetLocale'] as string | undefined;
-  await resolveTranslationAccess(request, { targetLocale });
-  const statusFilter = request.data?.['status'] as TranslationStatus | undefined;
-  const featureFilter = request.data?.['feature'] as string | undefined;
-  const search = (request.data?.['search'] as string | undefined)?.trim().toLowerCase();
+  try {
+    const targetLocale = request.data?.['targetLocale'] as string | undefined;
+    await resolveTranslationAccess(request, { targetLocale });
+    const statusFilter = request.data?.['status'] as TranslationStatus | undefined;
+    const featureFilter = request.data?.['feature'] as string | undefined;
+    const searchRaw = request.data?.['search'];
+    const search =
+      typeof searchRaw === 'string' ? searchRaw.trim().toLowerCase() : undefined;
 
-  if (!targetLocale) {
-    throw new HttpsError('invalid-argument', 'targetLocale is required.');
-  }
+    if (!targetLocale) {
+      throw new HttpsError('invalid-argument', 'targetLocale is required.');
+    }
 
-  const snap = await stringsRef(targetLocale).get();
-  let entries = snap.docs
-    .map((doc) => entryFromSnap(doc.id, doc.data()))
-    .sort((a, b) => a.stringKey.localeCompare(b.stringKey));
+    const snap = await stringsRef(targetLocale).get();
+    let entries = snap.docs
+      .map((doc) => entryFromSnap(doc.id, doc.data()))
+      .sort((a, b) => a.stringKey.localeCompare(b.stringKey));
 
-  if (statusFilter) {
-    entries = entries.filter((e) => e.status === statusFilter);
-  }
-  if (featureFilter) {
-    entries = entries.filter(
-      (e) => parseFeatureFromKey(e.stringKey) === featureFilter.toLowerCase(),
-    );
-  }
-  if (search) {
-    entries = entries.filter(
-      (e) =>
-        e.stringKey.toLowerCase().includes(search) ||
-        e.sourceValue.toLowerCase().includes(search) ||
-        (e.targetValue?.toLowerCase().includes(search) ?? false) ||
-        (e.aiDraft?.toLowerCase().includes(search) ?? false),
-    );
-  }
+    if (statusFilter) {
+      entries = entries.filter((e) => e.status === statusFilter);
+    }
+    if (featureFilter) {
+      entries = entries.filter(
+        (e) => parseFeatureFromKey(e.stringKey) === featureFilter.toLowerCase(),
+      );
+    }
+    if (search) {
+      entries = entries.filter(
+        (e) =>
+          e.stringKey.toLowerCase().includes(search) ||
+          e.sourceValue.toLowerCase().includes(search) ||
+          (e.targetValue?.toLowerCase().includes(search) ?? false) ||
+          (e.aiDraft?.toLowerCase().includes(search) ?? false),
+      );
+    }
 
-  return { entries };
+    logger.info('listTranslationEntries', {
+      targetLocale,
+      count: entries.length,
+    });
+    return { entries: entries.map(entryForClient) };
+  } catch (err) {
+    if (err instanceof HttpsError) throw err;
+    const message = err instanceof Error ? err.message : String(err);
+    logger.error('listTranslationEntries failed', { message, err });
+    throw new HttpsError('internal', message);
+  }
 });
 
 export const saveTranslationEntry = onCall(async (request) => {

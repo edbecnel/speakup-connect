@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:speakup_connect/core/l10n/app_localizations_extension.dart';
 import 'package:speakup_connect/core/permissions/app_permission.dart';
 import 'package:speakup_connect/core/permissions/providers/permission_provider.dart';
 import 'package:speakup_connect/features/organization/domain/entities/organization_config_entity.dart';
@@ -35,6 +36,7 @@ class _SchoolGradesSettingsScreenState
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
     final orgConfig = ref.watch(organizationConfigProvider);
     final configuredGrades = ref.watch(orgGradeLevelsProvider);
     final grades = _gradesFrom(configuredGrades);
@@ -49,13 +51,13 @@ class _SchoolGradesSettingsScreenState
       if (prev?.isLoading == true && !next.isLoading) {
         if (next.hasError) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text('Save failed: ${next.error}'),
+            content: Text(l10n.schoolGradesSaveFailed('${next.error}')),
             backgroundColor: theme.colorScheme.error,
           ));
         } else {
           setState(() => _draftGrades = null);
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Grade levels updated')),
+            SnackBar(content: Text(l10n.schoolGradesSaveSuccess)),
           );
         }
       }
@@ -64,12 +66,16 @@ class _SchoolGradesSettingsScreenState
     return Scaffold(
       appBar: AppBar(
         leading: BackButton(onPressed: () => context.pop()),
-        title: const Text('School Grades'),
+        title: Text(l10n.settingsSchoolGrades),
       ),
       body: orgConfig.isLoading && !orgConfig.hasValue
           ? const Center(child: CircularProgressIndicator())
           : orgConfig.hasError && !orgConfig.hasValue
-              ? Center(child: Text('Failed to load settings: ${orgConfig.error}'))
+              ? Center(
+                  child: Text(
+                    l10n.schoolGradesLoadFailed('${orgConfig.error}'),
+                  ),
+                )
               : !supportsGrades
                   ? const _NotSchoolPlaceholder()
                   : !canManage
@@ -80,27 +86,26 @@ class _SchoolGradesSettingsScreenState
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
                               Text(
-                                'Define which grade levels your school uses. These appear '
-                                'in Student Roster and Member Management filters.',
+                                l10n.schoolGradesIntro,
                                 style: theme.textTheme.bodyMedium?.copyWith(
                                   color: theme.colorScheme.onSurfaceVariant,
                                 ),
                               ),
                               const SizedBox(height: 8),
                               Text(
-                                'Municipalities, barangays, and NGOs do not use grades.',
+                                l10n.schoolGradesNonSchoolNote,
                                 style: theme.textTheme.bodySmall?.copyWith(
                                   color: theme.colorScheme.onSurfaceVariant,
                                 ),
                               ),
                               const SizedBox(height: 24),
                               Text(
-                                'Current grades',
+                                l10n.schoolGradesCurrent,
                                 style: theme.textTheme.titleMedium,
                               ),
                               const SizedBox(height: 12),
                               if (grades.isEmpty)
-                                const Text('No grades configured yet.')
+                                Text(l10n.schoolGradesEmpty)
                               else
                                 Wrap(
                                   spacing: 8,
@@ -108,7 +113,7 @@ class _SchoolGradesSettingsScreenState
                                   children: grades
                                       .map(
                                         (g) => InputChip(
-                                          label: Text('Grade $g'),
+                                          label: Text(l10n.schoolGradesGradeChip(g)),
                                           onDeleted: busy
                                               ? null
                                               : () => setState(() {
@@ -129,10 +134,10 @@ class _SchoolGradesSettingsScreenState
                                 inputFormatters: [
                                   FilteringTextInputFormatter.digitsOnly,
                                 ],
-                                decoration: const InputDecoration(
-                                  labelText: 'Add grade level',
-                                  hintText: 'e.g. 7',
-                                  border: OutlineInputBorder(),
+                                decoration: InputDecoration(
+                                  labelText: l10n.schoolGradesAddLabel,
+                                  hintText: l10n.schoolGradesAddHint,
+                                  border: const OutlineInputBorder(),
                                 ),
                                 onSubmitted: (_) => _addGrade(grades),
                               ),
@@ -141,7 +146,7 @@ class _SchoolGradesSettingsScreenState
                                 alignment: Alignment.centerRight,
                                 child: FilledButton(
                                   onPressed: busy ? null : () => _addGrade(grades),
-                                  child: const Text('Add grade'),
+                                  child: Text(l10n.schoolGradesAddButton),
                                 ),
                               ),
                               const SizedBox(height: 16),
@@ -154,9 +159,7 @@ class _SchoolGradesSettingsScreenState
                                           ),
                                         ),
                                 icon: const Icon(Icons.restore_outlined),
-                                label: const Text(
-                                  'Reset to high school default (7–12)',
-                                ),
+                                label: Text(l10n.schoolGradesResetDefault),
                               ),
                               const SizedBox(height: 32),
                               SizedBox(
@@ -174,7 +177,9 @@ class _SchoolGradesSettingsScreenState
                                           ),
                                         )
                                       : const Icon(Icons.save_outlined),
-                                  label: Text(busy ? 'Saving…' : 'Save grades'),
+                                  label: Text(
+                                    busy ? l10n.schoolGradesSaving : l10n.schoolGradesSave,
+                                  ),
                                 ),
                               ),
                             ],
@@ -184,10 +189,11 @@ class _SchoolGradesSettingsScreenState
   }
 
   void _addGrade(List<int> grades) {
+    final l10n = context.l10n;
     final value = int.tryParse(_addController.text.trim());
     if (value == null || value <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Enter a valid grade number')),
+        SnackBar(content: Text(l10n.schoolGradesInvalidNumber)),
       );
       return;
     }
@@ -203,22 +209,22 @@ class _SchoolGradesSettingsScreenState
   }
 
   Future<void> _save(List<int> grades) async {
+    final l10n = context.l10n;
+    final gradeList =
+        grades.map((g) => l10n.schoolGradesGradeChip(g)).join(', ');
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Save grade levels?'),
-        content: Text(
-          'Students will be filterable and assignable by: '
-          '${grades.map((g) => 'Grade $g').join(', ')}.',
-        ),
+        title: Text(l10n.schoolGradesSaveDialogTitle),
+        content: Text('${l10n.schoolGradesSaveDialogBody} $gradeList.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Cancel'),
+            child: Text(l10n.commonCancel),
           ),
           FilledButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Save'),
+            child: Text(l10n.commonSave),
           ),
         ],
       ),
@@ -234,12 +240,12 @@ class _NotSchoolPlaceholder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
+    final l10n = context.l10n;
+    return Center(
       child: Padding(
-        padding: EdgeInsets.all(32),
+        padding: const EdgeInsets.all(32),
         child: Text(
-          'Grade levels are only used by school-type organizations. '
-          'This setting is not available for your organization type.',
+          l10n.schoolGradesNotSchool,
           textAlign: TextAlign.center,
         ),
       ),
@@ -252,11 +258,12 @@ class _NoAccessPlaceholder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
+    final l10n = context.l10n;
+    return Center(
       child: Padding(
-        padding: EdgeInsets.all(32),
+        padding: const EdgeInsets.all(32),
         child: Text(
-          'You do not have permission to manage organization settings.',
+          l10n.schoolGradesNoPermission,
           textAlign: TextAlign.center,
         ),
       ),

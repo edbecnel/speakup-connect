@@ -12,6 +12,7 @@ import 'package:speakup_connect/features/reminders/domain/entities/reminder_enti
 import 'package:speakup_connect/features/reminders/domain/entities/reminder_response_config.dart';
 import 'package:speakup_connect/features/reminders/domain/repositories/reminder_repository.dart';
 import 'package:speakup_connect/features/reminders/presentation/widgets/expiration_picker_section.dart';
+import 'package:speakup_connect/l10n/app_localizations.dart';
 
 /// Extracts the source reminder ID from a feed notification, if any.
 String? reminderIdFromNotificationData(Map<String, dynamic> data) {
@@ -132,30 +133,41 @@ class ComposeReminderState {
   DateTime? get resolvedExpiresAt =>
       expiration.resolve(scheduledAt: scheduledAt);
 
-  bool get isValid => validationMessage == null;
+  bool get isValid {
+    if (title.trim().length < 3) return false;
+    if (body.trim().length < 5) return false;
+    if (audienceType != ReminderAudienceType.all && targetId == null) {
+      return false;
+    }
+    if (expiration.isEnabled && !expiration.isValid(scheduledAt: scheduledAt)) {
+      return false;
+    }
+    if (responseConfig.enabled && !responseConfig.isValid) return false;
+    return true;
+  }
 
   /// Human-readable reason the compose form cannot be submitted yet.
-  String? get validationMessage {
+  String? validationMessage(AppLocalizations l10n) {
     if (title.trim().length < 3) {
-      return 'Title must be at least 3 characters.';
+      return l10n.reminderComposeValidationTitleMin;
     }
     if (body.trim().length < 5) {
-      return 'Message must be at least 5 characters.';
+      return l10n.reminderComposeValidationMessageMin;
     }
     if (audienceType != ReminderAudienceType.all && targetId == null) {
       return audienceType == ReminderAudienceType.group
-          ? 'Select a group for this alert.'
-          : 'Select an audience for this reminder.';
+          ? l10n.reminderComposeValidationSelectGroup
+          : l10n.reminderComposeValidationSelectAudience;
     }
     if (expiration.isEnabled && !expiration.isValid(scheduledAt: scheduledAt)) {
-      return 'Set a valid expiration date and time.';
+      return l10n.reminderComposeValidationExpiration;
     }
     if (responseConfig.enabled && !responseConfig.isValid) {
       return responseConfig.type == ReminderResponseType.checkbox
-          ? 'Add at least one checkbox option with a label.'
+          ? l10n.reminderComposeValidationCheckboxOptions
           : responseConfig.type == ReminderResponseType.multipleChoice
-              ? 'Add at least 2 answer choices with labels.'
-              : 'Set a valid character limit for responses.';
+              ? l10n.reminderComposeValidationChoiceOptions
+              : l10n.reminderComposeValidationCharLimit;
     }
     return null;
   }
