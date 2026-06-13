@@ -752,6 +752,148 @@ export const batchSaveAiDrafts = onCall(async (request) => {
   return { ok: true, total: toSave.length, saved, skipped };
 });
 
+
+export const importTranslationTargets = onCall(
+  { timeoutSeconds: 300, memory: '512MiB' },
+  async (request) => {
+    try {
+      const targetLocale = request.data?.['targetLocale'] as string | undefined;
+      const access = await resolveTranslationAccess(request, { targetLocale });
+      const uid = access.uid;
+      const entries = request.data?.['entries'] as
+        | Array<{ key: string; translation: string; status?: string }>
+        | undefined;
+
+      if (!targetLocale || !Array.isArray(entries) || entries.length === 0) {
+        throw new HttpsError(
+          'invalid-argument',
+          'targetLocale and entries[] are required.',
+        );
+      }
+
+      const validEntries: Array<{
+        key: string;
+        translation: string;
+        status: TranslationStatus;
+      }> = [];
+      for (const entry of entries) {
+        const key = entry.key?.trim();
+        const translation = entry.translation?.trim() ?? '';
+        if (!key || key.startsWith('@') || !translation) continue;
+        const rawStatus = (entry.status ?? 'in_review').trim().toLowerCase();
+        let status: TranslationStatus = 'in_review';
+        if (rawStatus === 'approved') {
+          status = 'approved';
+        } else if (rawStatus && rawStatus !== 'in_review') {
+          throw new HttpsError(
+            'invalid-argument',
+            `Invalid status "${entry.status}" for key ${key}. Use in_review or approved.`,
+          );
+        }
+        validEntries.push({ key, translation, status });
+      }
+
+      if (validEntries.length === 0) {
+        throw new HttpsError('invalid-argument', 'No valid CSV rows to import.');
+      }
+
+      let updated = 0;
+      let skipped = 0;
+      const failed: Array<{ key: string; error: string }> = [];
+      const now = admin.firestore.FieldValue.serverTimestamp();
+
+      for (
+        let round = 0;
+        round < validEntries.length;
+        round += IMPORT_ENTRIES_PER_ROUND
+      ) {
+        const slice = validEntries.slice(round, round + IMPORT_ENTRIES_PER_ROUND);
+        const refs = slice.map((entry) => stringDocRef(targetLocale, entry.key));
+        const existingByKey = new Map<string, admin.firestore.DocumentSnapshot>();
+
+        for (let i = 0; i < refs.length; i += FIRESTORE_GETALL_LIMIT) {
+          const refSlice = refs.slice(i, i + FIRESTORE_GETALL_LIMIT);
+          const snaps = await db.getAll(...refSlice);
+          for (const snap of snaps) {
+            existingByKey.set(snap.id, snap);
+          }
+        }
+
+        let batch = db.batch();
+        let batchOps = 0;
+
+        const flushBatch = async () => {
+          if (batchOps === 0) return;
+          await batch.commit();
+          batch = db.batch();
+          batchOps = 0;
+        };
+
+        for (const entry of slice) {
+          const existing = existingByKey.get(entry.key);
+          if (!existing?.exists) {
+            skipped++;
+            continue;
+          }
+
+          const sourceValue = (existing.data()?.['sourceValue'] as string) ?? '';
+          if (!placeholdersMatch(sourceValue, entry.translation)) {
+            failed.push({
+              key: entry.key,
+              error: 'Target text must preserve ICU placeholders from English source.',
+            });
+            continue;
+          }
+
+          const patch: Record<string, unknown> = {
+            targetValue: entry.translation,
+            status: entry.status,
+            aiDraftError: null,
+            updatedAt: now,
+            lastEditedBy: uid,
+          };
+          if (access.organizationId) {
+            patch['lastEditedByOrgId'] = access.organizationId;
+          }
+          if (entry.status === 'approved') {
+            patch['reviewedBy'] = uid;
+          }
+
+          batch.set(stringDocRef(targetLocale, entry.key), patch, { merge: true });
+          batchOps++;
+          updated++;
+
+          if (batchOps >= FIRESTORE_BATCH_WRITE_LIMIT) {
+            await flushBatch();
+          }
+        }
+
+        await flushBatch();
+      }
+
+      await updateLocaleMetadata(targetLocale);
+      logger.info('importTranslationTargets', {
+        targetLocale,
+        updated,
+        skipped,
+        failed: failed.length,
+      });
+      return {
+        ok: true,
+        updated,
+        skipped,
+        failed: failed.length,
+        errors: failed.slice(0, 20),
+      };
+    } catch (err) {
+      if (err instanceof HttpsError) throw err;
+      const message = err instanceof Error ? err.message : String(err);
+      logger.error('importTranslationTargets failed', { message, err });
+      throw new HttpsError('internal', message);
+    }
+  },
+);
+
 export const exportTranslationArb = onCall(async (request) => {
   const targetLocale = request.data?.['targetLocale'] as string | undefined;
   await resolveTranslationAccess(request, {

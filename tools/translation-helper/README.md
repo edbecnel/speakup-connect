@@ -16,6 +16,7 @@ This README covers **setup commands and troubleshooting** only. The full transla
 3. **AI draft** single keys or all missing (`draftTranslation`, `batchDraftTranslations` Cloud Functions)
 4. **Review** — edit target text, mark `in_review` or `approved`
 5. **Export** downloadable `app_ceb.arb` / `app_fil.arb` JSON — org admin only
+6. **Export CSV** / **Import CSV** — spreadsheet handoff for human translators (all workspace editors)
 
 Workflow data lives in Firestore: `languages/{locale}/strings/{stringKey}`.
 
@@ -87,7 +88,7 @@ From the repo `functions/` folder. Choose **Option A** or **Option B** depending
 ```powershell
 cd D:\Dev\Speakup-Connect\functions
 npm run build
-npx firebase-tools deploy --only functions:getTranslationWorkspaceAccess,functions:importTranslationSource,functions:listTranslationEntries,functions:saveTranslationEntry,functions:draftTranslation,functions:batchDraftTranslations,functions:exportTranslationArb
+npx firebase-tools deploy --only functions:getTranslationWorkspaceAccess,functions:importTranslationSource,functions:importTranslationTargets,functions:listTranslationEntries,functions:saveTranslationEntry,functions:draftTranslation,functions:batchDraftTranslations,functions:exportTranslationArb
 ```
 
 List, save, approve, and export work. **AI draft** and **Translate missing (AI)** return an error until you complete **Option B** (or **Option B follow-up** below).
@@ -106,7 +107,7 @@ Copy-Item .env.example .env
 
 # 2. Build and deploy (deploy reads functions/.env)
 npm run build
-npx firebase-tools deploy --only functions:getTranslationWorkspaceAccess,functions:importTranslationSource,functions:listTranslationEntries,functions:saveTranslationEntry,functions:draftTranslation,functions:batchDraftTranslations,functions:exportTranslationArb
+npx firebase-tools deploy --only functions:getTranslationWorkspaceAccess,functions:importTranslationSource,functions:importTranslationTargets,functions:listTranslationEntries,functions:saveTranslationEntry,functions:draftTranslation,functions:batchDraftTranslations,functions:exportTranslationArb
 ```
 
 Do **not** commit `functions/.env`.
@@ -396,6 +397,18 @@ See **[INTERNATIONALIZATION.md §11 — Phase E–G](../docs/INTERNATIONALIZATIO
 2. Save the JSON as `lib/l10n/app_ceb.arb` or `lib/l10n/app_fil.arb`.
 3. Run `flutter gen-l10n`, hot restart the app, then commit ARB + generated Dart files.
 
+### Step 12 — Human translator via Google Sheets (optional)
+
+1. Click **Export CSV** for the target locale.
+2. Upload `app_ceb_translations.csv` (or `fil`) to Google Sheets and share with a translator.
+3. Translator edits the **translation** column; do not change **key** or ICU placeholders (`{name}`, etc.).
+4. Download the sheet as CSV from Google Sheets.
+5. Click **Import CSV** in the Translation Helper, confirm, then review imported rows.
+6. Approve strings in the workspace (or set `status` column to `approved` in the CSV before import).
+7. Org admin: **Export ARB** when ready for release (Step 11).
+
+**CSV columns:** `key`, `english` (reference), `translation` (required on import), `status` (optional: `in_review` or `approved`).
+
 ---
 
 ## Quick reference — who can do what
@@ -405,6 +418,7 @@ See **[INTERNATIONALIZATION.md §11 — Phase E–G](../docs/INTERNATIONALIZATIO
 | Edit / Save / Approve | Yes | Yes | Yes |
 | AI draft (single row) | Yes | Yes | Yes |
 | Translate missing (AI batch) | No | Yes | Yes |
+| Export CSV / Import CSV | Yes | Yes | Yes |
 | Export ARB | No | Yes | Yes |
 | Import `app_en.arb` | No | No | Yes |
 
@@ -454,3 +468,4 @@ See **[INTERNATIONALIZATION.md §11 — Phase E–G](../docs/INTERNATIONALIZATIO
 | `batchSaveAiDrafts` | Copy all `ai_draft` rows to `in_review` |
 | `batchApproveSavedTranslations` | Approve all saved/in-review rows |
 | `exportTranslationArb` | Generate ARB JSON for download |
+| `importTranslationTargets` | Batch import target translations from CSV |

@@ -86,6 +86,16 @@
           They will see <strong>Settings &rarr; Administration &rarr; Translations</strong> in the app.
         </p>
 
+        <h3>Human translator workflow (Google Sheets)</h3>
+        <ol>
+          <li>Select the target locale and click <strong>Export CSV</strong>.</li>
+          <li>Upload the CSV to Google Sheets (or Excel). Share with your translator.</li>
+          <li>Translator edits the <strong>translation</strong> column only; keep <strong>key</strong> and ICU placeholders unchanged.</li>
+          <li>Download the sheet as CSV (<em>File → Download → Comma-separated values</em> in Google Sheets).</li>
+          <li>Click <strong>Import CSV</strong>, choose the file, confirm, then review rows in the workspace.</li>
+          <li>Org admin: <strong>Export ARB</strong> when translations are approved for a release.</li>
+        </ol>
+
         <h3>Toolbar reference</h3>
         <dl class="help-dl">
           <dt>Target locale</dt>
@@ -104,6 +114,18 @@
           <dd>Copies every <code>ai_draft</code> into the saved target as <code>in_review</code> so you can review and approve in bulk.</dd>
           <dt class="help-org-admin">Translate missing (AI)</dt>
           <dd class="help-org-admin"><strong>Org admin only.</strong> Batch AI drafts for all missing strings in the selected locale.</dd>
+          <dt>Export CSV</dt>
+          <dd>
+            Download all strings as a spreadsheet-friendly CSV (<code>key</code>, <code>english</code>,
+            <code>translation</code>, <code>status</code>). Open in Google Sheets for offline human review.
+          </dd>
+          <dt>Import CSV</dt>
+          <dd>
+            Upload an edited CSV to update target translations in the workspace.
+            Rows need <code>key</code> and <code>translation</code> columns. Optional <code>status</code>:
+            <code>in_review</code> (default) or <code>approved</code>. Unknown keys are skipped;
+            placeholders like <code>{name}</code> must match English.
+          </dd>
           <dt class="help-org-admin">Export ARB</dt>
           <dd class="help-org-admin"><strong>Org admin only.</strong> Download approved strings as ARB JSON for app releases.</dd>
         </dl>
@@ -164,6 +186,12 @@
               <td>Yes</td>
             </tr>
             <tr>
+              <td>Export CSV / Import CSV</td>
+              <td>Yes</td>
+              <td>Yes</td>
+              <td>Yes</td>
+            </tr>
+            <tr>
               <td>Export ARB</td>
               <td>No</td>
               <td>Yes</td>
@@ -186,7 +214,7 @@
         <ol class="help-deployment-lead">
           <li>
             Deploy Cloud Functions:
-            <code>npx firebase-tools deploy --only functions:getTranslationWorkspaceAccess,functions:importTranslationSource,functions:listTranslationEntries,functions:saveTranslationEntry,functions:draftTranslation,functions:batchDraftTranslations,functions:exportTranslationArb</code>
+            <code>npx firebase-tools deploy --only functions:getTranslationWorkspaceAccess,functions:importTranslationSource,functions:importTranslationTargets,functions:listTranslationEntries,functions:saveTranslationEntry,functions:draftTranslation,functions:batchDraftTranslations,functions:exportTranslationArb</code>
           </li>
           <li>Seed roles: <code>node scripts/seed_roles.js</code> (or add <code>manageTranslations</code> in Firestore manually).</li>
           <li>Optional AI: set secret <code>TRANSLATION_AI_API_KEY</code>.</li>
@@ -243,6 +271,11 @@
         <button id="approve-all-saved-btn" type="button" class="secondary">Approve all saved/in-review</button>
         <button id="save-all-ai-drafts-btn" type="button" class="secondary">Save all AI drafts</button>
         <button id="batch-ai-btn" type="button">Translate missing (AI)</button>
+        <button id="export-csv-btn" type="button" class="secondary">Export CSV</button>
+        <label class="file-label">
+          Import CSV
+          <input id="import-csv" type="file" accept=".csv,text/csv" />
+        </label>
         <button id="export-btn" type="button" class="secondary">Export ARB</button>
       </div>
       <p id="workspace-status" class="status workspace-status" aria-live="polite"></p>

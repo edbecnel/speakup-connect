@@ -10,6 +10,7 @@ import {
   httpsCallable,
   connectFunctionsEmulator,
 } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-functions.js';
+import { parseTranslationCsv, rowsToCsv } from './csv-utils.js';
 
 const config = window.FIREBASE_CONFIG;
 if (!config?.apiKey || config.apiKey === 'YOUR_API_KEY') {
@@ -61,6 +62,8 @@ const els = {
   saveAllAiDraftsBtn: document.getElementById('save-all-ai-drafts-btn'),
   batchAiBtn: document.getElementById('batch-ai-btn'),
   exportBtn: document.getElementById('export-btn'),
+  exportCsvBtn: document.getElementById('export-csv-btn'),
+  importCsv: document.getElementById('import-csv'),
   meta: document.getElementById('meta'),
   workspaceStatus: document.getElementById('workspace-status'),
   entriesBody: document.getElementById('entries-body'),
@@ -713,6 +716,105 @@ async function exportArb() {
   }
 }
 
+const CSV_IMPORT_CHUNK = 200;
+
+function exportCsv() {
+  if (entries.length === 0) {
+    setWorkspaceStatus('No entries loaded. Click Refresh first.', 'error');
+    return;
+  }
+  const locale = els.targetLocale.value;
+  const rows = entries.map((entry) => ({
+    key: entry.stringKey,
+    english: entry.sourceValue,
+    translation: displayValue(entry),
+    status: entry.status,
+  }));
+  const csv = rowsToCsv(rows, ['key', 'english', 'translation', 'status']);
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `app_${locale}_translations.csv`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+  setWorkspaceStatus(
+    `Exported ${rows.length} rows → app_${locale}_translations.csv`,
+    'ok',
+  );
+}
+
+async function importCsvFile(file) {
+  const text = await file.text();
+  const { rows, warnings } = parseTranslationCsv(text);
+  if (rows.length === 0) {
+    const hint = warnings.length ? warnings.join(' ') : 'No importable rows found.';
+    setWorkspaceStatus(hint, 'error');
+    return;
+  }
+
+  const approvedCount = rows.filter((r) => r.status === 'approved').length;
+  const reviewCount = rows.length - approvedCount;
+  const confirmMsg =
+    `Import ${rows.length} translation${rows.length === 1 ? '' : 's'} from CSV?\n\n` +
+    `${reviewCount} will be saved as in_review` +
+    (approvedCount > 0 ? `, ${approvedCount} as approved` : '') +
+    '.\n\nRows with unknown keys are skipped. Placeholder mismatches are reported after import.';
+  if (!window.confirm(confirmMsg)) {
+    return;
+  }
+
+  setWorkspaceStatus(`Importing ${rows.length} translations from CSV…`);
+  let updated = 0;
+  let skipped = 0;
+  let failed = 0;
+  const allErrors = [];
+
+  try {
+    for (let i = 0; i < rows.length; i += CSV_IMPORT_CHUNK) {
+      const chunk = rows.slice(i, i + CSV_IMPORT_CHUNK).map((row) => ({
+        key: row.key,
+        translation: row.translation,
+        status: row.status === 'approved' ? 'approved' : 'in_review',
+      }));
+      const { data } = await call('importTranslationTargets')(
+        await callPayload({
+          targetLocale: els.targetLocale.value,
+          entries: chunk,
+        }),
+      );
+      updated += data.updated ?? 0;
+      skipped += data.skipped ?? 0;
+      failed += data.failed ?? 0;
+      if (Array.isArray(data.errors)) {
+        allErrors.push(...data.errors);
+      }
+      setWorkspaceStatus(
+        `Importing… ${Math.min(i + chunk.length, rows.length)} of ${rows.length} rows processed.`,
+      );
+    }
+
+    const sample = allErrors
+      .slice(0, 3)
+      .map((e) => `${e.key}: ${e.error}`)
+      .join(' · ');
+    const suffix = allErrors.length > 3 ? ` (+${allErrors.length - 3} more)` : '';
+    let message =
+      `CSV import complete: ${updated} updated, ${skipped} skipped (unknown keys)`;
+    if (failed > 0) {
+      message += `, ${failed} failed${sample ? ` — ${sample}${suffix}` : ''}`;
+    }
+    if (warnings.length > 0 && updated === 0 && failed === 0) {
+      message += `. ${warnings[0]}`;
+    }
+    setWorkspaceStatus(message, failed > 0 && updated === 0 ? 'error' : 'ok');
+  } catch (err) {
+    setWorkspaceStatus(formatError(err), 'error');
+    throw err;
+  }
+
+  await loadEntries();
+}
+
 els.signInBtn.addEventListener('click', async () => {
   try {
     await signInWithEmailAndPassword(auth, els.email.value.trim(), els.password.value);
@@ -755,7 +857,19 @@ els.saveAllAiDraftsBtn.addEventListener('click', () =>
   saveAllAiDrafts().catch(showError),
 );
 els.batchAiBtn.addEventListener('click', () => batchDraft().catch(showError));
+els.exportCsvBtn.addEventListener('click', () => exportCsv());
 els.exportBtn.addEventListener('click', () => exportArb().catch(showError));
+
+els.importCsv.addEventListener('change', async (e) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+  try {
+    await importCsvFile(file);
+  } catch (err) {
+    showError(err);
+  }
+  e.target.value = '';
+});
 
 els.importArb.addEventListener('change', async (e) => {
   const file = e.target.files?.[0];

@@ -2181,5 +2181,6 @@ export {
   batchDraftTranslations,
   batchApproveSavedTranslations,
   batchSaveAiDrafts,
+  importTranslationTargets,
   exportTranslationArb,
 } from './translation_helper';
