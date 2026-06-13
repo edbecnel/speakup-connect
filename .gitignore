@@ -1,4 +1,6 @@
-# Miscellaneous
+# Translation Helper local Firebase web config (copy from firebase-config.example.js)
+tools/translation-helper/firebase-config.js
+
 *.class
 *.log
 *.pyc

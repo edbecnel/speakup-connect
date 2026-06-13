@@ -460,7 +460,7 @@ flowchart LR
   ARB_OUT --> APP
 ```
 
-**Phase 1 (lightweight):** CLI script or web UI that reads/writes ARB files in the repo; no Firestore.
+**Phase 1 (shipped):** Web UI at `tools/translation-helper/` + Cloud Functions (`importTranslationSource`, `listTranslationEntries`, `saveTranslationEntry`, `draftTranslation`, `batchDraftTranslations`, `exportTranslationArb`). See [tools/translation-helper/README.md](../tools/translation-helper/README.md).
 
 **Phase 2:** Firestore `languages/{code}/strings/{key}` with `status`, `aiDraft`, `approvedValue`, `reviewedBy` — Translation Helper writes here; export job generates ARB for release.
 

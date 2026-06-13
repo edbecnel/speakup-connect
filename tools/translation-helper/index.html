@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SpeakUp Connect — Translation Helper</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header>
+    <h1>Translation Helper</h1>
+    <p class="subtitle">Super-admin workspace for ARB localization (Epic 2.5)</p>
+  </header>
+
+  <section id="auth-section" class="panel">
+    <h2>Sign in</h2>
+    <p class="hint">Platform <code>super_admin</code> account required.</p>
+    <div class="row">
+      <input id="email" type="email" placeholder="Email" autocomplete="username" />
+      <input id="password" type="password" placeholder="Password" autocomplete="current-password" />
+      <button id="sign-in-btn" type="button">Sign in</button>
+      <button id="sign-out-btn" type="button" class="secondary hidden">Sign out</button>
+    </div>
+    <p id="auth-status" class="status"></p>
+  </section>
+
+  <section id="workspace" class="hidden">
+    <div class="toolbar panel">
+      <div class="row wrap">
+        <label>
+          Target locale
+          <select id="target-locale">
+            <option value="ceb">ceb — Bisaya / Cebuano</option>
+            <option value="fil">fil — Tagalog</option>
+          </select>
+        </label>
+        <label>
+          Filter status
+          <select id="status-filter">
+            <option value="">All</option>
+            <option value="missing">missing</option>
+            <option value="ai_draft">ai_draft</option>
+            <option value="ai_draft_failed">ai_draft_failed</option>
+            <option value="in_review">in_review</option>
+            <option value="approved">approved</option>
+          </select>
+        </label>
+        <label>
+          Feature
+          <select id="feature-filter">
+            <option value="">All</option>
+          </select>
+        </label>
+        <input id="search" type="search" placeholder="Search keys or text" />
+      </div>
+      <div class="row wrap">
+        <label class="file-label">
+          Import <code>app_en.arb</code>
+          <input id="import-arb" type="file" accept=".arb,application/json" />
+        </label>
+        <button id="refresh-btn" type="button" class="secondary">Refresh</button>
+        <button id="batch-ai-btn" type="button">Translate missing (AI)</button>
+        <button id="export-btn" type="button" class="secondary">Export ARB</button>
+      </div>
+      <p id="meta" class="meta"></p>
+    </div>
+
+    <div id="table-wrap" class="panel">
+      <table>
+        <thead>
+          <tr>
+            <th>Key</th>
+            <th>English</th>
+            <th>Target</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="entries-body"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <script src="firebase-config.js"></script>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
