@@ -43,7 +43,7 @@ class AppLocalizationsCeb extends AppLocalizations {
   String get authSignInFailed => 'Sign in failed. Please try again.';
 
   @override
-  String get authOrgFallbackName => 'Connect';
+  String get authOrgFallbackName => 'Sumpay';
 
   @override
   String get authContinueWithGoogle => 'Continue with Google';
@@ -62,7 +62,7 @@ class AppLocalizationsCeb extends AppLocalizations {
   String get authEmailOrStudentIdHint => 'you@school.edu or student ID';
 
   @override
-  String get authPasswordHintLogin => 'Your password or student ID';
+  String get authPasswordHintLogin => 'Ang imong password o student ID';
 
   @override
   String get authForgotPassword => 'Forgot Password?';
@@ -71,13 +71,14 @@ class AppLocalizationsCeb extends AppLocalizations {
   String get authFullName => 'Full Name';
 
   @override
-  String get authFullNameHint => 'Enter your full name';
+  String get authFullNameHint => 'Ibutang ang imong tibuok ngalan';
 
   @override
   String get authEmailHint => 'you@school.edu';
 
   @override
-  String get authPasswordHintRegister => 'At least 8 characters';
+  String get authPasswordHintRegister =>
+      'Dapat adunay labing menos 8 ka karakter';
 
   @override
   String get authConfirmPassword => 'Confirm Password';
@@ -86,27 +87,29 @@ class AppLocalizationsCeb extends AppLocalizations {
   String get authConfirmPasswordHint => 'Re-enter your password';
 
   @override
-  String get authAcceptTermsCheckbox => 'I accept the Terms & Privacy Policy';
+  String get authAcceptTermsCheckbox =>
+      'Akong gidawat ang mga Termino ug Patakaran sa Privacy';
 
   @override
   String get homeTitle => 'Home';
 
   @override
   String homeWelcome(String firstName) {
-    return 'Welcome, $firstName!';
+    return 'Dayon, $firstName!';
   }
 
   @override
-  String get homeDefaultWelcomeMessage => 'How can we help make things better?';
+  String get homeDefaultWelcomeMessage =>
+      'Unsaon namo pagtabang aron mapalambo ang mga butang?';
 
   @override
-  String get homeQuickActions => 'Quick Actions';
+  String get homeQuickActions => 'Mabilis nga mga Aksyon';
 
   @override
-  String get homeSubmitConcern => 'Submit\nConcern';
+  String get homeSubmitConcern => 'Ipadala ang Kabalaoran';
 
   @override
-  String get homeMyReports => 'My Reports\n(Track Status)';
+  String get homeMyReports => 'Ang Akong mga Report (Sundan ang Kahimtang)';
 
   @override
   String get homeAnnouncements => 'Announcements';
@@ -123,16 +126,16 @@ class AppLocalizationsCeb extends AppLocalizations {
   String get homeOrgInfoComingSoon => 'Organization Info — Coming Soon';
 
   @override
-  String get homeNavMyReports => 'My Reports';
+  String get homeNavMyReports => 'Ang Akong mga Report';
 
   @override
-  String get homeNavAlerts => 'Alerts';
+  String get homeNavAlerts => 'Mga Abiso';
 
   @override
   String get homeNavProfile => 'Profile';
 
   @override
-  String get homeGroupsTitle => 'My Groups & Clubs';
+  String get homeGroupsTitle => 'Ang Akong mga Grupo ug Klab';
 
   @override
   String get homeGroupsSeeAll => 'See all';
@@ -210,7 +213,7 @@ class AppLocalizationsCeb extends AppLocalizations {
 
   @override
   String get settingsPersonalUploadsRequireApproval =>
-      'Tap your photo — personal uploads require admin approval';
+      'I-tap ang imong litrato — ang personal nga mga upload nagkinahanglan og pag-apruba sa admin';
 
   @override
   String get settingsSectionGroups => 'Groups & Clubs';
@@ -230,20 +233,21 @@ class AppLocalizationsCeb extends AppLocalizations {
   }
 
   @override
-  String get settingsGroupsSubtitle => 'Clubs and organizations you belong to';
+  String get settingsGroupsSubtitle =>
+      'Mga klub ug organisasyon nga imong gikauban';
 
   @override
-  String get settingsBrowseGroups => 'Browse Groups & Clubs';
+  String get settingsBrowseGroups => 'Tan-awa ang mga Grupo ug Klab';
 
   @override
   String get settingsBrowseGroupsSubtitle =>
-      'Discover clubs and request to join';
+      'Suhita ang mga grupo ug mag-request nga moapil';
 
   @override
   String get settingsSentGroupAlerts => 'Sent Group Alerts';
 
   @override
-  String get settingsMyBroadcasts => 'My Broadcasts';
+  String get settingsMyBroadcasts => 'Ang Akong mga Broadcast';
 
   @override
   String get settingsSentGroupAlertsSubtitle =>
@@ -251,7 +255,7 @@ class AppLocalizationsCeb extends AppLocalizations {
 
   @override
   String get settingsMyBroadcastsSubtitle =>
-      'Manage sent reminders and view responses';
+      'Pagdumala sa gipadala nga mga pahimangno ug tan-awa ang mga tubag';
 
   @override
   String get settingsSectionAppearance => 'Appearance';
@@ -276,7 +280,7 @@ class AppLocalizationsCeb extends AppLocalizations {
 
   @override
   String get settingsMemberSignInHint =>
-      'Sign in with your student ID or contact email and your password.';
+      'Mag-sign in gamit ang imong student ID o contact email ug ang imong password.';
 
   @override
   String get settingsNotificationPreferences => 'Notification Preferences';
@@ -377,7 +381,7 @@ class AppLocalizationsCeb extends AppLocalizations {
 
   @override
   String get settingsLanguageRevertToEnglish =>
-      'Dili ma-apply ang pinulongan. Balik sa English.';
+      'That language could not be applied. Reverted to English.';
 
   @override
   String get helpTitle => 'Help';

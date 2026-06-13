@@ -1,245 +1,151 @@
 {
   "@@locale": "ceb",
-
   "appName": "SpeakUp",
-  "@appName": {
-    "description": "Product name shown in splash title and about dialogs."
-  },
-
-  "splashDefaultTagline": "Your voice. Our action.",
-  "splashGetStarted": "Get Started",
-  "splashLearnMore": "Learn More",
-
-  "commonLogin": "Login",
-  "commonSignUp": "Sign Up",
-  "commonOr": "or",
-  "commonPassword": "Password",
-  "commonEmail": "Email",
-
+  "authAcceptTermsCheckbox": "Akong gidawat ang mga Termino ug Patakaran sa Privacy",
   "authAcceptTermsSnackbar": "Please accept the Terms & Privacy Policy",
-  "authSignInFailed": "Sign in failed. Please try again.",
-  "authOrgFallbackName": "Connect",
-  "authContinueWithGoogle": "Continue with Google",
-  "authGoogleSignInSoon": "Google sign-in coming soon!",
-  "authTermsFooter": "By continuing, you agree to our Terms and Privacy Policy.",
-  "authEmailOrStudentId": "Email or student ID",
-  "authEmailOrStudentIdHint": "you@school.edu or student ID",
-  "authPasswordHintLogin": "Your password or student ID",
-  "authForgotPassword": "Forgot Password?",
-  "authFullName": "Full Name",
-  "authFullNameHint": "Enter your full name",
-  "authEmailHint": "you@school.edu",
-  "authPasswordHintRegister": "At least 8 characters",
   "authConfirmPassword": "Confirm Password",
   "authConfirmPasswordHint": "Re-enter your password",
-  "authAcceptTermsCheckbox": "I accept the Terms & Privacy Policy",
-
-  "homeTitle": "Home",
-  "homeWelcome": "Welcome, {firstName}!",
-  "@homeWelcome": {
-    "placeholders": {
-      "firstName": { "type": "String" }
-    }
-  },
-  "homeDefaultWelcomeMessage": "How can we help make things better?",
-  "homeQuickActions": "Quick Actions",
-  "homeSubmitConcern": "Submit\nConcern",
-  "homeMyReports": "My Reports\n(Track Status)",
+  "authContinueWithGoogle": "Continue with Google",
+  "authEmailHint": "you@school.edu",
+  "authEmailOrStudentId": "Email or student ID",
+  "authEmailOrStudentIdHint": "you@school.edu or student ID",
+  "authForgotPassword": "Forgot Password?",
+  "authFullName": "Full Name",
+  "authFullNameHint": "Ibutang ang imong tibuok ngalan",
+  "authGoogleSignInSoon": "Google sign-in coming soon!",
+  "authOrgFallbackName": "Sumpay",
+  "authPasswordHintLogin": "Ang imong password o student ID",
+  "authPasswordHintRegister": "Dapat adunay labing menos 8 ka karakter",
+  "authSignInFailed": "Sign in failed. Please try again.",
+  "authTermsFooter": "By continuing, you agree to our Terms and Privacy Policy.",
+  "commonEmail": "Email",
+  "commonLogin": "Login",
+  "commonOr": "or",
+  "commonPassword": "Password",
+  "commonSave": "Save",
+  "commonSignUp": "Sign Up",
+  "helpAdminAccessDenied": "You do not have access to this administrator guide.",
+  "helpAdminGuideSubtitle": "Roster, groups, reports, and reminders",
+  "helpAdminGuideTitle": "Administrator Guide",
+  "helpGuideNotFound": "This guide could not be found.",
+  "helpHubAdminNote": "Includes administration topics for your role. ",
+  "helpHubDescription": "Guides for {orgName}. {adminNote}Content is specific to how this organization is set up.",
+  "helpHubHeadline": "Guides for using SpeakUp Connect",
+  "helpLoadFailed": "Could not load guide for your organization.",
+  "helpLoadFailedDetail": "Could not load guide for your organization.\n{error}",
+  "helpMemberGuideSubtitle": "Sign in, submit reports, and use alerts",
+  "helpMemberGuideTitle": "Member Guide",
+  "helpOrgFallback": "your organization",
+  "helpTitle": "Help",
   "homeAnnouncements": "Announcements",
-  "homeOrgInformation": "{orgName}\nInformation",
-  "@homeOrgInformation": {
-    "placeholders": {
-      "orgName": { "type": "String" }
-    }
-  },
-  "homeOrgFallback": "Org",
-  "homeOrgInfoComingSoon": "Organization Info — Coming Soon",
-  "homeNavMyReports": "My Reports",
-  "homeNavAlerts": "Alerts",
-  "homeNavProfile": "Profile",
-
-  "homeGroupsTitle": "My Groups & Clubs",
-  "homeGroupsSeeAll": "See all",
-  "homeGroupsSeeAllCount": "See all ({count})",
-  "@homeGroupsSeeAllCount": {
-    "placeholders": {
-      "count": { "type": "int" }
-    }
-  },
-  "homeGroupsView": "View",
+  "homeDefaultWelcomeMessage": "Unsaon namo pagtabang aron mapalambo ang mga butang?",
+  "homeGroupsCount": "{count, plural, =1{1 group} other{{count} groups}}",
+  "homeGroupsEmptyMessage": "You are not in any groups yet. Tap View for details.",
   "homeGroupsLoadError": "Could not load your groups. Tap See all to retry.",
   "homeGroupsNone": "No groups yet",
-  "homeGroupsCount": "{count, plural, =1{1 group} other{{count} groups}}",
-  "@homeGroupsCount": {
-    "placeholders": {
-      "count": { "type": "int" }
-    }
-  },
-  "homeGroupsEmptyMessage": "You are not in any groups yet. Tap View for details.",
-
-  "settingsTitle": "Settings",
-  "settingsAnonymous": "Anonymous",
-  "settingsOrgUnavailable": "—",
-  "settingsPhotoUpdateFailed": "Could not update photo: {message}",
-  "@settingsPhotoUpdateFailed": {
-    "placeholders": {
-      "message": { "type": "String" }
-    }
-  },
-  "settingsUnknownError": "Unknown error",
-  "settingsPersonalPhotosDisabled": "Personal profile photos are not enabled. Ask an administrator to turn on \"Allow personal profile photos\" under Organization Settings.",
-  "settingsPersonalPhotoUpdated": "Personal profile photo updated",
-  "settingsPersonalPhotoRemoved": "Personal photo removed — showing school photo",
-  "settingsSpeakUpOrg": "SpeakUp {orgName}",
-  "@settingsSpeakUpOrg": {
-    "placeholders": {
-      "orgName": { "type": "String" }
-    }
-  },
-  "settingsTapPhotoChange": "Tap your photo to change your personal badge",
-  "settingsSchoolPhotoOnFile": "School photo on file — ask an admin to enable personal uploads",
-  "settingsPersonalUploadsRequireApproval": "Tap your photo — personal uploads require admin approval",
-  "settingsSectionGroups": "Groups & Clubs",
-  "settingsMyGroups": "My Groups & Clubs",
-  "settingsPendingMembershipRequests": "{count, plural, =1{1 pending membership request} other{{count} pending membership requests}}",
-  "@settingsPendingMembershipRequests": {
-    "placeholders": {
-      "count": { "type": "int" }
-    }
-  },
-  "settingsGroupsSubtitle": "Clubs and organizations you belong to",
-  "settingsBrowseGroups": "Browse Groups & Clubs",
-  "settingsBrowseGroupsSubtitle": "Discover clubs and request to join",
-  "settingsSentGroupAlerts": "Sent Group Alerts",
-  "settingsMyBroadcasts": "My Broadcasts",
-  "settingsSentGroupAlertsSubtitle": "View alerts you sent and member responses",
-  "settingsMyBroadcastsSubtitle": "Manage sent reminders and view responses",
-  "settingsSectionAppearance": "Appearance",
-  "settingsTheme": "Theme",
-  "settingsThemeSystem": "System Default",
-  "settingsThemeLight": "Light",
-  "settingsThemeDark": "Dark",
-  "settingsSectionAccount": "Account",
-  "settingsChangePassword": "Change Password",
-  "settingsMemberSignInHint": "Sign in with your student ID or contact email and your password.",
-  "settingsNotificationPreferences": "Notification Preferences",
-  "settingsNotificationsComingSoon": "Notifications — coming soon",
-  "settingsSectionHelp": "Help & Support",
-  "settingsHelpCenter": "Help Center",
-  "settingsHelpCenterSubtitle": "Guides for members and administrators",
-  "settingsSectionAbout": "About",
+  "homeGroupsSeeAll": "See all",
+  "homeGroupsSeeAllCount": "See all ({count})",
+  "homeGroupsTitle": "Ang Akong mga Grupo ug Klab",
+  "homeGroupsView": "View",
+  "homeMyReports": "Ang Akong mga Report (Sundan ang Kahimtang)",
+  "homeNavAlerts": "Mga Abiso",
+  "homeNavMyReports": "Ang Akong mga Report",
+  "homeNavProfile": "Profile",
+  "homeOrgFallback": "Org",
+  "homeOrgInfoComingSoon": "Organization Info — Coming Soon",
+  "homeOrgInformation": "{orgName}\nInformation",
+  "homeQuickActions": "Mabilis nga mga Aksyon",
+  "homeSubmitConcern": "Ipadala ang Kabalaoran",
+  "homeTitle": "Home",
+  "homeWelcome": "Dayon, {firstName}!",
   "settingsAboutApp": "About {appName}",
-  "@settingsAboutApp": {
-    "placeholders": {
-      "appName": { "type": "String" }
-    }
-  },
   "settingsAboutLegalese": "© 2026 SpeakUp Connect",
-  "settingsSectionAdmin": "Administration",
   "settingsAdminDashboard": "Admin Dashboard",
   "settingsAdminDashboardSubtitle": "Review and manage submitted reports",
   "settingsAdminGroups": "Groups & Clubs",
   "settingsAdminGroupsSubtitle": "Create groups and manage member rosters",
+  "settingsAnonymous": "Anonymous",
+  "settingsBrowseGroups": "Tan-awa ang mga Grupo ug Klab",
+  "settingsBrowseGroupsSubtitle": "Suhita ang mga grupo ug mag-request nga moapil",
+  "settingsChangePassword": "Change Password",
+  "settingsGroupsSubtitle": "Mga klub ug organisasyon nga imong gikauban",
+  "settingsHelpCenter": "Help Center",
+  "settingsHelpCenterSubtitle": "Guides for members and administrators",
   "settingsJoinApplications": "Join Applications",
   "settingsJoinApplicationsSubtitle": "Approve new member sign-ups",
-  "settingsPendingApprovals": "Pending Approvals",
-  "settingsPendingApprovalsSubtitle": "Review announcements and group alerts awaiting publish",
+  "settingsLanguage": "Language",
+  "settingsLanguageCebuano": "Bisaya / Cebuano",
+  "settingsLanguageEnglish": "English",
+  "settingsLanguageRevertToEnglish": "That language could not be applied. Reverted to English.",
   "settingsMemberManagement": "Member Management",
   "settingsMemberManagementSubtitle": "View, block, unenroll, unblock, or re-enroll members",
-  "settingsStudentRoster": "Student Roster",
-  "settingsStudentRosterSubtitle": "Add students, assign grades individually or in bulk",
+  "settingsMemberSignInHint": "Mag-sign in gamit ang imong student ID o contact email ug ang imong password.",
+  "settingsMyBroadcasts": "Ang Akong mga Broadcast",
+  "settingsMyBroadcastsSubtitle": "Pagdumala sa gipadala nga mga pahimangno ug tan-awa ang mga tubag",
+  "settingsMyGroups": "My Groups & Clubs",
+  "settingsNotificationPreferences": "Notification Preferences",
+  "settingsNotificationsComingSoon": "Notifications — coming soon",
+  "settingsOrgUnavailable": "—",
+  "settingsPendingApprovals": "Pending Approvals",
+  "settingsPendingApprovalsSubtitle": "Review announcements and group alerts awaiting publish",
+  "settingsPendingMembershipRequests": "{count, plural, =1{1 pending membership request} other{{count} pending membership requests}}",
+  "settingsPersonalPhotoRemoved": "Personal photo removed — showing school photo",
+  "settingsPersonalPhotoUpdated": "Personal profile photo updated",
+  "settingsPersonalPhotosDisabled": "Personal profile photos are not enabled. Ask an administrator to turn on \"Allow personal profile photos\" under Organization Settings.",
+  "settingsPersonalUploadsRequireApproval": "I-tap ang imong litrato — ang personal nga mga upload nagkinahanglan og pag-apruba sa admin",
+  "settingsPhotoUpdateFailed": "Could not update photo: {message}",
   "settingsSchoolGrades": "School Grades",
   "settingsSchoolGradesSubtitle": "Define which grade levels your school uses",
+  "settingsSchoolPhotoOnFile": "School photo on file — ask an admin to enable personal uploads",
+  "settingsSectionAbout": "About",
+  "settingsSectionAccount": "Account",
+  "settingsSectionAdmin": "Administration",
+  "settingsSectionAppearance": "Appearance",
+  "settingsSectionGroups": "Groups & Clubs",
+  "settingsSectionHelp": "Help & Support",
+  "settingsSentGroupAlerts": "Sent Group Alerts",
+  "settingsSentGroupAlertsSubtitle": "View alerts you sent and member responses",
+  "settingsSignOut": "Sign Out",
+  "settingsSpeakUpOrg": "SpeakUp {orgName}",
+  "settingsStudentRoster": "Student Roster",
+  "settingsStudentRosterSubtitle": "Add students, assign grades individually or in bulk",
+  "settingsTapPhotoChange": "Tap your photo to change your personal badge",
+  "settingsTheme": "Theme",
+  "settingsThemeDark": "Dark",
+  "settingsThemeLight": "Light",
+  "settingsThemeSystem": "System Default",
+  "settingsTitle": "Settings",
   "settingsTranslations": "Translations",
   "settingsTranslationsSubtitle": "Edit UI strings for your organization's languages",
-  "settingsSignOut": "Sign Out",
-
-  "settingsLanguage": "Language",
-  "settingsLanguageEnglish": "English",
-  "settingsLanguageCebuano": "Bisaya / Cebuano",
-  "settingsLanguageRevertToEnglish": "Dili ma-apply ang pinulongan. Balik sa English.",
-
-  "helpTitle": "Help",
-  "helpHubHeadline": "Guides for using SpeakUp Connect",
-  "helpHubDescription": "Guides for {orgName}. {adminNote}Content is specific to how this organization is set up.",
-  "@helpHubDescription": {
-    "placeholders": {
-      "orgName": { "type": "String" },
-      "adminNote": { "type": "String" }
-    }
-  },
-  "helpHubAdminNote": "Includes administration topics for your role. ",
-  "helpOrgFallback": "your organization",
-  "helpMemberGuideTitle": "Member Guide",
-  "helpMemberGuideSubtitle": "Sign in, submit reports, and use alerts",
-  "helpAdminGuideTitle": "Administrator Guide",
-  "helpAdminGuideSubtitle": "Roster, groups, reports, and reminders",
-  "helpGuideNotFound": "This guide could not be found.",
-  "helpAdminAccessDenied": "You do not have access to this administrator guide.",
-  "helpLoadFailed": "Could not load guide for your organization.",
-  "helpLoadFailedDetail": "Could not load guide for your organization.\n{error}",
-  "@helpLoadFailedDetail": {
-    "placeholders": {
-      "error": { "type": "String" }
-    }
-  },
-
-  "validationEmailRequired": "Email is required",
-  "validationEmailInvalid": "Please enter a valid email address",
-  "validationFieldRequired": "{fieldName} is required",
-  "@validationFieldRequired": {
-    "placeholders": {
-      "fieldName": { "type": "String" }
-    }
-  },
-  "validationPasswordRequired": "Password is required",
-  "validationPasswordMin8": "Password must be at least 8 characters",
-  "validationPasswordMin6": "Password must be at least 6 characters",
-  "validationLoginIdentifierRequired": "Email or student ID is required",
-  "validationStudentIdRequired": "Student ID is required",
-  "validationStudentIdMin6": "Student ID must be at least 6 characters",
-  "validationStudentIdInvalidChars": "Use letters, numbers, and hyphens only",
-  "validationConfirmPasswordRequired": "Please confirm your password",
-  "validationPasswordsDoNotMatch": "Passwords do not match",
-  "validationMaxLength": "{fieldName} must be {maxLength} characters or fewer",
-  "@validationMaxLength": {
-    "placeholders": {
-      "fieldName": { "type": "String" },
-      "maxLength": { "type": "int" }
-    }
-  },
-  "validationMinLength": "{fieldName} must be at least {minLength} characters",
-  "@validationMinLength": {
-    "placeholders": {
-      "fieldName": { "type": "String" },
-      "minLength": { "type": "int" }
-    }
-  },
-  "validationReportTitleField": "Title",
-  "validationReportDescriptionField": "Description",
-
-  "commonSave": "Save",
-
-  "translationSearchHint": "Search keys or English text",
+  "settingsUnknownError": "Unknown error",
+  "splashDefaultTagline": "Your voice. Our action.",
+  "splashGetStarted": "Get Started",
+  "splashLearnMore": "Learn More",
+  "translationAiDraft": "AI draft",
+  "translationApprove": "Approve",
   "translationBatchAi": "Translate missing (AI)",
   "translationBatchAiNoneMissing": "No missing strings to translate.",
   "translationBatchAiResult": "AI draft: {succeeded} of {total} succeeded",
-  "@translationBatchAiResult": {
-    "placeholders": {
-      "succeeded": { "type": "int" },
-      "total": { "type": "int" }
-    }
-  },
+  "translationEntryCount": "{count} strings loaded",
   "translationExportArb": "Export ARB (copy JSON)",
   "translationExportCopied": "ARB JSON copied to clipboard",
-  "translationEntryCount": "{count} strings loaded",
-  "@translationEntryCount": {
-    "placeholders": {
-      "count": { "type": "int" }
-    }
-  },
   "translationNoEntries": "No translation entries yet. Platform operators import app_en.arb first.",
+  "translationSearchHint": "Search keys or English text",
   "translationTargetLabel": "Translation",
-  "translationAiDraft": "AI draft",
-  "translationApprove": "Approve"
+  "validationConfirmPasswordRequired": "Please confirm your password",
+  "validationEmailInvalid": "Please enter a valid email address",
+  "validationEmailRequired": "Email is required",
+  "validationFieldRequired": "{fieldName} is required",
+  "validationLoginIdentifierRequired": "Email or student ID is required",
+  "validationMaxLength": "{fieldName} must be {maxLength} characters or fewer",
+  "validationMinLength": "{fieldName} must be at least {minLength} characters",
+  "validationPasswordMin6": "Password must be at least 6 characters",
+  "validationPasswordMin8": "Password must be at least 8 characters",
+  "validationPasswordRequired": "Password is required",
+  "validationPasswordsDoNotMatch": "Passwords do not match",
+  "validationReportDescriptionField": "Description",
+  "validationReportTitleField": "Title",
+  "validationStudentIdInvalidChars": "Use letters, numbers, and hyphens only",
+  "validationStudentIdMin6": "Student ID must be at least 6 characters",
+  "validationStudentIdRequired": "Student ID is required"
 }

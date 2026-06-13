@@ -262,10 +262,16 @@ textarea.target-input {
   min-width: 3.5rem;
 }
 
-.search-filters-row input[type="search"] {
+.search-filters-row input[type="search"],
+.search-filters-row select {
   min-width: 11rem;
   flex: 1 1 11rem;
   max-width: 18rem;
+}
+
+.search-filters-row select {
+  min-width: 10rem;
+  max-width: 14rem;
 }
 
 code { font-size: 0.85em; }

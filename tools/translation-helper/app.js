@@ -180,21 +180,22 @@ function getSearchFilters() {
   };
 }
 
-function hasActiveSearchFilters() {
+function hasActiveTableFilters() {
   const f = getSearchFilters();
-  return Boolean(f.key || f.english || f.target);
+  return Boolean(f.key || f.english || f.target || els.statusFilter.value);
 }
 
-function clearSearchFilters() {
+function clearTableFilters() {
   els.searchKey.value = '';
   els.searchEnglish.value = '';
   els.searchTarget.value = '';
+  els.statusFilter.value = '';
   els.clearFiltersBtn.disabled = true;
   renderTable();
 }
 
 function updateClearFiltersButton() {
-  els.clearFiltersBtn.disabled = !hasActiveSearchFilters();
+  els.clearFiltersBtn.disabled = !hasActiveTableFilters();
 }
 
 function renderTable() {
@@ -424,7 +425,12 @@ async function approveAllSaved() {
       total = data.total ?? 0;
     } catch (err) {
       const code = err?.code ?? '';
-      if (code === 'functions/not-found' || code === 'not-found') {
+      const useFallback =
+        code === 'functions/not-found' ||
+        code === 'not-found' ||
+        code === 'functions/unavailable' ||
+        code === 'functions/internal';
+      if (useFallback) {
         setWorkspaceStatus(
           `Batch approve unavailable — approving ${inReviewCount} saved/in-review one at a time…`,
         );
@@ -497,7 +503,7 @@ for (const input of [els.searchKey, els.searchEnglish, els.searchTarget]) {
     searchTimer = setTimeout(renderTable, 200);
   });
 }
-els.clearFiltersBtn.addEventListener('click', clearSearchFilters);
+els.clearFiltersBtn.addEventListener('click', clearTableFilters);
 els.clearFiltersBtn.disabled = true;
 els.refreshBtn.addEventListener('click', () => loadEntries().catch(showError));
 els.approveAllSavedBtn.addEventListener('click', () =>
