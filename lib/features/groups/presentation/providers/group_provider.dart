@@ -226,6 +226,17 @@ final canBroadcastToGroupProvider =
   return effectiveMyGroupMembership(ref, groupId)?.isLeader ?? false;
 });
 
+/// True when the user may edit group settings for [groupId] (not roster).
+final canEditGroupSettingsProvider =
+    Provider.autoDispose.family<bool, String>((ref, groupId) {
+  return ref.watch(canManageGroupRosterProvider(groupId));
+});
+
+/// True when the user may deactivate/reactivate a group (org admin only).
+final canDeactivateGroupProvider = Provider<bool>((ref) {
+  return ref.watch(userProfileProvider).value?.isAdmin ?? false;
+});
+
 // ── Actions ──────────────────────────────────────────────────────────────────
 
 class CreateGroupNotifier extends Notifier<AsyncValue<GroupEntity?>> {
@@ -270,6 +281,51 @@ class CreateGroupNotifier extends Notifier<AsyncValue<GroupEntity?>> {
 final createGroupActionProvider =
     NotifierProvider<CreateGroupNotifier, AsyncValue<GroupEntity?>>(
   CreateGroupNotifier.new,
+);
+
+class UpdateGroupNotifier extends Notifier<AsyncValue<void>> {
+  @override
+  AsyncValue<void> build() => const AsyncData(null);
+
+  Future<bool> submit({
+    required String groupId,
+    required String name,
+    String? description,
+    List<GroupPositionRole>? positionRoles,
+    bool? allowJoinRequests,
+    MemberLeavePolicy? memberLeavePolicy,
+    String? joinRequestHint,
+    bool? isActive,
+  }) async {
+    state = const AsyncLoading();
+    try {
+      await ref.read(groupRepositoryProvider).updateGroup(
+            organizationId: AppConfig.defaultOrganizationId,
+            groupId: groupId,
+            name: name.trim(),
+            description: description,
+            positionRoles: positionRoles,
+            allowJoinRequests: allowJoinRequests,
+            memberLeavePolicy: memberLeavePolicy,
+            joinRequestHint: joinRequestHint,
+            isActive: isActive,
+          );
+      ref.invalidate(groupByIdProvider(groupId));
+      ref.invalidate(orgGroupsProvider);
+      ref.invalidate(myGroupsProvider);
+      ref.invalidate(myGroupMembershipsProvider);
+      state = const AsyncData(null);
+      return true;
+    } catch (e, st) {
+      state = AsyncError(e, st);
+      return false;
+    }
+  }
+}
+
+final updateGroupActionProvider =
+    NotifierProvider<UpdateGroupNotifier, AsyncValue<void>>(
+  UpdateGroupNotifier.new,
 );
 
 class UpdateGroupPositionRolesNotifier extends Notifier<AsyncValue<void>> {

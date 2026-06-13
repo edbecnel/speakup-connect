@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:speakup_connect/features/groups/data/models/group_position_role_codec.dart';
 import 'package:speakup_connect/features/groups/domain/entities/group_entity.dart';
 import 'package:speakup_connect/features/groups/domain/entities/group_membership_policy.dart';
+import 'package:speakup_connect/features/groups/domain/entities/group_position_role.dart';
 
 /// Firestore data model for a group document.
 ///
@@ -94,5 +95,50 @@ class GroupModel extends GroupEntity {
       else
         'joinRequestHint': FieldValue.delete(),
     };
+  }
+
+  /// Partial update payload for group settings (name, policies, optional roles).
+  static Map<String, dynamic> buildUpdateJson({
+    required String name,
+    String? description,
+    List<GroupPositionRole>? positionRoles,
+    bool? allowJoinRequests,
+    MemberLeavePolicy? memberLeavePolicy,
+    String? joinRequestHint,
+    bool? isActive,
+  }) {
+    final data = <String, dynamic>{
+      'name': name.trim(),
+      'updatedAt': FieldValue.serverTimestamp(),
+    };
+
+    if (description != null) {
+      final trimmed = description.trim();
+      data['description'] =
+          trimmed.isEmpty ? FieldValue.delete() : trimmed;
+    }
+
+    if (positionRoles != null) {
+      data['positionRoles'] = positionRoles.isEmpty
+          ? FieldValue.delete()
+          : GroupPositionRoleCodec.toList(positionRoles);
+    }
+
+    if (allowJoinRequests != null) {
+      data['allowJoinRequests'] = allowJoinRequests;
+    }
+    if (memberLeavePolicy != null) {
+      data['memberLeavePolicy'] = memberLeavePolicy.value;
+    }
+    if (joinRequestHint != null) {
+      final trimmed = joinRequestHint.trim();
+      data['joinRequestHint'] =
+          trimmed.isEmpty ? FieldValue.delete() : trimmed;
+    }
+    if (isActive != null) {
+      data['isActive'] = isActive;
+    }
+
+    return data;
   }
 }

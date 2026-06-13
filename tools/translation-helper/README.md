@@ -2,9 +2,12 @@
 
 Web workspace for org admins and translation moderators to manage UI translations before exporting ARB files into `lib/l10n/`. In-page help is built into `index.html` (expand **Translation workspace help** or click **Help** after sign-in).
 
+**End-to-end workflow (canonical — start here):** [docs/INTERNATIONALIZATION.md §11](../docs/INTERNATIONALIZATION.md#11-end-to-end-workflow-canonical)  
 **GitHub issue:** [#48](https://github.com/edbecnel/speakup-connect/issues/48)  
-**Design:** [docs/INTERNATIONALIZATION.md §12](../../docs/INTERNATIONALIZATION.md)  
+**Architecture:** [docs/INTERNATIONALIZATION.md §13](../docs/INTERNATIONALIZATION.md#13-translation-helper-tool)  
 **In-app docs:** Help Center → **Administrator Guide** → **UI translations** → **Platform setup**
+
+This README covers **setup commands and troubleshooting** only. The full translate → export → app release checklist lives in **INTERNATIONALIZATION.md §11**.
 
 ## What it does
 
@@ -387,9 +390,11 @@ In the web tool (or in-app **Translations** screen):
 
 ### Step 11 — Export ARB (org admin only)
 
+See **[INTERNATIONALIZATION.md §11 — Phase E–G](../docs/INTERNATIONALIZATION.md#phase-e--export-arb)** for export, `flutter gen-l10n`, hot restart, and commit.
+
 1. Click **Export ARB**.
 2. Save the JSON as `lib/l10n/app_ceb.arb` or `lib/l10n/app_fil.arb`.
-3. Commit with human review.
+3. Run `flutter gen-l10n`, hot restart the app, then commit ARB + generated Dart files.
 
 ---
 
@@ -444,4 +449,6 @@ In the web tool (or in-app **Translations** screen):
 | `saveTranslationEntry` | Save target text + status |
 | `draftTranslation` | AI draft one key |
 | `batchDraftTranslations` | AI draft missing keys (chunked) |
+| `batchSaveAiDrafts` | Copy all `ai_draft` rows to `in_review` |
+| `batchApproveSavedTranslations` | Approve all saved/in-review rows |
 | `exportTranslationArb` | Generate ARB JSON for download |

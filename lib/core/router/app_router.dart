@@ -29,7 +29,7 @@ import 'package:speakup_connect/features/auth/presentation/screens/splash_screen
 import 'package:speakup_connect/features/groups/presentation/providers/group_provider.dart';
 import 'package:speakup_connect/features/groups/presentation/screens/add_group_members_screen.dart';
 import 'package:speakup_connect/features/groups/presentation/screens/create_group_screen.dart';
-import 'package:speakup_connect/features/groups/presentation/screens/edit_group_position_roles_screen.dart';
+import 'package:speakup_connect/features/groups/presentation/screens/edit_group_screen.dart';
 import 'package:speakup_connect/features/groups/presentation/screens/group_members_screen.dart';
 import 'package:speakup_connect/features/groups/presentation/providers/group_membership_provider.dart';
 import 'package:speakup_connect/features/groups/presentation/screens/browse_groups_screen.dart';
@@ -398,21 +398,32 @@ GoRouter appRouter(Ref ref) {
         ],
       ),
       GoRoute(
-        path: Routes.editGroupPositionRoles,
-        name: 'editGroupPositionRoles',
+        path: Routes.editGroup,
+        name: 'editGroup',
         redirect: (context, state) {
-          final canManage = ref.read(canManageGroupsProvider);
           final groupId = state.pathParameters['groupId'];
-          if (!canManage) {
-            return groupId != null
-                ? Routes.groupMembersPath(groupId)
-                : Routes.groupsList;
-          }
+          if (groupId == null) return Routes.groupsList;
+          final canEdit =
+              ref.read(canEditGroupSettingsProvider(groupId));
+          if (!canEdit) return Routes.groupMembersPath(groupId);
           return null;
         },
         builder: (context, state) {
           final groupId = state.pathParameters['groupId']!;
-          return EditGroupPositionRolesScreen(groupId: groupId);
+          return EditGroupScreen(groupId: groupId);
+        },
+      ),
+      GoRoute(
+        path: Routes.editGroupPositionRoles,
+        name: 'editGroupPositionRoles',
+        redirect: (context, state) {
+          final groupId = state.pathParameters['groupId'];
+          if (groupId == null) return Routes.groupsList;
+          return Routes.editGroupPath(groupId);
+        },
+        builder: (context, state) {
+          final groupId = state.pathParameters['groupId']!;
+          return EditGroupScreen(groupId: groupId);
         },
       ),
       GoRoute(

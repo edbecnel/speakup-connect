@@ -1,6 +1,7 @@
 # Internationalization (i18n) — Architecture
 
 > **Status:** Phase 1 + 1b shipped (June 2026) — `app_en.arb` / `app_ceb.arb` (English placeholders), Home + Settings language pickers, locale-aware help, `kLanguageNativeLabels`  
+> **End-to-end workflow (canonical):** [§11](#11-end-to-end-workflow-canonical) — setup → translate → export → app release (all steps in one place)  
 > **Tasks:** [MASTER_TASK_LIST.md → Epic 2.5](MASTER_TASK_LIST.md) (authoritative checklist) · [SPRINT_TRACKER.md](SPRINT_TRACKER.md) (Sprint 15 delivered, Sprint 16 planned) · **GitHub:** [#48–#53](https://github.com/edbecnel/speakup-connect/issues?q=is%3Aissue+is%3Aopen+label%3Aepic%3A2.5)  
 > **Priority:** High — see language rollout table below  
 > **Epic:** [MASTER_TASK_LIST.md → Epic 2.5](MASTER_TASK_LIST.md)  
@@ -384,23 +385,203 @@ Already sketched in [DATABASE_DESIGN.md](DATABASE_DESIGN.md) and `firestore.rule
 
 ---
 
-## 11. Translation workflow (developers)
+## 11. End-to-end workflow (canonical)
 
-**Rule:** All new user-facing UI text goes in **`lib/l10n/app_en.arb`** first — no hardcoded strings in widgets. See [CODING_STANDARDS.md → String Localization](CODING_STANDARDS.md).
+**This section is the single source of truth** for updating bundled locale files (`app_ceb.arb`, `app_fil.arb`, …). Architecture detail lives in §13; Translation Helper setup commands in [tools/translation-helper/README.md](../tools/translation-helper/README.md).
+
+### Overview
+
+```mermaid
+flowchart LR
+  DEV[Developer: app_en.arb] --> GEN[flutter gen-l10n]
+  GEN --> IMP[super_admin: Import app_en.arb]
+  IMP --> TR[Translate in Helper]
+  TR --> EXP[Org admin: Export ARB]
+  EXP --> COPY[Save to lib/l10n/]
+  COPY --> GEN2[flutter gen-l10n]
+  GEN2 --> APP[Hot restart + test]
+  APP --> GIT[Commit + app release]
+```
+
+| Phase | Who | Where | Output |
+|-------|-----|-------|--------|
+| A — Platform setup (once) | Deployment lead | PowerShell + Firebase | Functions + web tool ready |
+| B — New English strings | Developer | `lib/l10n/app_en.arb` | New keys in repo |
+| C — Sync English to Firestore | Platform `super_admin` | Translation Helper | `languages/{locale}/strings/*` rows |
+| D — Translate & review | Org admin / moderators | Translation Helper or in-app **Translations** | `approved` rows in Firestore |
+| E — Export to repo | Org admin | Translation Helper **Export ARB** | Downloaded `app_ceb.arb` |
+| F — Bundle in app | Developer | `lib/l10n/` + `flutter gen-l10n` | Generated `app_localizations_*.dart` |
+| G — Verify & ship | Developer / QA | Device or emulator | Commit + release build |
+
+Workflow data lives in Firestore (`languages/{locale}/strings/{stringKey}`) until export; **users only see strings after a new app build** with updated ARB files.
+
+---
+
+### Phase A — One-time platform setup
+
+Complete once per Firebase project (or after adding translation callables). Detailed commands: [Translation Helper README](../tools/translation-helper/README.md).
+
+1. **Deploy translation Cloud Functions** from repo root:
+
+   ```powershell
+   cd D:\Dev\Speakup-Connect\functions
+   npm run build
+   cd ..
+   Remove-Item Env:GOOGLE_APPLICATION_CREDENTIALS -ErrorAction SilentlyContinue
+   $env:FUNCTIONS_DISCOVERY_TIMEOUT = "60"
+   npx firebase-tools deploy --only functions:getTranslationWorkspaceAccess,functions:importTranslationSource,functions:listTranslationEntries,functions:saveTranslationEntry,functions:draftTranslation,functions:batchDraftTranslations,functions:batchSaveAiDrafts,functions:batchApproveSavedTranslations,functions:exportTranslationArb
+   ```
+
+2. **Optional — AI draft:** copy `functions/.env.example` → `functions/.env`, set `TRANSLATION_AI_API_KEY`, redeploy `draftTranslation` and `batchDraftTranslations`.
+
+3. **Seed roles** (`manageTranslations` capability): `node scripts/seed_roles.js`
+
+4. **Grant access:**
+   - Org admins — full locale edit, batch AI, export (via org admin role).
+   - Translation moderators — edit / approve per role assignment in app.
+   - Platform `super_admin` — **Import `app_en.arb` only** (`node scripts/assign_super_admin.js`).
+
+5. **Web Translation Helper:** copy `tools/translation-helper/firebase-config.example.js` → `firebase-config.js`, set Firebase web config + `ORGANIZATION_ID`, run `npx serve tools/translation-helper` (or open via your static host). Set `USE_FUNCTIONS_EMULATOR = false` unless using the emulator.
+
+---
+
+### Phase B — Developer adds English strings
+
+**Rule:** All new user-facing UI text goes in **`lib/l10n/app_en.arb` only** — never hardcoded in widgets. See [CODING_STANDARDS.md → String Localization](CODING_STANDARDS.md).
+
+1. Add the key and US English copy to `lib/l10n/app_en.arb` (include `@key` metadata for placeholders).
+2. Reference it in Dart via `context.l10n.yourKey` (or existing extension).
+3. Regenerate localizations:
+
+   ```powershell
+   cd D:\Dev\Speakup-Connect
+   flutter gen-l10n
+   ```
+
+4. Commit `app_en.arb` and generated `app_localizations*.dart` with your feature work.
+
+New keys are **not** in Cebuano/Tagalog until Phase C–G.
+
+---
+
+### Phase C — Import English source into Translation Helper
+
+**Who:** platform `super_admin` only (once per batch of new keys, or after each `app_en.arb` update).
+
+1. Open Translation Helper → sign in as `super_admin`.
+2. Select **Target locale** (`ceb` or `fil`).
+3. Click **Import `app_en.arb`** → choose `lib/l10n/app_en.arb`.
+4. Wait for success (reports new/updated key counts) → **Refresh**.
+
+Org admins and moderators **cannot** import; they edit rows created by this step. If a key is missing in the tool after you added it to `app_en.arb`, re-run import — the tool reads Firestore, not your local ARB.
+
+---
+
+### Phase D — Translate and review
+
+**Where:** Translation Helper web UI (`tools/translation-helper/`) or **Settings → Administration → Translations** in the Flutter app.
+
+**Status flow:** `missing` → `ai_draft` → `in_review` (saved/in-review) → `approved`
+
+| Step | Action | Who | Result |
+|------|--------|-----|--------|
+| 1 | **Translate missing (AI)** | Org admin | Batch AI drafts for all `missing` / `ai_draft_failed` rows (chunked; may take several minutes) |
+| 2 | **Save all AI drafts** | Org admin / moderator | Copies `ai_draft` → saved target as `in_review` |
+| 3 | Edit **Target** column if needed → **Save** | Anyone with access | `in_review` |
+| 4 | **Approve** (per row) or **Approve all saved/in-review** | Anyone with access | `approved` — ready for export |
+
+**Placeholder rules:** Keep `{name}`, `{count}`, and ICU plural blocks (`{count, plural, =1{…} other{…}}`) structurally identical to English; only translate human-readable words inside branches.
+
+**AI tips:** Single-row **AI draft** for retries. If batch AI times out, redeploy functions and use `$env:FUNCTIONS_DISCOVERY_TIMEOUT = "60"` when deploying.
+
+---
+
+### Phase E — Export ARB
+
+**Who:** org admin (or `super_admin`).
+
+1. In Translation Helper, confirm target locale and that strings to ship are **`approved`** (export uses approved `targetValue`, with English fallback for unapproved keys if configured).
+2. Click **Export ARB** → save the downloaded JSON as:
+   - `lib/l10n/app_ceb.arb` for Cebuano, or
+   - `lib/l10n/app_fil.arb` for Tagalog.
+3. Overwrite the existing file in the repo (export strips `@` metadata — that is normal; metadata stays in `app_en.arb` only).
+
+---
+
+### Phase F — Bundle translations in the Flutter app
+
+1. Place the exported file in `lib/l10n/`.
+2. Regenerate Dart localizations:
+
+   ```powershell
+   flutter gen-l10n
+   ```
+
+   This updates `app_localizations_ceb.dart` (and related generated files). Commit the ARB **and** generated Dart together.
+
+3. **Run the app:**
+   - **Hot restart (`R`)** in an active `flutter run` session — not hot reload (`r`).
+   - **Settings → Language** → select **Bisaya / Cebuano** (or your target locale).
+   - Confirm strings on Home, Settings, and affected screens.
+
+4. **Note:** Firestore org fields like `welcomeMessage` are English-only in phase 1; the app uses ARB templates for non-English locales on the home welcome line.
+
+---
+
+### Phase G — Commit and release
+
+1. Commit `lib/l10n/app_{locale}.arb` and generated `app_localizations_*.dart`.
+2. Ship via normal app release (Play Store / TestFlight / APK). **There is no over-the-air string update** in phase 1 — users need a build that includes the new ARB.
+
+---
+
+### Roles quick reference
+
+| Action | Translation moderator | Org admin | Platform super_admin |
+|--------|----------------------|-----------|----------------------|
+| Edit / Save / Approve | Yes | Yes | Yes |
+| AI draft (single row) | Yes | Yes | Yes |
+| Save all AI drafts | Yes | Yes | Yes |
+| Translate missing (AI batch) | No | Yes | Yes |
+| Approve all saved/in-review | Yes | Yes | Yes |
+| Export ARB | No | Yes | Yes |
+| Import `app_en.arb` | No | No | Yes |
+
+---
+
+### Troubleshooting (workflow)
+
+| Symptom | Fix |
+|---------|-----|
+| New key not in Translation Helper | `super_admin` re-imports `app_en.arb`, then Refresh |
+| `functions/internal` on batch AI (~60s) | Functions deploy timed out during discovery — set `$env:FUNCTIONS_DISCOVERY_TIMEOUT = "60"` and redeploy |
+| `TRANSLATION_AI_API_KEY is not set` | Add key to `functions/.env`, redeploy AI callables |
+| Placeholder mismatch on AI draft | Redeploy `draftTranslation` / `batchDraftTranslations`; retry row. ICU plurals must keep `{count, plural, …}` structure |
+| Save all AI drafts fails ICU check | Redeploy `saveTranslationEntry` and `batchSaveAiDrafts` |
+| Approve all skips a row | Row may be `in_review` with only `aiDraft` — use **Save all AI drafts** first, or **Approve** on the row |
+| Cebuano reverts after hot restart | Ensure locale is Cebuano in Settings; pull latest app code (locale bootstrap fix). Hot **restart**, not reload |
+| Deploy: `Timeout after 10000` | `$env:FUNCTIONS_DISCOVERY_TIMEOUT = "60"` before `firebase deploy` |
+
+More setup detail: [tools/translation-helper/README.md](../tools/translation-helper/README.md). In-app help: **Help Center → Administrator Guide → UI translations**.
+
+---
+
+## 12. Translation workflow (developers) — superseded
+
+> **Use [§11 End-to-end workflow](#11-end-to-end-workflow-canonical)** instead. This section is kept as a short reminder only.
 
 1. Developer adds key to **`app_en.arb` only** (US English copy).
-2. Run `flutter gen-l10n` (or `flutter pub get`).
-3. CI / Translation Helper flags new keys as **missing** in `app_ceb.arb` and `app_fil.arb`.
-4. Human interpreter (or AI draft → human) fills target ARBs via Translation Helper.
-5. Native speaker marks string **approved** in Translation Helper (or PR review).
-6. Export merged ARB files into `lib/l10n/`; commit with app release.
-7. Optional later: super-admin pushes hotfixes to Firestore `languages/{code}/strings`.
+2. Run `flutter gen-l10n`.
+3. `super_admin` imports `app_en.arb` into Translation Helper.
+4. Translators fill target language → **approved**.
+5. Org admin exports ARB → `lib/l10n/app_{locale}.arb`.
+6. `flutter gen-l10n` → hot restart → commit → app release.
 
 **MONHS:** Cebuano review with teachers/students before pilot-wide rollout. Tagalog review with Luzon-based reviewers before nationwide enablement.
 
 ---
 
-## 12. Translation Helper tool
+## 13. Translation Helper tool
 
 A separate **Message Translator Helper** (web app or super-admin Flutter/web module) scales localization beyond Cebuano and Tagalog. It is the primary workspace for human interpreters and optional AI first drafts — **not** a runtime dependency for end users.
 
@@ -604,7 +785,7 @@ Default onboarding: when new keys appear in `app_en.arb` after a release branch,
 
 ---
 
-## 13. Formatting (dates, numbers)
+## 14. Formatting (dates, numbers)
 
 Use `intl` with the active locale:
 
@@ -616,7 +797,7 @@ Use **`en_US`** as the explicit English locale for formatting when `locale.langu
 
 ---
 
-## 14. Testing
+## 15. Testing
 
 | Test | Purpose | Status |
 |------|---------|--------|
@@ -629,7 +810,7 @@ Use **`en_US`** as the explicit English locale for formatting when `locale.langu
 
 ---
 
-## 15. Security and rules
+## 16. Security and rules
 
 - Bundled ARB: no rules needed.
 - Firestore `languages/{code}/strings/{key}`: existing rules — authenticated read, super-admin write.
@@ -642,7 +823,7 @@ Use **`en_US`** as the explicit English locale for formatting when `locale.langu
 
 ---
 
-## 16. Implementation checklist
+## 17. Implementation checklist
 
 Authoritative task list: **[MASTER_TASK_LIST.md → Epic 2.5](MASTER_TASK_LIST.md)**. Summary ship order:
 
@@ -673,7 +854,7 @@ Authoritative task list: **[MASTER_TASK_LIST.md → Epic 2.5](MASTER_TASK_LIST.m
 
 ---
 
-## 17. Related documents
+## 18. Related documents
 
 | Document | Contents |
 |----------|----------|

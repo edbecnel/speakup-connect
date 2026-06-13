@@ -262,14 +262,15 @@ class GroupsListScreen extends ConsumerWidget {
   }
 }
 
-class _GroupCard extends StatelessWidget {
+class _GroupCard extends ConsumerWidget {
   const _GroupCard({required this.group});
 
   final GroupEntity group;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final canEdit = ref.watch(canEditGroupSettingsProvider(group.groupId));
 
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -329,6 +330,14 @@ class _GroupCard extends StatelessWidget {
                   ],
                 ),
               ),
+              if (canEdit)
+                IconButton(
+                  tooltip: 'Edit group',
+                  icon: const Icon(Icons.edit_outlined),
+                  onPressed: () {
+                    context.push(Routes.editGroupPath(group.groupId));
+                  },
+                ),
               Icon(
                 Icons.chevron_right_rounded,
                 color: theme.colorScheme.onSurfaceVariant,

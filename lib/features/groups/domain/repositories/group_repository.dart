@@ -21,6 +21,19 @@ abstract class GroupRepository {
     MemberLeavePolicy memberLeavePolicy = MemberLeavePolicy.requestRequired,
   });
 
+  /// Updates editable group settings (not the member roster).
+  Future<void> updateGroup({
+    required String organizationId,
+    required String groupId,
+    required String name,
+    String? description,
+    List<GroupPositionRole>? positionRoles,
+    bool? allowJoinRequests,
+    MemberLeavePolicy? memberLeavePolicy,
+    String? joinRequestHint,
+    bool? isActive,
+  });
+
   Future<void> updateGroupMembershipPolicies({
     required String organizationId,
     required String groupId,

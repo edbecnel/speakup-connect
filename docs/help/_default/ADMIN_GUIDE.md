@@ -146,6 +146,8 @@ You can combine `manageTranslations` with other capabilities on the same role if
 
 Platform operators import the English source key list. School staff focus on reviewing, correcting, and approving target-language text.
 
+**Full workflow (setup → translate → export → app release):** [INTERNATIONALIZATION.md §11](../../INTERNATIONALIZATION.md#11-end-to-end-workflow-canonical)
+
 ### Platform setup (deployment lead only)
 
 **Audience:** SpeakUp Connect **deployment lead or developer** — not school org admins. Complete once per Firebase environment before the in-app **Translations** workspace and web Translation Helper will work.

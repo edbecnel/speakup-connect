@@ -359,6 +359,85 @@ class GroupRemoteDataSource {
     );
   }
 
+  Future<void> updateGroup({
+    required String organizationId,
+    required String groupId,
+    required String name,
+    String? description,
+    List<GroupPositionRole>? positionRoles,
+    bool? allowJoinRequests,
+    MemberLeavePolicy? memberLeavePolicy,
+    String? joinRequestHint,
+    bool? isActive,
+  }) async {
+    try {
+      final groupRef = _groupDoc(organizationId, groupId);
+      final snap = await groupRef.get();
+      if (!snap.exists) {
+        throw const DatabaseException(message: 'Group not found');
+      }
+
+      final oldName = snap.data()?['name'] as String? ?? '';
+      final trimmedName = name.trim();
+
+      await groupRef.update(
+        GroupModel.buildUpdateJson(
+          name: trimmedName,
+          description: description,
+          positionRoles: positionRoles,
+          allowJoinRequests: allowJoinRequests,
+          memberLeavePolicy: memberLeavePolicy,
+          joinRequestHint: joinRequestHint,
+          isActive: isActive,
+        ),
+      );
+
+      if (trimmedName != oldName) {
+        await _syncDenormalizedGroupName(
+          organizationId: organizationId,
+          groupId: groupId,
+          groupName: trimmedName,
+        );
+      }
+    } on FirebaseException catch (e) {
+      throw _mapFirebaseException(e, 'Failed to update group');
+    }
+  }
+
+  Future<void> _syncDenormalizedGroupName({
+    required String organizationId,
+    required String groupId,
+    required String groupName,
+  }) async {
+    final membersSnap =
+        await _membersRef(organizationId, groupId).get();
+
+    var batch = _firestore.batch();
+    var ops = 0;
+
+    Future<void> commitIfNeeded({bool force = false}) async {
+      if (!force && ops < 400) return;
+      if (ops == 0) return;
+      await batch.commit();
+      batch = _firestore.batch();
+      ops = 0;
+    }
+
+    for (final doc in membersSnap.docs) {
+      batch.update(
+        _userGroupMembershipDoc(organizationId, doc.id, groupId),
+        {
+          'groupName': groupName,
+          'updatedAt': FieldValue.serverTimestamp(),
+        },
+      );
+      ops++;
+      if (ops >= 400) await commitIfNeeded(force: true);
+    }
+
+    await commitIfNeeded(force: true);
+  }
+
   Future<void> updateGroupMembershipPolicies({
     required String organizationId,
     required String groupId,

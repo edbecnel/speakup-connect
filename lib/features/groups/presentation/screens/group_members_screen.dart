@@ -4,9 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:speakup_connect/core/constants/route_constants.dart';
 import 'package:speakup_connect/features/groups/domain/entities/group_entity.dart';
 import 'package:speakup_connect/features/groups/domain/entities/group_member_entity.dart';
-import 'package:speakup_connect/features/groups/presentation/providers/group_membership_provider.dart';
 import 'package:speakup_connect/features/groups/presentation/providers/group_provider.dart';
-import 'package:speakup_connect/features/groups/presentation/widgets/group_membership_policy_sheet.dart';
 import 'package:speakup_connect/shared/widgets/app_error_widget.dart';
 import 'package:speakup_connect/shared/widgets/app_loading_indicator.dart';
 
@@ -21,9 +19,7 @@ class GroupMembersScreen extends ConsumerWidget {
     final groupAsync = ref.watch(groupByIdProvider(groupId));
     final membersAsync = ref.watch(groupMembersProvider(groupId));
     final canManageRoster = ref.watch(canManageGroupRosterProvider(groupId));
-    final canEditPositions = ref.watch(canManageGroupsProvider);
-    final canEditPolicies =
-        ref.watch(canEditGroupMembershipPoliciesProvider(groupId));
+    final canEditSettings = ref.watch(canEditGroupSettingsProvider(groupId));
     final actionState = ref.watch(groupMemberActionsProvider);
     final group = groupAsync.asData?.value;
     final pendingCount = group == null
@@ -54,22 +50,11 @@ class GroupMembersScreen extends ConsumerWidget {
                     )
                   : const Icon(Icons.inbox_outlined),
             ),
-          if (canEditPolicies && group != null)
+          if (canEditSettings)
             IconButton(
-              tooltip: 'Membership settings',
-              onPressed: () => showGroupMembershipPolicySheet(
-                context: context,
-                ref: ref,
-                group: group,
-              ),
-              icon: const Icon(Icons.settings_outlined),
-            ),
-          if (canEditPositions)
-            IconButton(
-              tooltip: 'Edit club positions',
-              onPressed: () =>
-                  context.push(Routes.editGroupPositionRolesPath(groupId)),
-              icon: const Icon(Icons.badge_outlined),
+              tooltip: 'Edit group settings',
+              onPressed: () => context.push(Routes.editGroupPath(groupId)),
+              icon: const Icon(Icons.edit_outlined),
             ),
         ],
       ),

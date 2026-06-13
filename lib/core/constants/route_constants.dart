@@ -57,6 +57,7 @@ abstract class Routes {
   static const String groupMembershipRequests =
       '/groups/:groupId/membership-requests';
   static const String groupMembers = '/groups/:groupId/members';
+  static const String editGroup = '/groups/:groupId/edit';
   static const String addGroupMembers = '/groups/:groupId/members/add';
   static const String editGroupPositionRoles = '/groups/:groupId/roles';
   static const String accountBlocked = '/account-blocked';
@@ -90,6 +91,9 @@ abstract class Routes {
 
   /// Builds the group members roster path for a concrete [groupId].
   static String groupMembersPath(String groupId) => '/groups/$groupId/members';
+
+  /// Builds the group settings editor path for a concrete [groupId].
+  static String editGroupPath(String groupId) => '/groups/$groupId/edit';
 
   /// Builds the add-members picker path for a concrete [groupId].
   static String addGroupMembersPath(String groupId) =>

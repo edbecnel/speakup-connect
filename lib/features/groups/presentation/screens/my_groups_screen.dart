@@ -7,7 +7,6 @@ import 'package:speakup_connect/features/groups/domain/entities/my_group_members
 import 'package:speakup_connect/features/announcements/presentation/providers/announcement_provider.dart';
 import 'package:speakup_connect/features/groups/presentation/providers/group_membership_provider.dart';
 import 'package:speakup_connect/features/groups/presentation/providers/group_provider.dart';
-import 'package:speakup_connect/features/groups/presentation/widgets/group_membership_policy_sheet.dart';
 import 'package:speakup_connect/shared/widgets/app_button.dart';
 import 'package:speakup_connect/shared/widgets/app_error_widget.dart';
 import 'package:speakup_connect/shared/widgets/app_loading_indicator.dart';
@@ -204,8 +203,8 @@ class _MyGroupCard extends ConsumerWidget {
         ref.watch(canManageGroupRosterProvider(group.groupId));
     final canPostAnnouncement =
         ref.watch(canPostAnnouncementForGroupProvider(group.groupId));
-    final canEditPolicies =
-        ref.watch(canEditGroupMembershipPoliciesProvider(group.groupId));
+    final canEditSettings =
+        ref.watch(canEditGroupSettingsProvider(group.groupId));
     final leaveReq =
         ref.watch(myLeaveRequestForGroupProvider(group.groupId)).asData?.value;
     final leavePending = leaveReq?.status.isPending == true;
@@ -313,15 +312,13 @@ class _MyGroupCard extends ConsumerWidget {
                       Routes.composeReminderForGroupPath(group.groupId),
                     ),
                   ),
-                  if (canEditPolicies)
+                  if (canEditSettings)
                     AppButton.secondary(
-                      label: 'Settings',
-                      icon: Icons.settings_outlined,
+                      label: 'Edit Group',
+                      icon: Icons.edit_outlined,
                       minimumWidth: 0,
-                      onPressed: () => showGroupMembershipPolicySheet(
-                        context: context,
-                        ref: ref,
-                        group: group,
+                      onPressed: () => context.push(
+                        Routes.editGroupPath(group.groupId),
                       ),
                     ),
                 ],

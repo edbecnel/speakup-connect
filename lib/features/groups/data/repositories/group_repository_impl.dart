@@ -64,6 +64,31 @@ class GroupRepositoryImpl implements GroupRepository {
   }
 
   @override
+  Future<void> updateGroup({
+    required String organizationId,
+    required String groupId,
+    required String name,
+    String? description,
+    List<GroupPositionRole>? positionRoles,
+    bool? allowJoinRequests,
+    MemberLeavePolicy? memberLeavePolicy,
+    String? joinRequestHint,
+    bool? isActive,
+  }) {
+    return _remoteDataSource.updateGroup(
+      organizationId: organizationId,
+      groupId: groupId,
+      name: name,
+      description: description,
+      positionRoles: positionRoles,
+      allowJoinRequests: allowJoinRequests,
+      memberLeavePolicy: memberLeavePolicy,
+      joinRequestHint: joinRequestHint,
+      isActive: isActive,
+    );
+  }
+
+  @override
   Future<void> updateGroupMembershipPolicies({
     required String organizationId,
     required String groupId,

@@ -148,6 +148,9 @@ service cloud.firestore {
       let keys = request.resource.data.diff(resource.data).affectedKeys();
       return keys.hasOnly(['updatedAt'])
           || keys.hasOnly(['memberCount', 'updatedAt'])
+          || keys.hasOnly(['name', 'updatedAt'])
+          || keys.hasOnly(['description', 'updatedAt'])
+          || keys.hasOnly(['name', 'description', 'updatedAt'])
           || keys.hasOnly(['allowJoinRequests', 'updatedAt'])
           || keys.hasOnly(['joinRequestHint', 'updatedAt'])
           || keys.hasOnly(['memberLeavePolicy', 'updatedAt'])
@@ -156,7 +159,10 @@ service cloud.firestore {
           || keys.hasOnly(['allowJoinRequests', 'joinRequestHint', 'updatedAt'])
           || keys.hasOnly(['allowJoinRequests', 'memberLeavePolicy', 'updatedAt'])
           || keys.hasOnly(['joinRequestHint', 'memberLeavePolicy', 'updatedAt'])
-          || keys.hasOnly(['allowJoinRequests', 'joinRequestHint', 'memberLeavePolicy', 'updatedAt']);
+          || keys.hasOnly(['allowJoinRequests', 'joinRequestHint', 'memberLeavePolicy', 'updatedAt'])
+          || keys.hasOnly(['name', 'allowJoinRequests', 'joinRequestHint', 'memberLeavePolicy', 'updatedAt'])
+          || keys.hasOnly(['description', 'allowJoinRequests', 'joinRequestHint', 'memberLeavePolicy', 'updatedAt'])
+          || keys.hasOnly(['name', 'description', 'allowJoinRequests', 'joinRequestHint', 'memberLeavePolicy', 'updatedAt']);
     }
 
     // Group leaders may create reminders targeted only at a group they lead.
