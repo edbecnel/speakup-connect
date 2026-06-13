@@ -4,6 +4,7 @@ import 'package:speakup_connect/core/permissions/providers/permission_provider.d
 import 'package:speakup_connect/features/groups/presentation/providers/group_provider.dart';
 import 'package:speakup_connect/features/help/domain/help_article.dart';
 import 'package:speakup_connect/features/organization/presentation/providers/user_profile_provider.dart';
+import 'package:speakup_connect/features/translations/presentation/providers/translation_provider.dart';
 
 /// Organization whose bundled help assets should be loaded.
 final activeHelpOrganizationIdProvider = Provider<String>((ref) {
@@ -13,8 +14,6 @@ final activeHelpOrganizationIdProvider = Provider<String>((ref) {
   }
   return AppConfig.defaultOrganizationId;
 });
-
-import 'package:speakup_connect/features/translations/presentation/providers/translation_provider.dart';
 
 /// Whether the signed-in user should see administration help content.
 final canViewAdminHelpProvider = Provider<bool>((ref) {

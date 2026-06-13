@@ -60,7 +60,8 @@ class _TranslationWorkspaceScreenState
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     DropdownButtonFormField<String>(
-                      value: state.locale,
+                      key: ValueKey(state.locale),
+                      initialValue: state.locale,
                       decoration: InputDecoration(
                         labelText: l10n.settingsLanguage,
                         border: const OutlineInputBorder(),
