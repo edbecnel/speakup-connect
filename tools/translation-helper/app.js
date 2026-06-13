@@ -23,7 +23,10 @@ const app = initializeApp(config);
 const auth = getAuth(app);
 const functions = getFunctions(app);
 
-if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+if (
+  window.USE_FUNCTIONS_EMULATOR === true &&
+  (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+) {
   connectFunctionsEmulator(functions, '127.0.0.1', 5001);
 }
 
@@ -46,6 +49,7 @@ const els = {
   batchAiBtn: document.getElementById('batch-ai-btn'),
   exportBtn: document.getElementById('export-btn'),
   meta: document.getElementById('meta'),
+  workspaceStatus: document.getElementById('workspace-status'),
   entriesBody: document.getElementById('entries-body'),
   helpPanel: document.getElementById('help-panel'),
   helpToggleBtn: document.getElementById('help-toggle-btn'),
@@ -112,6 +116,24 @@ async function refreshAccess() {
 function setStatus(text, kind = '') {
   els.authStatus.textContent = text;
   els.authStatus.className = `status ${kind}`.trim();
+}
+
+function setWorkspaceStatus(text, kind = '') {
+  if (!els.workspaceStatus) return;
+  els.workspaceStatus.textContent = text;
+  els.workspaceStatus.className = `status workspace-status ${kind}`.trim();
+}
+
+function formatError(err) {
+  const code = err?.code;
+  const message = err?.message ?? String(err);
+  return code ? `${code}: ${message}` : message;
+}
+
+function countMissingEntries() {
+  return entries.filter(
+    (e) => e.status === 'missing' || e.status === 'ai_draft_failed',
+  ).length;
 }
 
 function parseFeature(key) {
@@ -201,12 +223,20 @@ async function importArbFile(file) {
     .filter(([k, v]) => !k.startsWith('@') && typeof v === 'string')
     .map(([key, sourceValue]) => ({ key, sourceValue }));
 
-  setStatus(`Importing ${entriesToImport.length} keys…`);
-  const { data } = await call('importTranslationSource')(orgPayload({
-    targetLocale: els.targetLocale.value,
-    entries: entriesToImport,
-  }));
-  setStatus(`Imported ${data.imported} new, updated ${data.updated}`, 'ok');
+  setWorkspaceStatus(`Importing ${entriesToImport.length} keys…`);
+  try {
+    const { data } = await call('importTranslationSource')(orgPayload({
+      targetLocale: els.targetLocale.value,
+      entries: entriesToImport,
+    }));
+    setWorkspaceStatus(
+      `Import complete: ${data.imported} new, ${data.updated} updated.`,
+      'ok',
+    );
+  } catch (err) {
+    setWorkspaceStatus(formatError(err), 'error');
+    throw err;
+  }
   await loadEntries();
 }
 
@@ -223,50 +253,101 @@ async function saveEntry(stringKey, approve = false) {
 }
 
 async function draftOne(stringKey) {
-  setStatus(`AI drafting ${stringKey}…`);
+  setWorkspaceStatus(`AI drafting ${stringKey}…`);
+  els.batchAiBtn.disabled = true;
   try {
     await call('draftTranslation')(orgPayload({
       targetLocale: els.targetLocale.value,
       stringKey,
     }));
-    setStatus('Draft ready', 'ok');
+    setWorkspaceStatus(`AI draft ready for ${stringKey}.`, 'ok');
   } catch (err) {
-    setStatus(err.message ?? String(err), 'error');
-  }
-  await loadEntries();
-}
-
-async function batchDraft() {
-  els.batchAiBtn.disabled = true;
-  setStatus('Batch AI translation running…');
-  try {
-    const { data } = await call('batchDraftTranslations')(orgPayload({
-      targetLocale: els.targetLocale.value,
-      onlyMissing: true,
-    }));
-    setStatus(`AI batch: ${data.succeeded}/${data.total} succeeded`, 'ok');
-  } catch (err) {
-    setStatus(err.message ?? String(err), 'error');
+    setWorkspaceStatus(formatError(err), 'error');
+    throw err;
   } finally {
     els.batchAiBtn.disabled = false;
   }
   await loadEntries();
 }
 
+async function batchDraft() {
+  const missing = countMissingEntries();
+  if (missing === 0) {
+    setWorkspaceStatus(
+      'No missing strings to translate. Filter by status “missing” or all rows are already drafted / in review / approved.',
+      'ok',
+    );
+    return;
+  }
+
+  const prevLabel = els.batchAiBtn.textContent;
+  els.batchAiBtn.disabled = true;
+  els.batchAiBtn.classList.add('busy');
+  els.batchAiBtn.textContent = `Translating ${missing}…`;
+  setWorkspaceStatus(
+    `Batch AI started — ${missing} missing strings. This may take several minutes; keep this tab open.`,
+  );
+
+  try {
+    const { data } = await call('batchDraftTranslations')(orgPayload({
+      targetLocale: els.targetLocale.value,
+      onlyMissing: true,
+    }));
+    const total = data.total ?? 0;
+    const succeeded = data.succeeded ?? 0;
+    const failed = (data.results ?? []).filter((r) => !r.ok);
+
+    if (total === 0) {
+      setWorkspaceStatus(
+        'Server found no missing strings. Try Refresh, then filter status “missing”.',
+        'ok',
+      );
+    } else if (failed.length === 0) {
+      setWorkspaceStatus(
+        `AI batch complete: ${succeeded} of ${total} succeeded.`,
+        'ok',
+      );
+    } else {
+      const sample = failed
+        .slice(0, 3)
+        .map((r) => `${r.stringKey}: ${r.error ?? 'failed'}`)
+        .join(' · ');
+      const suffix = failed.length > 3 ? ` (+${failed.length - 3} more)` : '';
+      setWorkspaceStatus(
+        `AI batch: ${succeeded} of ${total} succeeded. Failed: ${sample}${suffix}`,
+        succeeded === 0 ? 'error' : 'ok',
+      );
+    }
+  } catch (err) {
+    setWorkspaceStatus(formatError(err), 'error');
+  } finally {
+    els.batchAiBtn.disabled = false;
+    els.batchAiBtn.classList.remove('busy');
+    els.batchAiBtn.textContent = prevLabel;
+  }
+  await loadEntries();
+}
+
 async function exportArb() {
-  const { data } = await call('exportTranslationArb')(orgPayload({
-    targetLocale: els.targetLocale.value,
-    includeEnglishFallback: true,
-  }));
-  const blob = new Blob([JSON.stringify(data.arb, null, 2)], {
-    type: 'application/json',
-  });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `app_${data.locale}.arb`;
-  a.click();
-  URL.revokeObjectURL(a.href);
-  setStatus(`Exported ${data.keyCount} keys → app_${data.locale}.arb`, 'ok');
+  setWorkspaceStatus('Exporting ARB…');
+  try {
+    const { data } = await call('exportTranslationArb')(orgPayload({
+      targetLocale: els.targetLocale.value,
+      includeEnglishFallback: true,
+    }));
+    const blob = new Blob([JSON.stringify(data.arb, null, 2)], {
+      type: 'application/json',
+    });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `app_${data.locale}.arb`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+    setWorkspaceStatus(`Exported ${data.keyCount} keys → app_${data.locale}.arb`, 'ok');
+  } catch (err) {
+    setWorkspaceStatus(formatError(err), 'error');
+    throw err;
+  }
 }
 
 els.signInBtn.addEventListener('click', async () => {
@@ -319,7 +400,9 @@ els.entriesBody.addEventListener('click', async (e) => {
 });
 
 function showError(err) {
-  setStatus(err.message ?? String(err), 'error');
+  const message = formatError(err);
+  setStatus(message, 'error');
+  setWorkspaceStatus(message, 'error');
 }
 
 onAuthStateChanged(auth, async (user) => {

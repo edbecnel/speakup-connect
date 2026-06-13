@@ -174,6 +174,35 @@ button:disabled { opacity: 0.55; cursor: not-allowed; }
 .status.error { color: var(--danger); }
 .status.ok { color: var(--ok); }
 
+.workspace-status {
+  margin: 0.75rem 0 0;
+  padding: 0.55rem 0.75rem;
+  border-radius: 8px;
+  background: #eef1f8;
+  border: 1px solid var(--border);
+}
+
+.workspace-status:empty {
+  display: none;
+}
+
+.workspace-status.ok {
+  background: #ecfdf3;
+  border-color: #abefc6;
+  color: var(--ok);
+}
+
+.workspace-status.error {
+  background: #fef3f2;
+  border-color: #fecdca;
+  color: var(--danger);
+}
+
+button.busy {
+  opacity: 0.7;
+  cursor: wait;
+}
+
 .hidden { display: none !important; }
 
 #table-wrap { overflow-x: auto; }

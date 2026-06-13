@@ -156,6 +156,7 @@
   "settingsLanguage": "Language",
   "settingsLanguageEnglish": "English",
   "settingsLanguageCebuano": "Bisaya / Cebuano",
+  "settingsLanguageRevertToEnglish": "That language could not be applied. Reverted to English.",
 
   "helpTitle": "Help",
   "helpHubHeadline": "Guides for using SpeakUp Connect",
@@ -220,6 +221,7 @@
 
   "translationSearchHint": "Search keys or English text",
   "translationBatchAi": "Translate missing (AI)",
+  "translationBatchAiNoneMissing": "No missing strings to translate.",
   "translationBatchAiResult": "AI draft: {succeeded} of {total} succeeded",
   "@translationBatchAiResult": {
     "placeholders": {

@@ -1,3 +1,5 @@
+import { HttpsError } from 'firebase-functions/v2/https';
+
 const LOCALE_NAMES: Record<string, string> = {
   ceb: 'Bisaya / Cebuano',
   fil: 'Tagalog (Filipino)',
@@ -28,9 +30,10 @@ export function getTranslationAiConfig(): {
 } {
   const apiKey = process.env.TRANSLATION_AI_API_KEY?.trim();
   if (!apiKey) {
-    throw new Error(
+    throw new HttpsError(
+      'failed-precondition',
       'TRANSLATION_AI_API_KEY is not set. Add it to functions/.env (see .env.example) ' +
-        'and redeploy, or set the variable in your Firebase/Google Cloud environment.',
+        'and redeploy draftTranslation and batchDraftTranslations.',
     );
   }
   return {

@@ -30,18 +30,36 @@ class AppLocale extends _$AppLocale {
   }
 
   Future<void> _loadSaved() async {
-    final prefs = await SharedPreferences.getInstance();
-    final saved = prefs.getString(_kPreferredLanguageKey);
-    if (saved != null && supportedAppLanguageCodes.contains(saved)) {
-      state = localeFromLanguageCode(saved);
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final saved = prefs.getString(_kPreferredLanguageKey);
+      if (saved != null && supportedAppLanguageCodes.contains(saved)) {
+        state = localeFromLanguageCode(saved);
+      }
+    } catch (_) {
+      await resetToEnglish();
     }
   }
 
   Future<void> setLanguageCode(String code) async {
     if (!supportedAppLanguageCodes.contains(code)) return;
-    state = localeFromLanguageCode(code);
+    final previous = state;
+    try {
+      state = localeFromLanguageCode(code);
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_kPreferredLanguageKey, code);
+    } catch (_) {
+      state = previous;
+      await resetToEnglish();
+      rethrow;
+    }
+  }
+
+  /// Clears a broken saved preference and restores US English.
+  Future<void> resetToEnglish() async {
+    state = const Locale('en', 'US');
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_kPreferredLanguageKey, code);
+    await prefs.setString(_kPreferredLanguageKey, 'en');
   }
 }
 

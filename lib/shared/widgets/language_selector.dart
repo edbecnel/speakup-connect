@@ -44,9 +44,19 @@ class LanguageSelectorDropdown extends ConsumerWidget {
               ),
             )
             .toList(),
-        onChanged: (code) {
-          if (code != null) {
-            ref.read(appLocaleProvider.notifier).setLanguageCode(code);
+        onChanged: (code) async {
+          if (code == null) return;
+          try {
+            await ref.read(appLocaleProvider.notifier).setLanguageCode(code);
+          } catch (_) {
+            await ref.read(appLocaleProvider.notifier).resetToEnglish();
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(l10n.settingsLanguageRevertToEnglish),
+                ),
+              );
+            }
           }
         },
       ),
@@ -88,11 +98,22 @@ void showLanguagePickerSheet(BuildContext context, WidgetRef ref) {
     builder: (_) => SafeArea(
       child: RadioGroup<String>(
         groupValue: current,
-        onChanged: (code) {
-          if (code != null) {
-            ref.read(appLocaleProvider.notifier).setLanguageCode(code);
+        onChanged: (code) async {
+          if (code == null) return;
+          final l10n = context.l10n;
+          try {
+            await ref.read(appLocaleProvider.notifier).setLanguageCode(code);
+          } catch (_) {
+            await ref.read(appLocaleProvider.notifier).resetToEnglish();
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(l10n.settingsLanguageRevertToEnglish),
+                ),
+              );
+            }
           }
-          Navigator.pop(context);
+          if (context.mounted) Navigator.pop(context);
         },
         child: Column(
           mainAxisSize: MainAxisSize.min,

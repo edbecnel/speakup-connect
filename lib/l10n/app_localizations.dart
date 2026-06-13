@@ -728,6 +728,12 @@ abstract class AppLocalizations {
   /// **'Bisaya / Cebuano'**
   String get settingsLanguageCebuano;
 
+  /// No description provided for @settingsLanguageRevertToEnglish.
+  ///
+  /// In en, this message translates to:
+  /// **'That language could not be applied. Reverted to English.'**
+  String get settingsLanguageRevertToEnglish;
+
   /// No description provided for @helpTitle.
   ///
   /// In en, this message translates to:
@@ -919,6 +925,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Translate missing (AI)'**
   String get translationBatchAi;
+
+  /// No description provided for @translationBatchAiNoneMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'No missing strings to translate.'**
+  String get translationBatchAiNoneMissing;
 
   /// No description provided for @translationBatchAiResult.
   ///

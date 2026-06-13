@@ -25,6 +25,7 @@ Workflow data lives in Firestore: `languages/{locale}/strings/{stringKey}`.
 | 3a | Download `scripts/service-account.json` | Firebase Console |
 | 3b | Run `node scripts/seed_roles.js` | PowerShell |
 | 3c | Assign translation moderator roles | Flutter app |
+| 3d | Grant platform `super_admin` (import English only) | PowerShell + `assign_super_admin.js` |
 | 4 | Create `firebase-config.js` | Local file |
 | 5 | Start web server (`npx serve`) | PowerShell |
 | 6–11 | Import, edit, export translations | Browser (+ app for role assign) |
@@ -35,7 +36,25 @@ Workflow data lives in Firestore: `languages/{locale}/strings/{stringKey}`.
 
 Run these in order the **first time** you enable translation editing for an environment. Steps 1–4 are **one-time** per Firebase project. Step 5 is needed **each time** you open the web tool.
 
-> **PowerShell vs browser:** Steps 1–5 use PowerShell only — you do **not** sign into the Flutter app. Steps 6+ use a **browser** at http://localhost:5050 with email/password (separate from the mobile app sign-in).
+> **PowerShell vs browser:** Steps 1–5 use PowerShell only. Steps 6+ use a **browser** at http://localhost:5050. You sign in with the **same Firebase Auth email and password as the mobile app**, but the browser session is separate (signing into the app does not auto-sign you into the web tool).
+
+### Sign-in credentials (read before Step 6)
+
+This project uses **three different logins**. Do not mix them up:
+
+| Used for | What you enter | Example |
+|----------|----------------|---------|
+| **Step 1** — `npx firebase-tools login` | Your **Google account** (deploy CLI) | Google account that owns the Firebase project |
+| **Step 3a–3d, 3b** — Admin scripts | **Service account JSON** file path | `scripts\service-account.json` (not a password) |
+| **Step 7** — Translation Helper web page | **Firebase Auth email + password** | Same as SpeakUp Connect **mobile app** login |
+
+**Your web password is your Firebase Authentication password** (Email/Password provider) — the one you use in the Flutter app. It is **not**:
+
+- Your Google password for `firebase-tools login` (unless you chose the same password everywhere)
+- Your OpenAI key (`sk-…` — that goes in `functions/.env` only)
+- Changed by `assign_super_admin.js` or `assign_admin.js` (those scripts only update roles/claims)
+
+Forgot password? Firebase Console → **Authentication** → **Users** → select user → **Reset password**.
 
 **Requirements:** [Node.js](https://nodejs.org/) (includes `npm` / `npx`). You can run from **any** folder in the repo; paths below are examples.
 
@@ -177,19 +196,129 @@ If you cannot create a service account key:
 
 Then assign roles in the app as in **Step 3c**.
 
+#### Step 3d — Grant platform super_admin (deployment lead, one-time)
+
+Required only for **Import `app_en.arb`** in the web Translation Helper. Org admins can edit, approve, and export without this.
+
+| Role | Import English? | How it is granted |
+|------|-----------------|-------------------|
+| Org admin | No | `assign_admin.js` or app enrollment |
+| Platform `super_admin` | Yes | `assign_super_admin.js` (below) |
+
+**Prerequisites:**
+
+- Account already registered in the **mobile app** (Firebase Auth user exists).
+- Firestore profile exists at `organizations/monhs-ph-001/users/{uid}` (joined MONHS).
+- `scripts/service-account.json` in place (**Step 3a**).
+
+**Run** (replace with your Firebase Auth email — same email as app login):
+
+```powershell
+cd D:\Dev\Speakup-Connect
+$env:GOOGLE_APPLICATION_CREDENTIALS = "scripts\service-account.json"
+node scripts/assign_super_admin.js your-firebase-auth-email@example.com
+```
+
+**What the script does:**
+
+- Sets Firestore profile `role` to `super_admin`
+- Sets JWT custom claim `role: super_admin` and full `permissions` list
+- Creates org-admin role assignment if missing
+
+**What the script does not do:** create the Auth user, set your password, or register you in the app.
+
+**Expected output:**
+
+```
+Looking up user: your-firebase-auth-email@example.com
+Found UID: xxxxxxxxxxxxxxxxxxxxxx
+
+✅  "your-firebase-auth-email@example.com" is now platform super_admin for monhs-ph-001.
+Sign out and sign back in on the Translation Helper web page and Flutter app.
+You should see Import app_en.arb in the web Translation Helper.
+```
+
+**After running:**
+
+1. Sign **out** on http://localhost:5050 (or close the tab).
+2. Sign **in** again with your **app email + Firebase Auth password** (see **Sign-in credentials** above).
+3. Confirm **Import `app_en.arb`** appears in the toolbar.
+
+If Import still does not appear, hard-refresh the page or try a private browser window after sign-in.
+
 ### Step 4 — Web app config (one-time per machine)
+
+This file lets the Translation Helper sign in with **Firebase Auth** in the browser. It is **not** where your OpenAI key goes — that stays in `functions/.env` (Step 2).
 
 ```powershell
 cd D:\Dev\Speakup-Connect\tools\translation-helper
 Copy-Item firebase-config.example.js firebase-config.js
 ```
 
-Edit `firebase-config.js`:
+#### Step 4a — Get Firebase web app values from the Console
 
-1. Replace `YOUR_API_KEY` and `YOUR_WEB_APP_ID` with values from **Firebase Console → Project settings → Your apps → Web app** (create a web app if none exists).
-2. Set `ORGANIZATION_ID` to your tenant id (e.g. `monhs-ph-001`). **Required** for org admin and translation moderator sign-in. Platform `super_admin` can omit or ignore it.
+1. Open **Project settings** (gear icon) → **General** tab:  
+   https://console.firebase.google.com/project/speakup-connect-891dd/settings/general
 
-Do **not** commit `firebase-config.js`.
+2. Scroll to **Your apps**.
+
+3. **If you already have a Web app** (`</>` icon):
+   - Click the web app name.
+   - Choose **Config** (not npm / CDN snippets).
+   - You will see a `firebaseConfig` object like:
+     ```javascript
+     const firebaseConfig = {
+       apiKey: "AIzaSy...",
+       authDomain: "speakup-connect-891dd.firebaseapp.com",
+       projectId: "speakup-connect-891dd",
+       storageBucket: "speakup-connect-891dd.firebasestorage.app",
+       messagingSenderId: "212080957929",
+       appId: "1:212080957929:web:xxxxxxxx"
+     };
+     ```
+
+4. **If there is no Web app yet:**
+   - Click **Add app** → choose **Web** (`</>`).
+   - Nickname: e.g. `Translation Helper` (any label is fine).
+   - **Do not** enable Firebase Hosting unless you want it — not required for local `npx serve`.
+   - Click **Register app** → copy the `firebaseConfig` values shown.
+
+#### Step 4b — Paste values into `firebase-config.js`
+
+Open `tools/translation-helper/firebase-config.js` and fill in **only** the placeholders. The example file already has correct values for this project except the two marked `YOUR_*`:
+
+| Field in `firebase-config.js` | Copy from Firebase `firebaseConfig` | Example shape |
+|-------------------------------|-------------------------------------|---------------|
+| `apiKey` | `apiKey` | Starts with `AIzaSy…` (Firebase **Web API Key**) |
+| `authDomain` | `authDomain` | Already `speakup-connect-891dd.firebaseapp.com` in the example |
+| `projectId` | `projectId` | Already `speakup-connect-891dd` |
+| `storageBucket` | `storageBucket` | Already set in the example |
+| `messagingSenderId` | `messagingSenderId` | Already `212080957929` in the example |
+| `appId` | `appId` | Starts with `1:212080957929:web:` |
+
+**Common mistake:** putting your **OpenAI** key (`sk-…`) in `apiKey`. That field must be the Firebase **Web API Key** (`AIzaSy…`). OpenAI belongs only in `functions/.env` → `TRANSLATION_AI_API_KEY`.
+
+Example after editing (use **your** values from the Console):
+
+```javascript
+window.FIREBASE_CONFIG = {
+  apiKey: 'AIzaSy........................',
+  authDomain: 'speakup-connect-891dd.firebaseapp.com',
+  projectId: 'speakup-connect-891dd',
+  storageBucket: 'speakup-connect-891dd.firebasestorage.app',
+  messagingSenderId: '212080957929',
+  appId: '1:212080957929:web:abcdef123456',
+};
+
+/** Required for org admins and translation moderators (not platform super_admin). */
+window.ORGANIZATION_ID = 'monhs-ph-001';
+```
+
+#### Step 4c — Organization id
+
+Keep `ORGANIZATION_ID` as your school tenant id (`monhs-ph-001` for MONHS). **Required** when signing in as org admin or translation moderator. Platform `super_admin` can leave it as-is.
+
+**Enable Email/Password sign-in:** Firebase Console → **Build** → **Authentication** → **Sign-in method** → ensure **Email/Password** is enabled (same as the mobile app).
 
 ### Step 5 — Start the local web server (each session)
 
@@ -212,17 +341,19 @@ Open **http://localhost:5050** in Chrome/Edge/Firefox (not the Flutter app). Ens
 
 ### Step 7 — Sign in on the web page
 
-Enter **email + password** for a Firebase Auth account with translation access:
+Enter your **Firebase Auth email and password** — the **same credentials as the SpeakUp Connect mobile app** (see **Sign-in credentials** at the top of this guide).
 
-| Who | Access |
-|-----|--------|
-| Platform operator | Auth user with custom claim `role: super_admin` |
-| Org admin | Firestore user profile with `role: admin` (or `owner`) for the org |
-| Translation moderator | Role assignment including `manageTranslations` |
+| Who | Access | Password |
+|-----|--------|----------|
+| Platform operator | JWT claim `role: super_admin` (**Step 3d**) | App Firebase Auth password |
+| Org admin | Firestore profile `role: admin` for the org | App Firebase Auth password |
+| Translation moderator | Role with `manageTranslations` | App Firebase Auth password |
 
-This sign-in is **only for the web Translation Helper**. It is not the same session as the mobile app, even if you use the same email.
+The web tool uses a **separate browser session** from the mobile app. Signing into the app on your phone does not sign you into http://localhost:5050 — you must sign in on the web page too (same email/password).
 
 If sign-in fails with *Access denied*, check Step 3 (roles seeded), confirm `ORGANIZATION_ID` in `firebase-config.js`, and sign out/in after role changes.
+
+If you ran **Step 3d** but **Import `app_en.arb`** is missing, sign out and sign in again so the JWT picks up `super_admin`.
 
 **Alternative:** skip the web tool and use **Settings → Administration → Translations** in the Flutter app (same permissions).
 
@@ -283,6 +414,9 @@ In the web tool (or in-app **Translations** screen):
 | `firebase` / command not found | Use `npx firebase-tools` instead of `firebase` (see Step 1) |
 | `ENOENT ... service-account.json` on seed | Complete **Step 3a** — download key and save as `scripts\service-account.json` |
 | Access denied on web sign-in | Complete Step 3, set `ORGANIZATION_ID` in `firebase-config.js`, sign out/in after role assignment |
+| No **Import `app_en.arb`** after Step 3d | Sign out/in on web tool; confirm `assign_super_admin.js` succeeded; use app Firebase Auth password |
+| **Translate missing (AI)** seems to do nothing | Hard-refresh http://localhost:5050. Status now appears **below the toolbar** (green/red banner). Ensure `USE_FUNCTIONS_EMULATOR = false` in `firebase-config.js` unless the emulator is running. Redeploy functions if you see `TRANSLATION_AI_API_KEY is not set`. |
+| `Missing firebase-config.js` or `YOUR_API_KEY` in browser | Complete Step 4 — use Firebase `apiKey` (`AIzaSy…`), not OpenAI (`sk-…`) |
 
 ---
 
@@ -291,6 +425,14 @@ In the web tool (or in-app **Translations** screen):
 - Put `TRANSLATION_AI_API_KEY` in `functions/.env` (gitignored) — not in the app or git.
 - Callables require platform `super_admin`, org admin, or `manageTranslations`; org-scoped calls require `organizationId` in `firebase-config.js`.
 - Do not commit `firebase-config.js`, `functions/.env`, or `scripts/service-account.json`.
+
+## Related scripts
+
+| Script | Purpose |
+|--------|---------|
+| `scripts/seed_roles.js` | Seed role definitions including `manageTranslations` |
+| `scripts/assign_admin.js` | Grant org admin for a Firebase Auth email |
+| `scripts/assign_super_admin.js` | Grant platform `super_admin` (Import English in web tool) |
 
 ## Related Cloud Functions
 

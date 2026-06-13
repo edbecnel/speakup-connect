@@ -372,6 +372,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsLanguageCebuano => 'Bisaya / Cebuano';
 
   @override
+  String get settingsLanguageRevertToEnglish =>
+      'That language could not be applied. Reverted to English.';
+
+  @override
   String get helpTitle => 'Help';
 
   @override
@@ -483,6 +487,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get translationBatchAi => 'Translate missing (AI)';
+
+  @override
+  String get translationBatchAiNoneMissing =>
+      'No missing strings to translate.';
 
   @override
   String translationBatchAiResult(int succeeded, int total) {

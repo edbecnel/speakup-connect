@@ -111,20 +111,44 @@ class _TranslationWorkspaceScreenState
                             label: l10n.translationBatchAi,
                             minimumWidth: 0,
                             onPressed: () async {
-                              final result = await ref
-                                  .read(translationWorkspaceProvider.notifier)
-                                  .batchDraft();
-                              if (!context.mounted) return;
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    l10n.translationBatchAiResult(
-                                      result['succeeded'] as int? ?? 0,
-                                      result['total'] as int? ?? 0,
+                              try {
+                                final result = await ref
+                                    .read(translationWorkspaceProvider.notifier)
+                                    .batchDraft();
+                                if (!context.mounted) return;
+                                final total = result['total'] as int? ?? 0;
+                                final succeeded =
+                                    result['succeeded'] as int? ?? 0;
+                                if (total == 0) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        l10n.translationBatchAiNoneMissing,
+                                      ),
+                                    ),
+                                  );
+                                  return;
+                                }
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      l10n.translationBatchAiResult(
+                                        succeeded,
+                                        total,
+                                      ),
                                     ),
                                   ),
-                                ),
-                              );
+                                );
+                              } catch (e) {
+                                if (!context.mounted) return;
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(e.toString()),
+                                    backgroundColor:
+                                        Theme.of(context).colorScheme.error,
+                                  ),
+                                );
+                              }
                             },
                           ),
                         if (state.canExportArb)

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:speakup_connect/config/app_config.dart';
+import 'package:speakup_connect/core/l10n/app_localization_delegates.dart';
 import 'package:speakup_connect/core/l10n/locale_provider.dart';
 import 'package:speakup_connect/core/router/app_router.dart';
 import 'package:speakup_connect/core/theme/app_theme.dart';
@@ -41,7 +42,7 @@ class SpeakUpConnectApp extends ConsumerWidget {
       darkTheme: AppTheme.dark(orgColors: orgColors),
       themeMode: themeMode,
       locale: locale,
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      localizationsDelegates: kAppLocalizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
     );
   }
