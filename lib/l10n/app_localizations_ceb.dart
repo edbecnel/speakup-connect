@@ -66,6 +66,9 @@ class AppLocalizationsCeb extends AppLocalizations {
   String get commonSearch => 'Pangita';
 
   @override
+  String get commonRefresh => 'I-refresh';
+
+  @override
   String get commonSelectAll => 'Pilia tanan';
 
   @override
@@ -2734,6 +2737,178 @@ class AppLocalizationsCeb extends AppLocalizations {
   @override
   String adminDashboardSubmitterDate(String name, String date) {
     return '$name · $date';
+  }
+
+  @override
+  String get reportCategoryFacility => 'Pasilidad ug Inprastruktura';
+
+  @override
+  String get reportCategorySafety => 'Kaluwasan ug Seguridad';
+
+  @override
+  String get reportCategoryAcademic => 'Sangputanan sa Akademiko';
+
+  @override
+  String get reportCategoryBullying => 'Pangharas ug Pagpangdaut';
+
+  @override
+  String get reportCategorySanitation => 'Kahimsog ug Kalimpyo';
+
+  @override
+  String get reportCategoryConduct => 'Pamatasan sa Kawani / Magtutudlo';
+
+  @override
+  String get reportCategoryAdministrative => 'Administratibo';
+
+  @override
+  String get reportCategoryOther => 'Uban pa';
+
+  @override
+  String get adminReportDetailTitle => 'Detalye sa Report';
+
+  @override
+  String get adminReportDetailLoading => 'Nag-load sa report...';
+
+  @override
+  String get adminReportDetailLoadFailed => 'Nakapakyas sa pag-load sa report';
+
+  @override
+  String adminReportDetailSubmittedDate(String date) {
+    return 'Gisumite $date';
+  }
+
+  @override
+  String get adminReportDetailAnonymousSubmission =>
+      'Dihang walay ngalan nga gisumite';
+
+  @override
+  String adminReportDetailBySubmitter(String name) {
+    return 'Ni: $name';
+  }
+
+  @override
+  String get adminReportDetailDescription => 'Deskripsyon';
+
+  @override
+  String adminReportDetailPhotos(int count) {
+    return 'Mga Litrato ($count)';
+  }
+
+  @override
+  String get adminReportDetailAdminActions => 'Mga Aksyon sa Admin';
+
+  @override
+  String get adminReportDetailUpdateStatus => 'I-update ang Kahimtang';
+
+  @override
+  String get adminReportDetailAddNote => 'Magdugang og Nota';
+
+  @override
+  String get adminReportDetailAssignToAdmin => 'I-assign sa Admin';
+
+  @override
+  String get adminReportDetailReassign => 'Ibalik ang tahas';
+
+  @override
+  String get adminReportDetailUnassigned => 'Walay nakatalaga';
+
+  @override
+  String adminReportDetailAssignedTo(String name) {
+    return 'Ginatag sa: $name';
+  }
+
+  @override
+  String adminReportDetailAdminNotes(int count) {
+    return 'Mga Nota sa Admin ($count)';
+  }
+
+  @override
+  String get adminReportDetailStatusHistory => 'Kasaysayan sa Estado';
+
+  @override
+  String get adminReportDetailAddAdminNote => 'Magdugang og Admin nga Nota';
+
+  @override
+  String adminReportDetailCurrentStatus(String status) {
+    return 'Karon: $status';
+  }
+
+  @override
+  String get adminReportDetailNewStatus => 'Bag-ong Kahimtang';
+
+  @override
+  String get adminReportDetailStatusChangeNoteHint =>
+      'Magdugang og nota bahin sa kini nga pagbag-o sa estado…';
+
+  @override
+  String get adminReportDetailAssignTitle => 'I-assign sa Admin';
+
+  @override
+  String get adminReportDetailSearchAdmins => 'Pangita ang mga admin…';
+
+  @override
+  String get adminReportDetailNoAdmins => 'Walay nakitang mga admin.';
+
+  @override
+  String adminReportDetailLoadAdminsFailed(String error) {
+    return 'Nakapakyas sa pag-load sa mga admin: $error';
+  }
+
+  @override
+  String adminReportDetailAssignFailed(String error) {
+    return 'Napalpak ang pag-assign sa report: $error';
+  }
+
+  @override
+  String adminReportDetailUpdateStatusFailed(String error) {
+    return 'Nakapakyas sa pag-update sa estado: $error';
+  }
+
+  @override
+  String adminReportDetailAddNoteFailed(String error) {
+    return 'Napakyas sa pagdugang og nota: $error';
+  }
+
+  @override
+  String get adminReportDetailNoteLabel => 'Nota';
+
+  @override
+  String get adminReportDetailEnterNote => 'Isulod ang imong nota…';
+
+  @override
+  String get reportDetailsTitle => 'Detalye sa Report';
+
+  @override
+  String get reportDetailsLoading => 'Nag-load sa report...';
+
+  @override
+  String get reportDetailsLoadFailed => 'Nakapakyas sa pag-load sa report';
+
+  @override
+  String get myReportsTitle => 'Ang Akong mga Report';
+
+  @override
+  String get myReportsNoReportsYet => 'Wala pa\'y mga report';
+
+  @override
+  String get myReportsTabAll => 'Tanan';
+
+  @override
+  String get myReportsTabInProgress => 'Sa Progreso';
+
+  @override
+  String get myReportsTabResolved => 'Nasulbad';
+
+  @override
+  String get myReportsNewReport => 'Bag-ong Ulat';
+
+  @override
+  String get myReportsEmptyAll =>
+      'Wala ka pa nakasumite og bisan unsang report.';
+
+  @override
+  String myReportsEmptyFiltered(String status) {
+    return 'Walay mga report nga adunay status nga \"$status\".';
   }
 
   @override

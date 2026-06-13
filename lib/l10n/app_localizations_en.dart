@@ -66,6 +66,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get commonSearch => 'Search';
 
   @override
+  String get commonRefresh => 'Refresh';
+
+  @override
   String get commonSelectAll => 'Select all';
 
   @override
@@ -2668,6 +2671,176 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String adminDashboardSubmitterDate(String name, String date) {
     return '$name · $date';
+  }
+
+  @override
+  String get reportCategoryFacility => 'Facility & Infrastructure';
+
+  @override
+  String get reportCategorySafety => 'Safety & Security';
+
+  @override
+  String get reportCategoryAcademic => 'Academic Concern';
+
+  @override
+  String get reportCategoryBullying => 'Bullying & Harassment';
+
+  @override
+  String get reportCategorySanitation => 'Sanitation & Cleanliness';
+
+  @override
+  String get reportCategoryConduct => 'Staff / Teacher Conduct';
+
+  @override
+  String get reportCategoryAdministrative => 'Administrative';
+
+  @override
+  String get reportCategoryOther => 'Other';
+
+  @override
+  String get adminReportDetailTitle => 'Report Detail';
+
+  @override
+  String get adminReportDetailLoading => 'Loading report...';
+
+  @override
+  String get adminReportDetailLoadFailed => 'Failed to load report';
+
+  @override
+  String adminReportDetailSubmittedDate(String date) {
+    return 'Submitted $date';
+  }
+
+  @override
+  String get adminReportDetailAnonymousSubmission => 'Anonymous submission';
+
+  @override
+  String adminReportDetailBySubmitter(String name) {
+    return 'By: $name';
+  }
+
+  @override
+  String get adminReportDetailDescription => 'Description';
+
+  @override
+  String adminReportDetailPhotos(int count) {
+    return 'Photos ($count)';
+  }
+
+  @override
+  String get adminReportDetailAdminActions => 'Admin Actions';
+
+  @override
+  String get adminReportDetailUpdateStatus => 'Update Status';
+
+  @override
+  String get adminReportDetailAddNote => 'Add Note';
+
+  @override
+  String get adminReportDetailAssignToAdmin => 'Assign to Admin';
+
+  @override
+  String get adminReportDetailReassign => 'Reassign';
+
+  @override
+  String get adminReportDetailUnassigned => 'Unassigned';
+
+  @override
+  String adminReportDetailAssignedTo(String name) {
+    return 'Assigned to: $name';
+  }
+
+  @override
+  String adminReportDetailAdminNotes(int count) {
+    return 'Admin Notes ($count)';
+  }
+
+  @override
+  String get adminReportDetailStatusHistory => 'Status History';
+
+  @override
+  String get adminReportDetailAddAdminNote => 'Add Admin Note';
+
+  @override
+  String adminReportDetailCurrentStatus(String status) {
+    return 'Current: $status';
+  }
+
+  @override
+  String get adminReportDetailNewStatus => 'New Status';
+
+  @override
+  String get adminReportDetailStatusChangeNoteHint =>
+      'Add a note about this status change…';
+
+  @override
+  String get adminReportDetailAssignTitle => 'Assign to Admin';
+
+  @override
+  String get adminReportDetailSearchAdmins => 'Search admins…';
+
+  @override
+  String get adminReportDetailNoAdmins => 'No admins found.';
+
+  @override
+  String adminReportDetailLoadAdminsFailed(String error) {
+    return 'Failed to load admins: $error';
+  }
+
+  @override
+  String adminReportDetailAssignFailed(String error) {
+    return 'Failed to assign report: $error';
+  }
+
+  @override
+  String adminReportDetailUpdateStatusFailed(String error) {
+    return 'Failed to update status: $error';
+  }
+
+  @override
+  String adminReportDetailAddNoteFailed(String error) {
+    return 'Failed to add note: $error';
+  }
+
+  @override
+  String get adminReportDetailNoteLabel => 'Note';
+
+  @override
+  String get adminReportDetailEnterNote => 'Enter your note…';
+
+  @override
+  String get reportDetailsTitle => 'Report Details';
+
+  @override
+  String get reportDetailsLoading => 'Loading report...';
+
+  @override
+  String get reportDetailsLoadFailed => 'Failed to load report';
+
+  @override
+  String get myReportsTitle => 'My Reports';
+
+  @override
+  String get myReportsNoReportsYet => 'No reports yet';
+
+  @override
+  String get myReportsTabAll => 'All';
+
+  @override
+  String get myReportsTabInProgress => 'In Progress';
+
+  @override
+  String get myReportsTabResolved => 'Resolved';
+
+  @override
+  String get myReportsNewReport => 'New Report';
+
+  @override
+  String get myReportsEmptyAll => 'You haven\'t submitted any reports yet.';
+
+  @override
+  String myReportsEmptyFiltered(String status) {
+    return 'No reports with status \"$status\".';
   }
 
   @override

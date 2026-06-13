@@ -212,6 +212,12 @@ abstract class AppLocalizations {
   /// **'Search'**
   String get commonSearch;
 
+  /// No description provided for @commonRefresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get commonRefresh;
+
   /// No description provided for @commonSelectAll.
   ///
   /// In en, this message translates to:
@@ -4595,6 +4601,300 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{name} · {date}'**
   String adminDashboardSubmitterDate(String name, String date);
+
+  /// No description provided for @reportCategoryFacility.
+  ///
+  /// In en, this message translates to:
+  /// **'Facility & Infrastructure'**
+  String get reportCategoryFacility;
+
+  /// No description provided for @reportCategorySafety.
+  ///
+  /// In en, this message translates to:
+  /// **'Safety & Security'**
+  String get reportCategorySafety;
+
+  /// No description provided for @reportCategoryAcademic.
+  ///
+  /// In en, this message translates to:
+  /// **'Academic Concern'**
+  String get reportCategoryAcademic;
+
+  /// No description provided for @reportCategoryBullying.
+  ///
+  /// In en, this message translates to:
+  /// **'Bullying & Harassment'**
+  String get reportCategoryBullying;
+
+  /// No description provided for @reportCategorySanitation.
+  ///
+  /// In en, this message translates to:
+  /// **'Sanitation & Cleanliness'**
+  String get reportCategorySanitation;
+
+  /// No description provided for @reportCategoryConduct.
+  ///
+  /// In en, this message translates to:
+  /// **'Staff / Teacher Conduct'**
+  String get reportCategoryConduct;
+
+  /// No description provided for @reportCategoryAdministrative.
+  ///
+  /// In en, this message translates to:
+  /// **'Administrative'**
+  String get reportCategoryAdministrative;
+
+  /// No description provided for @reportCategoryOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get reportCategoryOther;
+
+  /// No description provided for @adminReportDetailTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Report Detail'**
+  String get adminReportDetailTitle;
+
+  /// No description provided for @adminReportDetailLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading report...'**
+  String get adminReportDetailLoading;
+
+  /// No description provided for @adminReportDetailLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load report'**
+  String get adminReportDetailLoadFailed;
+
+  /// No description provided for @adminReportDetailSubmittedDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Submitted {date}'**
+  String adminReportDetailSubmittedDate(String date);
+
+  /// No description provided for @adminReportDetailAnonymousSubmission.
+  ///
+  /// In en, this message translates to:
+  /// **'Anonymous submission'**
+  String get adminReportDetailAnonymousSubmission;
+
+  /// No description provided for @adminReportDetailBySubmitter.
+  ///
+  /// In en, this message translates to:
+  /// **'By: {name}'**
+  String adminReportDetailBySubmitter(String name);
+
+  /// No description provided for @adminReportDetailDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get adminReportDetailDescription;
+
+  /// No description provided for @adminReportDetailPhotos.
+  ///
+  /// In en, this message translates to:
+  /// **'Photos ({count})'**
+  String adminReportDetailPhotos(int count);
+
+  /// No description provided for @adminReportDetailAdminActions.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin Actions'**
+  String get adminReportDetailAdminActions;
+
+  /// No description provided for @adminReportDetailUpdateStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Update Status'**
+  String get adminReportDetailUpdateStatus;
+
+  /// No description provided for @adminReportDetailAddNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Note'**
+  String get adminReportDetailAddNote;
+
+  /// No description provided for @adminReportDetailAssignToAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign to Admin'**
+  String get adminReportDetailAssignToAdmin;
+
+  /// No description provided for @adminReportDetailReassign.
+  ///
+  /// In en, this message translates to:
+  /// **'Reassign'**
+  String get adminReportDetailReassign;
+
+  /// No description provided for @adminReportDetailUnassigned.
+  ///
+  /// In en, this message translates to:
+  /// **'Unassigned'**
+  String get adminReportDetailUnassigned;
+
+  /// No description provided for @adminReportDetailAssignedTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Assigned to: {name}'**
+  String adminReportDetailAssignedTo(String name);
+
+  /// No description provided for @adminReportDetailAdminNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin Notes ({count})'**
+  String adminReportDetailAdminNotes(int count);
+
+  /// No description provided for @adminReportDetailStatusHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Status History'**
+  String get adminReportDetailStatusHistory;
+
+  /// No description provided for @adminReportDetailAddAdminNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Admin Note'**
+  String get adminReportDetailAddAdminNote;
+
+  /// No description provided for @adminReportDetailCurrentStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Current: {status}'**
+  String adminReportDetailCurrentStatus(String status);
+
+  /// No description provided for @adminReportDetailNewStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'New Status'**
+  String get adminReportDetailNewStatus;
+
+  /// No description provided for @adminReportDetailStatusChangeNoteHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a note about this status change…'**
+  String get adminReportDetailStatusChangeNoteHint;
+
+  /// No description provided for @adminReportDetailAssignTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign to Admin'**
+  String get adminReportDetailAssignTitle;
+
+  /// No description provided for @adminReportDetailSearchAdmins.
+  ///
+  /// In en, this message translates to:
+  /// **'Search admins…'**
+  String get adminReportDetailSearchAdmins;
+
+  /// No description provided for @adminReportDetailNoAdmins.
+  ///
+  /// In en, this message translates to:
+  /// **'No admins found.'**
+  String get adminReportDetailNoAdmins;
+
+  /// No description provided for @adminReportDetailLoadAdminsFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load admins: {error}'**
+  String adminReportDetailLoadAdminsFailed(String error);
+
+  /// No description provided for @adminReportDetailAssignFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to assign report: {error}'**
+  String adminReportDetailAssignFailed(String error);
+
+  /// No description provided for @adminReportDetailUpdateStatusFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update status: {error}'**
+  String adminReportDetailUpdateStatusFailed(String error);
+
+  /// No description provided for @adminReportDetailAddNoteFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to add note: {error}'**
+  String adminReportDetailAddNoteFailed(String error);
+
+  /// No description provided for @adminReportDetailNoteLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Note'**
+  String get adminReportDetailNoteLabel;
+
+  /// No description provided for @adminReportDetailEnterNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your note…'**
+  String get adminReportDetailEnterNote;
+
+  /// No description provided for @reportDetailsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Report Details'**
+  String get reportDetailsTitle;
+
+  /// No description provided for @reportDetailsLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading report...'**
+  String get reportDetailsLoading;
+
+  /// No description provided for @reportDetailsLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load report'**
+  String get reportDetailsLoadFailed;
+
+  /// No description provided for @myReportsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'My Reports'**
+  String get myReportsTitle;
+
+  /// No description provided for @myReportsNoReportsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No reports yet'**
+  String get myReportsNoReportsYet;
+
+  /// No description provided for @myReportsTabAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get myReportsTabAll;
+
+  /// No description provided for @myReportsTabInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'In Progress'**
+  String get myReportsTabInProgress;
+
+  /// No description provided for @myReportsTabResolved.
+  ///
+  /// In en, this message translates to:
+  /// **'Resolved'**
+  String get myReportsTabResolved;
+
+  /// No description provided for @myReportsNewReport.
+  ///
+  /// In en, this message translates to:
+  /// **'New Report'**
+  String get myReportsNewReport;
+
+  /// No description provided for @myReportsEmptyAll.
+  ///
+  /// In en, this message translates to:
+  /// **'You haven\'t submitted any reports yet.'**
+  String get myReportsEmptyAll;
+
+  /// No description provided for @myReportsEmptyFiltered.
+  ///
+  /// In en, this message translates to:
+  /// **'No reports with status \"{status}\".'**
+  String myReportsEmptyFiltered(String status);
 
   /// No description provided for @rolesEdit.
   ///

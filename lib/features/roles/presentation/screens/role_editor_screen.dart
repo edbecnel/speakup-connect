@@ -12,6 +12,7 @@ import 'package:speakup_connect/shared/widgets/app_button.dart';
 import 'package:speakup_connect/shared/widgets/app_error_widget.dart';
 import 'package:speakup_connect/shared/widgets/app_loading_indicator.dart';
 import 'package:speakup_connect/shared/widgets/app_text_field.dart';
+import 'package:speakup_connect/shared/widgets/secondary_app_bar.dart';
 
 /// Admin screen for creating or editing a role definition.
 ///
@@ -136,20 +137,19 @@ class _RoleEditorScreenState extends ConsumerState<RoleEditorScreen> {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          widget.isNewRole
-              ? l10n.roleEditorCreateTitle
-              : l10n.roleEditorEditTitle,
-        ),
+      appBar: SecondaryAppBar(
+        title: widget.isNewRole
+            ? l10n.roleEditorCreateTitle
+            : l10n.roleEditorEditTitle,
         actions: [
           if (!widget.isNewRole)
-            TextButton.icon(
+            AppButton.text(
+              label: l10n.roleEditorAssignUsers,
+              icon: Icons.person_add_outlined,
+              minimumWidth: 0,
               onPressed: () => context.push(
                 Routes.adminRoleAssignPath(widget.roleId!),
               ),
-              icon: const Icon(Icons.person_add_outlined),
-              label: Text(l10n.roleEditorAssignUsers),
             ),
         ],
       ),

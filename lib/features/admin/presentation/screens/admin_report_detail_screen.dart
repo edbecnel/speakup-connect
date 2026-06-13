@@ -2,15 +2,19 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:speakup_connect/config/app_config.dart';
 import 'package:speakup_connect/core/constants/app_constants.dart';
+import 'package:speakup_connect/core/l10n/app_localizations_extension.dart';
 import 'package:speakup_connect/core/permissions/app_permission.dart';
 import 'package:speakup_connect/core/permissions/providers/permission_provider.dart';
+import 'package:speakup_connect/features/admin/presentation/l10n/admin_ui_l10n.dart';
 import 'package:speakup_connect/features/auth/presentation/providers/auth_provider.dart';
 import 'package:speakup_connect/features/organization/data/models/user_profile_model.dart';
 import 'package:speakup_connect/features/organization/domain/entities/user_profile_entity.dart';
 import 'package:speakup_connect/features/organization/presentation/providers/user_profile_provider.dart';
 import 'package:speakup_connect/features/reports/domain/entities/report_entity.dart';
+import 'package:speakup_connect/features/reports/presentation/l10n/report_ui_l10n.dart';
 import 'package:speakup_connect/features/reports/presentation/providers/report_provider.dart';
 import 'package:speakup_connect/shared/widgets/app_error_widget.dart';
 import 'package:speakup_connect/shared/widgets/app_loading_indicator.dart';
@@ -27,24 +31,26 @@ class AdminReportDetailScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final reportAsync = ref.watch(adminReportByIdProvider(reportId));
 
     return Scaffold(
       appBar: AppBar(
         leading: BackButton(onPressed: () => context.pop()),
-        title: const Text('Report Detail'),
+        title: Text(l10n.adminReportDetailTitle),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh_outlined),
-            tooltip: 'Refresh',
+            tooltip: l10n.commonRefresh,
             onPressed: () => ref.invalidate(adminReportByIdProvider(reportId)),
           ),
         ],
       ),
       body: reportAsync.when(
-        loading: () => const AppLoadingIndicator(message: 'Loading report...'),
+        loading: () =>
+            AppLoadingIndicator(message: l10n.adminReportDetailLoading),
         error: (e, _) => AppErrorWidget(
-          message: 'Failed to load report',
+          message: l10n.adminReportDetailLoadFailed,
           onRetry: () => ref.invalidate(adminReportByIdProvider(reportId)),
         ),
         data: (report) => _AdminDetailView(report: report, reportId: reportId),
@@ -65,16 +71,23 @@ class _AdminDetailView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     final canManageReports =
         ref.watch(hasPermissionProvider(AppPermission.manageReports));
     final categoryLabel = ref.watch(reportCategoriesProvider).maybeWhen(
-      data: (cats) => cats
-          .where((c) => c.categoryId == report.categoryId)
-          .map((c) => c.label)
-          .firstOrNull,
+      data: (cats) {
+        final cat = cats.where((c) => c.categoryId == report.categoryId).firstOrNull;
+        if (cat == null) return null;
+        return localizedReportCategoryLabel(
+          l10n,
+          cat.categoryId,
+          fallbackLabel: cat.label,
+        );
+      },
       orElse: () => null,
     );
+    final dateLabel = DateFormat.yMMMd().format(report.createdAt);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -130,7 +143,7 @@ class _AdminDetailView extends ConsumerWidget {
                   ],
                   const SizedBox(height: 8),
                   Text(
-                    'Submitted ${_formatDate(report.createdAt)}',
+                    l10n.adminReportDetailSubmittedDate(dateLabel),
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
@@ -146,7 +159,7 @@ class _AdminDetailView extends ConsumerWidget {
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          'Anonymous submission',
+                          l10n.adminReportDetailAnonymousSubmission,
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: theme.colorScheme.onSurfaceVariant,
                           ),
@@ -155,7 +168,11 @@ class _AdminDetailView extends ConsumerWidget {
                     )
                   else
                     Text(
-                      'By: ${report.submitterDisplayName ?? report.submittedBy ?? 'Unknown'}',
+                      l10n.adminReportDetailBySubmitter(
+                        report.submitterDisplayName ??
+                            report.submittedBy ??
+                            l10n.commonUnknown,
+                      ),
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
@@ -170,14 +187,14 @@ class _AdminDetailView extends ConsumerWidget {
           const SizedBox(height: 16),
 
           // ── Description ──────────────────────────────────────────────────
-          _SectionHeader(title: 'Description'),
+          _SectionHeader(title: l10n.adminReportDetailDescription),
           const SizedBox(height: 8),
           Text(report.description, style: theme.textTheme.bodyMedium),
 
           // ── Photos ───────────────────────────────────────────────────────
           if (report.hasPhotos) ...[
             const SizedBox(height: 24),
-            _SectionHeader(title: 'Photos (${report.photoUrls.length})'),
+            _SectionHeader(title: l10n.adminReportDetailPhotos(report.photoUrls.length)),
             const SizedBox(height: 8),
             SizedBox(
               height: 120,
@@ -214,14 +231,14 @@ class _AdminDetailView extends ConsumerWidget {
           // ── Admin actions ─────────────────────────────────────────────────
           if (canManageReports) ...[
             const SizedBox(height: 24),
-            _SectionHeader(title: 'Admin Actions'),
+            _SectionHeader(title: l10n.adminReportDetailAdminActions),
             const SizedBox(height: 12),
             Row(
               children: [
                 Expanded(
                   child: OutlinedButton.icon(
                     icon: const Icon(Icons.swap_horiz_outlined),
-                    label: const Text('Update Status'),
+                    label: Text(l10n.adminReportDetailUpdateStatus),
                     onPressed: () => _showStatusUpdateDialog(context, ref, report),
                   ),
                 ),
@@ -229,7 +246,7 @@ class _AdminDetailView extends ConsumerWidget {
                 Expanded(
                   child: OutlinedButton.icon(
                     icon: const Icon(Icons.note_add_outlined),
-                    label: const Text('Add Note'),
+                    label: Text(l10n.adminReportDetailAddNote),
                     onPressed: () => _showAddNoteDialog(context, ref, report),
                   ),
                 ),
@@ -240,7 +257,11 @@ class _AdminDetailView extends ConsumerWidget {
               width: double.infinity,
               child: OutlinedButton.icon(
                 icon: const Icon(Icons.assignment_ind_outlined),
-                label: Text(report.assignedTo == null ? 'Assign to Admin' : 'Reassign'),
+                label: Text(
+                  report.assignedTo == null
+                      ? l10n.adminReportDetailAssignToAdmin
+                      : l10n.adminReportDetailReassign,
+                ),
                 onPressed: () => _showAssignDialog(context, ref, report),
               ),
             ),
@@ -249,7 +270,7 @@ class _AdminDetailView extends ConsumerWidget {
           // ── Admin notes ───────────────────────────────────────────────────
           if (report.adminNotes.isNotEmpty) ...[
             const SizedBox(height: 24),
-            _SectionHeader(title: 'Admin Notes (${report.adminNotes.length})'),
+            _SectionHeader(title: l10n.adminReportDetailAdminNotes(report.adminNotes.length)),
             const SizedBox(height: 8),
             ...report.adminNotes.reversed.map(
               (note) => _AdminNoteCard(note: note),
@@ -259,7 +280,7 @@ class _AdminDetailView extends ConsumerWidget {
           // ── Status history ────────────────────────────────────────────────
           if (report.statusHistory.isNotEmpty) ...[
             const SizedBox(height: 24),
-            _SectionHeader(title: 'Status History'),
+            _SectionHeader(title: l10n.adminReportDetailStatusHistory),
             const SizedBox(height: 8),
             ...report.statusHistory.reversed.map(
               (entry) => _TimelineEntry(entry: entry),
@@ -315,14 +336,6 @@ class _AdminDetailView extends ConsumerWidget {
       ref.invalidate(adminReportByIdProvider(reportId));
     }
   }
-
-  String _formatDate(DateTime dt) {
-    const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-    ];
-    return '${months[dt.month - 1]} ${dt.day}, ${dt.year}';
-  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -336,11 +349,12 @@ class _AssigneeRow extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
 
     if (assignedToUid == null) {
       return Text(
-        'Unassigned',
+        l10n.adminReportDetailUnassigned,
         style: theme.textTheme.bodySmall?.copyWith(
           color: theme.colorScheme.onSurfaceVariant,
           fontStyle: FontStyle.italic,
@@ -362,7 +376,7 @@ class _AssigneeRow extends ConsumerWidget {
         Icon(Icons.person_outlined, size: 14, color: theme.colorScheme.primary),
         const SizedBox(width: 4),
         Text(
-          'Assigned to: ${name ?? assignedToUid!}',
+          l10n.adminReportDetailAssignedTo(name ?? assignedToUid!),
           style: theme.textTheme.bodySmall?.copyWith(
             color: theme.colorScheme.primary,
             fontWeight: FontWeight.w500,
@@ -404,7 +418,9 @@ class _AssignDialogState extends ConsumerState<_AssignDialog> {
       if (mounted) {
         setState(() => _isSaving = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to assign report: $e')),
+          SnackBar(
+            content: Text(context.l10n.adminReportDetailAssignFailed('$e')),
+          ),
         );
       }
     }
@@ -412,11 +428,12 @@ class _AssignDialogState extends ConsumerState<_AssignDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     final adminsAsync = ref.watch(_adminUsersProvider);
 
     return AlertDialog(
-      title: const Text('Assign to Admin'),
+      title: Text(l10n.adminReportDetailAssignTitle),
       contentPadding: const EdgeInsets.fromLTRB(24, 12, 24, 0),
       content: SizedBox(
         width: 320,
@@ -424,11 +441,11 @@ class _AssignDialogState extends ConsumerState<_AssignDialog> {
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
-              decoration: const InputDecoration(
-                hintText: 'Search admins...',
-                prefixIcon: Icon(Icons.search, size: 18),
+              decoration: InputDecoration(
+                hintText: l10n.adminReportDetailSearchAdmins,
+                prefixIcon: const Icon(Icons.search, size: 18),
                 contentPadding:
-                    EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 isDense: true,
               ),
               onChanged: (v) => setState(() => _filter = v.trim().toLowerCase()),
@@ -439,8 +456,10 @@ class _AssignDialogState extends ConsumerState<_AssignDialog> {
                 padding: EdgeInsets.symmetric(vertical: 24),
                 child: AppLoadingIndicator(),
               ),
-              error: (e, _) => Text('Failed to load admins: $e',
-                  style: TextStyle(color: theme.colorScheme.error)),
+              error: (e, _) => Text(
+                l10n.adminReportDetailLoadAdminsFailed('$e'),
+                style: TextStyle(color: theme.colorScheme.error),
+              ),
               data: (admins) {
                 final filtered = _filter.isEmpty
                     ? admins
@@ -452,10 +471,12 @@ class _AssignDialogState extends ConsumerState<_AssignDialog> {
                         .toList();
 
                 if (filtered.isEmpty) {
-                  return const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 24),
-                    child: Text('No admins found.',
-                        style: TextStyle(color: Colors.grey)),
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 24),
+                    child: Text(
+                      l10n.adminReportDetailNoAdmins,
+                      style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
+                    ),
                   );
                 }
 
@@ -509,7 +530,7 @@ class _AssignDialogState extends ConsumerState<_AssignDialog> {
       actions: [
         TextButton(
           onPressed: _isSaving ? null : () => Navigator.of(context).pop(false),
-          child: const Text('Cancel'),
+          child: Text(l10n.commonCancel),
         ),
       ],
     );
@@ -594,7 +615,9 @@ class _StatusUpdateDialogState extends ConsumerState<_StatusUpdateDialog> {
       if (mounted) {
         setState(() => _isSaving = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to update status: $e')),
+          SnackBar(
+            content: Text(context.l10n.adminReportDetailUpdateStatusFailed('$e')),
+          ),
         );
       }
     }
@@ -602,17 +625,20 @@ class _StatusUpdateDialogState extends ConsumerState<_StatusUpdateDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
 
     return _keyboardSafeAdminDialog(
       context: context,
-      title: const Text('Update Status'),
+      title: Text(l10n.adminReportDetailUpdateStatus),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            'Current: ${widget.report.status.label}',
+            l10n.adminReportDetailCurrentStatus(
+              localizedReportStatus(l10n, widget.report.status),
+            ),
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
@@ -620,14 +646,19 @@ class _StatusUpdateDialogState extends ConsumerState<_StatusUpdateDialog> {
           const SizedBox(height: 16),
           DropdownButtonFormField<ReportStatus>(
             value: _selectedStatus,
-            decoration: const InputDecoration(
-              labelText: 'New Status',
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              labelText: l10n.adminReportDetailNewStatus,
+              border: const OutlineInputBorder(),
               contentPadding:
-                  EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                  const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
             ),
             items: ReportStatus.values
-                .map((s) => DropdownMenuItem(value: s, child: Text(s.label)))
+                .map(
+                  (s) => DropdownMenuItem(
+                    value: s,
+                    child: Text(localizedReportStatus(l10n, s)),
+                  ),
+                )
                 .toList(),
             onChanged: _isSaving
                 ? null
@@ -642,12 +673,12 @@ class _StatusUpdateDialogState extends ConsumerState<_StatusUpdateDialog> {
             maxLines: 3,
             keyboardType: TextInputType.multiline,
             textInputAction: TextInputAction.newline,
-            decoration: const InputDecoration(
-              labelText: 'Note (optional)',
-              border: OutlineInputBorder(),
-              hintText: 'Add a note about this status change…',
+            decoration: InputDecoration(
+              labelText: l10n.commonNoteOptional,
+              border: const OutlineInputBorder(),
+              hintText: l10n.adminReportDetailStatusChangeNoteHint,
               contentPadding:
-                  EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                  const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
             ),
           ),
         ],
@@ -659,7 +690,7 @@ class _StatusUpdateDialogState extends ConsumerState<_StatusUpdateDialog> {
             TextButton(
               onPressed:
                   _isSaving ? null : () => Navigator.of(context).pop(false),
-              child: const Text('Cancel'),
+              child: Text(l10n.commonCancel),
             ),
             FilledButton(
               onPressed: _isSaving ? null : _save,
@@ -669,7 +700,7 @@ class _StatusUpdateDialogState extends ConsumerState<_StatusUpdateDialog> {
                       height: 20,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : const Text('Save'),
+                  : Text(l10n.commonSave),
             ),
           ],
         ),
@@ -722,7 +753,9 @@ class _AddNoteDialogState extends ConsumerState<_AddNoteDialog> {
       if (mounted) {
         setState(() => _isSaving = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to add note: $e')),
+          SnackBar(
+            content: Text(context.l10n.adminReportDetailAddNoteFailed('$e')),
+          ),
         );
       }
     }
@@ -730,9 +763,10 @@ class _AddNoteDialogState extends ConsumerState<_AddNoteDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return _keyboardSafeAdminDialog(
       context: context,
-      title: const Text('Add Admin Note'),
+      title: Text(l10n.adminReportDetailAddAdminNote),
       content: TextField(
         controller: _noteController,
         enabled: !_isSaving,
@@ -740,11 +774,11 @@ class _AddNoteDialogState extends ConsumerState<_AddNoteDialog> {
         autofocus: true,
         keyboardType: TextInputType.multiline,
         textInputAction: TextInputAction.newline,
-        decoration: const InputDecoration(
-          labelText: 'Note',
-          border: OutlineInputBorder(),
-          hintText: 'Enter your note…',
-          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+        decoration: InputDecoration(
+          labelText: l10n.adminReportDetailNoteLabel,
+          border: const OutlineInputBorder(),
+          hintText: l10n.adminReportDetailEnterNote,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
         ),
       ),
       actions: [
@@ -754,7 +788,7 @@ class _AddNoteDialogState extends ConsumerState<_AddNoteDialog> {
             TextButton(
               onPressed:
                   _isSaving ? null : () => Navigator.of(context).pop(false),
-              child: const Text('Cancel'),
+              child: Text(l10n.commonCancel),
             ),
             FilledButton(
               onPressed: _isSaving ? null : _save,
@@ -764,7 +798,7 @@ class _AddNoteDialogState extends ConsumerState<_AddNoteDialog> {
                       height: 20,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : const Text('Save'),
+                  : Text(l10n.commonSave),
             ),
           ],
         ),
@@ -824,7 +858,7 @@ class _StatusBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
-        status.label,
+        localizedReportStatus(context.l10n, status),
         style: theme.textTheme.labelSmall?.copyWith(
           color: color,
           fontWeight: FontWeight.w600,
@@ -859,7 +893,7 @@ class _PriorityBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
-        priority.label,
+        localizedReportPriority(context.l10n, priority),
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
               color: color,
               fontWeight: FontWeight.w600,
@@ -877,12 +911,7 @@ class _AdminNoteCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-    ];
-    final dt = note.createdAt;
-    final date = '${months[dt.month - 1]} ${dt.day}, ${dt.year}';
+    final date = DateFormat.yMMMd().format(note.createdAt);
 
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
@@ -934,12 +963,8 @@ class _TimelineEntry extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-    ];
-    final dt = entry.changedAt;
-    final date = '${months[dt.month - 1]} ${dt.day}, ${dt.year}';
+    final l10n = context.l10n;
+    final date = DateFormat.yMMMd().format(entry.changedAt);
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
@@ -966,7 +991,7 @@ class _TimelineEntry extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  entry.toStatus.label,
+                  localizedReportStatus(l10n, entry.toStatus),
                   style: theme.textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),

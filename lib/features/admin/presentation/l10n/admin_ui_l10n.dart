@@ -1,6 +1,7 @@
 import 'package:speakup_connect/features/admin/presentation/screens/admin_dashboard_screen.dart';
 import 'package:speakup_connect/features/organization/domain/entities/enrolled_member.dart';
-import 'package:speakup_connect/features/organization/domain/entities/user_profile_entity.dart';import 'package:speakup_connect/features/reports/domain/entities/report_entity.dart';
+import 'package:speakup_connect/features/organization/domain/entities/user_profile_entity.dart';
+import 'package:speakup_connect/features/reports/domain/entities/report_entity.dart';
 import 'package:speakup_connect/l10n/app_localizations.dart';
 
 String localizedMemberStatusFilter(

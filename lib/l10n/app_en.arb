@@ -26,6 +26,7 @@
   "commonDeny": "Deny",
   "commonBack": "Back",
   "commonSearch": "Search",
+  "commonRefresh": "Refresh",
   "commonSelectAll": "Select all",
   "commonClearAll": "Clear all",
 
@@ -1371,6 +1372,114 @@
     "placeholders": {
       "name": { "type": "String" },
       "date": { "type": "String" }
+    }
+  },
+
+  "reportCategoryFacility": "Facility & Infrastructure",
+  "reportCategorySafety": "Safety & Security",
+  "reportCategoryAcademic": "Academic Concern",
+  "reportCategoryBullying": "Bullying & Harassment",
+  "reportCategorySanitation": "Sanitation & Cleanliness",
+  "reportCategoryConduct": "Staff / Teacher Conduct",
+  "reportCategoryAdministrative": "Administrative",
+  "reportCategoryOther": "Other",
+
+  "adminReportDetailTitle": "Report Detail",
+  "adminReportDetailLoading": "Loading report...",
+  "adminReportDetailLoadFailed": "Failed to load report",
+  "adminReportDetailSubmittedDate": "Submitted {date}",
+  "@adminReportDetailSubmittedDate": {
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
+  "adminReportDetailAnonymousSubmission": "Anonymous submission",
+  "adminReportDetailBySubmitter": "By: {name}",
+  "@adminReportDetailBySubmitter": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "adminReportDetailDescription": "Description",
+  "adminReportDetailPhotos": "Photos ({count})",
+  "@adminReportDetailPhotos": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "adminReportDetailAdminActions": "Admin Actions",
+  "adminReportDetailUpdateStatus": "Update Status",
+  "adminReportDetailAddNote": "Add Note",
+  "adminReportDetailAssignToAdmin": "Assign to Admin",
+  "adminReportDetailReassign": "Reassign",
+  "adminReportDetailUnassigned": "Unassigned",
+  "adminReportDetailAssignedTo": "Assigned to: {name}",
+  "@adminReportDetailAssignedTo": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "adminReportDetailAdminNotes": "Admin Notes ({count})",
+  "@adminReportDetailAdminNotes": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "adminReportDetailStatusHistory": "Status History",
+  "adminReportDetailAddAdminNote": "Add Admin Note",
+  "adminReportDetailCurrentStatus": "Current: {status}",
+  "@adminReportDetailCurrentStatus": {
+    "placeholders": {
+      "status": { "type": "String" }
+    }
+  },
+  "adminReportDetailNewStatus": "New Status",
+  "adminReportDetailStatusChangeNoteHint": "Add a note about this status change…",
+  "adminReportDetailAssignTitle": "Assign to Admin",
+  "adminReportDetailSearchAdmins": "Search admins…",
+  "adminReportDetailNoAdmins": "No admins found.",
+  "adminReportDetailLoadAdminsFailed": "Failed to load admins: {error}",
+  "@adminReportDetailLoadAdminsFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "adminReportDetailAssignFailed": "Failed to assign report: {error}",
+  "@adminReportDetailAssignFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "adminReportDetailUpdateStatusFailed": "Failed to update status: {error}",
+  "@adminReportDetailUpdateStatusFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "adminReportDetailAddNoteFailed": "Failed to add note: {error}",
+  "@adminReportDetailAddNoteFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "adminReportDetailNoteLabel": "Note",
+  "adminReportDetailEnterNote": "Enter your note…",
+
+  "reportDetailsTitle": "Report Details",
+  "reportDetailsLoading": "Loading report...",
+  "reportDetailsLoadFailed": "Failed to load report",
+
+  "myReportsTitle": "My Reports",
+  "myReportsNoReportsYet": "No reports yet",
+  "myReportsTabAll": "All",
+  "myReportsTabInProgress": "In Progress",
+  "myReportsTabResolved": "Resolved",
+  "myReportsNewReport": "New Report",
+  "myReportsEmptyAll": "You haven't submitted any reports yet.",
+  "myReportsEmptyFiltered": "No reports with status \"{status}\".",
+  "@myReportsEmptyFiltered": {
+    "placeholders": {
+      "status": { "type": "String" }
     }
   },
 

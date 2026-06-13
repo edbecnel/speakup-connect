@@ -8,6 +8,7 @@ import 'package:speakup_connect/core/constants/app_constants.dart';
 import 'package:speakup_connect/core/constants/route_constants.dart';
 import 'package:speakup_connect/core/l10n/app_localizations_extension.dart';
 import 'package:speakup_connect/features/reports/domain/entities/report_category_entity.dart';
+import 'package:speakup_connect/features/reports/presentation/l10n/report_ui_l10n.dart';
 import 'package:speakup_connect/features/reports/presentation/providers/report_provider.dart';
 import 'package:speakup_connect/shared/widgets/app_button.dart';
 import 'package:speakup_connect/shared/widgets/app_error_widget.dart';
@@ -178,7 +179,11 @@ class _Step1CategoryDetails extends ConsumerWidget {
                   final selected = formState.categoryId == cat.categoryId;
                   return FilterChip(
                     label: Text(
-                      cat.label,
+                      localizedReportCategoryLabel(
+                        l10n,
+                        cat.categoryId,
+                        fallbackLabel: cat.label,
+                      ),
                       style: TextStyle(
                         color: selected
                             ? theme.colorScheme.onPrimary
@@ -380,21 +385,23 @@ class _Step3Review extends ConsumerWidget {
     final theme = Theme.of(context);
     final l10n = context.l10n;
 
-    final categoryLabel = categoriesAsync.value
-        ?.firstWhere(
-          (c) => c.categoryId == formState.categoryId,
-          orElse: () => const ReportCategoryEntity(
-            categoryId: '',
-            label: '',
-            iconName: 'report',
-            sortOrder: 0,
-          ),
-        )
-        .label;
+    final category = categoriesAsync.value?.firstWhere(
+      (c) => c.categoryId == formState.categoryId,
+      orElse: () => const ReportCategoryEntity(
+        categoryId: '',
+        label: '',
+        iconName: 'report',
+        sortOrder: 0,
+      ),
+    );
     final resolvedCategory =
-        (categoryLabel == null || categoryLabel.isEmpty)
+        (category == null || category.categoryId.isEmpty)
             ? l10n.commonUnknown
-            : categoryLabel;
+            : localizedReportCategoryLabel(
+                l10n,
+                category.categoryId,
+                fallbackLabel: category.label,
+              );
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),

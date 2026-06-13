@@ -9,6 +9,7 @@ import 'package:speakup_connect/core/permissions/providers/permission_provider.d
 import 'package:speakup_connect/features/roles/domain/entities/role_entity.dart';
 import 'package:speakup_connect/features/roles/presentation/providers/roles_provider.dart';
 import 'package:speakup_connect/shared/widgets/app_button.dart';
+import 'package:speakup_connect/shared/widgets/secondary_app_bar.dart';
 import 'package:speakup_connect/shared/widgets/app_error_widget.dart';
 import 'package:speakup_connect/shared/widgets/app_loading_indicator.dart';
 
@@ -28,18 +29,18 @@ class RolesManagementScreen extends ConsumerWidget {
         ref.watch(hasPermissionProvider(AppPermission.manageRoles));
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.rolesManagementTitle),
+      appBar: SecondaryAppBar(
+        title: l10n.rolesManagementTitle,
         actions: [
-          TextButton.icon(
-            onPressed: () => context.push(Routes.adminUserAssignments),
+          IconButton(
             icon: const Icon(Icons.people_outlined),
-            label: Text(l10n.rolesAssignments),
+            tooltip: l10n.rolesAssignments,
+            onPressed: () => context.push(Routes.adminUserAssignments),
           ),
-          TextButton.icon(
-            onPressed: () => context.push(Routes.adminCapabilities),
+          IconButton(
             icon: const Icon(Icons.tune_outlined),
-            label: Text(l10n.rolesCapabilities),
+            tooltip: l10n.rolesCapabilities,
+            onPressed: () => context.push(Routes.adminCapabilities),
           ),
         ],
       ),
@@ -308,17 +309,20 @@ class _RoleCard extends ConsumerWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  TextButton.icon(
-                    onPressed: () => context.push(
-                      Routes.adminRoleAssignPath(role.id),
+                  Flexible(
+                    child: AppButton.text(
+                      label: l10n.rolesAssignUsers,
+                      icon: Icons.person_add_outlined,
+                      minimumWidth: 0,
+                      onPressed: () => context.push(
+                        Routes.adminRoleAssignPath(role.id),
+                      ),
                     ),
-                    icon: const Icon(Icons.person_add_outlined, size: 18),
-                    label: Text(l10n.rolesAssignUsers),
                   ),
                   const SizedBox(width: 8),
                   AppButton.secondary(
                     label: l10n.rolesEdit,
-                    minimumWidth: 80,
+                    minimumWidth: 0,
                     onPressed: () => context.push(
                       Routes.adminRoleEditPath(role.id),
                     ),

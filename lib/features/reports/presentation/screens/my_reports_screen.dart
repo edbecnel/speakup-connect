@@ -1,53 +1,61 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:speakup_connect/core/constants/route_constants.dart';
+import 'package:speakup_connect/core/l10n/app_localizations_extension.dart';
+import 'package:speakup_connect/features/admin/presentation/l10n/admin_ui_l10n.dart';
 import 'package:speakup_connect/features/reports/domain/entities/report_entity.dart';
 import 'package:speakup_connect/features/reports/presentation/providers/report_provider.dart';
 import 'package:speakup_connect/shared/widgets/app_error_widget.dart';
 import 'package:speakup_connect/shared/widgets/app_loading_indicator.dart';
 
 /// "My Reports" screen — shows reports submitted by the current user.
-///
-/// Matches wireframe screen 4:
-/// - Tab bar: All | Submitted | In Progress | Resolved
-/// - Report cards with status badge, title, reference number, date
 class MyReportsScreen extends ConsumerWidget {
   const MyReportsScreen({super.key});
 
-  static const _tabs = [
-    (label: 'All', status: null),
-    (label: 'Submitted', status: ReportStatus.submitted),
-    (label: 'In Progress', status: ReportStatus.inProgress),
-    (label: 'Resolved', status: ReportStatus.resolved),
-  ];
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final tabs = [
+      (label: l10n.myReportsTabAll, status: null as ReportStatus?),
+      (
+        label: l10n.adminDashboardTabSubmitted,
+        status: ReportStatus.submitted,
+      ),
+      (label: l10n.myReportsTabInProgress, status: ReportStatus.inProgress),
+      (label: l10n.myReportsTabResolved, status: ReportStatus.resolved),
+    ];
+
     return DefaultTabController(
-      length: _tabs.length,
+      length: tabs.length,
       child: Scaffold(
         appBar: AppBar(
           leading: BackButton(
             onPressed: () {
-              if (context.canPop()) context.pop();
-              else context.go(Routes.home);
+              if (context.canPop()) {
+                context.pop();
+              } else {
+                context.go(Routes.home);
+              }
             },
           ),
-          title: const Text('My Reports'),
+          title: Text(l10n.myReportsTitle),
           bottom: TabBar(
             isScrollable: true,
             tabAlignment: TabAlignment.start,
-            tabs: _tabs.map((t) => Tab(text: t.label)).toList(),
+            tabs: tabs.map((t) => Tab(text: t.label)).toList(),
           ),
         ),
         body: TabBarView(
-          children: _tabs.map((t) => _ReportsList(filterStatus: t.status)).toList(),
+          children: tabs
+              .map((t) => _ReportsList(filterStatus: t.status))
+              .toList(),
         ),
         floatingActionButton: FloatingActionButton.extended(
           onPressed: () => context.push(Routes.submitReport),
           icon: const Icon(Icons.add_rounded),
-          label: const Text('New Report'),
+          label: Text(l10n.myReportsNewReport),
           shape: const StadiumBorder(),
         ),
       ),
@@ -62,12 +70,13 @@ class _ReportsList extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final reportsAsync = ref.watch(myReportsProvider);
 
     return reportsAsync.when(
-      loading: () => const AppLoadingIndicator(message: 'Loading your reports...'),
+      loading: () => AppLoadingIndicator(message: l10n.adminReportDetailLoading),
       error: (error, _) => AppErrorWidget(
-        message: 'Failed to load reports',
+        message: l10n.adminReportDetailLoadFailed,
         onRetry: () => ref.invalidate(myReportsProvider),
       ),
       data: (reports) {
@@ -78,10 +87,12 @@ class _ReportsList extends ConsumerWidget {
         if (filtered.isEmpty) {
           return AppEmptyState(
             icon: Icons.assignment_outlined,
-            message: 'No reports yet',
+            message: l10n.myReportsNoReportsYet,
             subtitle: filterStatus == null
-                ? 'You haven\'t submitted any reports yet.'
-                : 'No reports with status "${filterStatus!.label}".',
+                ? l10n.myReportsEmptyAll
+                : l10n.myReportsEmptyFiltered(
+                    localizedReportStatus(l10n, filterStatus!),
+                  ),
           );
         }
 
@@ -145,7 +156,7 @@ class _ReportCard extends StatelessWidget {
               ],
               const SizedBox(height: 6),
               Text(
-                _formatDate(report.createdAt),
+                DateFormat.yMMMd().format(report.createdAt),
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
@@ -155,14 +166,6 @@ class _ReportCard extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  String _formatDate(DateTime dt) {
-    final months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-    ];
-    return '${months[dt.month - 1]} ${dt.day}, ${dt.year}';
   }
 }
 
@@ -204,7 +207,7 @@ class _StatusBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
-        status.label,
+        localizedReportStatus(context.l10n, status),
         style: theme.textTheme.labelSmall?.copyWith(
           color: color,
           fontWeight: FontWeight.w600,

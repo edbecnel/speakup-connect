@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:speakup_connect/config/app_config.dart';
 import 'package:speakup_connect/core/constants/app_constants.dart';
 import 'package:speakup_connect/core/l10n/app_localizations_extension.dart';
-import 'package:speakup_connect/core/permissions/org_scope_type.dart';
 import 'package:speakup_connect/features/organization/data/models/user_profile_model.dart';
 import 'package:speakup_connect/features/organization/domain/entities/user_profile_entity.dart';
 import 'package:speakup_connect/features/roles/data/models/role_assignment_model.dart';
@@ -15,6 +14,7 @@ import 'package:speakup_connect/features/roles/presentation/providers/roles_prov
 import 'package:speakup_connect/l10n/app_localizations.dart';
 import 'package:speakup_connect/shared/widgets/app_error_widget.dart';
 import 'package:speakup_connect/shared/widgets/app_loading_indicator.dart';
+import 'package:speakup_connect/shared/widgets/secondary_app_bar.dart';
 
 // ── Providers ─────────────────────────────────────────────────────────────────
 
@@ -62,7 +62,7 @@ class UserAssignmentsScreen extends ConsumerWidget {
     final usersAsync = ref.watch(_usersProvider);
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.roleAssignmentsTitle)),
+      appBar: SecondaryAppBar(title: l10n.roleAssignmentsTitle),
       body: usersAsync.when(
         loading: () => const AppLoadingIndicator(),
         error: (e, _) => AppErrorWidget(message: e.toString()),

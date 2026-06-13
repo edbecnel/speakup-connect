@@ -9,6 +9,7 @@ import 'package:speakup_connect/shared/widgets/app_button.dart';
 import 'package:speakup_connect/shared/widgets/app_error_widget.dart';
 import 'package:speakup_connect/shared/widgets/app_loading_indicator.dart';
 import 'package:speakup_connect/shared/widgets/app_text_field.dart';
+import 'package:speakup_connect/shared/widgets/secondary_app_bar.dart';
 
 /// Admin screen for managing capability definitions.
 ///
@@ -26,8 +27,8 @@ class CapabilitiesScreen extends ConsumerWidget {
     return DefaultTabController(
       length: 2,
       child: Scaffold(
-        appBar: AppBar(
-          title: Text(l10n.capabilitiesTitle),
+        appBar: SecondaryAppBar(
+          title: l10n.capabilitiesTitle,
           bottom: TabBar(
             tabs: [
               Tab(text: l10n.capabilitiesTabCustom),

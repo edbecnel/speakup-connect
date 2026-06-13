@@ -17,6 +17,7 @@ import 'package:speakup_connect/shared/widgets/app_button.dart';
 import 'package:speakup_connect/shared/widgets/app_error_widget.dart';
 import 'package:speakup_connect/shared/widgets/app_loading_indicator.dart';
 import 'package:speakup_connect/shared/widgets/app_text_field.dart';
+import 'package:speakup_connect/shared/widgets/secondary_app_bar.dart';
 
 // ── Providers ─────────────────────────────────────────────────────────────────
 
@@ -131,9 +132,7 @@ class _AssignRoleScreenState extends ConsumerState<AssignRoleScreen> {
     final roleName = roleAsync.asData?.value?.displayName ?? l10n.commonRole;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.assignRoleTitle(roleName)),
-      ),
+      appBar: SecondaryAppBar(title: l10n.assignRoleTitle(roleName)),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
