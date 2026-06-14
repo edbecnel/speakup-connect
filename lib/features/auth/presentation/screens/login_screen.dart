@@ -7,6 +7,7 @@ import 'package:speakup_connect/core/extensions/context_extensions.dart';
 import 'package:speakup_connect/core/l10n/app_localizations_extension.dart';
 import 'package:speakup_connect/features/auth/presentation/providers/auth_provider.dart';
 import 'package:speakup_connect/features/organization/presentation/providers/organization_provider.dart';
+import 'package:speakup_connect/features/translations/presentation/widgets/translation_anchor.dart';
 import 'package:speakup_connect/shared/widgets/app_button.dart';
 import 'package:speakup_connect/shared/widgets/app_text_field.dart';
 
@@ -136,8 +137,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                   unselectedLabelColor: theme.colorScheme.onSurfaceVariant,
                   dividerColor: Colors.transparent,
                   tabs: [
-                    Tab(text: l10n.commonLogin),
-                    Tab(text: l10n.commonSignUp),
+                    Tab(
+                      child: TranslationAnchor(
+                        stringKey: 'commonLogin',
+                        text: l10n.commonLogin,
+                      ),
+                    ),
+                    Tab(
+                      child: TranslationAnchor(
+                        stringKey: 'commonSignUp',
+                        text: l10n.commonSignUp,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -190,8 +201,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                   Expanded(child: Divider(color: theme.colorScheme.outlineVariant)),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Text(
-                      l10n.commonOr,
+                    child: TranslationAnchor(
+                      stringKey: 'commonOr',
+                      text: l10n.commonOr,
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
@@ -207,15 +219,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                   context.showSnackBar(l10n.authGoogleSignInSoon);
                 },
                 icon: const Icon(Icons.login),
-                label: Text(l10n.authContinueWithGoogle),
+                label: TranslationAnchor(
+                  stringKey: 'authContinueWithGoogle',
+                  text: l10n.authContinueWithGoogle,
+                ),
                 style: OutlinedButton.styleFrom(minimumSize: const Size(double.infinity, 52)),
               ),
 
               const SizedBox(height: 24),
 
               // --- Terms ---
-              Text(
-                l10n.authTermsFooter,
+              TranslationAnchor(
+                stringKey: 'authTermsFooter',
+                text: l10n.authTermsFooter,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
@@ -292,7 +308,10 @@ class _LoginForm extends StatelessWidget {
               onPressed: () {
                 // TODO: Navigate to forgot password screen
               },
-              child: Text(l10n.authForgotPassword),
+              child: TranslationAnchor(
+                stringKey: 'authForgotPassword',
+                text: l10n.authForgotPassword,
+              ),
             ),
           ),
           const SizedBox(height: 16),

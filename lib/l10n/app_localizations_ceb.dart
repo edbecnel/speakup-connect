@@ -1628,12 +1628,12 @@ class AppLocalizationsCeb extends AppLocalizations {
 
   @override
   String get schoolGradesIntro =>
-      'I-define kung unsang mga baitang ang gigamit sa imong eskwelahan.';
+      'I-define kung unsang mga grado ang gigamit sa imong eskwelahan. Magpakita kini sa Student Roster ug Member Management filters.';
 
   @override
   String schoolGradesIntroWhereUsed(
       String studentRoster, String memberManagement) {
-    return 'Makita kini sa mga filter sa $studentRoster ug $memberManagement.';
+    return 'These appear in $studentRoster and $memberManagement filters.';
   }
 
   @override
@@ -1641,10 +1641,10 @@ class AppLocalizationsCeb extends AppLocalizations {
       'Ang mga munisipyo, barangay, ug NGO dili mogamit og grado.';
 
   @override
-  String get schoolGradesCurrent => 'Mga baitang karon';
+  String get schoolGradesCurrent => 'Kasalukuyang mga grado';
 
   @override
-  String get schoolGradesEmpty => 'Wala pa\'y gi-configure nga mga baitang.';
+  String get schoolGradesEmpty => 'Wala pa\'y na-configure nga mga grado.';
 
   @override
   String schoolGradesGradeChip(int level) {
@@ -1661,7 +1661,8 @@ class AppLocalizationsCeb extends AppLocalizations {
   String get schoolGradesAddButton => 'Idugang ang grado';
 
   @override
-  String get schoolGradesResetDefault => 'Ibalik sa default nga Baitang 7–12';
+  String get schoolGradesResetDefault =>
+      'I-reset sa default sa high school (7–12)';
 
   @override
   String get schoolGradesSave => 'I-save ang mga grado';
@@ -1675,15 +1676,15 @@ class AppLocalizationsCeb extends AppLocalizations {
   }
 
   @override
-  String get schoolGradesSaveSuccess => 'Na-update ang mga baitang';
+  String get schoolGradesSaveSuccess => 'Na-update ang mga grado';
 
   @override
   String get schoolGradesSaveVerifyFailed =>
-      'Wala matipig og husto ang mga baitang. Sulayi pag-usab.';
+      'Grade levels were not saved correctly. Try again.';
 
   @override
   String get schoolGradesAtLeastOneRequired =>
-      'Kinahanglan ang labing menos usa ka baitang.';
+      'At least one grade level is required.';
 
   @override
   String get schoolGradesInvalidNumber =>
@@ -1802,7 +1803,7 @@ class AppLocalizationsCeb extends AppLocalizations {
   }
 
   @override
-  String get adminDashboardJoinApplicationsTooltip => 'Apil sa mga Aplikasyon';
+  String get adminDashboardJoinApplicationsTooltip => 'Aplikasyon sa Pag-apil';
 
   @override
   String get adminDashboardPendingApprovalsTooltip =>
@@ -1816,10 +1817,10 @@ class AppLocalizationsCeb extends AppLocalizations {
   String get adminDashboardStudentRosterTooltip => 'Listahan sa mga Estudyante';
 
   @override
-  String get adminDashboardSchoolGradesTooltip => 'Mga Grado sa Eskwela';
+  String get adminDashboardSchoolGradesTooltip => 'Mga grado sa pag-eskwela';
 
   @override
-  String get adminDashboardRolesTooltip => 'Mga Papel ug Mga Tugot';
+  String get adminDashboardRolesTooltip => 'Mga Katungdanan ug Mga Permiso';
 
   @override
   String get adminDashboardOrgSettingsTooltip => 'Mga Setting sa Organisasyon';
@@ -1831,16 +1832,16 @@ class AppLocalizationsCeb extends AppLocalizations {
   String get adminDashboardTabSubmitted => 'Gipasa';
 
   @override
-  String get adminDashboardTabUnderReview => 'Sa Ilalim sa Repaso';
+  String get adminDashboardTabUnderReview => 'Ginasusi pa';
 
   @override
-  String get adminDashboardTabInProgress => 'Sa Progreso';
+  String get adminDashboardTabInProgress => 'Giproseso pa';
 
   @override
-  String get adminDashboardTabResolved => 'Naresolba';
+  String get adminDashboardTabResolved => 'Nasulbad';
 
   @override
-  String get adminDashboardTabClosed => 'Nagsira';
+  String get adminDashboardTabClosed => 'Sirado';
 
   @override
   String get adminDashboardStatTotal => 'Kinatibuk-an';
@@ -1849,26 +1850,26 @@ class AppLocalizationsCeb extends AppLocalizations {
   String get adminDashboardStatSubmitted => 'Gisumite';
 
   @override
-  String get adminDashboardStatUnderReview => 'Sa Ilalim sa Pagsusi';
+  String get adminDashboardStatUnderReview => 'Ginasusi pa';
 
   @override
-  String get adminDashboardStatInProgress => 'Sa Progreso';
+  String get adminDashboardStatInProgress => 'Giproseso pa';
 
   @override
   String get adminDashboardStatResolved => 'Nasulbad';
 
   @override
-  String get adminDashboardStatClosed => 'Nagsira';
+  String get adminDashboardStatClosed => 'Sirado';
 
   @override
   String get adminDashboardSearchHint =>
-      'Pangitaa pinaagi sa titulo o numero sa reperensya...';
+      'Pangita base sa titulo o reperensiya nga ngalan...';
 
   @override
-  String get adminDashboardLoadingReports => 'Nag-load sa mga report...';
+  String get adminDashboardLoadingReports => 'Nag-load ang reports...';
 
   @override
-  String get adminDashboardLoadFailed => 'Nakapakyas sa pag-load sa mga report';
+  String get adminDashboardLoadFailed => 'Walay maload nga reports';
 
   @override
   String get adminDashboardNoResults => 'Walay resulta';
@@ -1895,7 +1896,7 @@ class AppLocalizationsCeb extends AppLocalizations {
 
   @override
   String adminDashboardUpdateStatusFailed(String error) {
-    return 'Napalpak ang pag-update sa estado: $error';
+    return 'Wala na-update ang status: $error';
   }
 
   @override
@@ -1910,16 +1911,16 @@ class AppLocalizationsCeb extends AppLocalizations {
   }
 
   @override
-  String get adminDashboardReportPriorityLow => 'Mababa';
+  String get adminDashboardReportPriorityLow => 'Gamay';
 
   @override
   String get adminDashboardReportPriorityMedium => 'Tunga-tunga';
 
   @override
-  String get adminDashboardReportPriorityHigh => 'Mataas';
+  String get adminDashboardReportPriorityHigh => 'Taas';
 
   @override
-  String get adminDashboardReportPriorityUrgent => 'Dali nga kinahanglanon';
+  String get adminDashboardReportPriorityUrgent => 'Dinalian';
 
   @override
   String get memberManagementSearchHint =>
@@ -2839,7 +2840,7 @@ class AppLocalizationsCeb extends AppLocalizations {
   String get adminReportDetailStatusHistory => 'Kasaysayan sa Estado';
 
   @override
-  String get adminReportDetailAddAdminNote => 'Magdugang og Admin nga Nota';
+  String get adminReportDetailAddAdminNote => 'Idugang ang nota sa admin';
 
   @override
   String adminReportDetailCurrentStatus(String status) {
@@ -3235,4 +3236,72 @@ class AppLocalizationsCeb extends AppLocalizations {
 
   @override
   String get translationApprove => 'Aprobahan';
+
+  @override
+  String get translationModeStart => 'Browse app in translation mode';
+
+  @override
+  String get translationModeStartSubtitle =>
+      'Tap badges on screen text to edit translations in context';
+
+  @override
+  String translationModeBanner(String locale) {
+    return 'Translation mode — $locale';
+  }
+
+  @override
+  String translationModeShowingPreview(String locale) {
+    return 'Showing $locale';
+  }
+
+  @override
+  String get translationModeLoadingEntries => 'Loading translation entries…';
+
+  @override
+  String translationModeSessionEdited(int count) {
+    return '$count edits in this session';
+  }
+
+  @override
+  String get translationModeReviewSession => 'Review';
+
+  @override
+  String get translationModeExit => 'Exit translation mode';
+
+  @override
+  String get translationModeExitConfirmTitle => 'Discard session edits?';
+
+  @override
+  String translationModeExitConfirmBody(int count) {
+    return 'You have $count unsaved edits. Exit and discard them?';
+  }
+
+  @override
+  String get translationModeExitDiscard => 'Discard and exit';
+
+  @override
+  String get translationModeEditTitle => 'Edit translation';
+
+  @override
+  String get translationModeSourceLabel => 'English (source)';
+
+  @override
+  String get translationModeReviewTitle => 'Review session';
+
+  @override
+  String get translationModeReviewInactive => 'Translation mode is not active.';
+
+  @override
+  String get translationModeReviewEmpty =>
+      'No edits yet. Tap translation badges on screen text to add changes.';
+
+  @override
+  String translationModeReviewSaveAll(int count) {
+    return 'Save $count edits to Firestore';
+  }
+
+  @override
+  String translationModeReviewSaveAllSuccess(int count) {
+    return 'Saved $count translations.';
+  }
 }

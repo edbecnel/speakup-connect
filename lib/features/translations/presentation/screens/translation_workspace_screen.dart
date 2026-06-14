@@ -4,8 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:speakup_connect/core/constants/route_constants.dart';
 import 'package:speakup_connect/core/l10n/app_localizations_extension.dart';
 import 'package:speakup_connect/core/l10n/locale_provider.dart';
+import 'package:speakup_connect/features/translations/presentation/providers/translation_mode_provider.dart';
 import 'package:speakup_connect/features/translations/presentation/providers/translation_provider.dart';
 import 'package:speakup_connect/shared/widgets/app_button.dart';
 import 'package:speakup_connect/shared/widgets/app_error_widget.dart';
@@ -114,6 +116,28 @@ class _TranslationWorkspaceScreenState
                       spacing: 8,
                       runSpacing: 8,
                       children: [
+                        AppButton.primary(
+                          label: l10n.translationModeStart,
+                          minimumWidth: 0,
+                          onPressed: () async {
+                            try {
+                              await ref
+                                  .read(translationModeProvider.notifier)
+                                  .enterMode(localeValue);
+                              if (!context.mounted) return;
+                              context.go(Routes.home);
+                            } catch (e) {
+                              if (!context.mounted) return;
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(e.toString()),
+                                  backgroundColor:
+                                      Theme.of(context).colorScheme.error,
+                                ),
+                              );
+                            }
+                          },
+                        ),
                         if (state.canBatchAi)
                           AppButton.secondary(
                             label: l10n.translationBatchAi,
@@ -184,6 +208,11 @@ class _TranslationWorkspaceScreenState
                             },
                           ),
                       ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      l10n.translationModeStartSubtitle,
+                      style: Theme.of(context).textTheme.bodySmall,
                     ),
                     const SizedBox(height: 4),
                     Text(
@@ -306,6 +335,7 @@ class _TranslationEntryCardState extends State<_TranslationEntryCard> {
               style: theme.textTheme.labelLarge?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
+              softWrap: true,
             ),
             const SizedBox(height: 12),
             InputDecorator(
@@ -313,20 +343,25 @@ class _TranslationEntryCardState extends State<_TranslationEntryCard> {
                 labelText: l10n.settingsLanguageEnglish,
                 border: const OutlineInputBorder(),
                 filled: true,
+                alignLabelWithHint: true,
                 fillColor: theme.colorScheme.surface,
               ),
               child: Text(
                 englishDisplay,
                 style: theme.textTheme.bodyMedium,
+                softWrap: true,
               ),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: _controller,
-              maxLines: 3,
+              minLines: 2,
+              maxLines: 6,
+              keyboardType: TextInputType.multiline,
               decoration: InputDecoration(
                 labelText: l10n.translationTargetLabel,
                 border: const OutlineInputBorder(),
+                alignLabelWithHint: true,
               ),
             ),
             const SizedBox(height: 8),

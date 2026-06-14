@@ -32,8 +32,27 @@ Workflow data lives in Firestore: `languages/{locale}/strings/{stringKey}`.
 | 3c | Assign translation moderator roles | Flutter app |
 | 3d | Grant platform `super_admin` (import English only) | PowerShell + `assign_super_admin.js` |
 | 4 | Create `firebase-config.js` | Local file |
-| 5 | Start web server (`npx serve`) | PowerShell |
+| 5 | Start web server (`.\start.ps1` or `npx serve`) | PowerShell |
 | 6–11 | Import, edit, export translations | Browser (+ app for role assign) |
+
+### Open URLs (after Step 5)
+
+Use the **LAN URL** on phones, tablets, and other PCs on the same Wi‑Fi. Use **localhost** only on the PC running the server.
+
+| Device | URL |
+|--------|-----|
+| **LAN (recommended)** | `http://<YOUR-LAN-IP>:5050` — e.g. `http://192.168.1.6:5050` |
+| **Same PC as server** | `http://localhost:5050` |
+
+Find `<YOUR-LAN-IP>` on the server PC:
+
+```powershell
+ipconfig
+```
+
+Use the **IPv4 Address** under your active Wi‑Fi or Ethernet adapter (usually `192.168.x.x`).
+
+**LAN requirement:** `USE_FUNCTIONS_EMULATOR = false` in `firebase-config.js` (default for deployed Firebase). The Functions emulator only works from localhost.
 
 ---
 
@@ -41,7 +60,7 @@ Workflow data lives in Firestore: `languages/{locale}/strings/{stringKey}`.
 
 Run these in order the **first time** you enable translation editing for an environment. Steps 1–4 are **one-time** per Firebase project. Step 5 is needed **each time** you open the web tool.
 
-> **PowerShell vs browser:** Steps 1–5 use PowerShell only. Steps 6+ use a **browser** at http://localhost:5050. You sign in with the **same Firebase Auth email and password as the mobile app**, but the browser session is separate (signing into the app does not auto-sign you into the web tool).
+> **PowerShell vs browser:** Steps 1–5 use PowerShell only. Steps 6+ use a **browser** at **`http://<YOUR-LAN-IP>:5050`** (or `http://localhost:5050` on the server PC). You sign in with the **same Firebase Auth email and password as the mobile app**, but the browser session is separate (signing into the app does not auto-sign you into the web tool).
 
 ### Sign-in credentials (read before Step 6)
 
@@ -245,7 +264,7 @@ You should see Import app_en.arb in the web Translation Helper.
 
 **After running:**
 
-1. Sign **out** on http://localhost:5050 (or close the tab).
+1. Sign **out** on the Translation Helper (or close the tab).
 2. Sign **in** again with your **app email + Firebase Auth password** (see **Sign-in credentials** above).
 3. Confirm **Import `app_en.arb`** appears in the toolbar.
 
@@ -329,12 +348,21 @@ Keep `ORGANIZATION_ID` as your school tenant id (`monhs-ph-001` for MONHS). **Re
 
 ```powershell
 cd D:\Dev\Speakup-Connect\tools\translation-helper
+.\start.ps1
+```
+
+`start.ps1` prints your **LAN URL** (e.g. `http://192.168.1.6:5050`) and starts the server. Leave the terminal open.
+
+Manual alternative (no URL printout):
+
+```powershell
+cd D:\Dev\Speakup-Connect\tools\translation-helper
 npx --yes serve -p 5050
 ```
 
-Leave this terminal open. The tool is served at **http://localhost:5050**.
+Then open **`http://<YOUR-LAN-IP>:5050`** on any device on your Wi‑Fi, or **`http://localhost:5050`** on the server PC only. See **Open URLs** above.
 
-**Local Functions emulator (optional):** if you run `firebase emulators:start --only functions`, `app.js` auto-connects to `127.0.0.1:5001` when the page is loaded from localhost. Otherwise calls go to deployed Cloud Functions.
+**Local Functions emulator (optional):** if you run `firebase emulators:start --only functions`, `app.js` auto-connects to `127.0.0.1:5001` only when the page is opened via **localhost**. For LAN access (`http://192.168.x.x:5050`), keep `USE_FUNCTIONS_EMULATOR = false` so calls use deployed Cloud Functions.
 
 ---
 
@@ -342,7 +370,7 @@ Leave this terminal open. The tool is served at **http://localhost:5050**.
 
 ### Step 6 — Open the Translation Helper
 
-Open **http://localhost:5050** in Chrome/Edge/Firefox (not the Flutter app). Ensure Step 5 (`npx serve`) is still running.
+Open **`http://<YOUR-LAN-IP>:5050`** in Chrome/Edge/Firefox on any device on your network (phone, tablet, another PC). On the server PC you can use **`http://localhost:5050`** instead. Ensure Step 5 is still running.
 
 ### Step 7 — Sign in on the web page
 
@@ -354,7 +382,7 @@ Enter your **Firebase Auth email and password** — the **same credentials as th
 | Org admin | Firestore profile `role: admin` for the org | App Firebase Auth password |
 | Translation moderator | Role with `manageTranslations` | App Firebase Auth password |
 
-The web tool uses a **separate browser session** from the mobile app. Signing into the app on your phone does not sign you into http://localhost:5050 — you must sign in on the web page too (same email/password).
+The web tool uses a **separate browser session** from the mobile app. Signing into the app on your phone does not sign you into the Translation Helper — you must sign in on the web page too (same email/password), including when using the LAN URL.
 
 If sign-in fails with *Access denied*, check Step 3 (roles seeded), confirm `ORGANIZATION_ID` in `firebase-config.js`, and sign out/in after role changes.
 
@@ -447,8 +475,8 @@ See **[INTERNATIONALIZATION.md §11 — Phase E–G](../docs/INTERNATIONALIZATIO
 | `ENOENT ... service-account.json` on seed | Complete **Step 3a** — download key and save as `scripts\service-account.json` |
 | Access denied on web sign-in | Complete Step 3, set `ORGANIZATION_ID` in `firebase-config.js`, sign out/in after role assignment |
 | No **Import `app_en.arb`** after Step 3d | Sign out/in on web tool; confirm `assign_super_admin.js` succeeded; use app Firebase Auth password |
-| **Translate missing (AI)** seems to do nothing | Hard-refresh http://localhost:5050. Status now appears **below the toolbar** (green/red banner). Ensure `USE_FUNCTIONS_EMULATOR = false` in `firebase-config.js` unless the emulator is running. Redeploy functions if you see `TRANSLATION_AI_API_KEY is not set`. |
-| `functions/internal` on **Refresh** | Hard-refresh http://localhost:5050 (Ctrl+Shift+R). Sign out/in so JWT picks up `super_admin`. Confirm `USE_FUNCTIONS_EMULATOR = false` in `firebase-config.js`. Open the tool at **http://localhost:5050** on the same machine running `npx serve` (not another device IP unless emulator is off). Redeploy `listTranslationEntries` and `getTranslationWorkspaceAccess` if logs show a server error. |
+| **Translate missing (AI)** seems to do nothing | Hard-refresh the page (Ctrl+Shift+R). Status now appears **below the toolbar** (green/red banner). For LAN access, `USE_FUNCTIONS_EMULATOR = false` in `firebase-config.js`. Redeploy functions if you see `TRANSLATION_AI_API_KEY is not set`. |
+| `functions/internal` on **Refresh** | Hard-refresh (Ctrl+Shift+R). Sign out/in so JWT picks up `super_admin`. For **`http://<LAN-IP>:5050`**, `USE_FUNCTIONS_EMULATOR` must be **false** (emulator is localhost-only). Redeploy `listTranslationEntries` and `getTranslationWorkspaceAccess` if logs show a server error. |
 | `Missing firebase-config.js` or `YOUR_API_KEY` in browser | Complete Step 4 — use Firebase `apiKey` (`AIzaSy…`), not OpenAI (`sk-…`) |
 
 ---

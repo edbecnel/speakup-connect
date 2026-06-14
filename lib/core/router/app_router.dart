@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:speakup_connect/core/constants/route_constants.dart';
+import 'package:speakup_connect/core/router/app_navigator_key.dart';
 import 'package:speakup_connect/core/permissions/providers/permission_provider.dart';
 import 'package:speakup_connect/features/announcements/presentation/screens/announcement_detail_screen.dart';
 import 'package:speakup_connect/features/announcements/presentation/screens/announcements_screen.dart';
 import 'package:speakup_connect/features/announcements/presentation/screens/compose_announcement_screen.dart';
 import 'package:speakup_connect/features/announcements/presentation/screens/my_announcements_screen.dart';
 import 'package:speakup_connect/features/translations/presentation/providers/translation_provider.dart';
+import 'package:speakup_connect/features/translations/presentation/screens/translation_session_review_screen.dart';
 import 'package:speakup_connect/features/translations/presentation/screens/translation_workspace_screen.dart';
 import 'package:speakup_connect/features/admin/presentation/screens/admin_branding_screen.dart';
 import 'package:speakup_connect/features/admin/presentation/screens/admin_dashboard_screen.dart';
@@ -70,6 +72,7 @@ GoRouter appRouter(Ref ref) {
   // initialLocation. The _AuthStateListenable already triggers redirect
   // re-evaluation via notifyListeners(); we only need ref.read inside redirect.
   return GoRouter(
+    navigatorKey: rootNavigatorKey,
     initialLocation: Routes.splash,
     refreshListenable: _AuthStateListenable(ref),
     redirect: (BuildContext context, GoRouterState state) {
@@ -143,9 +146,10 @@ GoRouter appRouter(Ref ref) {
               return Routes.home;
             }
             if (!isReportTriageRoute && !profile.isAdmin) {
-              if (loc == Routes.translationWorkspace &&
+              if ((loc == Routes.translationWorkspace ||
+                      loc == Routes.translationSessionReview) &&
                   ref.read(canManageTranslationsProvider)) {
-                // Translation moderators may access /admin/translations only.
+                // Translation moderators may access translation tools only.
               } else {
                 return Routes.home;
               }
@@ -455,6 +459,11 @@ GoRouter appRouter(Ref ref) {
         path: Routes.translationWorkspace,
         name: 'translationWorkspace',
         builder: (context, state) => const TranslationWorkspaceScreen(),
+      ),
+      GoRoute(
+        path: Routes.translationSessionReview,
+        name: 'translationSessionReview',
+        builder: (context, state) => const TranslationSessionReviewScreen(),
       ),
       GoRoute(
         path: Routes.adminSettings,

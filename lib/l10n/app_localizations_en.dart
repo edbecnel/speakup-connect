@@ -3151,4 +3151,72 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get translationApprove => 'Approve';
+
+  @override
+  String get translationModeStart => 'Browse app in translation mode';
+
+  @override
+  String get translationModeStartSubtitle =>
+      'Tap badges on screen text to edit translations in context';
+
+  @override
+  String translationModeBanner(String locale) {
+    return 'Translation mode — $locale';
+  }
+
+  @override
+  String translationModeShowingPreview(String locale) {
+    return 'Showing $locale';
+  }
+
+  @override
+  String get translationModeLoadingEntries => 'Loading translation entries…';
+
+  @override
+  String translationModeSessionEdited(int count) {
+    return '$count edits in this session';
+  }
+
+  @override
+  String get translationModeReviewSession => 'Review';
+
+  @override
+  String get translationModeExit => 'Exit translation mode';
+
+  @override
+  String get translationModeExitConfirmTitle => 'Discard session edits?';
+
+  @override
+  String translationModeExitConfirmBody(int count) {
+    return 'You have $count unsaved edits. Exit and discard them?';
+  }
+
+  @override
+  String get translationModeExitDiscard => 'Discard and exit';
+
+  @override
+  String get translationModeEditTitle => 'Edit translation';
+
+  @override
+  String get translationModeSourceLabel => 'English (source)';
+
+  @override
+  String get translationModeReviewTitle => 'Review session';
+
+  @override
+  String get translationModeReviewInactive => 'Translation mode is not active.';
+
+  @override
+  String get translationModeReviewEmpty =>
+      'No edits yet. Tap translation badges on screen text to add changes.';
+
+  @override
+  String translationModeReviewSaveAll(int count) {
+    return 'Save $count edits to Firestore';
+  }
+
+  @override
+  String translationModeReviewSaveAllSuccess(int count) {
+    return 'Saved $count translations.';
+  }
 }

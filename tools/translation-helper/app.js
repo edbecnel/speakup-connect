@@ -33,8 +33,8 @@ if (window.USE_FUNCTIONS_EMULATOR === true) {
   } else {
     console.warn(
       'USE_FUNCTIONS_EMULATOR is true but the page is not on localhost — ' +
-        'calls will fail. Set USE_FUNCTIONS_EMULATOR = false in firebase-config.js ' +
-        'or open http://localhost:5050 on this machine.',
+        'calls will fail from a LAN URL (http://192.168.x.x:5050). ' +
+        'Set USE_FUNCTIONS_EMULATOR = false in firebase-config.js for LAN access.',
     );
   }
 }

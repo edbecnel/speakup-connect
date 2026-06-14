@@ -10,6 +10,7 @@ import 'package:speakup_connect/features/auth/presentation/providers/auth_provid
 import 'package:speakup_connect/features/groups/presentation/widgets/my_groups_home_section.dart';
 import 'package:speakup_connect/features/notifications/presentation/providers/notification_provider.dart';
 import 'package:speakup_connect/features/organization/presentation/providers/organization_provider.dart';
+import 'package:speakup_connect/features/translations/presentation/widgets/translation_anchor.dart';
 import 'package:speakup_connect/shared/widgets/language_selector.dart';
 import 'package:speakup_connect/shared/widgets/notification_badge_icon.dart';
 
@@ -49,7 +50,10 @@ class HomeDashboardScreen extends ConsumerWidget {
             // TODO: Open drawer/side menu
           },
         ),
-        title: Text(l10n.homeTitle),
+        title: TranslationAnchor(
+          stringKey: 'homeTitle',
+          text: l10n.homeTitle,
+        ),
         actions: [
           IconButton(
             icon: NotificationBadgeIcon(
@@ -77,8 +81,9 @@ class HomeDashboardScreen extends ConsumerWidget {
               const SizedBox(height: 24),
 
               // --- Feature Grid ---
-              Text(
-                l10n.homeQuickActions,
+              TranslationAnchor(
+                stringKey: 'homeQuickActions',
+                text: l10n.homeQuickActions,
                 style: theme.textTheme.titleSmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                   fontWeight: FontWeight.w600,
@@ -95,18 +100,21 @@ class HomeDashboardScreen extends ConsumerWidget {
                 children: [
                   _DashboardTile(
                     icon: Icons.edit_note_rounded,
+                    stringKey: 'homeSubmitConcern',
                     label: l10n.homeSubmitConcern,
                     color: theme.colorScheme.primary,
                     onTap: () => context.push(Routes.submitReport),
                   ),
                   _DashboardTile(
                     icon: Icons.list_alt_rounded,
+                    stringKey: 'homeMyReports',
                     label: l10n.homeMyReports,
                     color: theme.colorScheme.secondary,
                     onTap: () => context.push(Routes.myReports),
                   ),
                   _DashboardTile(
                     icon: Icons.campaign_rounded,
+                    stringKey: 'homeAnnouncements',
                     label: l10n.homeAnnouncements,
                     color: unreadAnnouncements > 0
                         ? theme.colorScheme.primary
@@ -116,6 +124,7 @@ class HomeDashboardScreen extends ConsumerWidget {
                   ),
                   _DashboardTile(
                     icon: Icons.info_outline_rounded,
+                    stringKey: 'homeOrgInformation',
                     label: l10n.homeOrgInformation(
                       orgConfig?.displayName ?? l10n.homeOrgFallback,
                     ),
@@ -195,8 +204,9 @@ class _WelcomeCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            context.l10n.homeWelcome(firstName),
+          TranslationAnchor(
+            stringKey: 'homeWelcome',
+            text: context.l10n.homeWelcome(firstName),
             style: theme.textTheme.titleLarge?.copyWith(
               color: theme.colorScheme.onPrimary,
               fontWeight: FontWeight.w700,
@@ -218,6 +228,7 @@ class _WelcomeCard extends StatelessWidget {
 class _DashboardTile extends StatelessWidget {
   const _DashboardTile({
     required this.icon,
+    required this.stringKey,
     required this.label,
     required this.color,
     required this.onTap,
@@ -225,6 +236,7 @@ class _DashboardTile extends StatelessWidget {
   });
 
   final IconData icon;
+  final String stringKey;
   final String label;
   final Color color;
   final VoidCallback onTap;
@@ -271,8 +283,9 @@ class _DashboardTile extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 12),
-              Text(
-                label,
+              TranslationAnchor(
+                stringKey: stringKey,
+                text: label,
                 style: theme.textTheme.labelMedium?.copyWith(
                   fontWeight: FontWeight.w600,
                   height: 1.3,

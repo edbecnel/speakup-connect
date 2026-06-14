@@ -18,6 +18,7 @@ import 'package:speakup_connect/features/organization/presentation/widgets/profi
 import 'package:speakup_connect/features/reminders/presentation/providers/reminder_provider.dart';
 import 'package:speakup_connect/features/settings/presentation/providers/settings_provider.dart';
 import 'package:speakup_connect/features/translations/presentation/providers/translation_provider.dart';
+import 'package:speakup_connect/features/translations/presentation/widgets/translation_anchor.dart';
 import 'package:speakup_connect/l10n/app_localizations.dart';
 import 'package:speakup_connect/shared/widgets/app_button.dart';
 import 'package:speakup_connect/shared/widgets/language_selector.dart';
@@ -71,7 +72,10 @@ class SettingsScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         leading: BackButton(onPressed: () => context.go(Routes.home)),
-        title: Text(l10n.settingsTitle),
+        title: TranslationAnchor(
+          stringKey: 'settingsTitle',
+          text: l10n.settingsTitle,
+        ),
       ),
       body: ListView(
         children: [
@@ -210,7 +214,10 @@ class SettingsScreen extends ConsumerWidget {
           const Divider(),
 
           // --- Appearance ---
-          _SectionHeader(title: l10n.settingsSectionAppearance),
+          _SectionHeader(
+            title: l10n.settingsSectionAppearance,
+            stringKey: 'settingsSectionAppearance',
+          ),
           ListTile(
             leading: const Icon(Icons.language_outlined),
             title: Text(l10n.settingsLanguage),
@@ -288,7 +295,10 @@ class SettingsScreen extends ConsumerWidget {
               canTriageReports ||
               canManageGroups ||
               canManageTranslations) ...[
-            _SectionHeader(title: l10n.settingsSectionAdmin),
+            _SectionHeader(
+              title: l10n.settingsSectionAdmin,
+              stringKey: 'settingsSectionAdmin',
+            ),
             if (canTriageReports)
               ListTile(
                 leading: const Icon(Icons.admin_panel_settings_outlined),
@@ -309,8 +319,14 @@ class SettingsScreen extends ConsumerWidget {
             if (profile?.isAdmin == true || canManageTranslations) ...[
               ListTile(
                 leading: const Icon(Icons.translate_outlined),
-                title: Text(l10n.settingsTranslations),
-                subtitle: Text(l10n.settingsTranslationsSubtitle),
+                title: TranslationAnchor(
+                  stringKey: 'settingsTranslations',
+                  text: l10n.settingsTranslations,
+                ),
+                subtitle: TranslationAnchor(
+                  stringKey: 'settingsTranslationsSubtitle',
+                  text: l10n.settingsTranslationsSubtitle,
+                ),
                 trailing: const Icon(Icons.chevron_right_rounded),
                 onTap: () => context.push(Routes.translationWorkspace),
               ),
@@ -435,22 +451,31 @@ String _themeModeLabel(AppLocalizations l10n, ThemeMode mode) => switch (mode) {
     };
 
 class _SectionHeader extends StatelessWidget {
-  const _SectionHeader({required this.title});
+  const _SectionHeader({
+    required this.title,
+    this.stringKey,
+  });
 
   final String title;
+  final String? stringKey;
 
   @override
   Widget build(BuildContext context) {
+    final style = Theme.of(context).textTheme.labelMedium?.copyWith(
+          color: Theme.of(context).colorScheme.primary,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 0.5,
+        );
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-      child: Text(
-        title,
-        style: Theme.of(context).textTheme.labelMedium?.copyWith(
-              color: Theme.of(context).colorScheme.primary,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 0.5,
-            ),
-      ),
+      child: stringKey != null
+          ? TranslationAnchor(
+              stringKey: stringKey!,
+              text: title,
+              style: style,
+            )
+          : Text(title, style: style),
     );
   }
 }

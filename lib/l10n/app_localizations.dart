@@ -5448,6 +5448,114 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Approve'**
   String get translationApprove;
+
+  /// No description provided for @translationModeStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse app in translation mode'**
+  String get translationModeStart;
+
+  /// No description provided for @translationModeStartSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap badges on screen text to edit translations in context'**
+  String get translationModeStartSubtitle;
+
+  /// No description provided for @translationModeBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Translation mode — {locale}'**
+  String translationModeBanner(String locale);
+
+  /// No description provided for @translationModeShowingPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Showing {locale}'**
+  String translationModeShowingPreview(String locale);
+
+  /// No description provided for @translationModeLoadingEntries.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading translation entries…'**
+  String get translationModeLoadingEntries;
+
+  /// No description provided for @translationModeSessionEdited.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} edits in this session'**
+  String translationModeSessionEdited(int count);
+
+  /// No description provided for @translationModeReviewSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Review'**
+  String get translationModeReviewSession;
+
+  /// No description provided for @translationModeExit.
+  ///
+  /// In en, this message translates to:
+  /// **'Exit translation mode'**
+  String get translationModeExit;
+
+  /// No description provided for @translationModeExitConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard session edits?'**
+  String get translationModeExitConfirmTitle;
+
+  /// No description provided for @translationModeExitConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You have {count} unsaved edits. Exit and discard them?'**
+  String translationModeExitConfirmBody(int count);
+
+  /// No description provided for @translationModeExitDiscard.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard and exit'**
+  String get translationModeExitDiscard;
+
+  /// No description provided for @translationModeEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit translation'**
+  String get translationModeEditTitle;
+
+  /// No description provided for @translationModeSourceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'English (source)'**
+  String get translationModeSourceLabel;
+
+  /// No description provided for @translationModeReviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Review session'**
+  String get translationModeReviewTitle;
+
+  /// No description provided for @translationModeReviewInactive.
+  ///
+  /// In en, this message translates to:
+  /// **'Translation mode is not active.'**
+  String get translationModeReviewInactive;
+
+  /// No description provided for @translationModeReviewEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No edits yet. Tap translation badges on screen text to add changes.'**
+  String get translationModeReviewEmpty;
+
+  /// No description provided for @translationModeReviewSaveAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Save {count} edits to Firestore'**
+  String translationModeReviewSaveAll(int count);
+
+  /// No description provided for @translationModeReviewSaveAllSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved {count} translations.'**
+  String translationModeReviewSaveAllSuccess(int count);
 }
 
 class _AppLocalizationsDelegate

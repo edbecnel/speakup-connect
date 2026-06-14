@@ -441,7 +441,7 @@ Complete once per Firebase project (or after adding translation callables). Deta
    - Translation moderators — edit / approve per role assignment in app.
    - Platform `super_admin` — **Import `app_en.arb` only** (`node scripts/assign_super_admin.js`).
 
-5. **Web Translation Helper:** copy `tools/translation-helper/firebase-config.example.js` → `firebase-config.js`, set Firebase web config + `ORGANIZATION_ID`, run `npx serve tools/translation-helper` (or open via your static host). Set `USE_FUNCTIONS_EMULATOR = false` unless using the emulator.
+5. **Web Translation Helper:** copy `tools/translation-helper/firebase-config.example.js` → `firebase-config.js`, set Firebase web config + `ORGANIZATION_ID`, run `.\start.ps1` from `tools/translation-helper/` (prints **`http://<YOUR-LAN-IP>:5050`** for phones/tablets/other PCs on Wi‑Fi; `localhost:5050` on the server PC only). Set `USE_FUNCTIONS_EMULATOR = false` for LAN access (required unless you use localhost + Functions emulator only).
 
 ---
 

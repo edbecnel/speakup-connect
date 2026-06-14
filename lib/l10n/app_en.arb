@@ -1636,5 +1636,54 @@
   "translationNoEntries": "No translation entries yet. Platform operators import app_en.arb first.",
   "translationTargetLabel": "Translation",
   "translationAiDraft": "AI draft",
-  "translationApprove": "Approve"
+  "translationApprove": "Approve",
+
+  "translationModeStart": "Browse app in translation mode",
+  "translationModeStartSubtitle": "Tap badges on screen text to edit translations in context",
+  "translationModeBanner": "Translation mode — {locale}",
+  "@translationModeBanner": {
+    "placeholders": {
+      "locale": { "type": "String" }
+    }
+  },
+  "translationModeShowingPreview": "Showing {locale}",
+  "@translationModeShowingPreview": {
+    "placeholders": {
+      "locale": { "type": "String" }
+    }
+  },
+  "translationModeLoadingEntries": "Loading translation entries…",
+  "translationModeSessionEdited": "{count} edits in this session",
+  "@translationModeSessionEdited": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "translationModeReviewSession": "Review",
+  "translationModeExit": "Exit translation mode",
+  "translationModeExitConfirmTitle": "Discard session edits?",
+  "translationModeExitConfirmBody": "You have {count} unsaved edits. Exit and discard them?",
+  "@translationModeExitConfirmBody": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "translationModeExitDiscard": "Discard and exit",
+  "translationModeEditTitle": "Edit translation",
+  "translationModeSourceLabel": "English (source)",
+  "translationModeReviewTitle": "Review session",
+  "translationModeReviewInactive": "Translation mode is not active.",
+  "translationModeReviewEmpty": "No edits yet. Tap translation badges on screen text to add changes.",
+  "translationModeReviewSaveAll": "Save {count} edits to Firestore",
+  "@translationModeReviewSaveAll": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "translationModeReviewSaveAllSuccess": "Saved {count} translations.",
+  "@translationModeReviewSaveAllSuccess": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  }
 }

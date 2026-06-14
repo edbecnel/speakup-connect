@@ -7,6 +7,7 @@ import 'package:speakup_connect/core/router/app_router.dart';
 import 'package:speakup_connect/core/theme/app_theme.dart';
 import 'package:speakup_connect/features/organization/presentation/providers/organization_provider.dart';
 import 'package:speakup_connect/features/settings/presentation/providers/settings_provider.dart';
+import 'package:speakup_connect/features/translations/presentation/widgets/translation_mode_shell.dart';
 import 'package:speakup_connect/l10n/app_localizations.dart';
 
 /// Root application widget.
@@ -44,6 +45,8 @@ class SpeakUpConnectApp extends ConsumerWidget {
       locale: locale,
       localizationsDelegates: kAppLocalizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
+      builder: (context, child) =>
+          TranslationModeShell(child: child ?? const SizedBox.shrink()),
     );
   }
 }
