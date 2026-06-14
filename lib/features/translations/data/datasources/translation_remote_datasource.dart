@@ -72,16 +72,19 @@ class TranslationRemoteDataSource {
     required String organizationId,
     required String targetLocale,
     required String stringKey,
-    required String targetValue,
-    required String status,
+    String? targetValue,
+    String? status,
+    String? context,
+    bool updateContext = false,
   }) =>
       _call('saveTranslationEntry', _orgPayload(
         organizationId: organizationId,
         extra: {
           'targetLocale': targetLocale,
           'stringKey': stringKey,
-          'targetValue': targetValue,
-          'status': status,
+          if (targetValue != null) 'targetValue': targetValue,
+          if (status != null) 'status': status,
+          if (updateContext) 'context': context ?? '',
         },
       ));
 
@@ -145,5 +148,62 @@ class TranslationRemoteDataSource {
           'targetLocale': targetLocale,
           'includeEnglishFallback': true,
         },
+      ));
+
+  Future<List<Map<String, dynamic>>> listScreens({
+    required String organizationId,
+  }) async {
+    final data = await _call('listTranslationScreens', _orgPayload(
+      organizationId: organizationId,
+    ));
+    final screens = data['screens'];
+    if (screens is! List) return [];
+    return screens
+        .whereType<Map<String, dynamic>>()
+        .map((e) => Map<String, dynamic>.from(e))
+        .toList();
+  }
+
+  Future<Map<String, dynamic>> createScreen({
+    required String organizationId,
+    required String name,
+  }) async {
+    final data = await _call('createTranslationScreen', _orgPayload(
+      organizationId: organizationId,
+      extra: {'name': name},
+    ));
+    return Map<String, dynamic>.from(data);
+  }
+
+  Future<Map<String, dynamic>> updateScreen({
+    required String organizationId,
+    required String screenId,
+    String? name,
+    String? assignedRoute,
+    bool unassignRoute = false,
+    bool? badgeEnabled,
+  }) async {
+    final extra = <String, dynamic>{'screenId': screenId};
+    if (name != null) extra['name'] = name;
+    if (unassignRoute) {
+      extra['assignedRoute'] = null;
+    } else if (assignedRoute != null) {
+      extra['assignedRoute'] = assignedRoute;
+    }
+    if (badgeEnabled != null) extra['badgeEnabled'] = badgeEnabled;
+    final data = await _call('updateTranslationScreen', _orgPayload(
+      organizationId: organizationId,
+      extra: extra,
+    ));
+    return Map<String, dynamic>.from(data);
+  }
+
+  Future<void> deleteScreen({
+    required String organizationId,
+    required String screenId,
+  }) =>
+      _call('deleteTranslationScreen', _orgPayload(
+        organizationId: organizationId,
+        extra: {'screenId': screenId},
       ));
 }

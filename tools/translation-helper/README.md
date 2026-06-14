@@ -17,9 +17,10 @@ This README covers **setup commands and troubleshooting** only. The full transla
 4. **Review** — edit target text, mark `in_review` or `approved`
 5. **Export** downloadable `app_ceb.arb` / `app_fil.arb` JSON — org admin only
 6. **Export CSV** / **Import CSV** — spreadsheet handoff for human translators (all workspace editors)
-7. **`populate-csv-screens.js`** — refresh **`screen`** column in a reviewer CSV after `app_en.arb` changes (repo script; see §11 and Step 12)
+7. **Screen names** tab — CRUD screen names, assign to app routes, enable **Translation badges** per route (controls in-app globe badges during translation mode)
+8. **`populate-csv-screens.js`** — refresh **`screen`** column in a reviewer CSV after `app_en.arb` changes (repo script; see §11 and Step 12)
 
-Workflow data lives in Firestore: `languages/{locale}/strings/{stringKey}`.
+Workflow data lives in Firestore: `languages/{locale}/strings/{stringKey}` and `organizations/{orgId}/translationScreens/{screenId}` (`name`, `assignedRoute`, `badgeEnabled`).
 
 ### Setup checklist
 
@@ -108,7 +109,7 @@ From the repo `functions/` folder. Choose **Option A** or **Option B** depending
 ```powershell
 cd D:\Dev\Speakup-Connect\functions
 npm run build
-npx firebase-tools deploy --only functions:getTranslationWorkspaceAccess,functions:importTranslationSource,functions:importTranslationTargets,functions:listTranslationEntries,functions:saveTranslationEntry,functions:draftTranslation,functions:batchDraftTranslations,functions:exportTranslationArb
+npx firebase-tools deploy --only functions:getTranslationWorkspaceAccess,functions:importTranslationSource,functions:importTranslationTargets,functions:listTranslationEntries,functions:saveTranslationEntry,functions:draftTranslation,functions:batchDraftTranslations,functions:exportTranslationArb,functions:listTranslationScreens,functions:createTranslationScreen,functions:updateTranslationScreen,functions:deleteTranslationScreen
 ```
 
 List, save, approve, and export work. **AI draft** and **Translate missing (AI)** return an error until you complete **Option B** (or **Option B follow-up** below).
@@ -127,7 +128,7 @@ Copy-Item .env.example .env
 
 # 2. Build and deploy (deploy reads functions/.env)
 npm run build
-npx firebase-tools deploy --only functions:getTranslationWorkspaceAccess,functions:importTranslationSource,functions:importTranslationTargets,functions:listTranslationEntries,functions:saveTranslationEntry,functions:draftTranslation,functions:batchDraftTranslations,functions:exportTranslationArb
+npx firebase-tools deploy --only functions:getTranslationWorkspaceAccess,functions:importTranslationSource,functions:importTranslationTargets,functions:listTranslationEntries,functions:saveTranslationEntry,functions:draftTranslation,functions:batchDraftTranslations,functions:exportTranslationArb,functions:listTranslationScreens,functions:createTranslationScreen,functions:updateTranslationScreen,functions:deleteTranslationScreen
 ```
 
 Do **not** commit `functions/.env`.

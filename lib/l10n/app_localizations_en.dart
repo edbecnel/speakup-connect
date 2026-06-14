@@ -3153,6 +3153,91 @@ class AppLocalizationsEn extends AppLocalizations {
   String get translationApprove => 'Approve';
 
   @override
+  String get translationScreenNamesTitle => 'Screen names';
+
+  @override
+  String get translationScreenNamesIntro =>
+      'Create screen names, assign each to one app screen, and tag translation strings for filtering. Enable translation badges per app screen to control where in-context editing appears in translation mode.';
+
+  @override
+  String get translationScreenNamesNewLabel => 'New screen name';
+
+  @override
+  String get translationScreenNamesAdd => 'Add screen name';
+
+  @override
+  String get translationScreenNamesCatalog => 'Screen name catalog';
+
+  @override
+  String get translationScreenNamesEmpty => 'No screen names yet.';
+
+  @override
+  String get translationScreenNamesNameLabel => 'Screen name';
+
+  @override
+  String translationScreenNamesAssignedRoute(String route) {
+    return 'Assigned to: $route';
+  }
+
+  @override
+  String get translationScreenNamesUnassignRoute => 'Unassign route';
+
+  @override
+  String get translationScreenNamesRouteAssignment => 'Assign to app screen';
+
+  @override
+  String get translationScreenNamesRouteHint =>
+      'Each app screen can have one screen name. Names already assigned elsewhere are hidden until unassigned. Turn on translation badges to show in-context edit badges on that screen during translation mode.';
+
+  @override
+  String get translationScreenNamesBadgesLabel => 'Translation badges';
+
+  @override
+  String get translationScreenNamesBadgesHint =>
+      'Show edit badges in app translation mode';
+
+  @override
+  String get translationModeBadgesOffOnScreen =>
+      'Edit badges are off for this screen. Enable them under Screen names.';
+
+  @override
+  String get translationScreenNamesRouteDropdown => 'Screen name';
+
+  @override
+  String get translationScreenNamesUnassigned => '(unassigned)';
+
+  @override
+  String get translationScreenNamesCreated => 'Screen name created.';
+
+  @override
+  String get translationScreenNamesSaved => 'Screen name saved.';
+
+  @override
+  String translationScreenNamesRenamedCount(int count) {
+    return 'Saved. Updated $count string labels.';
+  }
+
+  @override
+  String get translationScreenNamesDeleteTitle => 'Delete screen name?';
+
+  @override
+  String get translationScreenNamesDelete => 'Delete';
+
+  @override
+  String translationScreenNamesDeleteBody(String name) {
+    return 'Delete \"$name\"? Unassign from any app screen first.';
+  }
+
+  @override
+  String get translationScreenNamesManage => 'Manage screen names';
+
+  @override
+  String get translationStringScreenLabel => 'Screen name';
+
+  @override
+  String get translationStringScreenNone => '(none)';
+
+  @override
   String get translationModeStart => 'Browse app in translation mode';
 
   @override

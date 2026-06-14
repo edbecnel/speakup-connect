@@ -12,6 +12,7 @@ import {
 } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-functions.js';
 import { parseTranslationCsv, rowsToCsv } from './csv-utils.js';
 import { createFilterCombobox } from './filter-combobox.js';
+import { createScreenNamesPanel } from './screen-names.js';
 
 const config = window.FIREBASE_CONFIG;
 if (!config?.apiKey || config.apiKey === 'YOUR_API_KEY') {
@@ -77,6 +78,10 @@ const els = {
   operationsPanel: document.getElementById('operations-panel'),
   tableWrap: document.getElementById('table-wrap'),
   tableHeadWrap: document.getElementById('table-head-wrap'),
+  navTranslationsBtn: document.getElementById('nav-translations-btn'),
+  navScreenNamesBtn: document.getElementById('nav-screen-names-btn'),
+  screenNamesSection: document.getElementById('screen-names-section'),
+  translationsSection: document.getElementById('translations-section'),
 };
 
 const featureCombobox = createFilterCombobox({
@@ -393,10 +398,15 @@ function renderTable() {
       ? `<div class="verified-meta">${escapeHtml(verifiedText)}</div>`
       : '<span class="verified-meta muted">—</span>';
     const screen = (entry.context ?? '').trim();
+    const contextOptions = screenNamesPanel.buildContextSelectOptions(screen);
     return `
       <tr data-key="${entry.stringKey}">
         <td class="key">${entry.stringKey}<br><small>${parseFeature(entry.stringKey)}</small></td>
-        <td class="screen">${screen ? escapeHtml(screen) : '<span class="muted">—</span>'}</td>
+        <td class="screen">
+          <select class="context-select" data-key="${entry.stringKey}" aria-label="Screen name for ${entry.stringKey}">
+            ${contextOptions}
+          </select>
+        </td>
         <td class="en">${escapeHtml(entry.sourceValue)}</td>
         <td>
           <textarea class="target-input" data-key="${entry.stringKey}">${escapeHtml(val)}</textarea>
@@ -427,6 +437,36 @@ function escapeHtml(s) {
     .replace(/"/g, '&quot;');
 }
 
+const screenNamesPanel = createScreenNamesPanel({
+  call,
+  callPayload,
+  setStatus: (text, kind = '') => {
+    const el = document.getElementById('screen-names-status');
+    if (!el) return;
+    el.textContent = text;
+    el.className = `status ${kind}`.trim();
+  },
+  formatError,
+  escapeHtml,
+});
+
+function showWorkspaceView(view) {
+  const isStrings = view === 'strings';
+  els.navTranslationsBtn?.classList.toggle('active', isStrings);
+  els.navScreenNamesBtn?.classList.toggle('active', !isStrings);
+  els.screenNamesSection?.classList.toggle('hidden', isStrings);
+  els.translationsSection?.classList.toggle('hidden', !isStrings);
+  els.helpPanel?.classList.toggle('hidden', !isStrings);
+  els.operationsPanel?.classList.toggle('hidden', !isStrings);
+  document.body.classList.toggle('screen-names-view', !isStrings);
+  if (!isStrings) {
+    screenNamesPanel.loadScreens().catch(showError);
+  }
+}
+
+els.navTranslationsBtn?.addEventListener('click', () => showWorkspaceView('strings'));
+els.navScreenNamesBtn?.addEventListener('click', () => showWorkspaceView('screen-names'));
+
 async function loadEntries({ clearReviewMeta = true, resetWorkspaceStatus = true } = {}) {
   setStatus('Loading…');
   const targetLocale = els.targetLocale.value;
@@ -443,6 +483,11 @@ async function loadEntries({ clearReviewMeta = true, resetWorkspaceStatus = true
       await callPayload({ targetLocale }),
     );
     entries = data.entries ?? [];
+    try {
+      await screenNamesPanel.loadScreens();
+    } catch (screenErr) {
+      console.warn('Screen names load failed', screenErr);
+    }
     updateFeatureFilter();
     updateScreenFilter();
     renderTable();
@@ -488,13 +533,31 @@ async function importArbFile(file) {
 async function saveEntry(stringKey, approve = false) {
   const textarea = els.entriesBody.querySelector(`textarea[data-key="${stringKey}"]`);
   const targetValue = textarea?.value?.trim() ?? '';
+  const contextSelect = els.entriesBody.querySelector(
+    `select.context-select[data-key="${stringKey}"]`,
+  );
+  const contextValue = contextSelect?.value?.trim() ?? '';
   await call('saveTranslationEntry')(await callPayload({
     targetLocale: els.targetLocale.value,
     stringKey,
     targetValue,
     status: approve ? 'approved' : 'in_review',
+    context: contextValue,
   }));
   await loadEntries();
+}
+
+async function saveEntryContext(stringKey, contextValue) {
+  await call('saveTranslationEntry')(await callPayload({
+    targetLocale: els.targetLocale.value,
+    stringKey,
+    context: contextValue,
+  }));
+  const entry = entries.find((e) => e.stringKey === stringKey);
+  if (entry) {
+    entry.context = contextValue || null;
+  }
+  updateScreenFilter();
 }
 
 async function draftOne(stringKey) {
@@ -1053,6 +1116,23 @@ els.entriesBody.addEventListener('click', async (e) => {
     showError(err);
   } finally {
     btn.disabled = false;
+  }
+});
+
+els.entriesBody.addEventListener('change', async (e) => {
+  const select = e.target.closest('select.context-select');
+  if (!select) return;
+  const key = select.dataset.key;
+  if (!key) return;
+  select.disabled = true;
+  try {
+    await saveEntryContext(key, select.value.trim());
+    setWorkspaceStatus(`Screen name updated for ${key}.`, 'ok');
+  } catch (err) {
+    showError(err);
+    renderTable();
+  } finally {
+    select.disabled = false;
   }
 });
 

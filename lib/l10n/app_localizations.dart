@@ -5449,6 +5449,156 @@ abstract class AppLocalizations {
   /// **'Approve'**
   String get translationApprove;
 
+  /// No description provided for @translationScreenNamesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Screen names'**
+  String get translationScreenNamesTitle;
+
+  /// No description provided for @translationScreenNamesIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Create screen names, assign each to one app screen, and tag translation strings for filtering. Enable translation badges per app screen to control where in-context editing appears in translation mode.'**
+  String get translationScreenNamesIntro;
+
+  /// No description provided for @translationScreenNamesNewLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'New screen name'**
+  String get translationScreenNamesNewLabel;
+
+  /// No description provided for @translationScreenNamesAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add screen name'**
+  String get translationScreenNamesAdd;
+
+  /// No description provided for @translationScreenNamesCatalog.
+  ///
+  /// In en, this message translates to:
+  /// **'Screen name catalog'**
+  String get translationScreenNamesCatalog;
+
+  /// No description provided for @translationScreenNamesEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No screen names yet.'**
+  String get translationScreenNamesEmpty;
+
+  /// No description provided for @translationScreenNamesNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Screen name'**
+  String get translationScreenNamesNameLabel;
+
+  /// No description provided for @translationScreenNamesAssignedRoute.
+  ///
+  /// In en, this message translates to:
+  /// **'Assigned to: {route}'**
+  String translationScreenNamesAssignedRoute(String route);
+
+  /// No description provided for @translationScreenNamesUnassignRoute.
+  ///
+  /// In en, this message translates to:
+  /// **'Unassign route'**
+  String get translationScreenNamesUnassignRoute;
+
+  /// No description provided for @translationScreenNamesRouteAssignment.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign to app screen'**
+  String get translationScreenNamesRouteAssignment;
+
+  /// No description provided for @translationScreenNamesRouteHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Each app screen can have one screen name. Names already assigned elsewhere are hidden until unassigned. Turn on translation badges to show in-context edit badges on that screen during translation mode.'**
+  String get translationScreenNamesRouteHint;
+
+  /// No description provided for @translationScreenNamesBadgesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Translation badges'**
+  String get translationScreenNamesBadgesLabel;
+
+  /// No description provided for @translationScreenNamesBadgesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Show edit badges in app translation mode'**
+  String get translationScreenNamesBadgesHint;
+
+  /// No description provided for @translationModeBadgesOffOnScreen.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit badges are off for this screen. Enable them under Screen names.'**
+  String get translationModeBadgesOffOnScreen;
+
+  /// No description provided for @translationScreenNamesRouteDropdown.
+  ///
+  /// In en, this message translates to:
+  /// **'Screen name'**
+  String get translationScreenNamesRouteDropdown;
+
+  /// No description provided for @translationScreenNamesUnassigned.
+  ///
+  /// In en, this message translates to:
+  /// **'(unassigned)'**
+  String get translationScreenNamesUnassigned;
+
+  /// No description provided for @translationScreenNamesCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Screen name created.'**
+  String get translationScreenNamesCreated;
+
+  /// No description provided for @translationScreenNamesSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Screen name saved.'**
+  String get translationScreenNamesSaved;
+
+  /// No description provided for @translationScreenNamesRenamedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved. Updated {count} string labels.'**
+  String translationScreenNamesRenamedCount(int count);
+
+  /// No description provided for @translationScreenNamesDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete screen name?'**
+  String get translationScreenNamesDeleteTitle;
+
+  /// No description provided for @translationScreenNamesDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get translationScreenNamesDelete;
+
+  /// No description provided for @translationScreenNamesDeleteBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete \"{name}\"? Unassign from any app screen first.'**
+  String translationScreenNamesDeleteBody(String name);
+
+  /// No description provided for @translationScreenNamesManage.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage screen names'**
+  String get translationScreenNamesManage;
+
+  /// No description provided for @translationStringScreenLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Screen name'**
+  String get translationStringScreenLabel;
+
+  /// No description provided for @translationStringScreenNone.
+  ///
+  /// In en, this message translates to:
+  /// **'(none)'**
+  String get translationStringScreenNone;
+
   /// No description provided for @translationModeStart.
   ///
   /// In en, this message translates to:

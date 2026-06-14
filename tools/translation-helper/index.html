@@ -152,6 +152,11 @@
 
     <section id="workspace" class="workspace hidden">
 
+      <nav class="workspace-nav panel" aria-label="Translation Helper views">
+        <button type="button" id="nav-translations-btn" class="workspace-nav-btn active">Translation strings</button>
+        <button type="button" id="nav-screen-names-btn" class="workspace-nav-btn">Screen names</button>
+      </nav>
+
       <details id="help-panel" class="panel help-panel collapsible-section">
 
         <summary class="collapsible-summary">Translation workspace help</summary>
@@ -714,6 +719,63 @@
               <col class="col-actions" />
             </colgroup>
             <tbody id="entries-body"></tbody>
+          </table>
+        </div>
+
+      </section>
+
+
+
+      <section id="screen-names-section" class="screen-names-section panel hidden">
+
+        <h2>Screen names</h2>
+
+        <p class="hint">
+          Create screen names for your organization, assign each name to one app screen at a time,
+          and tag translation strings with a screen name for filtering. Turn on
+          <strong>Translation badges</strong> per app screen to control where in-context edit badges
+          appear in the mobile app during translation mode.
+        </p>
+
+        <div class="row wrap">
+          <input id="screen-name-new" type="text" placeholder="New screen name" aria-label="New screen name" />
+          <button type="button" id="screen-name-add-btn">Add screen name</button>
+          <button type="button" id="screen-names-refresh-btn" class="secondary">Refresh</button>
+        </div>
+
+        <p id="screen-names-status" class="status" aria-live="polite"></p>
+
+        <h3>Screen name catalog</h3>
+
+        <div class="screen-names-table-wrap">
+          <table class="screen-names-table">
+            <thead>
+              <tr>
+                <th scope="col">Screen name</th>
+                <th scope="col">Assigned app screen</th>
+                <th scope="col">Unassign</th>
+                <th scope="col">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="screen-names-body"></tbody>
+          </table>
+        </div>
+
+        <h3>Assign screen name to app screen</h3>
+
+        <p class="hint">Each app screen can have at most one screen name. Names already in use elsewhere do not appear in the list. Enable translation badges to show in-context editing on that screen in the app.</p>
+
+        <div class="screen-names-table-wrap screen-routes-table-wrap">
+          <table class="screen-names-table">
+            <thead>
+              <tr>
+                <th scope="col">App screen</th>
+                <th scope="col">Route</th>
+                <th scope="col">Screen name</th>
+                <th scope="col">Translation badges</th>
+              </tr>
+            </thead>
+            <tbody id="screen-routes-body"></tbody>
           </table>
         </div>
 

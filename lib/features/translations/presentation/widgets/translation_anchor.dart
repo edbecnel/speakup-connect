@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:speakup_connect/features/translations/presentation/providers/translation_mode_provider.dart';
+import 'package:speakup_connect/features/translations/presentation/providers/translation_screens_provider.dart';
+import 'package:speakup_connect/features/translations/presentation/utils/translation_route_utils.dart';
 import 'package:speakup_connect/features/translations/presentation/widgets/translation_edit_sheet.dart';
 
 /// Marks a localized string for in-context translation when [translationModeProvider]
@@ -38,6 +41,12 @@ class TranslationAnchor extends ConsumerWidget {
     );
 
     if (!mode.isActive) return textWidget;
+
+    final badgeRoutes = ref.watch(translationBadgeEnabledRoutesProvider);
+    final route = currentTranslationRoute(GoRouter.of(context));
+    if (!isTranslationBadgeRouteEnabled(badgeRoutes, route)) {
+      return textWidget;
+    }
 
     final hasEdit = mode.sessionEdits.containsKey(stringKey);
 

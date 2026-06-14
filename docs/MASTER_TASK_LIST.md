@@ -583,8 +583,9 @@ Suggested implementation order: **i18n → messaging → parents** (messaging is
 - [ ] Translation Helper: **Translate missing (AI)** + per-row re-draft; no direct browser → provider calls
 - [x] Filter/search by feature, missing keys, review status
 - [x] In-app Translation Workspace (`/admin/translations`) for org admins and translation moderators
-- [x] In-app translation mode (MVP) — browse app, EN/target toggle, session review → Firestore; badges on Home, Settings, Login
-- [ ] Expand in-context badges to all screens
+- [x] In-app translation mode — browse app, EN/target toggle, session review → Firestore; admin-configurable badges per app screen (Screen names)
+- [x] Screen names registry — CRUD, route assignment, string `context`, Translation badges toggle (app + web)
+- [ ] Expand `TranslationAnchor` instrumentation to more screens in code
 - [ ] Phase 2: Firestore-backed workflow (`languages/{code}/strings` + export job)
 
 **Cebuano (Bisaya) — 1st add-on**

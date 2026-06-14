@@ -2,7 +2,7 @@
   "name": "speakup-connect-functions",
   "description": "Firebase Cloud Functions for SpeakUp Connect",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && node -e \"require('fs').cpSync('src/data','lib/data',{recursive:true})\"",
     "build:watch": "tsc --watch",
     "serve": "npm run build && firebase emulators:start --only functions",
     "deploy": "firebase deploy --only functions",

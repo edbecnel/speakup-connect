@@ -10,6 +10,7 @@ import 'package:speakup_connect/features/announcements/presentation/screens/comp
 import 'package:speakup_connect/features/announcements/presentation/screens/my_announcements_screen.dart';
 import 'package:speakup_connect/features/translations/presentation/providers/translation_provider.dart';
 import 'package:speakup_connect/features/translations/presentation/screens/translation_session_review_screen.dart';
+import 'package:speakup_connect/features/translations/presentation/screens/translation_screen_names_screen.dart';
 import 'package:speakup_connect/features/translations/presentation/screens/translation_workspace_screen.dart';
 import 'package:speakup_connect/features/admin/presentation/screens/admin_branding_screen.dart';
 import 'package:speakup_connect/features/admin/presentation/screens/admin_dashboard_screen.dart';
@@ -147,6 +148,7 @@ GoRouter appRouter(Ref ref) {
             }
             if (!isReportTriageRoute && !profile.isAdmin) {
               if ((loc == Routes.translationWorkspace ||
+                      loc == Routes.translationScreenNames ||
                       loc == Routes.translationSessionReview) &&
                   ref.read(canManageTranslationsProvider)) {
                 // Translation moderators may access translation tools only.
@@ -459,6 +461,11 @@ GoRouter appRouter(Ref ref) {
         path: Routes.translationWorkspace,
         name: 'translationWorkspace',
         builder: (context, state) => const TranslationWorkspaceScreen(),
+      ),
+      GoRoute(
+        path: Routes.translationScreenNames,
+        name: 'translationScreenNames',
+        builder: (context, state) => const TranslationScreenNamesScreen(),
       ),
       GoRoute(
         path: Routes.translationSessionReview,

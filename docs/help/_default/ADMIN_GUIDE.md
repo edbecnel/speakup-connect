@@ -174,6 +174,27 @@ Platform operators import the English source key list. School staff focus on rev
 
 **Full workflow (setup → translate → export → app release):** [INTERNATIONALIZATION.md §11](../../INTERNATIONALIZATION.md#11-end-to-end-workflow-canonical)
 
+### Manage screen names and translation badges
+
+**Requires:** org admin **or** `manageTranslations`
+
+Use this to name app screens, tag translation strings for filtering, and control **where in-context edit badges appear** during translation mode.
+
+**Mobile app:** **Settings → Administration → Translations** → app bar **list icon** → **Screen names**
+
+**Web:** Translation Helper → **Screen names** tab (`tools/translation-helper/`)
+
+| Task | Action |
+|------|--------|
+| Add a screen name | Enter a name → **Add screen name** |
+| Rename | Edit the name → **Save** (updates string labels that used the old name) |
+| Assign to an app screen | In **Assign to app screen**, pick a screen name for each route |
+| Unassign | **(unassigned)** in the dropdown, or **Unassign route** on the catalog row |
+| Enable edit badges | Turn on **Translation badges** for an assigned route — globe badges appear on that screen in translation mode |
+| Tag a string | In the translation list (app or web), set **Screen name** on each row |
+
+**Rules:** One screen name per app route at a time. A name already assigned elsewhere must be unassigned before reuse. Badges only appear on routes where **Translation badges** is on **and** the string is wrapped for translation in app code (currently Home, Settings, Login key strings).
+
 ### Browse app in translation mode (in-context)
 
 **Requires:** org admin **or** `manageTranslations`
@@ -185,7 +206,7 @@ Use this when translators need to see **where** a label appears on a real screen
 3. Tap **Browse app in translation mode**.
 4. A banner appears at the top. The app opens in **English** first so you can read source meaning in context.
 5. Use the banner toggle **English | Bisaya / Cebuano** to preview the target language.
-6. On supported screens, tap the **globe badge** beside a label:
+6. On screens where **Translation badges** are enabled (see **Manage screen names and translation badges** above), tap the **globe badge** beside a label:
    - Read **English (source)** in the sheet.
    - Edit **Translation**; optionally enable **Approve**.
    - Tap **Save** — queued in your **session** (not on the server yet).
@@ -194,7 +215,7 @@ Use this when translators need to see **where** a label appears on a real screen
 
 **Where edits go:** Firestore `languages/{locale}/strings/{key}` as `in_review` or `approved`. They appear in the web **Translation Helper** after **Refresh**. To ship in the installed app, an org admin still **exports ARB** and releases a new build (see Phase E–G in the link above).
 
-**Coverage (MVP):** edit badges on key strings on **Home**, **Settings**, and **Login** only. Other screens respect the language toggle but most labels have no badge yet — use the list workspace above or the web Translation Helper.
+**Coverage:** Badge visibility is configured per app screen under **Screen names**. The language preview toggle still works on all screens; use the list workspace or web tool where badges are off.
 
 **Tips:** Exit with **X** on the banner (you are prompted if the session has unsaved edits). Edits use the same Firestore data as the list workspace and web tool.
 
@@ -205,7 +226,7 @@ Use this when translators need to see **where** a label appears on a real screen
 1. **Deploy translation Cloud Functions** (from the repo `functions/` folder):
 
    ```powershell
-   npx firebase-tools deploy --only functions:getTranslationWorkspaceAccess,functions:importTranslationSource,functions:listTranslationEntries,functions:saveTranslationEntry,functions:draftTranslation,functions:batchDraftTranslations,functions:exportTranslationArb
+   npx firebase-tools deploy --only functions:getTranslationWorkspaceAccess,functions:importTranslationSource,functions:listTranslationEntries,functions:saveTranslationEntry,functions:draftTranslation,functions:batchDraftTranslations,functions:exportTranslationArb,functions:listTranslationScreens,functions:createTranslationScreen,functions:updateTranslationScreen,functions:deleteTranslationScreen
    ```
 
 2. **Seed or update roles** so **`manageTranslations`** appears in the capability catalog:

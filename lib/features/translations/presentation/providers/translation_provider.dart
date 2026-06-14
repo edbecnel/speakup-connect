@@ -120,6 +120,22 @@ class TranslationWorkspaceNotifier
     await future;
   }
 
+  Future<void> saveContext({
+    required String stringKey,
+    required String? context,
+  }) async {
+    final ds = ref.read(translationRemoteDataSourceProvider);
+    await ds.saveEntry(
+      organizationId: _resolveOrganizationId(),
+      targetLocale: _locale,
+      stringKey: stringKey,
+      context: context,
+      updateContext: true,
+    );
+    ref.invalidateSelf();
+    await future;
+  }
+
   Future<void> draft(String stringKey) async {
     final ds = ref.read(translationRemoteDataSourceProvider);
     await ds.draftEntry(

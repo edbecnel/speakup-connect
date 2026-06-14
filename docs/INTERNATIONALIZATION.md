@@ -429,7 +429,7 @@ Complete once per Firebase project (or after adding translation callables). Deta
    cd ..
    Remove-Item Env:GOOGLE_APPLICATION_CREDENTIALS -ErrorAction SilentlyContinue
    $env:FUNCTIONS_DISCOVERY_TIMEOUT = "60"
-   npx firebase-tools deploy --only functions:getTranslationWorkspaceAccess,functions:importTranslationSource,functions:listTranslationEntries,functions:saveTranslationEntry,functions:draftTranslation,functions:batchDraftTranslations,functions:batchSaveAiDrafts,functions:batchApproveSavedTranslations,functions:exportTranslationArb
+   npx firebase-tools deploy --only functions:getTranslationWorkspaceAccess,functions:importTranslationSource,functions:listTranslationEntries,functions:saveTranslationEntry,functions:draftTranslation,functions:batchDraftTranslations,functions:batchSaveAiDrafts,functions:batchApproveSavedTranslations,functions:exportTranslationArb,functions:listTranslationScreens,functions:createTranslationScreen,functions:updateTranslationScreen,functions:deleteTranslationScreen
    ```
 
 2. **Optional — AI draft:** copy `functions/.env.example` → `functions/.env`, set `TRANSLATION_AI_API_KEY`, redeploy `draftTranslation` and `batchDraftTranslations`.
@@ -481,7 +481,7 @@ Org admins and moderators **cannot** import; they edit rows created by this step
 
 ### Phase D — Translate and review
 
-**Where:** Translation Helper web UI (`tools/translation-helper/`), **Settings → Administration → Translations** (list workspace), or **Browse app in translation mode** (in-context badges on pilot screens — Home, Settings, Login).
+**Where:** Translation Helper web UI (`tools/translation-helper/`), **Settings → Administration → Translations** (list workspace), or **Browse app in translation mode** (in-context badges on admin-configured app screens).
 
 **Status flow:** `missing` → `ai_draft` → `in_review` (saved/in-review) → `approved`
 
@@ -500,17 +500,49 @@ Use when reviewers need English meaning **on the real screen** before writing Ce
 
 | Step | Action |
 |------|--------|
+| 0 | **Screen names** — create names, assign to app routes, enable **Translation badges** (see below) |
 | 1 | **Settings → Translations** → target locale → **Browse app in translation mode** |
 | 2 | Banner toggle **English** ↔ target locale (preview) |
-| 3 | Tap **globe badge** on a labeled string → edit → **Save** (session queue) |
+| 3 | On badge-enabled screens, tap **globe badge** on a labeled string → edit → **Save** (session queue) |
 | 4 | Banner **Review** → **Save N edits to Firestore** (`languages/{locale}/strings/{key}`) |
 | 5 | Optional: continue in web Translation Helper → **Refresh** → approve → **Export ARB** (Phase E) |
 
-**MVP badge coverage:** Home, Settings, and Login key strings only. All other keys: list workspace or web tool. Session edits are device-local until step 4.
+**Badge coverage:** Org admins and translation moderators choose which app screens show edit badges via **Screen names** (app: **Translations → list icon**; web: **Screen names** tab). Only screens with **Translation badges** enabled display globe badges during translation mode. Developers must still wrap strings with `TranslationAnchor` in code — configuration controls visibility, not instrumentation. Screens without badges still respect the English/target preview toggle; use the list workspace or web tool to edit those strings.
 
 **Placeholder rules:** Keep `{name}`, `{count}`, and ICU plural blocks (`{count, plural, =1{…} other{…}}`) structurally identical to English; only translate human-readable words inside branches.
 
 **AI tips:** Single-row **AI draft** for retries. If batch AI times out, redeploy functions and use `$env:FUNCTIONS_DISCOVERY_TIMEOUT = "60"` when deploying.
+
+#### Screen names and translation badge configuration
+
+**Who:** org admin **or** `manageTranslations`.
+
+**Where:**
+
+| Surface | Path |
+|---------|------|
+| Mobile app | **Settings → Administration → Translations** → app bar **list icon** → **Screen names** |
+| Web Translation Helper | **Screen names** tab (after sign-in) |
+
+**Firestore:** `organizations/{orgId}/translationScreens/{screenId}` — fields: `name`, `assignedRoute`, `badgeEnabled`.
+
+| Task | How |
+|------|-----|
+| **Create** screen name | Add a name in the catalog (no route yet) |
+| **Rename** | Edit name → **Save** — updates string `context` values that used the old name |
+| **Delete** | Only when not assigned to a route |
+| **Assign to app screen** | Pick a screen name per route (one name ↔ one route) |
+| **Unassign** | Clears route and turns off badges for that name |
+| **Enable translation badges** | Toggle **Translation badges** on an assigned route — controls in-app globe badges during translation mode |
+| **Tag a string** | In translation workspace, set **Screen name** dropdown per row (`context` in Firestore) |
+
+**Rules:**
+
+- A screen name assigned to route A cannot be selected for route B until unassigned from A.
+- **Translation badges** can only be enabled when a screen name is assigned to a route.
+- Many translation strings may share the same screen name; badge gating is **per app route**, not per string.
+
+**Deploy (functions):** include `listTranslationScreens`, `createTranslationScreen`, `updateTranslationScreen`, `deleteTranslationScreen` when deploying translation callables (see Phase A).
 
 #### Human reviewer CSV workflow (Google Sheets)
 
@@ -610,6 +642,7 @@ Scripts: `tools/translation-helper/map-l10n-screens.js` (mapping logic), `tools/
 | Action | Translation moderator | Org admin | Platform super_admin |
 |--------|----------------------|-----------|----------------------|
 | Edit / Save / Approve | Yes | Yes | Yes |
+| Manage screen names & translation badges | Yes | Yes | Yes |
 | Browse app in translation mode (in-context) | Yes | Yes | Yes |
 | AI draft (single row) | Yes | Yes | Yes |
 | Save all AI drafts | Yes | Yes | Yes |
@@ -715,11 +748,13 @@ flowchart LR
 
 **Phase 1 (shipped):** Web UI at `tools/translation-helper/` + Cloud Functions (`importTranslationSource`, `listTranslationEntries`, `saveTranslationEntry`, `draftTranslation`, `batchDraftTranslations`, `exportTranslationArb`). See [tools/translation-helper/README.md](../tools/translation-helper/README.md).
 
-**Phase 1b (shipped):** In-app **Browse app in translation mode** — English/target preview toggle, globe badges on pilot screens (Home, Settings, Login), session review → Firestore. See §11 Phase D and Administrator Guide → **UI translations**.
+**Phase 1b (shipped):** In-app **Browse app in translation mode** — English/target preview toggle, session review → Firestore, admin-configurable translation badges per app screen. See §11 Phase D (in-app translation mode + screen names).
+
+**Phase 1c (shipped):** **Screen names** registry — CRUD, route assignment, per-string `context`, **Translation badges** toggle (app + web). See §11 → Screen names and translation badge configuration.
 
 **Phase 2:** Firestore `languages/{code}/strings/{key}` with `status`, `aiDraft`, `approvedValue`, `reviewedBy` — Translation Helper writes here; export job generates ARB for release.
 
-**Phase 3:** Expand in-context badges to all screens; optional live ARB preview without rebuild.
+**Phase 3:** Expand `TranslationAnchor` instrumentation to more screens in code; optional live ARB preview without rebuild.
 
 ### Export rules
 
@@ -921,7 +956,7 @@ Authoritative task list: **[MASTER_TASK_LIST.md → Epic 2.5](MASTER_TASK_LIST.m
 14. **CI key parity** for target ARBs + presentation-layer string lint  
 15. **Help content** — real Cebuano/Tagalog in `member_guide_ceb.md` / `member_guide_fil.md` (assets + docs)  
 16. **Widget tests** — `Locale('ceb')` / `Locale('fil')` smoke on auth + home  
-17. **Expand in-context translation mode** — badges on remaining screens (phase 3)  
+17. **Expand `TranslationAnchor` in code** — wrap strings on additional screens (badges are admin-enabled per route in Screen names)  
 18. **Cloud Functions push i18n** — localized notification templates (phase 2)  
 19. **(Optional) Firestore OTA overlay** — `languages/{code}/strings` hotfixes  
 

@@ -9,6 +9,7 @@ import 'package:speakup_connect/core/l10n/app_localizations_extension.dart';
 import 'package:speakup_connect/core/l10n/locale_provider.dart';
 import 'package:speakup_connect/features/translations/presentation/providers/translation_mode_provider.dart';
 import 'package:speakup_connect/features/translations/presentation/providers/translation_provider.dart';
+import 'package:speakup_connect/features/translations/presentation/providers/translation_screens_provider.dart';
 import 'package:speakup_connect/shared/widgets/app_button.dart';
 import 'package:speakup_connect/shared/widgets/app_error_widget.dart';
 import 'package:speakup_connect/shared/widgets/app_loading_indicator.dart';
@@ -44,11 +45,19 @@ class _TranslationWorkspaceScreenState
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final workspaceAsync = ref.watch(translationWorkspaceProvider);
+    final screensAsync = ref.watch(translationScreensProvider);
 
     return Scaffold(
       appBar: AppBar(
         leading: BackButton(onPressed: () => context.pop()),
         title: Text(l10n.settingsTranslations),
+        actions: [
+          IconButton(
+            tooltip: l10n.translationScreenNamesManage,
+            icon: const Icon(Icons.view_list_outlined),
+            onPressed: () => context.push(Routes.translationScreenNames),
+          ),
+        ],
       ),
       body: workspaceAsync.when(
         skipLoadingOnReload: true,
@@ -61,6 +70,10 @@ class _TranslationWorkspaceScreenState
           final localeValue = state.allowedLocales.contains(state.locale)
               ? state.locale
               : state.allowedLocales.first;
+          final screenNames = screensAsync.maybeWhen(
+            data: (screensState) => screensState.sortedNames(),
+            orElse: () => const <TranslationScreenEntity>[],
+          );
 
           return Column(
             children: [
@@ -246,6 +259,14 @@ class _TranslationWorkspaceScreenState
                                 return _TranslationEntryCard(
                                   entry: entry,
                                   initialTarget: _displayTarget(entry),
+                                  screenNames: screenNames,
+                                  onContextChanged: (value) => ref
+                                      .read(translationWorkspaceProvider
+                                          .notifier)
+                                      .saveContext(
+                                        stringKey: stringKey,
+                                        context: value,
+                                      ),
                                   onSave: (value, approve) => ref
                                       .read(translationWorkspaceProvider
                                           .notifier)
@@ -275,14 +296,18 @@ class _TranslationEntryCard extends StatefulWidget {
   const _TranslationEntryCard({
     required this.entry,
     required this.initialTarget,
+    required this.screenNames,
     required this.onSave,
     required this.onDraft,
+    required this.onContextChanged,
   });
 
   final Map<String, dynamic> entry;
   final String initialTarget;
+  final List<TranslationScreenEntity> screenNames;
   final Future<void> Function(String value, bool approve) onSave;
   final Future<void> Function() onDraft;
+  final Future<void> Function(String? context) onContextChanged;
 
   @override
   State<_TranslationEntryCard> createState() => _TranslationEntryCardState();
@@ -290,12 +315,22 @@ class _TranslationEntryCard extends StatefulWidget {
 
 class _TranslationEntryCardState extends State<_TranslationEntryCard> {
   late final TextEditingController _controller;
+  late String? _selectedContext;
   var _busy = false;
 
   @override
   void initState() {
     super.initState();
     _controller = TextEditingController(text: widget.initialTarget);
+    final raw = widget.entry['context'] as String?;
+    _selectedContext = (raw != null && raw.trim().isNotEmpty) ? raw.trim() : null;
+  }
+
+  @override
+  void didUpdateWidget(covariant _TranslationEntryCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final raw = widget.entry['context'] as String?;
+    _selectedContext = (raw != null && raw.trim().isNotEmpty) ? raw.trim() : null;
   }
 
   @override
@@ -336,6 +371,32 @@ class _TranslationEntryCardState extends State<_TranslationEntryCard> {
                 color: theme.colorScheme.onSurfaceVariant,
               ),
               softWrap: true,
+            ),
+            const SizedBox(height: 12),
+            DropdownButtonFormField<String?>(
+              initialValue: _selectedContext,
+              decoration: InputDecoration(
+                labelText: l10n.translationStringScreenLabel,
+                border: const OutlineInputBorder(),
+              ),
+              items: [
+                DropdownMenuItem<String?>(
+                  value: null,
+                  child: Text(l10n.translationStringScreenNone),
+                ),
+                ...widget.screenNames.map(
+                  (screen) => DropdownMenuItem<String?>(
+                    value: screen.name,
+                    child: Text(screen.name),
+                  ),
+                ),
+              ],
+              onChanged: _busy
+                  ? null
+                  : (value) => _run(() async {
+                        setState(() => _selectedContext = value);
+                        await widget.onContextChanged(value);
+                      }),
             ),
             const SizedBox(height: 12),
             InputDecorator(

@@ -1638,6 +1638,47 @@
   "translationAiDraft": "AI draft",
   "translationApprove": "Approve",
 
+  "translationScreenNamesTitle": "Screen names",
+  "translationScreenNamesIntro": "Create screen names, assign each to one app screen, and tag translation strings for filtering. Enable translation badges per app screen to control where in-context editing appears in translation mode.",
+  "translationScreenNamesNewLabel": "New screen name",
+  "translationScreenNamesAdd": "Add screen name",
+  "translationScreenNamesCatalog": "Screen name catalog",
+  "translationScreenNamesEmpty": "No screen names yet.",
+  "translationScreenNamesNameLabel": "Screen name",
+  "translationScreenNamesAssignedRoute": "Assigned to: {route}",
+  "@translationScreenNamesAssignedRoute": {
+    "placeholders": {
+      "route": { "type": "String" }
+    }
+  },
+  "translationScreenNamesUnassignRoute": "Unassign route",
+  "translationScreenNamesRouteAssignment": "Assign to app screen",
+  "translationScreenNamesRouteHint": "Each app screen can have one screen name. Names already assigned elsewhere are hidden until unassigned. Turn on translation badges to show in-context edit badges on that screen during translation mode.",
+  "translationScreenNamesBadgesLabel": "Translation badges",
+  "translationScreenNamesBadgesHint": "Show edit badges in app translation mode",
+  "translationModeBadgesOffOnScreen": "Edit badges are off for this screen. Enable them under Screen names.",
+  "translationScreenNamesRouteDropdown": "Screen name",
+  "translationScreenNamesUnassigned": "(unassigned)",
+  "translationScreenNamesCreated": "Screen name created.",
+  "translationScreenNamesSaved": "Screen name saved.",
+  "translationScreenNamesRenamedCount": "Saved. Updated {count} string labels.",
+  "@translationScreenNamesRenamedCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "translationScreenNamesDeleteTitle": "Delete screen name?",
+  "translationScreenNamesDelete": "Delete",
+  "translationScreenNamesDeleteBody": "Delete \"{name}\"? Unassign from any app screen first.",
+  "@translationScreenNamesDeleteBody": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "translationScreenNamesManage": "Manage screen names",
+  "translationStringScreenLabel": "Screen name",
+  "translationStringScreenNone": "(none)",
+
   "translationModeStart": "Browse app in translation mode",
   "translationModeStartSubtitle": "Tap badges on screen text to edit translations in context",
   "translationModeBanner": "Translation mode — {locale}",

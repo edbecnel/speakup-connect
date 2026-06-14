@@ -4,6 +4,7 @@ import 'package:speakup_connect/core/l10n/locale_provider.dart';
 import 'package:speakup_connect/features/organization/presentation/providers/user_profile_provider.dart';
 import 'package:speakup_connect/features/translations/domain/translation_session_edit.dart';
 import 'package:speakup_connect/features/translations/presentation/providers/translation_provider.dart';
+import 'package:speakup_connect/features/translations/presentation/providers/translation_screens_provider.dart';
 
 class TranslationModeState {
   const TranslationModeState({
@@ -115,6 +116,7 @@ class TranslationModeNotifier extends Notifier<TranslationModeState> {
     );
 
     try {
+      await ref.read(translationScreensProvider.notifier).refresh();
       final ds = ref.read(translationRemoteDataSourceProvider);
       final entries = await ds.listEntries(
         organizationId: _resolveOrganizationId(),

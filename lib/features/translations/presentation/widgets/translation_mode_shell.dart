@@ -6,6 +6,8 @@ import 'package:speakup_connect/core/l10n/app_localizations_extension.dart';
 import 'package:speakup_connect/core/l10n/locale_provider.dart';
 import 'package:speakup_connect/core/router/app_navigator_key.dart';
 import 'package:speakup_connect/features/translations/presentation/providers/translation_mode_provider.dart';
+import 'package:speakup_connect/features/translations/presentation/providers/translation_screens_provider.dart';
+import 'package:speakup_connect/features/translations/presentation/utils/translation_route_utils.dart';
 
 /// Wraps the app when translation mode is active — shows banner and handles exit.
 ///
@@ -64,6 +66,11 @@ class TranslationModeShell extends ConsumerWidget {
         kLanguageNativeLabels[mode.targetLocale] ?? mode.targetLocale;
     final previewLabel =
         kLanguageNativeLabels[mode.previewLocale] ?? mode.previewLocale;
+    final badgeRoutes = ref.watch(translationBadgeEnabledRoutesProvider);
+    final navContext = _navigatorContext ?? context;
+    final currentRoute = currentTranslationRoute(GoRouter.of(navContext));
+    final badgesOnScreen =
+        isTranslationBadgeRouteEnabled(badgeRoutes, currentRoute);
 
     return SizedBox.expand(
       child: Column(
@@ -114,6 +121,13 @@ class TranslationModeShell extends ConsumerWidget {
                                   l10n.translationModeSessionEdited(
                                     mode.pendingCount,
                                   ),
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: theme.colorScheme.onPrimaryContainer,
+                                  ),
+                                )
+                              else if (!badgesOnScreen)
+                                Text(
+                                  l10n.translationModeBadgesOffOnScreen,
                                   style: theme.textTheme.bodySmall?.copyWith(
                                     color: theme.colorScheme.onPrimaryContainer,
                                   ),
