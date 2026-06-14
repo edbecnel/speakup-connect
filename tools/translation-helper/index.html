@@ -214,7 +214,7 @@
 
             <li>Upload the CSV to Google Sheets (or Excel). Share with your translator.</li>
 
-            <li>Translator edits the <strong>translation</strong> column; optional <strong>screen</strong>, <strong>notes</strong>, and <strong>verified</strong> columns support review. Keep <strong>key</strong> and ICU placeholders unchanged.</li>
+            <li>Translator edits the <strong>translation</strong> column; optional <strong>review</strong> (reviewer notes — shown in the <strong>Review</strong> column), <strong>verified</strong>, and <strong>screen</strong>. Keep <strong>key</strong> and ICU placeholders unchanged.</li>
 
             <li>Download the sheet as CSV (<em>File → Download → Comma-separated values</em> in Google Sheets).</li>
 
@@ -243,12 +243,13 @@
             <dd>Type to filter screen names (case-insensitive), for example <code>admin</code> shows all screens containing that text. Pick <strong>(no screen)</strong> for rows without context.</dd>
 
             <dt>Review</dt>
-
-            <dd>Filter rows by imported CSV <code>notes</code> / <code>verified</code> (session cache until Refresh).</dd>
+            <dd>Reviewer notes from CSV <strong>review</strong> column (session cache until Refresh).</dd>
+            <dt>Verified</dt>
+            <dd>Reviewer sign-off from CSV <strong>verified</strong> column (session cache until Refresh).</dd>
 
             <dt>Filters</dt>
 
-            <dd>Filter by <strong>Key</strong>, <strong>English</strong>, <strong>Target</strong>, <strong>Review</strong>, <strong>Status</strong>, <strong>Feature</strong>, or <strong>Screen</strong> (combine any of them). Use <strong>Clear filters</strong> to reset.</dd>
+            <dd>Filter by <strong>Key</strong>, <strong>English</strong>, <strong>Target</strong>, <strong>Review</strong>, <strong>Verified</strong>, <strong>Status</strong>, <strong>Feature</strong>, or <strong>Screen</strong> (combine any of them). Use <strong>Clear filters</strong> to reset.</dd>
 
             <dt>Refresh</dt>
 
@@ -634,18 +635,16 @@
 
             <input id="search-target" type="search" placeholder="Target…" aria-label="Filter by target text" />
 
-            <select id="review-filter" aria-label="Filter by review">
-
+            <select id="review-filter" aria-label="Filter by review notes">
               <option value="">All review</option>
+              <option value="has">Has review notes</option>
+              <option value="none">No review notes</option>
+            </select>
 
-              <option value="any">Has notes or verified</option>
-
-              <option value="notes">Has notes</option>
-
-              <option value="verified">Has verified</option>
-
-              <option value="none">No review data</option>
-
+            <select id="verified-filter" aria-label="Filter by verified">
+              <option value="">All verified</option>
+              <option value="has">Has verified</option>
+              <option value="none">No verified</option>
             </select>
 
             <select id="status-filter" aria-label="Filter by status">
@@ -681,6 +680,7 @@
               <col class="col-english" />
               <col class="col-target" />
               <col class="col-review" />
+              <col class="col-verified" />
               <col class="col-status" />
               <col class="col-actions" />
             </colgroup>
@@ -691,6 +691,7 @@
                 <th scope="col">English</th>
                 <th scope="col">Target</th>
                 <th scope="col">Review</th>
+                <th scope="col">Verified</th>
                 <th scope="col">Status</th>
                 <th scope="col">Actions</th>
               </tr>
@@ -708,6 +709,7 @@
               <col class="col-english" />
               <col class="col-target" />
               <col class="col-review" />
+              <col class="col-verified" />
               <col class="col-status" />
               <col class="col-actions" />
             </colgroup>

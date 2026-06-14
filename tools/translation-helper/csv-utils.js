@@ -117,7 +117,7 @@ const TRANSLATION_ALIASES = [
 ];
 const STATUS_ALIASES = ['status'];
 const SCREEN_ALIASES = ['screen', 'ui_screen', 'location', 'context'];
-const NOTES_ALIASES = ['notes', 'note', 'reviewer_notes', 'comment', 'comments'];
+const NOTES_ALIASES = ['review', 'notes', 'note', 'reviewer_notes', 'comment', 'comments'];
 const VERIFIED_ALIASES = ['verified', 'checked', 'reviewed'];
 
 /**

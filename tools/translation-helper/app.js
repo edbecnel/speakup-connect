@@ -55,6 +55,7 @@ const els = {
   featureFilter: document.getElementById('feature-filter'),
   screenFilter: document.getElementById('screen-filter'),
   reviewFilter: document.getElementById('review-filter'),
+  verifiedFilter: document.getElementById('verified-filter'),
   searchKey: document.getElementById('search-key'),
   searchEnglish: document.getElementById('search-english'),
   searchTarget: document.getElementById('search-target'),
@@ -259,19 +260,25 @@ function entryReviewMeta(entry) {
 
 function matchesReviewFilter(entry, reviewFilter) {
   if (!reviewFilter) return true;
-  const meta = entryReviewMeta(entry);
-  const hasNotes = Boolean(meta?.notes?.trim());
-  const hasVerified = Boolean(meta?.verified?.trim());
-  const hasAny = hasNotes || hasVerified;
+  const hasNotes = Boolean(entryReviewMeta(entry)?.notes?.trim());
   switch (reviewFilter) {
-    case 'any':
-      return hasAny;
-    case 'notes':
+    case 'has':
       return hasNotes;
-    case 'verified':
+    case 'none':
+      return !hasNotes;
+    default:
+      return true;
+  }
+}
+
+function matchesVerifiedFilter(entry, verifiedFilter) {
+  if (!verifiedFilter) return true;
+  const hasVerified = Boolean(entryReviewMeta(entry)?.verified?.trim());
+  switch (verifiedFilter) {
+    case 'has':
       return hasVerified;
     case 'none':
-      return !hasAny;
+      return !hasVerified;
     default:
       return true;
   }
@@ -328,6 +335,7 @@ function hasActiveTableFilters() {
     f.target ||
     els.statusFilter.value ||
     els.reviewFilter.value ||
+    els.verifiedFilter.value ||
     featureCombobox.getFilterValue() ||
     screenCombobox.getFilterValue(),
   );
@@ -339,6 +347,7 @@ function clearTableFilters() {
   els.searchTarget.value = '';
   els.statusFilter.value = '';
   els.reviewFilter.value = '';
+  els.verifiedFilter.value = '';
   featureCombobox.clear();
   screenCombobox.clear();
   els.clearFiltersBtn.disabled = true;
@@ -354,6 +363,7 @@ function renderTable() {
   const feature = featureCombobox.getFilterState();
   const screen = screenCombobox.getFilterState();
   const review = els.reviewFilter.value;
+  const verified = els.verifiedFilter.value;
   const { key: keyQ, english: englishQ, target: targetQ } = getSearchFilters();
 
   const filtered = entries.filter((e) => {
@@ -361,6 +371,7 @@ function renderTable() {
     if (!matchesFeatureFilter(e, feature)) return false;
     if (!matchesScreenFilter(e, screen)) return false;
     if (!matchesReviewFilter(e, review)) return false;
+    if (!matchesVerifiedFilter(e, verified)) return false;
     if (!matchesFilter(e.stringKey, keyQ)) return false;
     if (!matchesFilter(e.sourceValue, englishQ)) return false;
     const targetText = [e.targetValue, e.aiDraft].filter(Boolean).join(' ');
@@ -373,14 +384,14 @@ function renderTable() {
   els.entriesBody.innerHTML = filtered.map((entry) => {
     const val = displayValue(entry);
     const meta = importReviewMetaByKey.get(entry.stringKey);
-    const reviewBits = [];
-    if (meta?.notes) reviewBits.push(`<span class="review-label">Notes</span> ${escapeHtml(meta.notes)}`);
-    if (meta?.verified) {
-      reviewBits.push(`<span class="review-label">Verified</span> ${escapeHtml(meta.verified)}`);
-    }
-    const reviewHtml = reviewBits.length
-      ? `<div class="review-meta">${reviewBits.join('<br>')}</div>`
+    const reviewText = meta?.notes?.trim() ?? '';
+    const verifiedText = meta?.verified?.trim() ?? '';
+    const reviewHtml = reviewText
+      ? `<div class="review-meta">${escapeHtml(reviewText)}</div>`
       : '<span class="review-meta muted">—</span>';
+    const verifiedHtml = verifiedText
+      ? `<div class="verified-meta">${escapeHtml(verifiedText)}</div>`
+      : '<span class="verified-meta muted">—</span>';
     const screen = (entry.context ?? '').trim();
     return `
       <tr data-key="${entry.stringKey}">
@@ -392,6 +403,7 @@ function renderTable() {
           ${entry.aiDraftError ? `<div class="status error">${escapeHtml(entry.aiDraftError)}</div>` : ''}
         </td>
         <td class="review">${reviewHtml}</td>
+        <td class="verified">${verifiedHtml}</td>
         <td><span class="status-pill ${entry.status}">${entry.status}</span></td>
         <td class="actions">
           <button type="button" data-action="save" data-key="${entry.stringKey}">Save</button>
@@ -847,7 +859,7 @@ function exportCsv() {
       screen: entry.context ?? '',
       english: entry.sourceValue,
       translation: displayValue(entry),
-      notes: meta?.notes ?? '',
+      review: meta?.notes ?? '',
       verified: meta?.verified ?? '',
       status: entry.status,
     };
@@ -857,7 +869,7 @@ function exportCsv() {
     'screen',
     'english',
     'translation',
-    'notes',
+    'review',
     'verified',
     'status',
   ]);
@@ -985,6 +997,7 @@ els.signOutBtn.addEventListener('click', () => signOut(auth));
 els.targetLocale.addEventListener('change', () => loadEntries().catch(showError));
 els.statusFilter.addEventListener('change', renderTable);
 els.reviewFilter.addEventListener('change', renderTable);
+els.verifiedFilter.addEventListener('change', renderTable);
 for (const input of [els.searchKey, els.searchEnglish, els.searchTarget]) {
   input.addEventListener('input', () => {
     clearTimeout(searchTimer);

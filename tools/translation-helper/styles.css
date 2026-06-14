@@ -497,19 +497,20 @@ button.busy {
 
 .translations-table {
   width: 100%;
-  min-width: 52rem;
+  min-width: 56rem;
   border-collapse: collapse;
   font-size: 0.9rem;
   table-layout: fixed;
 }
 
-.translations-table col.col-key { width: 15%; }
-.translations-table col.col-screen { width: 11%; }
-.translations-table col.col-english { width: 18%; }
-.translations-table col.col-target { width: 22%; }
+.translations-table col.col-key { width: 14%; }
+.translations-table col.col-screen { width: 10%; }
+.translations-table col.col-english { width: 16%; }
+.translations-table col.col-target { width: 20%; }
 .translations-table col.col-review { width: 12%; }
-.translations-table col.col-status { width: 9%; }
-.translations-table col.col-actions { width: 13%; }
+.translations-table col.col-verified { width: 8%; }
+.translations-table col.col-status { width: 8%; }
+.translations-table col.col-actions { width: 12%; }
 
 .translations-table-head th {
   background: #eef1f8;
@@ -542,6 +543,8 @@ th { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.03em; color
 .key { font-family: ui-monospace, monospace; font-size: 0.82rem; word-break: break-all; }
 .screen { color: var(--muted); font-size: 0.82rem; }
 .review { font-size: 0.8rem; }
+.verified { font-size: 0.8rem; color: var(--muted); }
+.verified-meta { line-height: 1.35; }
 .review-meta { line-height: 1.35; }
 .review-label {
   color: var(--muted);

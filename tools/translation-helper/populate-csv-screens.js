@@ -1,18 +1,32 @@
 /**
- * Add or refresh the screen column in a translation CSV using codebase key→screen mapping.
+ * Refresh reviewer CSV columns: screen (from Dart usage), plus review/verified placeholders.
  *
  * Essential after app_en.arb is updated or new keys are added — run before sharing
  * the CSV with human reviewers.
  *
+ * Output columns: key, screen, english, translation, review, verified, status
+ * The review column feeds the Translation Helper Review column on CSV import.
+ *
  * Usage (from repo root):
  *   node tools/translation-helper/populate-csv-screens.js lib/l10n/ceb_translations.csv
  *
- * Mapping logic: map-l10n-screens.js (scans lib/**/*.dart for l10n key usage).
+ * Mapping logic: map-l10n-screens.js (scans lib Dart files for l10n key usage).
  * Docs: docs/INTERNATIONALIZATION.md §11 — Populate screen column for reviewer CSV
  */
 const fs = require('fs');
 const path = require('path');
 const { resolveScreen, keyToScreens } = require('./map-l10n-screens');
+
+/** Canonical reviewer CSV column order. */
+const CANONICAL_HEADERS = [
+  'key',
+  'screen',
+  'english',
+  'translation',
+  'review',
+  'verified',
+  'status',
+];
 
 function escapeCsvField(value) {
   const s = String(value ?? '');
@@ -89,6 +103,11 @@ function normalizeHeader(header) {
     .replace(/[\s-]+/g, '_');
 }
 
+/** @param {Record<string, string>} row */
+function reviewTextFromRow(row) {
+  return String(row.review ?? row.notes ?? '').trim();
+}
+
 function main() {
   const csvFile =
     process.argv[2] ||
@@ -101,19 +120,11 @@ function main() {
   }
 
   const headers = table[0].map(normalizeHeader);
-  const hasScreen = headers.includes('screen');
   const keyIdx = headers.indexOf('key');
   if (keyIdx < 0) {
     console.error('CSV must have a key column.');
     process.exit(1);
   }
-
-  const outHeaders = hasScreen
-    ? table[0]
-    : ['key', 'screen', ...table[0].slice(1)];
-
-  const normalizedOut = outHeaders.map(normalizeHeader);
-  const screenOutIdx = normalizedOut.indexOf('screen');
 
   const rows = [];
   let fromCode = 0;
@@ -121,11 +132,11 @@ function main() {
 
   for (let i = 1; i < table.length; i++) {
     const cells = table[i];
-    const row = {};
+    const raw = {};
     for (let c = 0; c < headers.length; c++) {
-      row[headers[c]] = cells[c] ?? '';
+      raw[headers[c]] = cells[c] ?? '';
     }
-    const key = String(row.key ?? '').trim();
+    const key = String(raw.key ?? '').trim();
     if (!key) continue;
 
     const screen = resolveScreen(key);
@@ -135,17 +146,21 @@ function main() {
       fromKey++;
     }
 
-    row.screen = screen;
-    rows.push(
-      Object.fromEntries(
-        normalizedOut.map((h) => [h, row[h] ?? '']),
-      ),
-    );
+    rows.push({
+      key,
+      screen,
+      english: raw.english ?? '',
+      translation: raw.translation ?? '',
+      review: reviewTextFromRow(raw),
+      verified: raw.verified ?? '',
+      status: raw.status ?? '',
+    });
   }
 
-  const csv = rowsToCsv(rows, normalizedOut);
+  const csv = rowsToCsv(rows, CANONICAL_HEADERS);
   fs.writeFileSync(csvFile, csv, 'utf8');
   console.log(`Updated ${rows.length} rows in ${csvFile}`);
+  console.log(`Columns: ${CANONICAL_HEADERS.join(', ')}`);
   console.log(`Screen labels: ${fromCode} from Dart usage, ${fromKey} from key heuristics.`);
 }
 
