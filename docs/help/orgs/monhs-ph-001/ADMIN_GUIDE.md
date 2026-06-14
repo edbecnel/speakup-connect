@@ -353,6 +353,20 @@ They will see **Settings → Administration → Translations** without gaining o
 
 Org admins may also run **Translate missing (AI)** for a whole language and **Export ARB (copy JSON)** when approved strings are ready for an app release. Translation moderators edit and approve individual strings only.
 
+### Browse app in translation mode (in-context)
+
+**Requires:** org admin **or** `manageTranslations`
+
+Best for MONHS Cebuano translators who need to see English labels **in place** on Home, Settings, or Login before writing Bisaya.
+
+1. **Settings → Administration → Translations** → choose **Bisaya / Cebuano**.
+2. Tap **Browse app in translation mode**.
+3. Banner toggle: **English** (read meaning) ↔ **Bisaya / Cebuano** (preview translation).
+4. Tap the **globe badge** on a labeled string → edit → **Save** (session queue).
+5. **Review** → **Save edits to Firestore**.
+
+Edits sync to the web **Translation Helper** (`tools/translation-helper/`, `ORGANIZATION_ID = monhs-ph-001`) after **Refresh**. Export ARB when ready for a new app build. Badge coverage is limited to pilot screens in the current release — use the list workspace for other strings.
+
 ### Platform setup (deployment lead only)
 
 **Audience:** SpeakUp Connect **deployment lead or developer** — not MONHS org admins. Complete once per Firebase environment before the in-app **Translations** workspace works for MONHS.

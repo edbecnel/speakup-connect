@@ -174,6 +174,30 @@ Platform operators import the English source key list. School staff focus on rev
 
 **Full workflow (setup → translate → export → app release):** [INTERNATIONALIZATION.md §11](../../INTERNATIONALIZATION.md#11-end-to-end-workflow-canonical)
 
+### Browse app in translation mode (in-context)
+
+**Requires:** org admin **or** `manageTranslations`
+
+Use this when translators need to see **where** a label appears on a real screen, not only in a searchable list.
+
+1. **Settings → Administration → Translations**
+2. Select the **target language** (for example **Bisaya / Cebuano**).
+3. Tap **Browse app in translation mode**.
+4. A banner appears at the top. The app opens in **English** first so you can read source meaning in context.
+5. Use the banner toggle **English | Bisaya / Cebuano** to preview the target language.
+6. On supported screens, tap the **globe badge** beside a label:
+   - Read **English (source)** in the sheet.
+   - Edit **Translation**; optionally enable **Approve**.
+   - Tap **Save** — queued in your **session** (not on the server yet).
+7. Tap **Review** in the banner when done.
+8. On the review screen, tap **Save N edits to Firestore**.
+
+**Where edits go:** Firestore `languages/{locale}/strings/{key}` as `in_review` or `approved`. They appear in the web **Translation Helper** after **Refresh**. To ship in the installed app, an org admin still **exports ARB** and releases a new build (see Phase E–G in the link above).
+
+**Coverage (MVP):** edit badges on key strings on **Home**, **Settings**, and **Login** only. Other screens respect the language toggle but most labels have no badge yet — use the list workspace above or the web Translation Helper.
+
+**Tips:** Exit with **X** on the banner (you are prompted if the session has unsaved edits). Edits use the same Firestore data as the list workspace and web tool.
+
 ### Platform setup (deployment lead only)
 
 **Audience:** SpeakUp Connect **deployment lead or developer** — not school org admins. Complete once per Firebase environment before the in-app **Translations** workspace and web Translation Helper will work.

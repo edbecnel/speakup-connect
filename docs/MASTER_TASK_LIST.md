@@ -583,7 +583,8 @@ Suggested implementation order: **i18n → messaging → parents** (messaging is
 - [ ] Translation Helper: **Translate missing (AI)** + per-row re-draft; no direct browser → provider calls
 - [x] Filter/search by feature, missing keys, review status
 - [x] In-app Translation Workspace (`/admin/translations`) for org admins and translation moderators
-- [ ] Phase 2: in-context preview (screenshots or Flutter web shell with callouts)
+- [x] In-app translation mode (MVP) — browse app, EN/target toggle, session review → Firestore; badges on Home, Settings, Login
+- [ ] Expand in-context badges to all screens
 - [ ] Phase 2: Firestore-backed workflow (`languages/{code}/strings` + export job)
 
 **Cebuano (Bisaya) — 1st add-on**
@@ -1079,7 +1080,8 @@ Optional expiration, notification history, broadcast management, full-screen det
 
 > Builds on [Translation Helper](INTERNATIONALIZATION.md#12-translation-helper-tool) (Epic 2.5). Cebuano + Tagalog ship in 2.5.
 
-- [ ] Translation Helper: in-context preview + completion dashboard (% approved per locale)
+- [x] Translation Helper: in-context preview (MVP — in-app translation mode; expand badge coverage)
+- [ ] Translation Helper: completion dashboard (% approved per locale)
 - [ ] Community / contractor interpreter accounts (language-scoped)
 - [ ] Additional language packs via same pipeline (Hiligaynon, Ilocano, Spanish, …)
 - [ ] Org-level language enablement (subset of platform languages)

@@ -481,7 +481,7 @@ Org admins and moderators **cannot** import; they edit rows created by this step
 
 ### Phase D — Translate and review
 
-**Where:** Translation Helper web UI (`tools/translation-helper/`) or **Settings → Administration → Translations** in the Flutter app.
+**Where:** Translation Helper web UI (`tools/translation-helper/`), **Settings → Administration → Translations** (list workspace), or **Browse app in translation mode** (in-context badges on pilot screens — Home, Settings, Login).
 
 **Status flow:** `missing` → `ai_draft` → `in_review` (saved/in-review) → `approved`
 
@@ -491,6 +491,22 @@ Org admins and moderators **cannot** import; they edit rows created by this step
 | 2 | **Save all AI drafts** | Org admin / moderator | Copies `ai_draft` → saved target as `in_review` |
 | 3 | Edit **Target** column if needed → **Save** | Anyone with access | `in_review` |
 | 4 | **Approve** (per row) or **Approve all saved/in-review** | Anyone with access | `approved` — ready for export |
+
+#### In-app translation mode (in-context, MVP)
+
+**Who:** org admin **or** `manageTranslations`.
+
+Use when reviewers need English meaning **on the real screen** before writing Cebuano/Tagalog.
+
+| Step | Action |
+|------|--------|
+| 1 | **Settings → Translations** → target locale → **Browse app in translation mode** |
+| 2 | Banner toggle **English** ↔ target locale (preview) |
+| 3 | Tap **globe badge** on a labeled string → edit → **Save** (session queue) |
+| 4 | Banner **Review** → **Save N edits to Firestore** (`languages/{locale}/strings/{key}`) |
+| 5 | Optional: continue in web Translation Helper → **Refresh** → approve → **Export ARB** (Phase E) |
+
+**MVP badge coverage:** Home, Settings, and Login key strings only. All other keys: list workspace or web tool. Session edits are device-local until step 4.
 
 **Placeholder rules:** Keep `{name}`, `{count}`, and ICU plural blocks (`{count, plural, =1{…} other{…}}`) structurally identical to English; only translate human-readable words inside branches.
 
@@ -594,6 +610,7 @@ Scripts: `tools/translation-helper/map-l10n-screens.js` (mapping logic), `tools/
 | Action | Translation moderator | Org admin | Platform super_admin |
 |--------|----------------------|-----------|----------------------|
 | Edit / Save / Approve | Yes | Yes | Yes |
+| Browse app in translation mode (in-context) | Yes | Yes | Yes |
 | AI draft (single row) | Yes | Yes | Yes |
 | Save all AI drafts | Yes | Yes | Yes |
 | Translate missing (AI batch) | No | Yes | Yes |
@@ -698,9 +715,11 @@ flowchart LR
 
 **Phase 1 (shipped):** Web UI at `tools/translation-helper/` + Cloud Functions (`importTranslationSource`, `listTranslationEntries`, `saveTranslationEntry`, `draftTranslation`, `batchDraftTranslations`, `exportTranslationArb`). See [tools/translation-helper/README.md](../tools/translation-helper/README.md).
 
+**Phase 1b (shipped):** In-app **Browse app in translation mode** — English/target preview toggle, globe badges on pilot screens (Home, Settings, Login), session review → Firestore. See §11 Phase D and Administrator Guide → **UI translations**.
+
 **Phase 2:** Firestore `languages/{code}/strings/{key}` with `status`, `aiDraft`, `approvedValue`, `reviewedBy` — Translation Helper writes here; export job generates ARB for release.
 
-**Phase 3:** In-context preview wired to Flutter web build with locale override.
+**Phase 3:** Expand in-context badges to all screens; optional live ARB preview without rebuild.
 
 ### Export rules
 
@@ -902,7 +921,7 @@ Authoritative task list: **[MASTER_TASK_LIST.md → Epic 2.5](MASTER_TASK_LIST.m
 14. **CI key parity** for target ARBs + presentation-layer string lint  
 15. **Help content** — real Cebuano/Tagalog in `member_guide_ceb.md` / `member_guide_fil.md` (assets + docs)  
 16. **Widget tests** — `Locale('ceb')` / `Locale('fil')` smoke on auth + home  
-17. **Translation Helper in-context preview** (phase 2)  
+17. **Expand in-context translation mode** — badges on remaining screens (phase 3)  
 18. **Cloud Functions push i18n** — localized notification templates (phase 2)  
 19. **(Optional) Firestore OTA overlay** — `languages/{code}/strings` hotfixes  
 
