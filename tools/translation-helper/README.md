@@ -12,11 +12,12 @@ This README covers **setup commands and troubleshooting** only. The full transla
 ## What it does
 
 1. **Import** `lib/l10n/app_en.arb` (English source keys) — platform `super_admin` only
-2. **List / filter** strings by status, feature prefix, or search
+2. **List / filter** strings by status, feature, screen, review, or search
 3. **AI draft** single keys or all missing (`draftTranslation`, `batchDraftTranslations` Cloud Functions)
 4. **Review** — edit target text, mark `in_review` or `approved`
 5. **Export** downloadable `app_ceb.arb` / `app_fil.arb` JSON — org admin only
 6. **Export CSV** / **Import CSV** — spreadsheet handoff for human translators (all workspace editors)
+7. **`populate-csv-screens.js`** — refresh **`screen`** column in a reviewer CSV after `app_en.arb` changes (repo script; see §11 and Step 12)
 
 Workflow data lives in Firestore: `languages/{locale}/strings/{stringKey}`.
 
@@ -399,15 +400,26 @@ See **[INTERNATIONALIZATION.md §11 — Phase E–G](../docs/INTERNATIONALIZATIO
 
 ### Step 12 — Human translator via Google Sheets (optional)
 
-1. Click **Export CSV** for the target locale.
-2. Upload `app_ceb_translations.csv` (or `fil`) to Google Sheets and share with a translator.
-3. Translator edits the **translation** column; do not change **key** or ICU placeholders (`{name}`, etc.).
-4. Download the sheet as CSV from Google Sheets.
-5. Click **Import CSV** in the Translation Helper, confirm, then review imported rows.
-6. Approve strings in the workspace (or set `status` column to `approved` in the CSV before import).
-7. Org admin: **Export ARB** when ready for release (Step 11).
+1. Click **Export CSV** for the target locale (or use `lib/l10n/ceb_translations.csv` / `fil` equivalent in the repo).
+2. **Populate the `screen` column** (required after `app_en.arb` changes or new keys):
 
-**CSV columns:** `key`, `english` (reference), `translation` (required on import), `status` (optional: `in_review` or `approved`).
+   ```powershell
+   cd D:\Dev\Speakup-Connect
+   node tools/translation-helper/populate-csv-screens.js lib/l10n/ceb_translations.csv
+   ```
+
+   This scans Dart usage under `lib/` and fills **`screen`** so reviewers know where each string appears. Re-run whenever English keys are added or moved. See [INTERNATIONALIZATION.md §11 — Populate screen column](../docs/INTERNATIONALIZATION.md#populate-screen-column-for-reviewer-csv).
+
+3. Upload the CSV to Google Sheets (or Excel) and share with your translator.
+4. Translator edits **`translation`**; optional **`notes`**, **`verified`**, **`status`**. Keep **`key`** and ICU placeholders (`{name}`, etc.) unchanged.
+5. Download the sheet as CSV from Google Sheets.
+6. Click **Import CSV** in the Translation Helper, confirm, then review imported rows (`screen` → Firestore `context`; `notes` / `verified` are session-only until re-import).
+7. Approve strings in the workspace (or set `status` column to `approved` in the CSV before import).
+8. Org admin: **Export ARB** when ready for release (Step 11).
+
+**CSV columns:** `key`, `screen`, `english`, `translation`, `notes`, `verified`, `status` (last four optional except `translation` on import). Legacy four-column CSVs still work.
+
+**Scripts:** `map-l10n-screens.js` (key → screen map), `populate-csv-screens.js` (updates a CSV file in place).
 
 ---
 

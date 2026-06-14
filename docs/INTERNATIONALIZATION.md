@@ -462,6 +462,8 @@ Complete once per Firebase project (or after adding translation callables). Deta
 
 New keys are **not** in Cebuano/Tagalog until Phase C–G.
 
+**If you maintain a reviewer CSV in the repo** (e.g. `lib/l10n/ceb_translations.csv`), refresh the **`screen`** column after every `app_en.arb` change — see [Populate screen column](#populate-screen-column-for-reviewer-csv) below.
+
 ---
 
 ### Phase C — Import English source into Translation Helper
@@ -493,6 +495,58 @@ Org admins and moderators **cannot** import; they edit rows created by this step
 **Placeholder rules:** Keep `{name}`, `{count}`, and ICU plural blocks (`{count, plural, =1{…} other{…}}`) structurally identical to English; only translate human-readable words inside branches.
 
 **AI tips:** Single-row **AI draft** for retries. If batch AI times out, redeploy functions and use `$env:FUNCTIONS_DISCOVERY_TIMEOUT = "60"` when deploying.
+
+#### Human reviewer CSV workflow (Google Sheets)
+
+Use this when a translator works offline in a spreadsheet (no app access). Screenshots per screen supplement the sheet.
+
+| Step | Action | Who |
+|------|--------|-----|
+| 1 | **Export CSV** in Translation Helper (target locale `ceb` / `fil`), or refresh an existing repo CSV — see below | Org admin / moderator |
+| 2 | **Populate `screen` column** (essential after English keys change) | Developer or org admin |
+| 3 | Upload CSV to Google Sheets; share with translator | Org admin |
+| 4 | Translator edits **`translation`**; optional **`notes`**, **`verified`**, **`status`** | Translator |
+| 5 | Download sheet as CSV → **Import CSV** in Translation Helper | Org admin / moderator |
+| 6 | Review in workspace → **Approve** (or import with `status=approved`) | Org admin / moderator |
+| 7 | **Export ARB** → Phase F | Org admin |
+
+**CSV columns:** `key`, `screen`, `english`, `translation`, `notes`, `verified`, `status`
+
+| Column | Required on import | Persisted |
+|--------|-------------------|-----------|
+| `key`, `translation` | Yes | Firestore `targetValue` |
+| `screen` | No | Firestore `context` |
+| `status` | No (`in_review` default) | Firestore `status` |
+| `english` | No | Export only (reference) |
+| `notes`, `verified` | No | Browser session only — re-import CSV after **Refresh** |
+
+Old four-column CSVs (`key`, `english`, `translation`, `status`) still import correctly.
+
+#### Populate screen column for reviewer CSV
+
+**When:** After **`app_en.arb`** is updated (new keys, renamed keys, or keys moved to a different screen in Dart). Run this **before** sharing the CSV with a human reviewer so the **`screen`** column shows where each string appears.
+
+**What it does:** Scans `lib/**/*.dart` for `context.l10n.*` / `l10n.*` usage, maps each key to a human-readable screen name (e.g. `Admin Dashboard`, `Login`, `Shared`), and writes the **`screen`** column into your CSV. Keys only referenced indirectly fall back to key-name heuristics.
+
+From repo root:
+
+```powershell
+cd D:\Dev\Speakup-Connect
+node tools/translation-helper/populate-csv-screens.js lib/l10n/ceb_translations.csv
+```
+
+For Tagalog, use your `fil` CSV path instead. The script creates a `screen` column if missing, or overwrites existing `screen` values.
+
+**Typical loop after a feature adds English strings:**
+
+1. Phase B — add keys to `app_en.arb`, `flutter gen-l10n`, commit.
+2. Phase C — `super_admin` imports `app_en.arb` into Translation Helper.
+3. **Export CSV** from Translation Helper (or copy the repo CSV template).
+4. Run **`populate-csv-screens.js`** on that file.
+5. Share the CSV (+ screenshots) with the reviewer.
+6. After edits, **Import CSV** → translations and `screen` values sync to Firestore.
+
+Scripts: `tools/translation-helper/map-l10n-screens.js` (mapping logic), `tools/translation-helper/populate-csv-screens.js` (CSV writer).
 
 ---
 

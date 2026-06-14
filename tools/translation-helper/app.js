@@ -11,6 +11,7 @@ import {
   connectFunctionsEmulator,
 } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-functions.js';
 import { parseTranslationCsv, rowsToCsv } from './csv-utils.js';
+import { createFilterCombobox } from './filter-combobox.js';
 
 const config = window.FIREBASE_CONFIG;
 if (!config?.apiKey || config.apiKey === 'YOUR_API_KEY') {
@@ -52,6 +53,8 @@ const els = {
   targetLocale: document.getElementById('target-locale'),
   statusFilter: document.getElementById('status-filter'),
   featureFilter: document.getElementById('feature-filter'),
+  screenFilter: document.getElementById('screen-filter'),
+  reviewFilter: document.getElementById('review-filter'),
   searchKey: document.getElementById('search-key'),
   searchEnglish: document.getElementById('search-english'),
   searchTarget: document.getElementById('search-target'),
@@ -69,9 +72,27 @@ const els = {
   entriesBody: document.getElementById('entries-body'),
   helpPanel: document.getElementById('help-panel'),
   helpToggleBtn: document.getElementById('help-toggle-btn'),
+  headerCollapseBtn: document.getElementById('header-collapse-btn'),
+  operationsPanel: document.getElementById('operations-panel'),
+  tableWrap: document.getElementById('table-wrap'),
+  tableHeadWrap: document.getElementById('table-head-wrap'),
 };
 
+const featureCombobox = createFilterCombobox({
+  input: els.featureFilter,
+  list: document.getElementById('feature-filter-list'),
+  onFilter: () => renderTable(),
+});
+
+const screenCombobox = createFilterCombobox({
+  input: els.screenFilter,
+  list: document.getElementById('screen-filter-list'),
+  onFilter: () => renderTable(),
+});
+
 let entries = [];
+/** @type {Map<string, { notes: string, verified: string }>} Session cache for CSV review columns (not persisted). */
+let importReviewMetaByKey = new Map();
 let searchTimer;
 let workspaceAccess = {
   isPlatformSuperAdmin: false,
@@ -211,10 +232,65 @@ function parseFeature(key) {
 
 function updateFeatureFilter() {
   const features = [...new Set(entries.map((e) => parseFeature(e.stringKey)))].sort();
-  const current = els.featureFilter.value;
-  els.featureFilter.innerHTML = '<option value="">All</option>' +
-    features.map((f) => `<option value="${f}">${f}</option>`).join('');
-  if (features.includes(current)) els.featureFilter.value = current;
+  featureCombobox.setOptions(features.map((f) => ({ value: f, label: f })));
+}
+
+const SCREEN_FILTER_EMPTY = '__empty__';
+
+function updateScreenFilter() {
+  const screens = [
+    ...new Set(entries.map((e) => (e.context ?? '').trim())),
+  ].sort((a, b) => {
+    if (!a) return 1;
+    if (!b) return -1;
+    return a.localeCompare(b);
+  });
+  screenCombobox.setOptions(
+    screens.map((screen) => ({
+      value: screen || SCREEN_FILTER_EMPTY,
+      label: screen || '(no screen)',
+    })),
+  );
+}
+
+function entryReviewMeta(entry) {
+  return importReviewMetaByKey.get(entry.stringKey);
+}
+
+function matchesReviewFilter(entry, reviewFilter) {
+  if (!reviewFilter) return true;
+  const meta = entryReviewMeta(entry);
+  const hasNotes = Boolean(meta?.notes?.trim());
+  const hasVerified = Boolean(meta?.verified?.trim());
+  const hasAny = hasNotes || hasVerified;
+  switch (reviewFilter) {
+    case 'any':
+      return hasAny;
+    case 'notes':
+      return hasNotes;
+    case 'verified':
+      return hasVerified;
+    case 'none':
+      return !hasAny;
+    default:
+      return true;
+  }
+}
+
+function matchesFeatureFilter(entry, featureFilter) {
+  const text = typeof featureFilter === 'string' ? featureFilter : featureFilter.text;
+  if (!text) return true;
+  return parseFeature(entry.stringKey).toLowerCase().includes(text.toLowerCase());
+}
+
+function matchesScreenFilter(entry, screenFilter) {
+  const text = typeof screenFilter === 'string' ? screenFilter : screenFilter.text;
+  const selectedValue =
+    typeof screenFilter === 'string' ? '' : screenFilter.selectedValue;
+  if (!text) return true;
+  const screen = (entry.context ?? '').trim();
+  if (selectedValue === SCREEN_FILTER_EMPTY) return !screen;
+  return screen.toLowerCase().includes(text.toLowerCase());
 }
 
 function displayValue(entry) {
@@ -246,7 +322,15 @@ function getSearchFilters() {
 
 function hasActiveTableFilters() {
   const f = getSearchFilters();
-  return Boolean(f.key || f.english || f.target || els.statusFilter.value);
+  return Boolean(
+    f.key ||
+    f.english ||
+    f.target ||
+    els.statusFilter.value ||
+    els.reviewFilter.value ||
+    featureCombobox.getFilterValue() ||
+    screenCombobox.getFilterValue(),
+  );
 }
 
 function clearTableFilters() {
@@ -254,6 +338,9 @@ function clearTableFilters() {
   els.searchEnglish.value = '';
   els.searchTarget.value = '';
   els.statusFilter.value = '';
+  els.reviewFilter.value = '';
+  featureCombobox.clear();
+  screenCombobox.clear();
   els.clearFiltersBtn.disabled = true;
   renderTable();
 }
@@ -264,12 +351,16 @@ function updateClearFiltersButton() {
 
 function renderTable() {
   const status = els.statusFilter.value;
-  const feature = els.featureFilter.value;
+  const feature = featureCombobox.getFilterState();
+  const screen = screenCombobox.getFilterState();
+  const review = els.reviewFilter.value;
   const { key: keyQ, english: englishQ, target: targetQ } = getSearchFilters();
 
   const filtered = entries.filter((e) => {
     if (status && e.status !== status) return false;
-    if (feature && parseFeature(e.stringKey) !== feature) return false;
+    if (!matchesFeatureFilter(e, feature)) return false;
+    if (!matchesScreenFilter(e, screen)) return false;
+    if (!matchesReviewFilter(e, review)) return false;
     if (!matchesFilter(e.stringKey, keyQ)) return false;
     if (!matchesFilter(e.sourceValue, englishQ)) return false;
     const targetText = [e.targetValue, e.aiDraft].filter(Boolean).join(' ');
@@ -281,14 +372,26 @@ function renderTable() {
 
   els.entriesBody.innerHTML = filtered.map((entry) => {
     const val = displayValue(entry);
+    const meta = importReviewMetaByKey.get(entry.stringKey);
+    const reviewBits = [];
+    if (meta?.notes) reviewBits.push(`<span class="review-label">Notes</span> ${escapeHtml(meta.notes)}`);
+    if (meta?.verified) {
+      reviewBits.push(`<span class="review-label">Verified</span> ${escapeHtml(meta.verified)}`);
+    }
+    const reviewHtml = reviewBits.length
+      ? `<div class="review-meta">${reviewBits.join('<br>')}</div>`
+      : '<span class="review-meta muted">—</span>';
+    const screen = (entry.context ?? '').trim();
     return `
       <tr data-key="${entry.stringKey}">
         <td class="key">${entry.stringKey}<br><small>${parseFeature(entry.stringKey)}</small></td>
+        <td class="screen">${screen ? escapeHtml(screen) : '<span class="muted">—</span>'}</td>
         <td class="en">${escapeHtml(entry.sourceValue)}</td>
         <td>
           <textarea class="target-input" data-key="${entry.stringKey}">${escapeHtml(val)}</textarea>
           ${entry.aiDraftError ? `<div class="status error">${escapeHtml(entry.aiDraftError)}</div>` : ''}
         </td>
+        <td class="review">${reviewHtml}</td>
         <td><span class="status-pill ${entry.status}">${entry.status}</span></td>
         <td class="actions">
           <button type="button" data-action="save" data-key="${entry.stringKey}">Save</button>
@@ -301,6 +404,7 @@ function renderTable() {
   const approved = entries.filter((e) => e.status === 'approved').length;
   els.meta.textContent =
     `${entries.length} keys · ${approved} approved · showing ${filtered.length}`;
+  syncTranslationTableHeadScroll();
 }
 
 function escapeHtml(s) {
@@ -311,11 +415,15 @@ function escapeHtml(s) {
     .replace(/"/g, '&quot;');
 }
 
-async function loadEntries() {
+async function loadEntries({ clearReviewMeta = true, resetWorkspaceStatus = true } = {}) {
   setStatus('Loading…');
   const targetLocale = els.targetLocale.value;
   if (!targetLocale) {
     throw new Error('Select a target locale first.');
+  }
+  const hadReviewMeta = clearReviewMeta && importReviewMetaByKey.size > 0;
+  if (hadReviewMeta) {
+    importReviewMetaByKey.clear();
   }
   try {
     await refreshAccess();
@@ -324,9 +432,17 @@ async function loadEntries() {
     );
     entries = data.entries ?? [];
     updateFeatureFilter();
+    updateScreenFilter();
     renderTable();
     setStatus(`Signed in as ${auth.currentUser?.email}`, 'ok');
-    setWorkspaceStatus('', '');
+    if (hadReviewMeta) {
+      setWorkspaceStatus(
+        'Notes and verified columns cleared. Re-import CSV to restore them.',
+        'ok',
+      );
+    } else if (resetWorkspaceStatus) {
+      setWorkspaceStatus('', '');
+    }
   } catch (err) {
     console.error('loadEntries failed', err);
     throw err;
@@ -724,13 +840,27 @@ function exportCsv() {
     return;
   }
   const locale = els.targetLocale.value;
-  const rows = entries.map((entry) => ({
-    key: entry.stringKey,
-    english: entry.sourceValue,
-    translation: displayValue(entry),
-    status: entry.status,
-  }));
-  const csv = rowsToCsv(rows, ['key', 'english', 'translation', 'status']);
+  const rows = entries.map((entry) => {
+    const meta = importReviewMetaByKey.get(entry.stringKey);
+    return {
+      key: entry.stringKey,
+      screen: entry.context ?? '',
+      english: entry.sourceValue,
+      translation: displayValue(entry),
+      notes: meta?.notes ?? '',
+      verified: meta?.verified ?? '',
+      status: entry.status,
+    };
+  });
+  const csv = rowsToCsv(rows, [
+    'key',
+    'screen',
+    'english',
+    'translation',
+    'notes',
+    'verified',
+    'status',
+  ]);
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
@@ -763,6 +893,14 @@ async function importCsvFile(file) {
     return;
   }
 
+  for (const row of rows) {
+    const notes = row.notes?.trim() ?? '';
+    const verified = row.verified?.trim() ?? '';
+    if (notes || verified) {
+      importReviewMetaByKey.set(row.key, { notes, verified });
+    }
+  }
+
   setWorkspaceStatus(`Importing ${rows.length} translations from CSV…`);
   let updated = 0;
   let skipped = 0;
@@ -771,11 +909,17 @@ async function importCsvFile(file) {
 
   try {
     for (let i = 0; i < rows.length; i += CSV_IMPORT_CHUNK) {
-      const chunk = rows.slice(i, i + CSV_IMPORT_CHUNK).map((row) => ({
-        key: row.key,
-        translation: row.translation,
-        status: row.status === 'approved' ? 'approved' : 'in_review',
-      }));
+      const chunk = rows.slice(i, i + CSV_IMPORT_CHUNK).map((row) => {
+        /** @type {{ key: string, translation: string, status: string, context?: string }} */
+        const entry = {
+          key: row.key,
+          translation: row.translation,
+          status: row.status === 'approved' ? 'approved' : 'in_review',
+        };
+        const screen = row.screen?.trim();
+        if (screen) entry.context = screen;
+        return entry;
+      });
       const { data } = await call('importTranslationTargets')(
         await callPayload({
           targetLocale: els.targetLocale.value,
@@ -812,7 +956,7 @@ async function importCsvFile(file) {
     throw err;
   }
 
-  await loadEntries();
+  await loadEntries({ clearReviewMeta: false, resetWorkspaceStatus: false });
 }
 
 els.signInBtn.addEventListener('click', async () => {
@@ -840,7 +984,7 @@ els.signOutBtn.addEventListener('click', () => signOut(auth));
 
 els.targetLocale.addEventListener('change', () => loadEntries().catch(showError));
 els.statusFilter.addEventListener('change', renderTable);
-els.featureFilter.addEventListener('change', renderTable);
+els.reviewFilter.addEventListener('change', renderTable);
 for (const input of [els.searchKey, els.searchEnglish, els.searchTarget]) {
   input.addEventListener('input', () => {
     clearTimeout(searchTimer);
@@ -907,9 +1051,13 @@ function showError(err) {
 
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
+    setWorkspaceActive(false);
     els.workspace.classList.add('hidden');
     els.signOutBtn.classList.add('hidden');
     els.helpToggleBtn?.classList.add('hidden');
+    if (els.authSection?.tagName === 'DETAILS') {
+      els.authSection.open = true;
+    }
     setStatus('Not signed in');
     return;
   }
@@ -928,14 +1076,44 @@ onAuthStateChanged(auth, async (user) => {
     );
     return;
   }
+  setWorkspaceActive(true);
   els.workspace.classList.remove('hidden');
   els.signOutBtn.classList.remove('hidden');
   els.helpToggleBtn?.classList.remove('hidden');
+  if (els.authSection?.tagName === 'DETAILS') {
+    els.authSection.open = false;
+  }
   try {
     await loadEntries();
   } catch (err) {
     showError(err);
   }
+});
+
+function syncTranslationTableHeadScroll() {
+  if (!els.tableWrap || !els.tableHeadWrap) return;
+  const headTable = els.tableHeadWrap.querySelector('table');
+  if (!headTable) return;
+  headTable.style.transform = `translateX(-${els.tableWrap.scrollLeft}px)`;
+}
+
+els.tableWrap?.addEventListener('scroll', syncTranslationTableHeadScroll, { passive: true });
+
+function setWorkspaceActive(active) {
+  document.body.classList.toggle('workspace-active', active);
+}
+
+function setHeaderCollapsed(collapsed) {
+  document.body.classList.toggle('header-collapsed', collapsed);
+  if (!els.headerCollapseBtn) return;
+  els.headerCollapseBtn.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+  els.headerCollapseBtn.title = collapsed ? 'Expand header' : 'Collapse header';
+  const label = els.headerCollapseBtn.querySelector('.header-collapse-label');
+  if (label) label.textContent = collapsed ? 'Expand' : 'Collapse';
+}
+
+els.headerCollapseBtn?.addEventListener('click', () => {
+  setHeaderCollapsed(!document.body.classList.contains('header-collapsed'));
 });
 
 els.helpToggleBtn?.addEventListener('click', () => {

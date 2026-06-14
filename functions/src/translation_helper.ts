@@ -761,7 +761,7 @@ export const importTranslationTargets = onCall(
       const access = await resolveTranslationAccess(request, { targetLocale });
       const uid = access.uid;
       const entries = request.data?.['entries'] as
-        | Array<{ key: string; translation: string; status?: string }>
+        | Array<{ key: string; translation: string; status?: string; context?: string }>
         | undefined;
 
       if (!targetLocale || !Array.isArray(entries) || entries.length === 0) {
@@ -775,6 +775,7 @@ export const importTranslationTargets = onCall(
         key: string;
         translation: string;
         status: TranslationStatus;
+        context?: string;
       }> = [];
       for (const entry of entries) {
         const key = entry.key?.trim();
@@ -790,7 +791,13 @@ export const importTranslationTargets = onCall(
             `Invalid status "${entry.status}" for key ${key}. Use in_review or approved.`,
           );
         }
-        validEntries.push({ key, translation, status });
+        const context = entry.context?.trim();
+        validEntries.push({
+          key,
+          translation,
+          status,
+          ...(context ? { context } : {}),
+        });
       }
 
       if (validEntries.length === 0) {
@@ -857,6 +864,9 @@ export const importTranslationTargets = onCall(
           }
           if (entry.status === 'approved') {
             patch['reviewedBy'] = uid;
+          }
+          if (entry.context) {
+            patch['context'] = entry.context;
           }
 
           batch.set(stringDocRef(targetLocale, entry.key), patch, { merge: true });

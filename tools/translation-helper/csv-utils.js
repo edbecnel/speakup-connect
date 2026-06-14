@@ -1,4 +1,4 @@
-/** @typedef {{ key: string, english?: string, translation: string, status?: string }} TranslationCsvRow */
+/** @typedef {{ key: string, screen?: string, english?: string, translation: string, notes?: string, verified?: string, status?: string }} TranslationCsvRow */
 
 /**
  * Escape a single CSV field (RFC 4180).
@@ -116,6 +116,9 @@ const TRANSLATION_ALIASES = [
   'message',
 ];
 const STATUS_ALIASES = ['status'];
+const SCREEN_ALIASES = ['screen', 'ui_screen', 'location', 'context'];
+const NOTES_ALIASES = ['notes', 'note', 'reviewer_notes', 'comment', 'comments'];
+const VERIFIED_ALIASES = ['verified', 'checked', 'reviewed'];
 
 /**
  * Parse translation CSV into row objects.
@@ -146,6 +149,9 @@ export function parseTranslationCsv(text) {
 
   const englishIdx = findColumnIndex(headers, ENGLISH_ALIASES);
   const statusIdx = findColumnIndex(headers, STATUS_ALIASES);
+  const screenIdx = findColumnIndex(headers, SCREEN_ALIASES);
+  const notesIdx = findColumnIndex(headers, NOTES_ALIASES);
+  const verifiedIdx = findColumnIndex(headers, VERIFIED_ALIASES);
 
   /** @type {TranslationCsvRow[]} */
   const rows = [];
@@ -167,6 +173,15 @@ export function parseTranslationCsv(text) {
     }
     if (statusIdx >= 0) {
       row.status = String(cells[statusIdx] ?? '').trim().toLowerCase();
+    }
+    if (screenIdx >= 0) {
+      row.screen = String(cells[screenIdx] ?? '').trim();
+    }
+    if (notesIdx >= 0) {
+      row.notes = String(cells[notesIdx] ?? '').trim();
+    }
+    if (verifiedIdx >= 0) {
+      row.verified = String(cells[verifiedIdx] ?? '').trim();
     }
     rows.push(row);
   }

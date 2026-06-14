@@ -1,304 +1,734 @@
 <!DOCTYPE html>
+
 <html lang="en">
+
 <head>
+
   <meta charset="UTF-8" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <title>SpeakUp Connect — Translation Helper</title>
+
   <link rel="icon" type="image/png" href="main_app_icon.png" />
+
   <link rel="stylesheet" href="styles.css" />
+
 </head>
+
 <body>
-<header>
-  <div class="header-row">
-    <div class="header-brand">
-      <img src="main_app_icon.png" alt="" class="header-brand-icon" width="36" height="36" />
-      <span class="header-brand-name">SpeakUp Connect</span>
-    </div>
-    <div class="header-title">
-      <h1>Translation Helper</h1>
-      <p class="subtitle">Edit and approve UI strings for your organization&rsquo;s languages</p>
-    </div>
-    <button type="button" id="help-toggle-btn" class="secondary header-btn hidden" aria-controls="help-panel" aria-expanded="false">
-      Help
-    </button>
-  </div>
-</header>
 
-  <section id="auth-section" class="panel">
-    <h2>Sign in</h2>
-    <p class="hint">Platform <code>super_admin</code>, org admin, or <code>manageTranslations</code> permission.</p>
-    <p class="hint">After sign-in, open <strong>Translation workspace help</strong> or click <strong>Help</strong> for editing instructions.</p>
-    <div class="row">
-      <input id="email" type="email" placeholder="Email" autocomplete="username" />
-      <div class="password-field">
-        <input id="password" type="password" placeholder="Password" autocomplete="current-password" />
+  <header class="site-header" id="site-header">
+
+    <div class="site-header-inner">
+
+      <div class="header-brand">
+
+        <img src="main_app_icon.png" alt="" class="header-brand-icon" width="36" height="36" />
+
+        <span class="header-brand-name">SpeakUp Connect</span>
+
+      </div>
+
+      <div class="header-title">
+
+        <h1>Translation Helper</h1>
+
+        <p class="subtitle">Edit and approve UI strings for your organization&rsquo;s languages</p>
+
+      </div>
+
+      <div class="header-actions">
+
         <button
+
           type="button"
-          id="password-toggle-btn"
-          class="password-toggle"
-          aria-label="Show password"
-          aria-pressed="false"
-          title="Show password"
+
+          id="header-collapse-btn"
+
+          class="secondary header-btn header-collapse-btn"
+
+          aria-controls="site-header"
+
+          aria-expanded="true"
+
+          title="Collapse header"
+
         >
-          <svg class="icon-eye" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-            <circle cx="12" cy="12" r="3"/>
-          </svg>
-          <svg class="icon-eye-off hidden" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
-            <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
-            <path d="M1 1l22 22"/>
-            <path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/>
-          </svg>
+
+          <span class="header-collapse-icon" aria-hidden="true">▲</span>
+
+          <span class="header-collapse-label">Collapse</span>
+
         </button>
+
+        <button type="button" id="help-toggle-btn" class="secondary header-btn hidden" aria-controls="help-panel" aria-expanded="false">
+
+          Help
+
+        </button>
+
       </div>
-      <button id="sign-in-btn" type="button">Sign in</button>
-      <button id="sign-out-btn" type="button" class="secondary hidden">Sign out</button>
+
     </div>
-    <p id="auth-status" class="status"></p>
-  </section>
 
-  <section id="workspace" class="hidden">
-    <details id="help-panel" class="panel help-panel">
-      <summary>Translation workspace help</summary>
-      <div class="help-body">
-        <p class="hint">
-          English is the source language. Your organization maintains other UI languages here
-          (for example <strong>Bisaya / Cebuano</strong> or <strong>Tagalog</strong>).
-          End users only pick which language they see in the mobile app &mdash; they do not edit strings here.
-        </p>
+  </header>
 
-        <h3>Quick start (translation moderator)</h3>
-        <ol>
-          <li>Select the <strong>Target locale</strong> for the language you are editing.</li>
-          <li>Use <strong>Filters</strong> (Key, English, Target, <strong>Status</strong>), or <strong>Feature</strong> to find strings.</li>
-          <li>Read the <strong>English</strong> column, then type your translation in the <strong>Target</strong> field.</li>
-          <li>Click <strong>Save</strong> to store as <em>in review</em>, or <strong>Approve</strong> when the wording is final.</li>
-          <li>Optional: <strong>AI draft</strong> on one row for a suggested first pass &mdash; always review before approving.</li>
-        </ol>
 
-        <h3 class="help-org-admin">Assign translation moderators</h3>
-        <p class="help-org-admin">
-          <strong>Org admins only.</strong> Delegates can edit translations without full admin access.
-          In the mobile app: <strong>Settings &rarr; Admin Dashboard &rarr; Roles &amp; Permissions</strong>.
-          Create or edit a role, enable <strong>Translation moderator (edit UI strings)</strong>
-          (<code>manageTranslations</code>), save, then <strong>Assign</strong> the role to an approved member.
-          They will see <strong>Settings &rarr; Administration &rarr; Translations</strong> in the app.
-        </p>
 
-        <h3>Human translator workflow (Google Sheets)</h3>
-        <ol>
-          <li>Select the target locale and click <strong>Export CSV</strong>.</li>
-          <li>Upload the CSV to Google Sheets (or Excel). Share with your translator.</li>
-          <li>Translator edits the <strong>translation</strong> column only; keep <strong>key</strong> and ICU placeholders unchanged.</li>
-          <li>Download the sheet as CSV (<em>File → Download → Comma-separated values</em> in Google Sheets).</li>
-          <li>Click <strong>Import CSV</strong>, choose the file, confirm, then review rows in the workspace.</li>
-          <li>Org admin: <strong>Export ARB</strong> when translations are approved for a release.</li>
-        </ol>
+  <main id="app-shell" class="app-shell">
 
-        <h3>Toolbar reference</h3>
-        <dl class="help-dl">
-          <dt>Target locale</dt>
-          <dd>Languages enabled for your organization. You cannot edit English here.</dd>
-          <dt>Feature</dt>
-          <dd>Filter by key prefix (for example <code>settings</code>, <code>auth</code>).</dd>
-          <dt>Filters</dt>
-          <dd>Filter by <strong>Key</strong>, <strong>English</strong>, <strong>Target</strong>, or <strong>Status</strong> (combine any of them). Use <strong>Clear filters</strong> to reset.</dd>
-          <dt>Refresh</dt>
-          <dd>Reload the list from the server.</dd>
-          <dt class="help-platform">Import <code>app_en.arb</code></dt>
-          <dd class="help-platform"><strong>Platform super-admin only.</strong> Upload English source keys from <code>lib/l10n/app_en.arb</code>.</dd>
-          <dt>Approve all saved/in-review</dt>
-          <dd>Sets every <code>in_review</code> row (saved target, not yet approved) to <code>approved</code> in one step.</dd>
-          <dt>Save all AI drafts</dt>
-          <dd>Copies every <code>ai_draft</code> into the saved target as <code>in_review</code> so you can review and approve in bulk.</dd>
-          <dt class="help-org-admin">Translate missing (AI)</dt>
-          <dd class="help-org-admin"><strong>Org admin only.</strong> Batch AI drafts for all missing strings in the selected locale.</dd>
-          <dt>Export CSV</dt>
-          <dd>
-            Download all strings as a spreadsheet-friendly CSV (<code>key</code>, <code>english</code>,
-            <code>translation</code>, <code>status</code>). Open in Google Sheets for offline human review.
-          </dd>
-          <dt>Import CSV</dt>
-          <dd>
-            Upload an edited CSV to update target translations in the workspace.
-            Rows need <code>key</code> and <code>translation</code> columns. Optional <code>status</code>:
-            <code>in_review</code> (default) or <code>approved</code>. Unknown keys are skipped;
-            placeholders like <code>{name}</code> must match English.
-          </dd>
-          <dt class="help-org-admin">Export ARB</dt>
-          <dd class="help-org-admin"><strong>Org admin only.</strong> Download approved strings as ARB JSON for app releases.</dd>
-        </dl>
+    <details id="auth-section" class="panel collapsible-section" open>
 
-        <h3>Row actions</h3>
-        <dl class="help-dl">
-          <dt>Save</dt>
-          <dd>Stores your edit with status <code>in_review</code>.</dd>
-          <dt>Approve</dt>
-          <dd>Marks the string <code>approved</code> and ready for export.</dd>
-          <dt>AI draft</dt>
-          <dd>Generates a machine suggestion for this row only. Review and edit before approving.</dd>
-        </dl>
+      <summary class="collapsible-summary">Sign in</summary>
 
-        <h3>Status values</h3>
-        <ul class="help-status-list">
-          <li><code>missing</code> &mdash; no target text yet</li>
-          <li><code>ai_draft</code> &mdash; AI suggestion present; needs human review</li>
-          <li><code>ai_draft_failed</code> &mdash; AI could not draft (often placeholder mismatch); edit manually</li>
-          <li><code>in_review</code> &mdash; human edit saved, not yet approved</li>
-          <li><code>approved</code> &mdash; final; included in ARB export</li>
-        </ul>
+      <div class="collapsible-body">
 
-        <h3>Placeholder rules</h3>
-        <p>
-          Keep ICU placeholders exactly as they appear in English, for example
-          <code>{name}</code>, <code>{count}</code>, or <code>{error}</code>.
-          Do not translate or remove curly-brace placeholders or the app may show broken text.
-        </p>
+        <p class="hint">Platform <code>super_admin</code>, org admin, or <code>manageTranslations</code> permission.</p>
 
-        <h3>Who can do what</h3>
-        <table class="help-table">
-          <thead>
-            <tr>
-              <th>Action</th>
-              <th>Translation moderator</th>
-              <th>Org admin</th>
-              <th>Platform super-admin</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Edit / Save / Approve</td>
-              <td>Yes</td>
-              <td>Yes</td>
-              <td>Yes</td>
-            </tr>
-            <tr>
-              <td>AI draft (single row)</td>
-              <td>Yes</td>
-              <td>Yes</td>
-              <td>Yes</td>
-            </tr>
-            <tr>
-              <td>Translate missing (AI batch)</td>
-              <td>No</td>
-              <td>Yes</td>
-              <td>Yes</td>
-            </tr>
-            <tr>
-              <td>Export CSV / Import CSV</td>
-              <td>Yes</td>
-              <td>Yes</td>
-              <td>Yes</td>
-            </tr>
-            <tr>
-              <td>Export ARB</td>
-              <td>No</td>
-              <td>Yes</td>
-              <td>Yes</td>
-            </tr>
-            <tr>
-              <td>Import English source</td>
-              <td>No</td>
-              <td>No</td>
-              <td>Yes</td>
-            </tr>
-          </tbody>
-        </table>
+        <p class="hint">After sign-in, open <strong>Translation workspace help</strong> or click <strong>Help</strong> for editing instructions.</p>
 
-        <h3 class="help-deployment-lead">Platform setup (deployment lead only)</h3>
-        <p class="help-deployment-lead hint">
-          <strong>Not for school org admins.</strong> One-time setup per Firebase environment before this tool and the in-app
-          <strong>Translations</strong> workspace work.
-        </p>
-        <ol class="help-deployment-lead">
-          <li>
-            Deploy Cloud Functions:
-            <code>npx firebase-tools deploy --only functions:getTranslationWorkspaceAccess,functions:importTranslationSource,functions:importTranslationTargets,functions:listTranslationEntries,functions:saveTranslationEntry,functions:draftTranslation,functions:batchDraftTranslations,functions:exportTranslationArb</code>
-          </li>
-          <li>Seed roles: <code>node scripts/seed_roles.js</code> (or add <code>manageTranslations</code> in Firestore manually).</li>
-          <li>Optional AI: set secret <code>TRANSLATION_AI_API_KEY</code>.</li>
-          <li>Platform <code>super_admin</code>: import <code>lib/l10n/app_en.arb</code> here; set <code>ORGANIZATION_ID</code> in <code>firebase-config.js</code> for org-scoped sign-in.</li>
-        </ol>
-        <p class="help-deployment-lead hint">
-          See <code>tools/translation-helper/README.md</code> and <strong>Help Center &rarr; Administrator Guide &rarr; Platform setup</strong> in the app.
-        </p>
+        <div class="row">
 
-        <p class="hint help-footer">
-          The in-app editor is at <strong>Settings &rarr; Administration &rarr; Translations</strong>.
-          Full administrator documentation is in the app <strong>Help Center &rarr; Administrator Guide</strong>.
-        </p>
+          <input id="email" type="email" placeholder="Email" autocomplete="username" />
+
+          <div class="password-field">
+
+            <input id="password" type="password" placeholder="Password" autocomplete="current-password" />
+
+            <button
+
+              type="button"
+
+              id="password-toggle-btn"
+
+              class="password-toggle"
+
+              aria-label="Show password"
+
+              aria-pressed="false"
+
+              title="Show password"
+
+            >
+
+              <svg class="icon-eye" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+
+                <circle cx="12" cy="12" r="3"/>
+
+              </svg>
+
+              <svg class="icon-eye-off hidden" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+
+                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+
+                <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+
+                <path d="M1 1l22 22"/>
+
+                <path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/>
+
+              </svg>
+
+            </button>
+
+          </div>
+
+          <button id="sign-in-btn" type="button">Sign in</button>
+
+          <button id="sign-out-btn" type="button" class="secondary hidden">Sign out</button>
+
+        </div>
+
+        <p id="auth-status" class="status"></p>
+
       </div>
+
     </details>
 
-    <div class="toolbar panel">
-      <div class="row wrap">
-        <label>
-          Target locale
-          <select id="target-locale">
-            <option value="ceb">ceb — Bisaya / Cebuano</option>
-            <option value="fil">fil — Tagalog</option>
-          </select>
-        </label>
-        <label>
-          Feature
-          <select id="feature-filter">
-            <option value="">All</option>
-          </select>
-        </label>
-      </div>
-      <div class="row wrap search-filters-row">
-        <span class="search-filters-label">Filters</span>
-        <input id="search-key" type="search" placeholder="Key…" aria-label="Filter by key" />
-        <input id="search-english" type="search" placeholder="English…" aria-label="Filter by English text" />
-        <input id="search-target" type="search" placeholder="Target…" aria-label="Filter by target text" />
-        <select id="status-filter" aria-label="Filter by status">
-          <option value="">All statuses</option>
-          <option value="missing">missing</option>
-          <option value="ai_draft">ai_draft</option>
-          <option value="ai_draft_failed">ai_draft_failed</option>
-          <option value="in_review">saved/in-review</option>
-          <option value="approved">approved</option>
-        </select>
-        <button id="clear-filters-btn" type="button" class="secondary" title="Clear all filters">Clear filters</button>
-      </div>
-      <div class="row wrap">
-        <label class="file-label">
-          Import <code>app_en.arb</code>
-          <input id="import-arb" type="file" accept=".arb,application/json" />
-        </label>
-        <button id="refresh-btn" type="button" class="secondary">Refresh</button>
-        <button id="approve-all-saved-btn" type="button" class="secondary">Approve all saved/in-review</button>
-        <button id="save-all-ai-drafts-btn" type="button" class="secondary">Save all AI drafts</button>
-        <button id="batch-ai-btn" type="button">Translate missing (AI)</button>
-        <button id="export-csv-btn" type="button" class="secondary">Export CSV</button>
-        <label class="file-label">
-          Import CSV
-          <input id="import-csv" type="file" accept=".csv,text/csv" />
-        </label>
-        <button id="export-btn" type="button" class="secondary">Export ARB</button>
-      </div>
-      <p id="workspace-status" class="status workspace-status" aria-live="polite"></p>
-      <p id="meta" class="meta"></p>
-    </div>
 
-    <div id="table-wrap" class="panel">
-      <table>
-        <thead>
-          <tr>
-            <th>Key</th>
-            <th>English</th>
-            <th>Target</th>
-            <th>Status</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody id="entries-body"></tbody>
-      </table>
-    </div>
-  </section>
+
+    <section id="workspace" class="workspace hidden">
+
+      <details id="help-panel" class="panel help-panel collapsible-section">
+
+        <summary class="collapsible-summary">Translation workspace help</summary>
+
+        <div class="help-body collapsible-body">
+
+          <p class="hint">
+
+            English is the source language. Your organization maintains other UI languages here
+
+            (for example <strong>Bisaya / Cebuano</strong> or <strong>Tagalog</strong>).
+
+            End users only pick which language they see in the mobile app &mdash; they do not edit strings here.
+
+          </p>
+
+
+
+          <h3>Quick start (translation moderator)</h3>
+
+          <ol>
+
+            <li>Select the <strong>Target locale</strong> for the language you are editing.</li>
+
+            <li>Use <strong>Filters</strong> (Key, English, Target, <strong>Status</strong>), or <strong>Feature</strong> to find strings.</li>
+
+            <li>Read the <strong>English</strong> column, then type your translation in the <strong>Target</strong> field.</li>
+
+            <li>Click <strong>Save</strong> to store as <em>in review</em>, or <strong>Approve</strong> when the wording is final.</li>
+
+            <li>Optional: <strong>AI draft</strong> on one row for a suggested first pass &mdash; always review before approving.</li>
+
+          </ol>
+
+
+
+          <h3 class="help-org-admin">Assign translation moderators</h3>
+
+          <p class="help-org-admin">
+
+            <strong>Org admins only.</strong> Delegates can edit translations without full admin access.
+
+            In the mobile app: <strong>Settings &rarr; Admin Dashboard &rarr; Roles &amp; Permissions</strong>.
+
+            Create or edit a role, enable <strong>Translation moderator (edit UI strings)</strong>
+
+            (<code>manageTranslations</code>), save, then <strong>Assign</strong> the role to an approved member.
+
+            They will see <strong>Settings &rarr; Administration &rarr; Translations</strong> in the app.
+
+          </p>
+
+
+
+          <h3>Human translator workflow (Google Sheets)</h3>
+
+          <ol>
+
+            <li>Select the target locale and click <strong>Export CSV</strong>.</li>
+
+            <li>Upload the CSV to Google Sheets (or Excel). Share with your translator.</li>
+
+            <li>Translator edits the <strong>translation</strong> column; optional <strong>screen</strong>, <strong>notes</strong>, and <strong>verified</strong> columns support review. Keep <strong>key</strong> and ICU placeholders unchanged.</li>
+
+            <li>Download the sheet as CSV (<em>File → Download → Comma-separated values</em> in Google Sheets).</li>
+
+            <li>Click <strong>Import CSV</strong>, choose the file, confirm, then review rows in the workspace.</li>
+
+            <li>Org admin: <strong>Export ARB</strong> when translations are approved for a release.</li>
+
+          </ol>
+
+
+
+          <h3>Toolbar reference</h3>
+
+          <dl class="help-dl">
+
+            <dt>Target locale</dt>
+
+            <dd>Languages enabled for your organization. You cannot edit English here.</dd>
+
+            <dt>Feature</dt>
+
+            <dd>Type to filter the list, then pick a feature prefix (for example <code>settings</code>, <code>auth</code>). Table rows match while you type.</dd>
+
+            <dt>Screen</dt>
+
+            <dd>Type to filter screen names (case-insensitive), for example <code>admin</code> shows all screens containing that text. Pick <strong>(no screen)</strong> for rows without context.</dd>
+
+            <dt>Review</dt>
+
+            <dd>Filter rows by imported CSV <code>notes</code> / <code>verified</code> (session cache until Refresh).</dd>
+
+            <dt>Filters</dt>
+
+            <dd>Filter by <strong>Key</strong>, <strong>English</strong>, <strong>Target</strong>, <strong>Review</strong>, <strong>Status</strong>, <strong>Feature</strong>, or <strong>Screen</strong> (combine any of them). Use <strong>Clear filters</strong> to reset.</dd>
+
+            <dt>Refresh</dt>
+
+            <dd>Reload the list from the server. Clears imported <code>notes</code> / <code>verified</code> columns — re-import CSV to restore them.</dd>
+
+            <dt class="help-platform">Import <code>app_en.arb</code></dt>
+
+            <dd class="help-platform"><strong>Platform super-admin only.</strong> Upload English source keys from <code>lib/l10n/app_en.arb</code>.</dd>
+
+            <dt>Approve all saved/in-review</dt>
+
+            <dd>Sets every <code>in_review</code> row (saved target, not yet approved) to <code>approved</code> in one step.</dd>
+
+            <dt>Save all AI drafts</dt>
+
+            <dd>Copies every <code>ai_draft</code> into the saved target as <code>in_review</code> so you can review and approve in bulk.</dd>
+
+            <dt class="help-org-admin">Translate missing (AI)</dt>
+
+            <dd class="help-org-admin"><strong>Org admin only.</strong> Batch AI drafts for all missing strings in the selected locale.</dd>
+
+            <dt>Export CSV</dt>
+
+            <dd>
+
+              Download all strings as a spreadsheet-friendly CSV (<code>key</code>, <code>screen</code>,
+
+              <code>english</code>, <code>translation</code>, <code>notes</code>, <code>verified</code>,
+
+              <code>status</code>). <code>screen</code> is stored in the workspace; <code>notes</code> and
+
+              <code>verified</code> are session-only until you re-import the CSV.
+
+            </dd>
+
+            <dt>Import CSV</dt>
+
+            <dd>
+
+              Upload an edited CSV to update target translations in the workspace.
+
+              Rows need <code>key</code> and <code>translation</code> columns. Optional:
+
+              <code>screen</code> (saved as workspace context), <code>status</code>
+
+              (<code>in_review</code> or <code>approved</code>), <code>notes</code> and
+
+              <code>verified</code> (browser session reference only). Unknown keys are skipped;
+
+              placeholders like <code>{name}</code> must match English.
+
+            </dd>
+
+            <dt class="help-org-admin">Export ARB</dt>
+
+            <dd class="help-org-admin"><strong>Org admin only.</strong> Download approved strings as ARB JSON for app releases.</dd>
+
+          </dl>
+
+
+
+          <h3>Row actions</h3>
+
+          <dl class="help-dl">
+
+            <dt>Save</dt>
+
+            <dd>Stores your edit with status <code>in_review</code>.</dd>
+
+            <dt>Approve</dt>
+
+            <dd>Marks the string <code>approved</code> and ready for export.</dd>
+
+            <dt>AI draft</dt>
+
+            <dd>Generates a machine suggestion for this row only. Review and edit before approving.</dd>
+
+          </dl>
+
+
+
+          <h3>Status values</h3>
+
+          <ul class="help-status-list">
+
+            <li><code>missing</code> &mdash; no target text yet</li>
+
+            <li><code>ai_draft</code> &mdash; AI suggestion present; needs human review</li>
+
+            <li><code>ai_draft_failed</code> &mdash; AI could not draft (often placeholder mismatch); edit manually</li>
+
+            <li><code>in_review</code> &mdash; human edit saved, not yet approved</li>
+
+            <li><code>approved</code> &mdash; final; included in ARB export</li>
+
+          </ul>
+
+
+
+          <h3>Placeholder rules</h3>
+
+          <p>
+
+            Keep ICU placeholders exactly as they appear in English, for example
+
+            <code>{name}</code>, <code>{count}</code>, or <code>{error}</code>.
+
+            Do not translate or remove curly-brace placeholders or the app may show broken text.
+
+          </p>
+
+
+
+          <h3>Who can do what</h3>
+
+          <table class="help-table">
+
+            <thead>
+
+              <tr>
+
+                <th>Action</th>
+
+                <th>Translation moderator</th>
+
+                <th>Org admin</th>
+
+                <th>Platform super-admin</th>
+
+              </tr>
+
+            </thead>
+
+            <tbody>
+
+              <tr>
+
+                <td>Edit / Save / Approve</td>
+
+                <td>Yes</td>
+
+                <td>Yes</td>
+
+                <td>Yes</td>
+
+              </tr>
+
+              <tr>
+
+                <td>AI draft (single row)</td>
+
+                <td>Yes</td>
+
+                <td>Yes</td>
+
+                <td>Yes</td>
+
+              </tr>
+
+              <tr>
+
+                <td>Translate missing (AI batch)</td>
+
+                <td>No</td>
+
+                <td>Yes</td>
+
+                <td>Yes</td>
+
+              </tr>
+
+              <tr>
+
+                <td>Export CSV / Import CSV</td>
+
+                <td>Yes</td>
+
+                <td>Yes</td>
+
+                <td>Yes</td>
+
+              </tr>
+
+              <tr>
+
+                <td>Export ARB</td>
+
+                <td>No</td>
+
+                <td>Yes</td>
+
+                <td>Yes</td>
+
+              </tr>
+
+              <tr>
+
+                <td>Import English source</td>
+
+                <td>No</td>
+
+                <td>No</td>
+
+                <td>Yes</td>
+
+              </tr>
+
+            </tbody>
+
+          </table>
+
+
+
+          <h3 class="help-deployment-lead">Platform setup (deployment lead only)</h3>
+
+          <p class="help-deployment-lead hint">
+
+            <strong>Not for school org admins.</strong> One-time setup per Firebase environment before this tool and the in-app
+
+            <strong>Translations</strong> workspace work.
+
+          </p>
+
+          <ol class="help-deployment-lead">
+
+            <li>
+
+              Deploy Cloud Functions:
+
+              <code>npx firebase-tools deploy --only functions:getTranslationWorkspaceAccess,functions:importTranslationSource,functions:importTranslationTargets,functions:listTranslationEntries,functions:saveTranslationEntry,functions:draftTranslation,functions:batchDraftTranslations,functions:exportTranslationArb</code>
+
+            </li>
+
+            <li>Seed roles: <code>node scripts/seed_roles.js</code> (or add <code>manageTranslations</code> in Firestore manually).</li>
+
+            <li>Optional AI: set secret <code>TRANSLATION_AI_API_KEY</code>.</li>
+
+            <li>Platform <code>super_admin</code>: import <code>lib/l10n/app_en.arb</code> here; set <code>ORGANIZATION_ID</code> in <code>firebase-config.js</code> for org-scoped sign-in.</li>
+
+          </ol>
+
+          <p class="help-deployment-lead hint">
+
+            See <code>tools/translation-helper/README.md</code> and <strong>Help Center &rarr; Administrator Guide &rarr; Platform setup</strong> in the app.
+
+          </p>
+
+
+
+          <p class="hint help-footer">
+
+            The in-app editor is at <strong>Settings &rarr; Administration &rarr; Translations</strong>.
+
+            Full administrator documentation is in the app <strong>Help Center &rarr; Administrator Guide</strong>.
+
+          </p>
+
+        </div>
+
+      </details>
+
+
+
+      <details id="operations-panel" class="panel collapsible-section operations-panel" open>
+
+        <summary class="collapsible-summary">Operations</summary>
+
+        <div class="collapsible-body">
+
+          <div class="row wrap">
+
+            <label class="file-label">
+
+              Import <code>app_en.arb</code>
+
+              <input id="import-arb" type="file" accept=".arb,application/json" />
+
+            </label>
+
+            <button id="refresh-btn" type="button" class="secondary">Refresh</button>
+
+            <button id="approve-all-saved-btn" type="button" class="secondary">Approve all saved/in-review</button>
+
+            <button id="save-all-ai-drafts-btn" type="button" class="secondary">Save all AI drafts</button>
+
+            <button id="batch-ai-btn" type="button">Translate missing (AI)</button>
+
+            <button id="export-csv-btn" type="button" class="secondary">Export CSV</button>
+
+            <label class="file-label">
+
+              Import CSV
+
+              <input id="import-csv" type="file" accept=".csv,text/csv" />
+
+            </label>
+
+            <button id="export-btn" type="button" class="secondary">Export ARB</button>
+
+          </div>
+
+          <p id="workspace-status" class="status workspace-status" aria-live="polite"></p>
+
+          <p id="meta" class="meta"></p>
+
+        </div>
+
+      </details>
+
+
+
+      <section id="translations-section" class="translations-section panel">
+
+        <details id="translations-filters-panel" class="translations-filters-panel collapsible-section" open>
+          <summary class="collapsible-summary translations-filters-summary">Filters</summary>
+          <div id="translations-filters" class="translations-filters collapsible-body">
+
+          <div class="row wrap filters-primary-row">
+
+            <label>
+
+              Target locale
+
+              <select id="target-locale">
+
+                <option value="ceb">ceb — Bisaya / Cebuano</option>
+
+                <option value="fil">fil — Tagalog</option>
+
+              </select>
+
+            </label>
+
+            <label class="filter-combobox-label">
+
+              Feature
+
+              <div class="filter-combobox">
+                <input
+                  type="search"
+                  id="feature-filter"
+                  class="filter-combobox-input"
+                  placeholder="All features"
+                  autocomplete="off"
+                  aria-autocomplete="list"
+                  aria-controls="feature-filter-list"
+                  aria-expanded="false"
+                />
+                <ul id="feature-filter-list" class="filter-combobox-list" role="listbox" hidden></ul>
+              </div>
+
+            </label>
+
+            <label class="filter-combobox-label">
+
+              Screen
+
+              <div class="filter-combobox">
+                <input
+                  type="search"
+                  id="screen-filter"
+                  class="filter-combobox-input"
+                  placeholder="All screens"
+                  autocomplete="off"
+                  aria-autocomplete="list"
+                  aria-controls="screen-filter-list"
+                  aria-expanded="false"
+                />
+                <ul id="screen-filter-list" class="filter-combobox-list" role="listbox" hidden></ul>
+              </div>
+
+            </label>
+
+          </div>
+
+          <div class="row wrap search-filters-row">
+
+            <span class="search-filters-label">Search</span>
+
+            <input id="search-key" type="search" placeholder="Key…" aria-label="Filter by key" />
+
+            <input id="search-english" type="search" placeholder="English…" aria-label="Filter by English text" />
+
+            <input id="search-target" type="search" placeholder="Target…" aria-label="Filter by target text" />
+
+            <select id="review-filter" aria-label="Filter by review">
+
+              <option value="">All review</option>
+
+              <option value="any">Has notes or verified</option>
+
+              <option value="notes">Has notes</option>
+
+              <option value="verified">Has verified</option>
+
+              <option value="none">No review data</option>
+
+            </select>
+
+            <select id="status-filter" aria-label="Filter by status">
+
+              <option value="">All statuses</option>
+
+              <option value="missing">missing</option>
+
+              <option value="ai_draft">ai_draft</option>
+
+              <option value="ai_draft_failed">ai_draft_failed</option>
+
+              <option value="in_review">saved/in-review</option>
+
+              <option value="approved">approved</option>
+
+            </select>
+
+            <button id="clear-filters-btn" type="button" class="secondary" title="Clear all filters">Clear filters</button>
+
+          </div>
+
+          </div>
+        </details>
+
+
+
+        <div id="table-head-wrap" class="translations-table-head-wrap">
+          <table class="translations-table translations-table-head">
+            <colgroup>
+              <col class="col-key" />
+              <col class="col-screen" />
+              <col class="col-english" />
+              <col class="col-target" />
+              <col class="col-review" />
+              <col class="col-status" />
+              <col class="col-actions" />
+            </colgroup>
+            <thead>
+              <tr>
+                <th scope="col">Key</th>
+                <th scope="col">Screen</th>
+                <th scope="col">English</th>
+                <th scope="col">Target</th>
+                <th scope="col">Review</th>
+                <th scope="col">Status</th>
+                <th scope="col">Actions</th>
+              </tr>
+            </thead>
+          </table>
+        </div>
+
+
+
+        <div id="table-wrap" class="translations-table-body-scroll">
+          <table class="translations-table translations-table-body">
+            <colgroup>
+              <col class="col-key" />
+              <col class="col-screen" />
+              <col class="col-english" />
+              <col class="col-target" />
+              <col class="col-review" />
+              <col class="col-status" />
+              <col class="col-actions" />
+            </colgroup>
+            <tbody id="entries-body"></tbody>
+          </table>
+        </div>
+
+      </section>
+
+    </section>
+
+  </main>
+
+
 
   <script src="firebase-config.js"></script>
+
   <script type="module" src="app.js"></script>
+
 </body>
+
 </html>
+
+
