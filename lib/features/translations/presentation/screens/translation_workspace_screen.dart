@@ -59,6 +59,11 @@ class _TranslationWorkspaceScreenState
             icon: const Icon(Icons.view_list_outlined),
             onPressed: () => context.push(Routes.translationScreenNames),
           ),
+          IconButton(
+            tooltip: l10n.translationScreensSummaryTooltip,
+            icon: const Icon(Icons.badge_outlined),
+            onPressed: () => context.push(Routes.translationScreensSummary),
+          ),
         ],
       ),
       body: workspaceAsync.when(

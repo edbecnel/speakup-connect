@@ -872,6 +872,50 @@
   "translationNoEntries": "Wala pa'y mga entry sa hubad. Una nga i-import sa mga operator sa plataporma ang app_en.arb.",
   "translationSearchHint": "Pangitaon ang mga yawe o Ingles nga teksto",
   "translationTargetLabel": "Pagsalin",
+  "translationScreensSummaryTitle": "Screens summary",
+  "translationScreensSummaryTooltip": "Screens summary",
+  "translationScreensSummaryBadgesOnlyLabel": "Show badges ON only",
+  "translationScreensSummaryCountsHint": "Counts reflect current locale and search filter.",
+  "translationScreensSummaryTotalRoutes": "Routes: {count}",
+  "@translationScreensSummaryTotalRoutes": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "translationScreensSummaryAssigned": "Assigned: {count}",
+  "@translationScreensSummaryAssigned": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "translationScreensSummaryBadgesOn": "Badges ON: {count}",
+  "@translationScreensSummaryBadgesOn": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "translationScreensSummaryUnknownRoutes": "Unknown: {count}",
+  "@translationScreensSummaryUnknownRoutes": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "translationScreensSummaryUnknownSection": "Unknown/custom routes",
+  "translationScreensSummaryUnknownSectionSubtitle": "{count} route(s) found in entries",
+  "@translationScreensSummaryUnknownSectionSubtitle": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "translationScreensSummaryUnassigned": "Unassigned",
+  "translationScreensSummaryBadgesOnChip": "Badges ON",
+  "translationScreensSummaryBadgesOffChip": "Badges OFF",
+  "translationScreensSummaryCountChip": "{count} strings",
+  "@translationScreensSummaryCountChip": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
   "translationModeStart": "Browse app in translation mode",
   "translationModeStartSubtitle": "Tap badges on screen text to edit translations in context",
   "translationModeBanner": "Translation mode — {locale}",

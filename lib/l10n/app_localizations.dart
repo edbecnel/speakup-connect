@@ -6151,6 +6151,90 @@ abstract class AppLocalizations {
   /// **'Manage screen names'**
   String get translationScreenNamesManage;
 
+  /// No description provided for @translationScreensSummaryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Screens summary'**
+  String get translationScreensSummaryTitle;
+
+  /// No description provided for @translationScreensSummaryTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Screens summary'**
+  String get translationScreensSummaryTooltip;
+
+  /// No description provided for @translationScreensSummaryBadgesOnlyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Show badges ON only'**
+  String get translationScreensSummaryBadgesOnlyLabel;
+
+  /// No description provided for @translationScreensSummaryCountsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Counts reflect current locale and search filter.'**
+  String get translationScreensSummaryCountsHint;
+
+  /// No description provided for @translationScreensSummaryTotalRoutes.
+  ///
+  /// In en, this message translates to:
+  /// **'Routes: {count}'**
+  String translationScreensSummaryTotalRoutes(int count);
+
+  /// No description provided for @translationScreensSummaryAssigned.
+  ///
+  /// In en, this message translates to:
+  /// **'Assigned: {count}'**
+  String translationScreensSummaryAssigned(int count);
+
+  /// No description provided for @translationScreensSummaryBadgesOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Badges ON: {count}'**
+  String translationScreensSummaryBadgesOn(int count);
+
+  /// No description provided for @translationScreensSummaryUnknownRoutes.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown: {count}'**
+  String translationScreensSummaryUnknownRoutes(int count);
+
+  /// No description provided for @translationScreensSummaryUnknownSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown/custom routes'**
+  String get translationScreensSummaryUnknownSection;
+
+  /// No description provided for @translationScreensSummaryUnknownSectionSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} route(s) found in entries'**
+  String translationScreensSummaryUnknownSectionSubtitle(int count);
+
+  /// No description provided for @translationScreensSummaryUnassigned.
+  ///
+  /// In en, this message translates to:
+  /// **'Unassigned'**
+  String get translationScreensSummaryUnassigned;
+
+  /// No description provided for @translationScreensSummaryBadgesOnChip.
+  ///
+  /// In en, this message translates to:
+  /// **'Badges ON'**
+  String get translationScreensSummaryBadgesOnChip;
+
+  /// No description provided for @translationScreensSummaryBadgesOffChip.
+  ///
+  /// In en, this message translates to:
+  /// **'Badges OFF'**
+  String get translationScreensSummaryBadgesOffChip;
+
+  /// No description provided for @translationScreensSummaryCountChip.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} strings'**
+  String translationScreensSummaryCountChip(int count);
+
   /// No description provided for @translationStringScreenLabel.
   ///
   /// In en, this message translates to:

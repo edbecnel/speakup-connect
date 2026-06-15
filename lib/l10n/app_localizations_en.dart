@@ -3563,6 +3563,61 @@ class AppLocalizationsEn extends AppLocalizations {
   String get translationScreenNamesManage => 'Manage screen names';
 
   @override
+  String get translationScreensSummaryTitle => 'Screens summary';
+
+  @override
+  String get translationScreensSummaryTooltip => 'Screens summary';
+
+  @override
+  String get translationScreensSummaryBadgesOnlyLabel => 'Show badges ON only';
+
+  @override
+  String get translationScreensSummaryCountsHint =>
+      'Counts reflect current locale and search filter.';
+
+  @override
+  String translationScreensSummaryTotalRoutes(int count) {
+    return 'Routes: $count';
+  }
+
+  @override
+  String translationScreensSummaryAssigned(int count) {
+    return 'Assigned: $count';
+  }
+
+  @override
+  String translationScreensSummaryBadgesOn(int count) {
+    return 'Badges ON: $count';
+  }
+
+  @override
+  String translationScreensSummaryUnknownRoutes(int count) {
+    return 'Unknown: $count';
+  }
+
+  @override
+  String get translationScreensSummaryUnknownSection => 'Unknown/custom routes';
+
+  @override
+  String translationScreensSummaryUnknownSectionSubtitle(int count) {
+    return '$count route(s) found in entries';
+  }
+
+  @override
+  String get translationScreensSummaryUnassigned => 'Unassigned';
+
+  @override
+  String get translationScreensSummaryBadgesOnChip => 'Badges ON';
+
+  @override
+  String get translationScreensSummaryBadgesOffChip => 'Badges OFF';
+
+  @override
+  String translationScreensSummaryCountChip(int count) {
+    return '$count strings';
+  }
+
+  @override
   String get translationStringScreenLabel => 'Screen name';
 
   @override

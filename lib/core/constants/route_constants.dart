@@ -72,6 +72,8 @@ abstract class Routes {
   static const String adminUserAssignments = '/admin/roles/assignments';
   static const String translationWorkspace = '/admin/translations';
   static const String translationScreenNames = '/admin/translations/screens';
+  static const String translationScreensSummary =
+      '/admin/translations/screens-summary';
   static const String translationSessionReview = '/admin/translations/session';
 
   // --- Helpers ---
