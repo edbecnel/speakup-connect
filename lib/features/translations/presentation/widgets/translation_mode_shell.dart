@@ -6,8 +6,6 @@ import 'package:speakup_connect/core/l10n/app_localizations_extension.dart';
 import 'package:speakup_connect/core/l10n/locale_provider.dart';
 import 'package:speakup_connect/core/router/app_navigator_key.dart';
 import 'package:speakup_connect/features/translations/presentation/providers/translation_mode_provider.dart';
-import 'package:speakup_connect/features/translations/presentation/providers/translation_screens_provider.dart';
-import 'package:speakup_connect/features/translations/presentation/utils/translation_route_utils.dart';
 
 /// Wraps the app when translation mode is active — shows banner and handles exit.
 ///
@@ -64,13 +62,6 @@ class TranslationModeShell extends ConsumerWidget {
     final theme = Theme.of(context);
     final targetLabel =
         kLanguageNativeLabels[mode.targetLocale] ?? mode.targetLocale;
-    final previewLabel =
-        kLanguageNativeLabels[mode.previewLocale] ?? mode.previewLocale;
-    final badgeRoutes = ref.watch(translationBadgeEnabledRoutesProvider);
-    final navContext = _navigatorContext ?? context;
-    final currentRoute = currentTranslationRoute(GoRouter.of(navContext));
-    final badgesOnScreen =
-        isTranslationBadgeRouteEnabled(badgeRoutes, currentRoute);
 
     return SizedBox.expand(
       child: Column(
@@ -80,7 +71,7 @@ class TranslationModeShell extends ConsumerWidget {
             child: SafeArea(
               bottom: false,
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+                padding: const EdgeInsets.fromLTRB(12, 6, 12, 6),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -93,46 +84,15 @@ class TranslationModeShell extends ConsumerWidget {
                         ),
                         const SizedBox(width: 8),
                         Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                l10n.translationModeBanner(targetLabel),
-                                style: theme.textTheme.titleSmall?.copyWith(
-                                  color: theme.colorScheme.onPrimaryContainer,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              Text(
-                                l10n.translationModeShowingPreview(previewLabel),
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: theme.colorScheme.onPrimaryContainer,
-                                ),
-                              ),
-                              if (mode.isLoadingEntries)
-                                Text(
-                                  l10n.translationModeLoadingEntries,
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    color: theme.colorScheme.onPrimaryContainer,
-                                  ),
-                                )
-                              else if (mode.pendingCount > 0)
-                                Text(
-                                  l10n.translationModeSessionEdited(
-                                    mode.pendingCount,
-                                  ),
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    color: theme.colorScheme.onPrimaryContainer,
-                                  ),
-                                )
-                              else if (!badgesOnScreen)
-                                Text(
-                                  l10n.translationModeBadgesOffOnScreen,
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    color: theme.colorScheme.onPrimaryContainer,
-                                  ),
-                                ),
-                            ],
+                          child: Text(
+                            l10n.translationModeBanner(targetLabel),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            softWrap: true,
+                            style: theme.textTheme.titleSmall?.copyWith(
+                              color: theme.colorScheme.onPrimaryContainer,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ),
                         if (mode.pendingCount > 0)
@@ -145,10 +105,25 @@ class TranslationModeShell extends ConsumerWidget {
                                 );
                               }
                             },
+                            style: TextButton.styleFrom(
+                              visualDensity: VisualDensity.compact,
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 6,
+                              ),
+                              minimumSize: const Size(0, 0),
+                            ),
                             child: Text(l10n.translationModeReviewSession),
                           ),
                         IconButton(
                           onPressed: () => _confirmExit(context, ref),
+                          visualDensity: VisualDensity.compact,
+                          padding: const EdgeInsets.all(6),
+                          constraints: const BoxConstraints(
+                            minWidth: 36,
+                            minHeight: 36,
+                          ),
                           icon: Icon(
                             Icons.close_rounded,
                             color: theme.colorScheme.onPrimaryContainer,
@@ -156,7 +131,7 @@ class TranslationModeShell extends ConsumerWidget {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 4),
                     SegmentedButton<String>(
                       segments: [
                         ButtonSegment<String>(
