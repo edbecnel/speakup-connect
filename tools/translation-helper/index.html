@@ -560,112 +560,24 @@
 
       <section id="translations-section" class="translations-section panel">
 
-        <details id="translations-filters-panel" class="translations-filters-panel collapsible-section" open>
-          <summary class="collapsible-summary translations-filters-summary">Filters</summary>
-          <div id="translations-filters" class="translations-filters collapsible-body">
-
-          <div class="row wrap filters-primary-row">
-
-            <label>
-
-              Target locale
-
-              <select id="target-locale">
-
-                <option value="ceb">ceb — Bisaya / Cebuano</option>
-
-                <option value="fil">fil — Tagalog</option>
-
-              </select>
-
-            </label>
-
-            <label class="filter-combobox-label">
-
-              Feature
-
-              <div class="filter-combobox">
-                <input
-                  type="search"
-                  id="feature-filter"
-                  class="filter-combobox-input"
-                  placeholder="All features"
-                  autocomplete="off"
-                  aria-autocomplete="list"
-                  aria-controls="feature-filter-list"
-                  aria-expanded="false"
-                />
-                <ul id="feature-filter-list" class="filter-combobox-list" role="listbox" hidden></ul>
-              </div>
-
-            </label>
-
-            <label class="filter-combobox-label">
-
-              Screen
-
-              <div class="filter-combobox">
-                <input
-                  type="search"
-                  id="screen-filter"
-                  class="filter-combobox-input"
-                  placeholder="All screens"
-                  autocomplete="off"
-                  aria-autocomplete="list"
-                  aria-controls="screen-filter-list"
-                  aria-expanded="false"
-                />
-                <ul id="screen-filter-list" class="filter-combobox-list" role="listbox" hidden></ul>
-              </div>
-
-            </label>
-
-          </div>
-
-          <div class="row wrap search-filters-row">
-
-            <span class="search-filters-label">Search</span>
-
-            <input id="search-key" type="search" placeholder="Key…" aria-label="Filter by key" />
-
-            <input id="search-english" type="search" placeholder="English…" aria-label="Filter by English text" />
-
-            <input id="search-target" type="search" placeholder="Target…" aria-label="Filter by target text" />
-
-            <select id="review-filter" aria-label="Filter by review notes">
-              <option value="">All review</option>
-              <option value="has">Has review notes</option>
-              <option value="none">No review notes</option>
+        <div class="row wrap filters-primary-row">
+          <label>
+            Target locale
+            <select id="target-locale">
+              <option value="ceb">ceb — Bisaya / Cebuano</option>
+              <option value="fil">fil — Tagalog</option>
             </select>
+          </label>
 
-            <select id="verified-filter" aria-label="Filter by verified">
-              <option value="">All verified</option>
-              <option value="has">Has verified</option>
-              <option value="none">No verified</option>
-            </select>
-
-            <select id="status-filter" aria-label="Filter by status">
-
-              <option value="">All statuses</option>
-
-              <option value="missing">missing</option>
-
-              <option value="ai_draft">ai_draft</option>
-
-              <option value="ai_draft_failed">ai_draft_failed</option>
-
-              <option value="in_review">saved/in-review</option>
-
-              <option value="approved">approved</option>
-
-            </select>
-
-            <button id="clear-filters-btn" type="button" class="secondary" title="Clear all filters">Clear filters</button>
-
-          </div>
-
-          </div>
-        </details>
+          <button
+            id="clear-filters-btn"
+            type="button"
+            class="secondary"
+            title="Clear all table filters"
+          >
+            Clear filters
+          </button>
+        </div>
 
 
 
@@ -681,18 +593,7 @@
               <col class="col-status" />
               <col class="col-actions" />
             </colgroup>
-            <thead>
-              <tr>
-                <th scope="col">Key</th>
-                <th scope="col">Screen</th>
-                <th scope="col">English</th>
-                <th scope="col">Target</th>
-                <th scope="col">Review</th>
-                <th scope="col">Verified</th>
-                <th scope="col">Status</th>
-                <th scope="col">Actions</th>
-              </tr>
-            </thead>
+            <thead id="entries-head"></thead>
           </table>
         </div>
 

@@ -11,7 +11,7 @@ import {
   connectFunctionsEmulator,
 } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-functions.js';
 import { parseTranslationCsv, rowsToCsv } from './csv-utils.js';
-import { createFilterCombobox } from './filter-combobox.js';
+import { createColumnHeaderFilter, matchesColumnFilter } from './column-filter.js';
 import { createScreenNamesPanel } from './screen-names.js';
 
 const config = window.FIREBASE_CONFIG;
@@ -54,14 +54,6 @@ const els = {
   signInBtn: document.getElementById('sign-in-btn'),
   signOutBtn: document.getElementById('sign-out-btn'),
   targetLocale: document.getElementById('target-locale'),
-  statusFilter: document.getElementById('status-filter'),
-  featureFilter: document.getElementById('feature-filter'),
-  screenFilter: document.getElementById('screen-filter'),
-  reviewFilter: document.getElementById('review-filter'),
-  verifiedFilter: document.getElementById('verified-filter'),
-  searchKey: document.getElementById('search-key'),
-  searchEnglish: document.getElementById('search-english'),
-  searchTarget: document.getElementById('search-target'),
   clearFiltersBtn: document.getElementById('clear-filters-btn'),
   importArb: document.getElementById('import-arb'),
   refreshBtn: document.getElementById('refresh-btn'),
@@ -73,6 +65,7 @@ const els = {
   importCsv: document.getElementById('import-csv'),
   meta: document.getElementById('meta'),
   workspaceStatus: document.getElementById('workspace-status'),
+  entriesHead: document.getElementById('entries-head'),
   entriesBody: document.getElementById('entries-body'),
   helpPanel: document.getElementById('help-panel'),
   helpToggleBtn: document.getElementById('help-toggle-btn'),
@@ -86,22 +79,9 @@ const els = {
   translationsSection: document.getElementById('translations-section'),
 };
 
-const featureCombobox = createFilterCombobox({
-  input: els.featureFilter,
-  list: document.getElementById('feature-filter-list'),
-  onFilter: () => renderTable(),
-});
-
-const screenCombobox = createFilterCombobox({
-  input: els.screenFilter,
-  list: document.getElementById('screen-filter-list'),
-  onFilter: () => renderTable(),
-});
-
 let entries = [];
 /** @type {Map<string, { notes: string, verified: string }>} Session cache for CSV review columns (not persisted). */
 let importReviewMetaByKey = new Map();
-let searchTimer;
 let workspaceAccess = {
   isPlatformSuperAdmin: false,
   organizationId: null,
@@ -109,6 +89,106 @@ let workspaceAccess = {
   canExportArb: false,
   canBatchAi: false,
 };
+
+const SCREEN_NONE_LABEL = '(no screen)';
+
+const STATUS_OPTIONS = [
+  'missing',
+  'ai_draft',
+  'ai_draft_failed',
+  'in_review',
+  'approved',
+];
+
+let renderTableScheduled = false;
+
+function scheduleRenderTable() {
+  if (renderTableScheduled) return;
+  renderTableScheduled = true;
+  requestAnimationFrame(() => {
+    renderTableScheduled = false;
+    renderTable();
+  });
+}
+
+const tableFilters = {
+  key: createColumnHeaderFilter({
+    columnLabel: 'Key',
+    getOptions: () =>
+      [...new Set(entries.map((e) => parseFeature(e.stringKey)))]
+        .sort((a, b) => a.localeCompare(b))
+        .map((feature) => ({ value: feature, label: feature })),
+    onFilter: () => scheduleRenderTable(),
+  }),
+  screen: createColumnHeaderFilter({
+    columnLabel: 'Screen',
+    getOptions: () => {
+      const screens = entries
+        .map((e) => (e.context ?? '').trim() || SCREEN_NONE_LABEL)
+        .filter(Boolean);
+      return [...new Set(screens)]
+        .sort((a, b) => a.localeCompare(b))
+        .map((screen) => ({ value: screen, label: screen }));
+    },
+    onFilter: () => scheduleRenderTable(),
+  }),
+  english: createColumnHeaderFilter({
+    columnLabel: 'English',
+    getOptions: () => [],
+    onFilter: () => scheduleRenderTable(),
+  }),
+  target: createColumnHeaderFilter({
+    columnLabel: 'Target',
+    getOptions: () => [],
+    onFilter: () => scheduleRenderTable(),
+  }),
+  review: createColumnHeaderFilter({
+    columnLabel: 'Review',
+    getOptions: () => [
+      { value: 'Has', label: 'Has' },
+      { value: 'None', label: 'None' },
+    ],
+    onFilter: () => scheduleRenderTable(),
+  }),
+  verified: createColumnHeaderFilter({
+    columnLabel: 'Verified',
+    getOptions: () => [
+      { value: 'Has', label: 'Has' },
+      { value: 'None', label: 'None' },
+    ],
+    onFilter: () => scheduleRenderTable(),
+  }),
+  status: createColumnHeaderFilter({
+    columnLabel: 'Status',
+    getOptions: () => STATUS_OPTIONS.map((s) => ({ value: s, label: s })),
+    onFilter: () => scheduleRenderTable(),
+  }),
+};
+
+function mountTranslationsTableHead() {
+  const head = els.entriesHead ?? document.getElementById('entries-head');
+  if (head && !els.entriesHead) {
+    els.entriesHead = head;
+  }
+  if (!head || head.querySelector('tr')) return;
+  const row = document.createElement('tr');
+  row.append(
+    tableFilters.key.th,
+    tableFilters.screen.th,
+    tableFilters.english.th,
+    tableFilters.target.th,
+    tableFilters.review.th,
+    tableFilters.verified.th,
+    tableFilters.status.th,
+    document.createElement('th'),
+  );
+  const actionsTh = row.children[row.children.length - 1];
+  actionsTh.textContent = 'Actions';
+  actionsTh.scope = 'col';
+  head.appendChild(row);
+}
+
+mountTranslationsTableHead();
 
 function resolveOrgIdFromConfig() {
   return workspaceAccess.organizationId || window.ORGANIZATION_ID || null;
@@ -247,73 +327,8 @@ function parseFeature(key) {
   return m ? m[1].toLowerCase() : 'other';
 }
 
-function updateFeatureFilter() {
-  const features = [...new Set(entries.map((e) => parseFeature(e.stringKey)))].sort();
-  featureCombobox.setOptions(features.map((f) => ({ value: f, label: f })));
-}
-
-const SCREEN_FILTER_EMPTY = '__empty__';
-
-function updateScreenFilter() {
-  const screens = [
-    ...new Set(entries.map((e) => (e.context ?? '').trim())),
-  ].sort((a, b) => {
-    if (!a) return 1;
-    if (!b) return -1;
-    return a.localeCompare(b);
-  });
-  screenCombobox.setOptions(
-    screens.map((screen) => ({
-      value: screen || SCREEN_FILTER_EMPTY,
-      label: screen || '(no screen)',
-    })),
-  );
-}
-
 function entryReviewMeta(entry) {
   return importReviewMetaByKey.get(entry.stringKey);
-}
-
-function matchesReviewFilter(entry, reviewFilter) {
-  if (!reviewFilter) return true;
-  const hasNotes = Boolean(entryReviewMeta(entry)?.notes?.trim());
-  switch (reviewFilter) {
-    case 'has':
-      return hasNotes;
-    case 'none':
-      return !hasNotes;
-    default:
-      return true;
-  }
-}
-
-function matchesVerifiedFilter(entry, verifiedFilter) {
-  if (!verifiedFilter) return true;
-  const hasVerified = Boolean(entryReviewMeta(entry)?.verified?.trim());
-  switch (verifiedFilter) {
-    case 'has':
-      return hasVerified;
-    case 'none':
-      return !hasVerified;
-    default:
-      return true;
-  }
-}
-
-function matchesFeatureFilter(entry, featureFilter) {
-  const text = typeof featureFilter === 'string' ? featureFilter : featureFilter.text;
-  if (!text) return true;
-  return parseFeature(entry.stringKey).toLowerCase().includes(text.toLowerCase());
-}
-
-function matchesScreenFilter(entry, screenFilter) {
-  const text = typeof screenFilter === 'string' ? screenFilter : screenFilter.text;
-  const selectedValue =
-    typeof screenFilter === 'string' ? '' : screenFilter.selectedValue;
-  if (!text) return true;
-  const screen = (entry.context ?? '').trim();
-  if (selectedValue === SCREEN_FILTER_EMPTY) return !screen;
-  return screen.toLowerCase().includes(text.toLowerCase());
 }
 
 function displayValue(entry) {
@@ -323,75 +338,63 @@ function displayValue(entry) {
   return '';
 }
 
-function normalizeSearchText(text) {
-  return String(text ?? '')
-    .toLowerCase()
-    .replace(/\s+/g, ' ')
-    .trim();
-}
-
-function matchesFilter(value, query) {
-  if (!query) return true;
-  return normalizeSearchText(value).includes(normalizeSearchText(query));
-}
-
-function getSearchFilters() {
-  return {
-    key: els.searchKey.value.trim().toLowerCase(),
-    english: els.searchEnglish.value.trim().toLowerCase(),
-    target: els.searchTarget.value.trim().toLowerCase(),
-  };
-}
-
 function hasActiveTableFilters() {
-  const f = getSearchFilters();
   return Boolean(
-    f.key ||
-    f.english ||
-    f.target ||
-    els.statusFilter.value ||
-    els.reviewFilter.value ||
-    els.verifiedFilter.value ||
-    featureCombobox.getFilterValue() ||
-    screenCombobox.getFilterValue(),
+    tableFilters.key.getValue() ||
+      tableFilters.screen.getValue() ||
+      tableFilters.english.getValue() ||
+      tableFilters.target.getValue() ||
+      tableFilters.review.getValue() ||
+      tableFilters.verified.getValue() ||
+      tableFilters.status.getValue(),
   );
 }
 
 function clearTableFilters() {
-  els.searchKey.value = '';
-  els.searchEnglish.value = '';
-  els.searchTarget.value = '';
-  els.statusFilter.value = '';
-  els.reviewFilter.value = '';
-  els.verifiedFilter.value = '';
-  featureCombobox.clear();
-  screenCombobox.clear();
-  els.clearFiltersBtn.disabled = true;
-  renderTable();
+  tableFilters.key.clear();
+  tableFilters.screen.clear();
+  tableFilters.english.clear();
+  tableFilters.target.clear();
+  tableFilters.review.clear();
+  tableFilters.verified.clear();
+  tableFilters.status.clear();
+  if (els.clearFiltersBtn) {
+    els.clearFiltersBtn.disabled = true;
+  }
 }
 
 function updateClearFiltersButton() {
+  if (!els.clearFiltersBtn) return;
   els.clearFiltersBtn.disabled = !hasActiveTableFilters();
 }
 
 function renderTable() {
-  const status = els.statusFilter.value;
-  const feature = featureCombobox.getFilterState();
-  const screen = screenCombobox.getFilterState();
-  const review = els.reviewFilter.value;
-  const verified = els.verifiedFilter.value;
-  const { key: keyQ, english: englishQ, target: targetQ } = getSearchFilters();
+  mountTranslationsTableHead();
+  const keyQ = tableFilters.key.getValue();
+  const screenQ = tableFilters.screen.getValue();
+  const englishQ = tableFilters.english.getValue();
+  const targetQ = tableFilters.target.getValue();
+  const reviewQ = tableFilters.review.getValue();
+  const verifiedQ = tableFilters.verified.getValue();
+  const statusQ = tableFilters.status.getValue();
 
   const filtered = entries.filter((e) => {
-    if (status && e.status !== status) return false;
-    if (!matchesFeatureFilter(e, feature)) return false;
-    if (!matchesScreenFilter(e, screen)) return false;
-    if (!matchesReviewFilter(e, review)) return false;
-    if (!matchesVerifiedFilter(e, verified)) return false;
-    if (!matchesFilter(e.stringKey, keyQ)) return false;
-    if (!matchesFilter(e.sourceValue, englishQ)) return false;
+    const feature = parseFeature(e.stringKey);
+    const screen = (e.context ?? '').trim() || SCREEN_NONE_LABEL;
+    const meta = entryReviewMeta(e);
+    const notes = meta?.notes?.trim() ?? '';
+    const verified = meta?.verified?.trim() ?? '';
+    const reviewCell = notes ? `Has ${notes}` : 'None';
+    const verifiedCell = verified ? `Has ${verified}` : 'None';
+
+    if (!matchesColumnFilter(`${e.stringKey} ${feature}`, keyQ)) return false;
+    if (!matchesColumnFilter(screen, screenQ)) return false;
+    if (!matchesColumnFilter(e.sourceValue, englishQ)) return false;
     const targetText = [e.targetValue, e.aiDraft].filter(Boolean).join(' ');
-    if (!matchesFilter(targetText, targetQ)) return false;
+    if (!matchesColumnFilter(targetText, targetQ)) return false;
+    if (!matchesColumnFilter(reviewCell, reviewQ)) return false;
+    if (!matchesColumnFilter(verifiedCell, verifiedQ)) return false;
+    if (!matchesColumnFilter(e.status, statusQ)) return false;
     return true;
   });
 
@@ -507,8 +510,6 @@ async function loadEntries({ clearReviewMeta = true, resetWorkspaceStatus = true
     } catch (screenErr) {
       console.warn('Screen names load failed', screenErr);
     }
-    updateFeatureFilter();
-    updateScreenFilter();
     renderTable();
     setStatus(`Signed in as ${auth.currentUser?.email}`, 'ok');
     if (hadReviewMeta) {
@@ -576,7 +577,7 @@ async function saveEntryContext(stringKey, contextValue) {
   if (entry) {
     entry.context = contextValue || null;
   }
-  updateScreenFilter();
+  scheduleRenderTable();
 }
 
 async function draftOne(stringKey) {
@@ -1111,17 +1112,8 @@ els.passwordToggleBtn?.addEventListener('click', () => {
 els.signOutBtn.addEventListener('click', () => signOut(auth));
 
 els.targetLocale.addEventListener('change', () => loadEntries().catch(showError));
-els.statusFilter.addEventListener('change', renderTable);
-els.reviewFilter.addEventListener('change', renderTable);
-els.verifiedFilter.addEventListener('change', renderTable);
-for (const input of [els.searchKey, els.searchEnglish, els.searchTarget]) {
-  input.addEventListener('input', () => {
-    clearTimeout(searchTimer);
-    searchTimer = setTimeout(renderTable, 200);
-  });
-}
-els.clearFiltersBtn.addEventListener('click', clearTableFilters);
-els.clearFiltersBtn.disabled = true;
+els.clearFiltersBtn?.addEventListener('click', clearTableFilters);
+if (els.clearFiltersBtn) els.clearFiltersBtn.disabled = true;
 els.refreshBtn.addEventListener('click', () => loadEntries().catch(showError));
 els.approveAllSavedBtn.addEventListener('click', () =>
   approveAllSaved().catch(showError),

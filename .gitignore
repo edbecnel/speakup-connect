@@ -16,6 +16,9 @@ tools/translation-helper/firebase-config.js
 migrate_working_dir/
 All .md files.md
 **/node_modules/
+/Temp/
+/temp/
+tools/translation-helper/hardcoded-report*.json
 
 # Temporary / backup files
 *~
