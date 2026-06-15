@@ -136,6 +136,22 @@ class TranslationWorkspaceNotifier
     await future;
   }
 
+  Future<void> saveRoute({
+    required String stringKey,
+    required String? route,
+  }) async {
+    final ds = ref.read(translationRemoteDataSourceProvider);
+    await ds.saveEntry(
+      organizationId: _resolveOrganizationId(),
+      targetLocale: _locale,
+      stringKey: stringKey,
+      route: route,
+      updateRoute: true,
+    );
+    ref.invalidateSelf();
+    await future;
+  }
+
   Future<void> draft(String stringKey) async {
     final ds = ref.read(translationRemoteDataSourceProvider);
     await ds.draftEntry(

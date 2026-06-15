@@ -76,6 +76,8 @@ class TranslationRemoteDataSource {
     String? status,
     String? context,
     bool updateContext = false,
+    String? route,
+    bool updateRoute = false,
   }) =>
       _call('saveTranslationEntry', _orgPayload(
         organizationId: organizationId,
@@ -85,6 +87,7 @@ class TranslationRemoteDataSource {
           if (targetValue != null) 'targetValue': targetValue,
           if (status != null) 'status': status,
           if (updateContext) 'context': context ?? '',
+          if (updateRoute) 'route': route ?? '',
         },
       ));
 
@@ -159,10 +162,22 @@ class TranslationRemoteDataSource {
     final screens = data['screens'];
     if (screens is! List) return [];
     return screens
-        .whereType<Map<String, dynamic>>()
+        .whereType<Map>()
         .map((e) => Map<String, dynamic>.from(e))
         .toList();
   }
+
+  Future<Map<String, dynamic>> seedScreensFromContexts({
+    required String organizationId,
+    bool assignRoutes = true,
+  }) =>
+      _call(
+        'seedTranslationScreensFromContexts',
+        _orgPayload(
+          organizationId: organizationId,
+          extra: {'assignRoutes': assignRoutes},
+        ),
+      );
 
   Future<Map<String, dynamic>> createScreen({
     required String organizationId,

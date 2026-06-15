@@ -2190,4 +2190,5 @@ export {
   updateTranslationScreen,
   deleteTranslationScreen,
   seedTranslationScreensFromContexts,
+  backfillTranslationEntryRoutesFromContexts,
 } from './translation_screens';

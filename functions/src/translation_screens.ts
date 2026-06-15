@@ -492,23 +492,15 @@ export const listTranslationScreens = onCall(async (request) => {
   const organizationId = resolveScreenOrganizationId(access, request);
 
   let snap = await screensRef(organizationId).orderBy('name').get();
-  let seededFromContexts: {
+  // NOTE: Under the canonical-route model, per-string `context` is no longer a
+  // screen-name field. Auto-seeding from contexts can create noise; keep seeding
+  // available via the explicit callable `seedTranslationScreensFromContexts`.
+  const seededFromContexts: {
     created: number;
     routesAssigned: number;
     contextCount: number;
   } | null = null;
-  let routesBackfilled = 0;
-
-  if (snap.empty) {
-    seededFromContexts = await seedScreensFromStringContexts(
-      organizationId,
-      access.uid,
-    );
-    routesBackfilled = seededFromContexts.routesAssigned;
-    if (seededFromContexts.created > 0) {
-      snap = await screensRef(organizationId).orderBy('name').get();
-    }
-  }
+  const routesBackfilled = 0;
 
   const screens = snap.docs.map((doc) =>
     screenForClient(doc.id, doc.data() as TranslationScreenDoc),
@@ -545,6 +537,152 @@ export const seedTranslationScreensFromContexts = onCall(async (request) => {
     assignableRoutes: loadAssignableRoutes(),
   };
 });
+
+export const backfillTranslationEntryRoutesFromContexts = onCall(
+  { timeoutSeconds: 300, memory: '512MiB' },
+  async (request) => {
+    const access = await resolveTranslationAccess(request, {});
+    const organizationId = resolveScreenOrganizationId(access, request);
+
+    const dryRun = request.data?.['dryRun'] === true;
+    const includeEnglish = request.data?.['includeEnglish'] === true;
+    const maxWritesRaw = request.data?.['maxWrites'];
+    const maxWrites =
+      typeof maxWritesRaw === 'number' && maxWritesRaw > 0
+        ? Math.floor(maxWritesRaw)
+        : undefined;
+
+    const localesRaw = request.data?.['locales'];
+    let locales: string[] | null = null;
+    if (Array.isArray(localesRaw) && localesRaw.length > 0) {
+      locales = localesRaw
+        .filter((v): v is string => typeof v === 'string')
+        .map((v) => v.trim())
+        .filter(Boolean);
+    }
+
+    const targetLocales = locales ?? (await orgTranslationLocales(organizationId));
+    const allLocales = includeEnglish
+      ? ['en', ...targetLocales.filter((l) => l !== 'en')]
+      : targetLocales;
+
+    const results: Array<{
+      locale: string;
+      scanned: number;
+      updated: number;
+      skippedWithRoute: number;
+      skippedNoContext: number;
+      skippedNoMatch: number;
+    }> = [];
+
+    let totalUpdated = 0;
+    let totalScanned = 0;
+    let remainingWrites = maxWrites ?? Number.POSITIVE_INFINITY;
+
+    for (const locale of allLocales) {
+      if (remainingWrites <= 0) break;
+
+      const snap = await db
+        .collection('languages')
+        .doc(locale)
+        .collection('strings')
+        .get();
+
+      let scanned = 0;
+      let updated = 0;
+      let skippedWithRoute = 0;
+      let skippedNoContext = 0;
+      let skippedNoMatch = 0;
+
+      let batch = db.batch();
+      let ops = 0;
+
+      const flush = async () => {
+        if (ops === 0) return;
+        if (!dryRun) await batch.commit();
+        batch = db.batch();
+        ops = 0;
+      };
+
+      for (const doc of snap.docs) {
+        if (remainingWrites <= 0) break;
+        const key = doc.id;
+        if (key.startsWith('@')) continue;
+
+        scanned++;
+        const data = doc.data();
+        const existingRoute = data['route'];
+        if (typeof existingRoute === 'string' && existingRoute.trim()) {
+          skippedWithRoute++;
+          continue;
+        }
+
+        const ctx = data['context'];
+        if (typeof ctx !== 'string' || !ctx.trim()) {
+          skippedNoContext++;
+          continue;
+        }
+
+        const computed = routeForScreenName(ctx.trim());
+        if (!computed) {
+          skippedNoMatch++;
+          continue;
+        }
+
+        batch.set(
+          doc.ref,
+          {
+            route: computed,
+            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+            lastEditedBy: access.uid,
+            lastEditedByOrgId: organizationId,
+          },
+          { merge: true },
+        );
+        ops++;
+        updated++;
+        totalUpdated++;
+        remainingWrites--;
+
+        if (ops >= 450) {
+          await flush();
+        }
+      }
+
+      await flush();
+
+      totalScanned += scanned;
+      results.push({
+        locale,
+        scanned,
+        updated,
+        skippedWithRoute,
+        skippedNoContext,
+        skippedNoMatch,
+      });
+    }
+
+    logger.info('backfillTranslationEntryRoutesFromContexts', {
+      orgId: organizationId,
+      uid: access.uid,
+      dryRun,
+      includeEnglish,
+      maxWrites,
+      totalScanned,
+      totalUpdated,
+    });
+
+    return {
+      ok: true,
+      dryRun,
+      includeEnglish,
+      maxWrites: maxWrites ?? null,
+      totalScanned,
+      totalUpdated,
+      results,
+    };
+  },
+);
 
 export const createTranslationScreen = onCall(async (request) => {
   const access = await resolveTranslationAccess(request, {});
@@ -610,11 +748,14 @@ export const updateTranslationScreen = onCall(async (request) => {
     if (name !== data.name) {
       await assertUniqueName(organizationId, name, screenId);
       patch['name'] = name;
-      contextsRenamed = await renameStringContexts(
-        organizationId,
-        data.name,
-        name,
-      );
+      const renameContexts = request.data?.['renameStringContexts'] === true;
+      if (renameContexts) {
+        contextsRenamed = await renameStringContexts(
+          organizationId,
+          data.name,
+          name,
+        );
+      }
     }
   }
 

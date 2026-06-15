@@ -51,6 +51,10 @@ class TranslationAnchor extends ConsumerWidget {
     final hasEdit = mode.sessionEdits.containsKey(stringKey);
 
     void openEditor() {
+      ref.read(translationModeProvider.notifier).captureRouteForKey(
+            stringKey: stringKey,
+            route: route,
+          );
       final targetFallback = mode.isPreviewingTarget
           ? text
           : mode.baselineTarget(stringKey);

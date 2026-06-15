@@ -13,6 +13,7 @@ import {
 import { parseTranslationCsv, rowsToCsv } from './csv-utils.js';
 import { createColumnHeaderFilter, matchesColumnFilter } from './column-filter.js';
 import { createScreenNamesPanel } from './screen-names.js';
+import { ASSIGNABLE_ROUTES } from './assignable-routes.js';
 
 const config = window.FIREBASE_CONFIG;
 if (!config?.apiKey || config.apiKey === 'YOUR_API_KEY') {
@@ -90,7 +91,8 @@ let workspaceAccess = {
   canBatchAi: false,
 };
 
-const SCREEN_NONE_LABEL = '(no screen)';
+const SCREEN_NONE_LABEL = 'Unassigned';
+const SCREEN_BADGES_ON_LABEL = '(badges on)';
 
 const STATUS_OPTIONS = [
   'missing',
@@ -101,6 +103,62 @@ const STATUS_OPTIONS = [
 ];
 
 let renderTableScheduled = false;
+
+const ASSIGNABLE_ROUTE_LABEL_BY_ROUTE = new Map(
+  ASSIGNABLE_ROUTES.map((r) => [r.route, r.label]),
+);
+
+/** @type {Map<string, string>} */
+let screenOverrideNameByRoute = new Map();
+/** @type {Set<string>} */
+let badgeEnabledRoutes = new Set();
+
+function refreshScreenOverrideCache() {
+  screenOverrideNameByRoute = new Map();
+  badgeEnabledRoutes = new Set();
+  const screens = screenNamesPanel?.getScreens?.() ?? [];
+  for (const screen of screens) {
+    const route = String(screen?.assignedRoute ?? '').trim();
+    const name = String(screen?.name ?? '').trim();
+    if (route && name) screenOverrideNameByRoute.set(route, name);
+    if (route && screen?.badgeEnabled) badgeEnabledRoutes.add(route);
+  }
+}
+
+function translationRouteLabel(route) {
+  const r = String(route ?? '').trim();
+  if (!r) return null;
+  return ASSIGNABLE_ROUTE_LABEL_BY_ROUTE.get(r) ?? r;
+}
+
+function translationScreenDisplayLabel(route) {
+  const r = String(route ?? '').trim();
+  if (!r) return SCREEN_NONE_LABEL;
+  const override = screenOverrideNameByRoute.get(r);
+  if (override && override.trim()) return override.trim();
+  return translationRouteLabel(r) ?? r;
+}
+
+function buildRouteSelectOptions(currentRoute) {
+  const current = String(currentRoute ?? '').trim();
+  const known = new Set(ASSIGNABLE_ROUTES.map((r) => r.route));
+  const merged = [
+    ...(current && !known.has(current) ? [{ route: current, label: current }] : []),
+    ...ASSIGNABLE_ROUTES,
+  ];
+
+  const options = [`<option value="">${escapeHtml(SCREEN_NONE_LABEL)}</option>`];
+  for (const item of merged) {
+    const route = String(item.route ?? '').trim();
+    if (!route) continue;
+    const display = escapeHtml(translationScreenDisplayLabel(route));
+    const selected = route === current ? ' selected' : '';
+    options.push(
+      `<option value="${escapeHtml(route)}"${selected}>${display} — ${escapeHtml(route)}</option>`,
+    );
+  }
+  return options.join('');
+}
 
 function scheduleRenderTable() {
   if (renderTableScheduled) return;
@@ -124,11 +182,12 @@ const tableFilters = {
     columnLabel: 'Screen',
     getOptions: () => {
       const screens = entries
-        .map((e) => (e.context ?? '').trim() || SCREEN_NONE_LABEL)
+        .map((e) => translationScreenDisplayLabel(e.route))
         .filter(Boolean);
-      return [...new Set(screens)]
+      const uniq = [...new Set(screens)]
         .sort((a, b) => a.localeCompare(b))
         .map((screen) => ({ value: screen, label: screen }));
+      return [{ value: SCREEN_BADGES_ON_LABEL, label: SCREEN_BADGES_ON_LABEL }, ...uniq];
     },
     onFilter: () => scheduleRenderTable(),
   }),
@@ -369,6 +428,7 @@ function updateClearFiltersButton() {
 }
 
 function renderTable() {
+  refreshScreenOverrideCache();
   mountTranslationsTableHead();
   const keyQ = tableFilters.key.getValue();
   const screenQ = tableFilters.screen.getValue();
@@ -380,7 +440,8 @@ function renderTable() {
 
   const filtered = entries.filter((e) => {
     const feature = parseFeature(e.stringKey);
-    const screen = (e.context ?? '').trim() || SCREEN_NONE_LABEL;
+    const route = String(e.route ?? '').trim();
+    const screen = translationScreenDisplayLabel(route);
     const meta = entryReviewMeta(e);
     const notes = meta?.notes?.trim() ?? '';
     const verified = meta?.verified?.trim() ?? '';
@@ -388,7 +449,12 @@ function renderTable() {
     const verifiedCell = verified ? `Has ${verified}` : 'None';
 
     if (!matchesColumnFilter(`${e.stringKey} ${feature}`, keyQ)) return false;
-    if (!matchesColumnFilter(screen, screenQ)) return false;
+    if (screenQ === SCREEN_BADGES_ON_LABEL) {
+      if (!route) return false;
+      if (!badgeEnabledRoutes.has(route)) return false;
+    } else {
+      if (!matchesColumnFilter(screen, screenQ)) return false;
+    }
     if (!matchesColumnFilter(e.sourceValue, englishQ)) return false;
     const targetText = [e.targetValue, e.aiDraft].filter(Boolean).join(' ');
     if (!matchesColumnFilter(targetText, targetQ)) return false;
@@ -411,20 +477,14 @@ function renderTable() {
     const verifiedHtml = verifiedText
       ? `<div class="verified-meta">${escapeHtml(verifiedText)}</div>`
       : '<span class="verified-meta muted">—</span>';
-    const screen = (entry.context ?? '').trim();
-    const extraContexts = entries
-      .map((e) => (e.context ?? '').trim())
-      .filter(Boolean);
-    const contextOptions = screenNamesPanel.buildContextSelectOptions(
-      screen,
-      extraContexts,
-    );
+    const route = String(entry.route ?? '').trim();
+    const routeOptions = buildRouteSelectOptions(route);
     return `
       <tr data-key="${entry.stringKey}">
         <td class="key">${entry.stringKey}<br><small>${parseFeature(entry.stringKey)}</small></td>
         <td class="screen">
-          <select class="context-select" data-key="${entry.stringKey}" aria-label="Screen name for ${entry.stringKey}">
-            ${contextOptions}
+          <select class="route-select" data-key="${entry.stringKey}" aria-label="Route for ${entry.stringKey}">
+            ${routeOptions}
           </select>
         </td>
         <td class="en">${escapeHtml(entry.sourceValue)}</td>
@@ -553,29 +613,29 @@ async function importArbFile(file) {
 async function saveEntry(stringKey, approve = false) {
   const textarea = els.entriesBody.querySelector(`textarea[data-key="${stringKey}"]`);
   const targetValue = textarea?.value?.trim() ?? '';
-  const contextSelect = els.entriesBody.querySelector(
-    `select.context-select[data-key="${stringKey}"]`,
+  const routeSelect = els.entriesBody.querySelector(
+    `select.route-select[data-key="${stringKey}"]`,
   );
-  const contextValue = contextSelect?.value?.trim() ?? '';
+  const routeValue = routeSelect?.value?.trim() ?? '';
   await call('saveTranslationEntry')(await callPayload({
     targetLocale: els.targetLocale.value,
     stringKey,
     targetValue,
     status: approve ? 'approved' : 'in_review',
-    context: contextValue,
+    route: routeValue,
   }));
   await loadEntries();
 }
 
-async function saveEntryContext(stringKey, contextValue) {
+async function saveEntryRoute(stringKey, routeValue) {
   await call('saveTranslationEntry')(await callPayload({
     targetLocale: els.targetLocale.value,
     stringKey,
-    context: contextValue,
+    route: routeValue,
   }));
   const entry = entries.find((e) => e.stringKey === stringKey);
   if (entry) {
-    entry.context = contextValue || null;
+    entry.route = routeValue || null;
   }
   scheduleRenderTable();
 }
@@ -939,7 +999,7 @@ function exportCsv() {
     const meta = importReviewMetaByKey.get(entry.stringKey);
     return {
       key: entry.stringKey,
-      screen: entry.context ?? '',
+      screen: entry.route ?? '',
       english: entry.sourceValue,
       translation: displayValue(entry),
       review: meta?.notes ?? '',
@@ -1005,14 +1065,20 @@ async function importCsvFile(file) {
   try {
     for (let i = 0; i < rows.length; i += CSV_IMPORT_CHUNK) {
       const chunk = rows.slice(i, i + CSV_IMPORT_CHUNK).map((row) => {
-        /** @type {{ key: string, translation: string, status: string, context?: string }} */
+        /** @type {{ key: string, translation: string, status: string, context?: string, route?: string }} */
         const entry = {
           key: row.key,
           translation: row.translation,
           status: row.status === 'approved' ? 'approved' : 'in_review',
         };
         const screen = row.screen?.trim();
-        if (screen) entry.context = screen;
+        if (screen) {
+          if (screen.startsWith('/')) {
+            entry.route = screen;
+          } else {
+            entry.context = screen;
+          }
+        }
         return entry;
       });
       const { data } = await call('importTranslationTargets')(
@@ -1165,14 +1231,14 @@ els.entriesBody.addEventListener('click', async (e) => {
 });
 
 els.entriesBody.addEventListener('change', async (e) => {
-  const select = e.target.closest('select.context-select');
+  const select = e.target.closest('select.route-select');
   if (!select) return;
   const key = select.dataset.key;
   if (!key) return;
   select.disabled = true;
   try {
-    await saveEntryContext(key, select.value.trim());
-    setWorkspaceStatus(`Screen name updated for ${key}.`, 'ok');
+    await saveEntryRoute(key, select.value.trim());
+    setWorkspaceStatus(`Route updated for ${key}.`, 'ok');
   } catch (err) {
     showError(err);
     renderTable();

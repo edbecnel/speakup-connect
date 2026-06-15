@@ -37,9 +37,44 @@ interface TranslationEntry {
   aiDraftedAt: admin.firestore.Timestamp | null;
   aiDraftError: string | null;
   status: TranslationStatus;
+  /** Canonical location/route this string was observed on (e.g. "/admin"). */
+  route: string | null;
+  /** Optional human/AI context to help translate; not used as a screen name. */
   context: string | null;
   reviewedBy: string | null;
   updatedAt: admin.firestore.Timestamp;
+}
+
+function normalizeTranslationRoute(raw: unknown): string | null {
+  if (raw === undefined || raw === null) return null;
+  if (typeof raw !== 'string') return null;
+  let route = raw.trim();
+  if (!route) return null;
+
+  // Strip query/fragment; we want the canonical path-like route.
+  const queryIdx = route.indexOf('?');
+  if (queryIdx >= 0) route = route.slice(0, queryIdx);
+  const hashIdx = route.indexOf('#');
+  if (hashIdx >= 0) route = route.slice(0, hashIdx);
+  route = route.trim();
+  if (!route) return null;
+
+  if (route.includes('://')) {
+    throw new HttpsError('invalid-argument', 'route must be a path like "/admin".');
+  }
+
+  if (!route.startsWith('/')) route = `/${route}`;
+  // Collapse repeated slashes.
+  route = route.replace(/\/{2,}/g, '/');
+  // Remove trailing slash (except root).
+  if (route.length > 1) route = route.replace(/\/+$/g, '');
+  if (route.length > 200) {
+    throw new HttpsError('invalid-argument', 'route is too long.');
+  }
+  if (/\s/.test(route)) {
+    throw new HttpsError('invalid-argument', 'route must not contain whitespace.');
+  }
+  return route;
 }
 
 function stringsRef(locale: string) {
@@ -70,6 +105,7 @@ function entryFromSnap(
     aiDraftedAt: (data['aiDraftedAt'] as admin.firestore.Timestamp | null) ?? null,
     aiDraftError: (data['aiDraftError'] as string | null) ?? null,
     status: (data['status'] as TranslationStatus) ?? 'missing',
+    route: (data['route'] as string | null) ?? null,
     context: (data['context'] as string | null) ?? null,
     reviewedBy: (data['reviewedBy'] as string | null) ?? null,
     updatedAt:
@@ -105,6 +141,7 @@ function entryForClient(entry: TranslationEntry) {
     aiDraftedAt: serializeTimestamp(entry.aiDraftedAt),
     aiDraftError: entry.aiDraftError,
     status: entry.status,
+    route: entry.route,
     context: entry.context,
     reviewedBy: entry.reviewedBy,
     updatedAt: serializeTimestamp(entry.updatedAt) ?? new Date().toISOString(),
@@ -165,7 +202,7 @@ export const importTranslationSource = onCall(
         requireImport: true,
       });
       const entries = request.data?.['entries'] as
-        | Array<{ key: string; sourceValue: string; context?: string }>
+        | Array<{ key: string; sourceValue: string; context?: string; route?: string }>
         | undefined;
 
       if (!targetLocale || !Array.isArray(entries) || entries.length === 0) {
@@ -179,14 +216,17 @@ export const importTranslationSource = onCall(
         key: string;
         sourceValue: string;
         context?: string;
+        route?: string;
       }> = [];
       for (const entry of entries) {
         const key = entry.key?.trim();
         if (!key || key.startsWith('@') || !entry.sourceValue) continue;
+        const route = normalizeTranslationRoute(entry.route) ?? undefined;
         validEntries.push({
           key,
           sourceValue: entry.sourceValue,
           context: entry.context,
+          ...(route ? { route } : {}),
         });
       }
 
@@ -235,6 +275,7 @@ export const importTranslationSource = onCall(
               {
                 sourceLocale: 'en',
                 sourceValue: entry.sourceValue,
+                route: entry.route ?? data['route'] ?? null,
                 context: entry.context ?? data['context'] ?? null,
                 updatedAt: now,
               },
@@ -252,6 +293,7 @@ export const importTranslationSource = onCall(
               aiDraftedAt: null,
               aiDraftError: null,
               status: 'missing',
+              route: entry.route ?? null,
               context: entry.context ?? null,
               reviewedBy: null,
               updatedAt: now,
@@ -342,6 +384,7 @@ export const saveTranslationEntry = onCall(async (request) => {
   const targetValue = request.data?.['targetValue'] as string | undefined;
   const status = request.data?.['status'] as TranslationStatus | undefined;
   const context = request.data?.['context'] as string | undefined;
+  const routeRaw = request.data?.['route'] as string | undefined;
 
   if (!targetLocale || !stringKey) {
     throw new HttpsError('invalid-argument', 'targetLocale and stringKey required.');
@@ -379,6 +422,9 @@ export const saveTranslationEntry = onCall(async (request) => {
   }
   if (context !== undefined) {
     patch['context'] = context || null;
+  }
+  if (routeRaw !== undefined) {
+    patch['route'] = normalizeTranslationRoute(routeRaw);
   }
 
   await ref.set(patch, { merge: true });
@@ -761,7 +807,13 @@ export const importTranslationTargets = onCall(
       const access = await resolveTranslationAccess(request, { targetLocale });
       const uid = access.uid;
       const entries = request.data?.['entries'] as
-        | Array<{ key: string; translation: string; status?: string; context?: string }>
+        | Array<{
+            key: string;
+            translation: string;
+            status?: string;
+            context?: string;
+            route?: string;
+          }>
         | undefined;
 
       if (!targetLocale || !Array.isArray(entries) || entries.length === 0) {
@@ -776,6 +828,7 @@ export const importTranslationTargets = onCall(
         translation: string;
         status: TranslationStatus;
         context?: string;
+        route?: string;
       }> = [];
       for (const entry of entries) {
         const key = entry.key?.trim();
@@ -792,11 +845,13 @@ export const importTranslationTargets = onCall(
           );
         }
         const context = entry.context?.trim();
+        const route = normalizeTranslationRoute(entry.route) ?? undefined;
         validEntries.push({
           key,
           translation,
           status,
           ...(context ? { context } : {}),
+          ...(route ? { route } : {}),
         });
       }
 
@@ -867,6 +922,9 @@ export const importTranslationTargets = onCall(
           }
           if (entry.context) {
             patch['context'] = entry.context;
+          }
+          if (entry.route) {
+            patch['route'] = entry.route;
           }
 
           batch.set(stringDocRef(targetLocale, entry.key), patch, { merge: true });

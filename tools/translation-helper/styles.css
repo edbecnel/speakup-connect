@@ -938,7 +938,8 @@ body.screen-names-view .app-shell {
 
 .screen-name-input,
 .route-screen-select,
-.context-select {
+.context-select,
+.route-select {
   width: 100%;
   min-width: 8rem;
   font: inherit;

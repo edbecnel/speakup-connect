@@ -5,11 +5,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:speakup_connect/core/constants/route_constants.dart';
+import 'package:speakup_connect/core/constants/translation_assignable_routes.dart';
 import 'package:speakup_connect/core/l10n/app_localizations_extension.dart';
 import 'package:speakup_connect/core/l10n/locale_provider.dart';
 import 'package:speakup_connect/features/translations/presentation/providers/translation_mode_provider.dart';
 import 'package:speakup_connect/features/translations/presentation/providers/translation_provider.dart';
 import 'package:speakup_connect/features/translations/presentation/providers/translation_screens_provider.dart';
+import 'package:speakup_connect/features/translations/presentation/utils/translation_screen_display_utils.dart';
 import 'package:speakup_connect/shared/widgets/app_button.dart';
 import 'package:speakup_connect/shared/widgets/app_error_widget.dart';
 import 'package:speakup_connect/shared/widgets/app_loading_indicator.dart';
@@ -70,10 +72,9 @@ class _TranslationWorkspaceScreenState
           final localeValue = state.allowedLocales.contains(state.locale)
               ? state.locale
               : state.allowedLocales.first;
-          final screenNames = screensAsync.maybeWhen(
-            data: (screensState) => screensState.sortedNames(),
-            orElse: () => const <TranslationScreenEntity>[],
-          );
+          final screensState = screensAsync.asData?.value;
+          final assignableRoutes =
+              screensState?.assignableRoutes ?? kTranslationAssignableRoutes;
 
           return Column(
             children: [
@@ -151,51 +152,6 @@ class _TranslationWorkspaceScreenState
                             }
                           },
                         ),
-                        if (state.canBatchAi)
-                          AppButton.secondary(
-                            label: l10n.translationBatchAi,
-                            minimumWidth: 0,
-                            onPressed: () async {
-                              try {
-                                final result = await ref
-                                    .read(translationWorkspaceProvider.notifier)
-                                    .batchDraft();
-                                if (!context.mounted) return;
-                                final total = result['total'] as int? ?? 0;
-                                final succeeded =
-                                    result['succeeded'] as int? ?? 0;
-                                if (total == 0) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                        l10n.translationBatchAiNoneMissing,
-                                      ),
-                                    ),
-                                  );
-                                  return;
-                                }
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      l10n.translationBatchAiResult(
-                                        succeeded,
-                                        total,
-                                      ),
-                                    ),
-                                  ),
-                                );
-                              } catch (e) {
-                                if (!context.mounted) return;
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(e.toString()),
-                                    backgroundColor:
-                                        Theme.of(context).colorScheme.error,
-                                  ),
-                                );
-                              }
-                            },
-                          ),
                         if (state.canExportArb)
                           AppButton.secondary(
                             label: l10n.translationExportArb,
@@ -259,13 +215,14 @@ class _TranslationWorkspaceScreenState
                                 return _TranslationEntryCard(
                                   entry: entry,
                                   initialTarget: _displayTarget(entry),
-                                  screenNames: screenNames,
-                                  onContextChanged: (value) => ref
+                                  screensState: screensState,
+                                  assignableRoutes: assignableRoutes,
+                                  onRouteChanged: (value) => ref
                                       .read(translationWorkspaceProvider
                                           .notifier)
-                                      .saveContext(
+                                      .saveRoute(
                                         stringKey: stringKey,
-                                        context: value,
+                                        route: value,
                                       ),
                                   onSave: (value, approve) => ref
                                       .read(translationWorkspaceProvider
@@ -296,18 +253,20 @@ class _TranslationEntryCard extends StatefulWidget {
   const _TranslationEntryCard({
     required this.entry,
     required this.initialTarget,
-    required this.screenNames,
     required this.onSave,
     required this.onDraft,
-    required this.onContextChanged,
+    required this.onRouteChanged,
+    required this.screensState,
+    required this.assignableRoutes,
   });
 
   final Map<String, dynamic> entry;
   final String initialTarget;
-  final List<TranslationScreenEntity> screenNames;
+  final TranslationScreensState? screensState;
+  final List<TranslationAssignableRoute> assignableRoutes;
   final Future<void> Function(String value, bool approve) onSave;
   final Future<void> Function() onDraft;
-  final Future<void> Function(String? context) onContextChanged;
+  final Future<void> Function(String? route) onRouteChanged;
 
   @override
   State<_TranslationEntryCard> createState() => _TranslationEntryCardState();
@@ -315,22 +274,29 @@ class _TranslationEntryCard extends StatefulWidget {
 
 class _TranslationEntryCardState extends State<_TranslationEntryCard> {
   late final TextEditingController _controller;
-  late String? _selectedContext;
+  late String? _selectedRoute;
   var _busy = false;
+
+  String? _normalizeRoute(String? raw) {
+    final v = raw?.trim();
+    return (v != null && v.isNotEmpty) ? v : null;
+  }
 
   @override
   void initState() {
     super.initState();
     _controller = TextEditingController(text: widget.initialTarget);
-    final raw = widget.entry['context'] as String?;
-    _selectedContext = (raw != null && raw.trim().isNotEmpty) ? raw.trim() : null;
+    _selectedRoute = _normalizeRoute(widget.entry['route'] as String?);
   }
 
   @override
   void didUpdateWidget(covariant _TranslationEntryCard oldWidget) {
     super.didUpdateWidget(oldWidget);
-    final raw = widget.entry['context'] as String?;
-    _selectedContext = (raw != null && raw.trim().isNotEmpty) ? raw.trim() : null;
+    final raw = _normalizeRoute(widget.entry['route'] as String?);
+    final oldRaw = _normalizeRoute(oldWidget.entry['route'] as String?);
+    if (raw != oldRaw && raw != _selectedRoute) {
+      setState(() => _selectedRoute = raw);
+    }
   }
 
   @override
@@ -356,6 +322,26 @@ class _TranslationEntryCardState extends State<_TranslationEntryCard> {
     final source = widget.entry['sourceValue'] as String? ?? '';
     final status = widget.entry['status'] as String? ?? 'missing';
     final englishDisplay = source.trim().isEmpty ? '—' : source;
+    final assignableRoutes = widget.assignableRoutes;
+    final routeFromEntry = _normalizeRoute(widget.entry['route'] as String?);
+    final currentRoute = _normalizeRoute(_selectedRoute) ?? routeFromEntry;
+
+    final knownRouteSet = assignableRoutes.map((r) => r.route).toSet();
+    final effectiveRoutes = <TranslationAssignableRoute>[
+      if (currentRoute != null && !knownRouteSet.contains(currentRoute))
+        TranslationAssignableRoute(route: currentRoute, label: currentRoute),
+      ...assignableRoutes,
+    ];
+
+    final routeDropdownKey = ValueKey(
+      Object.hash(Object.hashAll(effectiveRoutes.map((e) => e.route)), currentRoute),
+    );
+
+    final screenLabel = translationScreenDisplayLabel(
+      route: currentRoute,
+      screensState: widget.screensState,
+      unassignedLabel: l10n.adminReportDetailUnassigned,
+    );
 
     return Card(
       color: theme.colorScheme.surfaceContainerLow,
@@ -374,7 +360,9 @@ class _TranslationEntryCardState extends State<_TranslationEntryCard> {
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<String?>(
-              initialValue: _selectedContext,
+              key: routeDropdownKey,
+              initialValue: currentRoute,
+              isExpanded: true,
               decoration: InputDecoration(
                 labelText: l10n.translationStringScreenLabel,
                 border: const OutlineInputBorder(),
@@ -382,21 +370,57 @@ class _TranslationEntryCardState extends State<_TranslationEntryCard> {
               items: [
                 DropdownMenuItem<String?>(
                   value: null,
-                  child: Text(l10n.translationStringScreenNone),
-                ),
-                ...widget.screenNames.map(
-                  (screen) => DropdownMenuItem<String?>(
-                    value: screen.name,
-                    child: Text(screen.name),
+                  child: Text(
+                    l10n.adminReportDetailUnassigned,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
+                ),
+                ...effectiveRoutes.map(
+                  (item) {
+                    final display = translationScreenDisplayLabel(
+                      route: item.route,
+                      screensState: widget.screensState,
+                      unassignedLabel: l10n.adminReportDetailUnassigned,
+                    );
+                    return DropdownMenuItem<String?>(
+                      value: item.route,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            display,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          Text(
+                            item.route,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
                 ),
               ],
               onChanged: _busy
                   ? null
                   : (value) => _run(() async {
-                        setState(() => _selectedContext = value);
-                        await widget.onContextChanged(value);
+                        setState(() => _selectedRoute = value);
+                        await widget.onRouteChanged(value);
                       }),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              screenLabel,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
             ),
             const SizedBox(height: 12),
             InputDecorator(

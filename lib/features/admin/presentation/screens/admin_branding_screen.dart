@@ -10,6 +10,7 @@ import 'package:speakup_connect/features/roles/presentation/l10n/roles_ui_l10n.d
 import 'package:speakup_connect/features/organization/domain/entities/organization_config_entity.dart';
 import 'package:speakup_connect/features/organization/presentation/providers/organization_provider.dart';
 import 'package:speakup_connect/features/reports/presentation/providers/report_provider.dart';
+import 'package:speakup_connect/features/translations/presentation/widgets/translation_anchor.dart';
 
 /// Admin screen for updating the organization's display name and brand colors.
 ///
@@ -86,7 +87,10 @@ class _AdminBrandingScreenState extends ConsumerState<AdminBrandingScreen> {
     return Scaffold(
       appBar: AppBar(
         leading: BackButton(onPressed: () => context.pop()),
-        title: Text(l10n.orgSettingsTitle),
+        title: TranslationAnchor(
+          stringKey: 'orgSettingsTitle',
+          text: l10n.orgSettingsTitle,
+        ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
@@ -99,6 +103,8 @@ class _AdminBrandingScreenState extends ConsumerState<AdminBrandingScreen> {
               const SizedBox(height: 32),
               _SectionHeader(
                 icon: Icons.business_outlined,
+                titleKey: 'orgSettingsOrgNameTitle',
+                subtitleKey: 'orgSettingsOrgNameSubtitle',
                 title: l10n.orgSettingsOrgNameTitle,
                 subtitle: l10n.orgSettingsOrgNameSubtitle,
               ),
@@ -119,6 +125,8 @@ class _AdminBrandingScreenState extends ConsumerState<AdminBrandingScreen> {
               const SizedBox(height: 32),
               _SectionHeader(
                 icon: Icons.palette_outlined,
+                titleKey: 'orgSettingsBrandColorsTitle',
+                subtitleKey: 'orgSettingsBrandColorsSubtitle',
                 title: l10n.orgSettingsBrandColorsTitle,
                 subtitle: l10n.orgSettingsBrandColorsSubtitle,
               ),
@@ -324,18 +332,23 @@ class _AdminBrandingScreenState extends ConsumerState<AdminBrandingScreen> {
 class _SectionHeader extends StatelessWidget {
   const _SectionHeader({
     required this.icon,
+    required this.titleKey,
+    required this.subtitleKey,
     required this.title,
     required this.subtitle,
   });
 
   final IconData icon;
+  final String titleKey;
+  final String subtitleKey;
   final String title;
   final String subtitle;
 
   @override
   Widget build(BuildContext context) {
-    final l10n = context.l10n;
     final theme = Theme.of(context);
+    final subtitleStyle = theme.textTheme.bodySmall
+        ?.copyWith(color: theme.colorScheme.onSurfaceVariant);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -343,14 +356,18 @@ class _SectionHeader extends StatelessWidget {
           children: [
             Icon(icon, size: 20, color: theme.colorScheme.primary),
             const SizedBox(width: 8),
-            Text(title, style: theme.textTheme.titleMedium),
+            TranslationAnchor(
+              stringKey: titleKey,
+              text: title,
+              style: theme.textTheme.titleMedium,
+            ),
           ],
         ),
         const SizedBox(height: 4),
-        Text(
-          subtitle,
-          style: theme.textTheme.bodySmall
-              ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+        TranslationAnchor(
+          stringKey: subtitleKey,
+          text: subtitle,
+          style: subtitleStyle,
         ),
       ],
     );
@@ -502,7 +519,6 @@ class _InfoBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = context.l10n;
     final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.all(12),
@@ -564,6 +580,8 @@ class _SetupCategoriesCard extends ConsumerWidget {
       children: [
         _SectionHeader(
           icon: Icons.category_outlined,
+          titleKey: 'orgSettingsReportCategoriesTitle',
+          subtitleKey: 'orgSettingsReportCategoriesSubtitle',
           title: l10n.orgSettingsReportCategoriesTitle,
           subtitle: l10n.orgSettingsReportCategoriesSubtitle,
         ),
@@ -705,6 +723,8 @@ class _OrganizationTypeCardState extends ConsumerState<_OrganizationTypeCard> {
       children: [
         _SectionHeader(
           icon: Icons.apartment_outlined,
+          titleKey: 'orgSettingsOrgTypeTitle',
+          subtitleKey: 'orgSettingsOrgTypeSubtitle',
           title: l10n.orgSettingsOrgTypeTitle,
           subtitle: l10n.orgSettingsOrgTypeSubtitle,
         ),
@@ -846,6 +866,8 @@ class _MemberProfilePhotosCardState
       children: [
         _SectionHeader(
           icon: Icons.account_circle_outlined,
+          titleKey: 'orgSettingsMemberPhotosTitle',
+          subtitleKey: 'orgSettingsMemberPhotosSubtitle',
           title: l10n.orgSettingsMemberPhotosTitle,
           subtitle: l10n.orgSettingsMemberPhotosSubtitle,
         ),
@@ -964,6 +986,8 @@ class _ReminderApprovalCardState extends ConsumerState<_ReminderApprovalCard> {
       children: [
         _SectionHeader(
           icon: Icons.fact_check_outlined,
+          titleKey: 'orgSettingsReminderApprovalTitle',
+          subtitleKey: 'orgSettingsReminderApprovalSubtitle',
           title: l10n.orgSettingsReminderApprovalTitle,
           subtitle: l10n.orgSettingsReminderApprovalSubtitle,
         ),

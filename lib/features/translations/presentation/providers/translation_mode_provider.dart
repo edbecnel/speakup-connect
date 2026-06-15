@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:speakup_connect/config/app_config.dart';
 import 'package:speakup_connect/core/l10n/locale_provider.dart';
@@ -90,6 +92,10 @@ class TranslationModeState {
 }
 
 class TranslationModeNotifier extends Notifier<TranslationModeState> {
+  /// Best-effort route learning while translators edit strings in-context.
+  /// Stored outside state so it doesn't trigger rebuilds.
+  final Map<String, String> _capturedRouteByKey = {};
+
   String _resolveOrganizationId() {
     final profileOrg = ref.read(userProfileProvider).value?.organizationId;
     if (profileOrg != null && profileOrg.isNotEmpty) return profileOrg;
@@ -114,6 +120,7 @@ class TranslationModeNotifier extends Notifier<TranslationModeState> {
       previousLocaleCode: previous,
       isLoadingEntries: true,
     );
+    _capturedRouteByKey.clear();
 
     try {
       await ref.read(translationScreensProvider.notifier).refresh();
@@ -154,9 +161,47 @@ class TranslationModeNotifier extends Notifier<TranslationModeState> {
 
     final restore = state.previousLocaleCode;
     state = const TranslationModeState.inactive();
+    _capturedRouteByKey.clear();
 
     if (restore != ref.read(appLocaleProvider).languageCode) {
       await ref.read(appLocaleProvider.notifier).setLanguageCode(restore);
+    }
+  }
+
+  /// Records the current route for this key so the backend can learn it.
+  ///
+  /// This is intentionally best-effort: it avoids duplicate writes and does not
+  /// block the UI if the network call fails.
+  void captureRouteForKey({
+    required String stringKey,
+    required String route,
+  }) {
+    if (!state.isActive) return;
+    final trimmed = route.trim();
+    if (trimmed.isEmpty) return;
+
+    final previous = _capturedRouteByKey[stringKey];
+    if (previous == trimmed) return;
+    _capturedRouteByKey[stringKey] = trimmed;
+
+    unawaited(_persistCapturedRoute(stringKey: stringKey, route: trimmed));
+  }
+
+  Future<void> _persistCapturedRoute({
+    required String stringKey,
+    required String route,
+  }) async {
+    try {
+      final ds = ref.read(translationRemoteDataSourceProvider);
+      await ds.saveEntry(
+        organizationId: _resolveOrganizationId(),
+        targetLocale: state.targetLocale,
+        stringKey: stringKey,
+        route: route,
+        updateRoute: true,
+      );
+    } catch (_) {
+      // Best-effort. If this fails, we can learn it again on a later edit.
     }
   }
 

@@ -96,6 +96,17 @@ class TranslationScreensNotifier
     await future;
   }
 
+  Future<Map<String, dynamic>> seedFromContexts({
+    bool assignRoutes = true,
+  }) async {
+    final result = await _ds.seedScreensFromContexts(
+      organizationId: _resolveOrganizationId(),
+      assignRoutes: assignRoutes,
+    );
+    await refresh();
+    return result;
+  }
+
   Future<void> create(String name) async {
     await _ds.createScreen(
       organizationId: _resolveOrganizationId(),
@@ -166,7 +177,6 @@ final translationScreensProvider = AsyncNotifierProvider<
 
 /// Routes that show translation edit badges during in-app translation mode.
 final translationBadgeEnabledRoutesProvider = Provider<Set<String>>((ref) {
-  final state = ref.watch(translationScreensProvider).valueOrNull;
-  if (state == null) return const {};
-  return state.badgeEnabledRoutes;
+  final async = ref.watch(translationScreensProvider);
+  return async.asData?.value.badgeEnabledRoutes ?? const {};
 });

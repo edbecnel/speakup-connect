@@ -13,6 +13,7 @@ import 'package:speakup_connect/features/organization/presentation/providers/use
 import 'package:speakup_connect/features/reminders/presentation/providers/reminder_provider.dart';
 import 'package:speakup_connect/features/reports/domain/entities/report_entity.dart';
 import 'package:speakup_connect/features/reports/presentation/providers/report_provider.dart';
+import 'package:speakup_connect/features/translations/presentation/widgets/translation_anchor.dart';
 import 'package:speakup_connect/shared/widgets/app_error_widget.dart';
 import 'package:speakup_connect/shared/widgets/app_loading_indicator.dart';
 import 'package:speakup_connect/shared/widgets/notification_badge_icon.dart';
@@ -43,7 +44,10 @@ class AdminDashboardScreen extends ConsumerWidget {
               }
             },
           ),
-          title: Text(l10n.settingsAdminDashboard),
+          title: TranslationAnchor(
+            stringKey: 'settingsAdminDashboard',
+            text: l10n.settingsAdminDashboard,
+          ),
           actions: [
             IconButton(
               tooltip: l10n.adminDashboardJoinApplicationsTooltip,
@@ -93,12 +97,48 @@ class AdminDashboardScreen extends ConsumerWidget {
             isScrollable: true,
             tabAlignment: TabAlignment.start,
             tabs: [
-              Tab(text: l10n.adminDashboardTabAll),
-              Tab(text: l10n.adminDashboardTabSubmitted),
-              Tab(text: l10n.adminDashboardTabUnderReview),
-              Tab(text: l10n.adminDashboardTabInProgress),
-              Tab(text: l10n.adminDashboardTabResolved),
-              Tab(text: l10n.adminDashboardTabClosed),
+              Tab(
+                child: TranslationAnchor(
+                  stringKey: 'adminDashboardTabAll',
+                  text: l10n.adminDashboardTabAll,
+                  maxLines: 1,
+                ),
+              ),
+              Tab(
+                child: TranslationAnchor(
+                  stringKey: 'adminDashboardTabSubmitted',
+                  text: l10n.adminDashboardTabSubmitted,
+                  maxLines: 1,
+                ),
+              ),
+              Tab(
+                child: TranslationAnchor(
+                  stringKey: 'adminDashboardTabUnderReview',
+                  text: l10n.adminDashboardTabUnderReview,
+                  maxLines: 1,
+                ),
+              ),
+              Tab(
+                child: TranslationAnchor(
+                  stringKey: 'adminDashboardTabInProgress',
+                  text: l10n.adminDashboardTabInProgress,
+                  maxLines: 1,
+                ),
+              ),
+              Tab(
+                child: TranslationAnchor(
+                  stringKey: 'adminDashboardTabResolved',
+                  text: l10n.adminDashboardTabResolved,
+                  maxLines: 1,
+                ),
+              ),
+              Tab(
+                child: TranslationAnchor(
+                  stringKey: 'adminDashboardTabClosed',
+                  text: l10n.adminDashboardTabClosed,
+                  maxLines: 1,
+                ),
+              ),
             ],
           ),
         ),
@@ -173,6 +213,7 @@ class _QuickStatsHeader extends ConsumerWidget {
                 child: Row(
                   children: [
                     _StatChip(
+                      stringKey: 'adminDashboardStatTotal',
                       label: localizedAdminReportsStatLabel(
                         l10n,
                         AdminReportsTab.allActive,
@@ -184,6 +225,7 @@ class _QuickStatsHeader extends ConsumerWidget {
                     ),
                     const SizedBox(width: 8),
                     _StatChip(
+                      stringKey: 'adminDashboardStatSubmitted',
                       label: localizedAdminReportsStatLabel(
                         l10n,
                         AdminReportsTab.submitted,
@@ -196,6 +238,7 @@ class _QuickStatsHeader extends ConsumerWidget {
                     ),
                     const SizedBox(width: 8),
                     _StatChip(
+                      stringKey: 'adminDashboardStatUnderReview',
                       label: localizedAdminReportsStatLabel(
                         l10n,
                         AdminReportsTab.underReview,
@@ -208,6 +251,7 @@ class _QuickStatsHeader extends ConsumerWidget {
                     ),
                     const SizedBox(width: 8),
                     _StatChip(
+                      stringKey: 'adminDashboardStatInProgress',
                       label: localizedAdminReportsStatLabel(
                         l10n,
                         AdminReportsTab.inProgress,
@@ -220,6 +264,7 @@ class _QuickStatsHeader extends ConsumerWidget {
                     ),
                     const SizedBox(width: 8),
                     _StatChip(
+                      stringKey: 'adminDashboardStatResolved',
                       label: localizedAdminReportsStatLabel(
                         l10n,
                         AdminReportsTab.resolved,
@@ -232,6 +277,7 @@ class _QuickStatsHeader extends ConsumerWidget {
                     ),
                     const SizedBox(width: 8),
                     _StatChip(
+                      stringKey: 'adminDashboardStatClosed',
                       label: localizedAdminReportsStatLabel(
                         l10n,
                         AdminReportsTab.closed,
@@ -259,6 +305,7 @@ class _StatChip extends StatelessWidget {
     required this.color,
     required this.onTap,
     this.selected = false,
+    this.stringKey,
   });
 
   final String label;
@@ -266,10 +313,16 @@ class _StatChip extends StatelessWidget {
   final Color color;
   final VoidCallback onTap;
   final bool selected;
+  final String? stringKey;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final labelStyle = TextStyle(
+      fontSize: 11,
+      fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+      color: color,
+    );
     return Semantics(
       button: true,
       label: l10n.adminDashboardReportsCount(label, count),
@@ -301,17 +354,22 @@ class _StatChip extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 2),
-                Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-                    color: color,
+                if (stringKey != null)
+                  TranslationAnchor(
+                    stringKey: stringKey!,
+                    text: label,
+                    style: labelStyle,
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                  )
+                else
+                  Text(
+                    label,
+                    style: labelStyle,
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  textAlign: TextAlign.center,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
               ],
             ),
           ),

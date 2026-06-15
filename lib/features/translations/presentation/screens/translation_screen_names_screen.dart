@@ -20,6 +20,7 @@ class _TranslationScreenNamesScreenState
     extends ConsumerState<TranslationScreenNamesScreen> {
   final _newNameController = TextEditingController();
   final _nameControllers = <String, TextEditingController>{};
+  bool _isImporting = false;
 
   @override
   void dispose() {
@@ -60,6 +61,18 @@ class _TranslationScreenNamesScreenState
       appBar: AppBar(
         leading: BackButton(onPressed: () => context.pop()),
         title: Text(l10n.translationScreenNamesTitle),
+        actions: [
+          TextButton(
+            onPressed: _isImporting ? null : _importFromContexts,
+            child: _isImporting
+                ? const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Text('Import'),
+          ),
+        ],
       ),
       body: screensAsync.when(
         loading: () => const AppLoadingIndicator(),
@@ -208,6 +221,40 @@ class _TranslationScreenNamesScreenState
         SnackBar(content: Text(context.l10n.translationScreenNamesCreated)),
       );
     });
+  }
+
+  Future<void> _importFromContexts() async {
+    if (_isImporting) return;
+    setState(() => _isImporting = true);
+    try {
+      final result =
+          await ref.read(translationScreensProvider.notifier).seedFromContexts();
+
+      final created = (result['created'] as num?)?.toInt() ?? 0;
+      final routesAssigned = (result['routesAssigned'] as num?)?.toInt() ?? 0;
+      final deduped = (result['deduped'] as num?)?.toInt() ?? 0;
+      final contextCount = (result['contextCount'] as num?)?.toInt() ?? 0;
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Import complete: $created created, $routesAssigned routes assigned, '
+            '$deduped deduped (from $contextCount contexts).',
+          ),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.toString()),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _isImporting = false);
+    }
   }
 
   Future<void> _confirmDelete(String screenId, String name) async {
