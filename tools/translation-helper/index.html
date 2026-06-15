@@ -68,6 +68,70 @@
 
         </button>
 
+        <div class="header-auth" id="header-auth">
+
+          <button type="button" id="header-sign-in-btn" class="secondary header-btn">Sign in</button>
+
+          <button type="button" id="sign-out-btn" class="secondary header-btn hidden">Sign out</button>
+
+          <div id="auth-popover" class="header-auth-popover hidden" role="dialog" aria-label="Sign in" hidden>
+
+            <p class="header-auth-hint">Org admin or <code>manageTranslations</code> permission.</p>
+
+            <input id="email" type="email" placeholder="Email" autocomplete="username" />
+
+            <div class="password-field">
+
+              <input id="password" type="password" placeholder="Password" autocomplete="current-password" />
+
+              <button
+
+                type="button"
+
+                id="password-toggle-btn"
+
+                class="password-toggle"
+
+                aria-label="Show password"
+
+                aria-pressed="false"
+
+                title="Show password"
+
+              >
+
+                <svg class="icon-eye" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+
+                  <circle cx="12" cy="12" r="3"/>
+
+                </svg>
+
+                <svg class="icon-eye-off hidden" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+
+                  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+
+                  <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+
+                  <path d="M1 1l22 22"/>
+
+                  <path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/>
+
+                </svg>
+
+              </button>
+
+            </div>
+
+            <button id="sign-in-btn" type="button">Sign in</button>
+
+            <p id="auth-status" class="status"></p>
+
+          </div>
+
+        </div>
+
       </div>
 
     </div>
@@ -77,78 +141,6 @@
 
 
   <main id="app-shell" class="app-shell">
-
-    <details id="auth-section" class="panel collapsible-section" open>
-
-      <summary class="collapsible-summary">Sign in</summary>
-
-      <div class="collapsible-body">
-
-        <p class="hint">Platform <code>super_admin</code>, org admin, or <code>manageTranslations</code> permission.</p>
-
-        <p class="hint">After sign-in, open <strong>Translation workspace help</strong> or click <strong>Help</strong> for editing instructions.</p>
-
-        <div class="row">
-
-          <input id="email" type="email" placeholder="Email" autocomplete="username" />
-
-          <div class="password-field">
-
-            <input id="password" type="password" placeholder="Password" autocomplete="current-password" />
-
-            <button
-
-              type="button"
-
-              id="password-toggle-btn"
-
-              class="password-toggle"
-
-              aria-label="Show password"
-
-              aria-pressed="false"
-
-              title="Show password"
-
-            >
-
-              <svg class="icon-eye" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-
-                <circle cx="12" cy="12" r="3"/>
-
-              </svg>
-
-              <svg class="icon-eye-off hidden" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-
-                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
-
-                <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
-
-                <path d="M1 1l22 22"/>
-
-                <path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/>
-
-              </svg>
-
-            </button>
-
-          </div>
-
-          <button id="sign-in-btn" type="button">Sign in</button>
-
-          <button id="sign-out-btn" type="button" class="secondary hidden">Sign out</button>
-
-        </div>
-
-        <p id="auth-status" class="status"></p>
-
-      </div>
-
-    </details>
-
-
 
     <section id="workspace" class="workspace hidden">
 
@@ -730,54 +722,105 @@
 
         <h2>Screen names</h2>
 
-        <p class="hint">
-          Create screen names for your organization, assign each name to one app screen at a time,
-          and tag translation strings with a screen name for filtering. Turn on
-          <strong>Translation badges</strong> per app screen to control where in-context edit badges
-          appear in the mobile app during translation mode.
-        </p>
+        <details id="screen-names-intro-panel" class="screen-names-panel collapsible-section" open>
 
-        <div class="row wrap">
-          <input id="screen-name-new" type="text" placeholder="New screen name" aria-label="New screen name" />
-          <button type="button" id="screen-name-add-btn">Add screen name</button>
-          <button type="button" id="screen-names-refresh-btn" class="secondary">Refresh</button>
-        </div>
+          <summary class="collapsible-summary">Screen names</summary>
 
-        <p id="screen-names-status" class="status" aria-live="polite"></p>
+          <div class="collapsible-body">
 
-        <h3>Screen name catalog</h3>
+            <p class="hint">
+              Create screen names for your organization, assign each name to one app screen at a time,
+              and tag translation strings with a screen name for filtering. If you already tagged strings
+              via CSV import or <code>map-l10n-screens.js</code>, open this tab once to import those
+              names into the catalog automatically. Turn on
+              <strong>Translation badges</strong> per app screen to control where in-context edit badges
+              appear in the mobile app during translation mode.
+            </p>
 
-        <div class="screen-names-table-wrap">
-          <table class="screen-names-table">
-            <thead>
-              <tr>
-                <th scope="col">Screen name</th>
-                <th scope="col">Assigned app screen</th>
-                <th scope="col">Unassign</th>
-                <th scope="col">Actions</th>
-              </tr>
-            </thead>
-            <tbody id="screen-names-body"></tbody>
-          </table>
-        </div>
+            <div class="row wrap">
+              <input id="screen-name-new" type="text" placeholder="New screen name" aria-label="New screen name" />
+              <button type="button" id="screen-name-add-btn">Add screen name</button>
+              <button type="button" id="screen-names-refresh-btn" class="secondary">Refresh</button>
+              <button type="button" id="screen-names-import-btn" class="secondary">Import from string tags</button>
+            </div>
 
-        <h3>Assign screen name to app screen</h3>
+            <p id="screen-names-status" class="status" aria-live="polite"></p>
 
-        <p class="hint">Each app screen can have at most one screen name. Names already in use elsewhere do not appear in the list. Enable translation badges to show in-context editing on that screen in the app.</p>
+          </div>
 
-        <div class="screen-names-table-wrap screen-routes-table-wrap">
-          <table class="screen-names-table">
-            <thead>
-              <tr>
-                <th scope="col">App screen</th>
-                <th scope="col">Route</th>
-                <th scope="col">Screen name</th>
-                <th scope="col">Translation badges</th>
-              </tr>
-            </thead>
-            <tbody id="screen-routes-body"></tbody>
-          </table>
-        </div>
+        </details>
+
+        <details id="screen-names-catalog-panel" class="screen-names-panel collapsible-section" open>
+
+          <summary class="collapsible-summary">Screen name catalog</summary>
+
+          <div class="collapsible-body">
+
+            <div class="screen-names-table-stack">
+              <div id="screen-names-head-wrap" class="screen-names-table-head-wrap">
+                <table class="screen-names-table screen-names-table-head">
+                  <colgroup>
+                    <col class="col-sn-name" />
+                    <col class="col-sn-assigned" />
+                    <col class="col-sn-unassign" />
+                    <col class="col-sn-actions" />
+                  </colgroup>
+                  <thead id="screen-names-head"></thead>
+                </table>
+              </div>
+              <div id="screen-names-body-scroll" class="screen-names-table-body-scroll">
+                <table class="screen-names-table screen-names-table-body">
+                  <colgroup>
+                    <col class="col-sn-name" />
+                    <col class="col-sn-assigned" />
+                    <col class="col-sn-unassign" />
+                    <col class="col-sn-actions" />
+                  </colgroup>
+                  <tbody id="screen-names-body"></tbody>
+                </table>
+              </div>
+            </div>
+
+          </div>
+
+        </details>
+
+        <details id="screen-names-routes-panel" class="screen-names-panel collapsible-section" open>
+
+          <summary class="collapsible-summary">Assign screen name to app screen</summary>
+
+          <div class="collapsible-body">
+
+            <p class="hint">Each app screen can have at most one screen name. Names already in use elsewhere do not appear in the list. Enable translation badges to show in-context editing on that screen in the app.</p>
+
+            <div class="screen-names-table-stack screen-routes-table-stack">
+              <div id="screen-routes-head-wrap" class="screen-names-table-head-wrap">
+                <table class="screen-names-table screen-names-table-head">
+                  <colgroup>
+                    <col class="col-sn-app" />
+                    <col class="col-sn-route" />
+                    <col class="col-sn-screen" />
+                    <col class="col-sn-badges" />
+                  </colgroup>
+                  <thead id="screen-routes-head"></thead>
+                </table>
+              </div>
+              <div id="screen-routes-body-scroll" class="screen-names-table-body-scroll">
+                <table class="screen-names-table screen-names-table-body">
+                  <colgroup>
+                    <col class="col-sn-app" />
+                    <col class="col-sn-route" />
+                    <col class="col-sn-screen" />
+                    <col class="col-sn-badges" />
+                  </colgroup>
+                  <tbody id="screen-routes-body"></tbody>
+                </table>
+              </div>
+            </div>
+
+          </div>
+
+        </details>
 
       </section>
 

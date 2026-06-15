@@ -279,7 +279,7 @@ class _DurationPickers extends StatelessWidget {
                         .map(
                           (h) => DropdownMenuItem(
                             value: h,
-                            child: Text('$h'),
+                            child: Text(h.toString()),
                           ),
                         )
                         .toList(),

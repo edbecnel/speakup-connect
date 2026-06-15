@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:speakup_connect/core/l10n/app_localizations_extension.dart';
 import 'package:speakup_connect/features/organization/presentation/providers/profile_photo_provider.dart';
 import 'package:speakup_connect/features/organization/presentation/widgets/profile_photo_picker.dart';
 
@@ -20,6 +21,7 @@ class OfficialPhotoSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     final busy = ref.watch(profilePhotoProvider).isLoading;
 
@@ -27,7 +29,9 @@ class OfficialPhotoSection extends ConsumerWidget {
       if (prev?.isLoading == true && !next.isLoading && next.hasError) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Photo update failed: ${next.error}'),
+            content: Text(
+              l10n.studentRosterPhotoUpdateFailed(next.error.toString()),
+            ),
             backgroundColor: theme.colorScheme.error,
           ),
         );
@@ -38,17 +42,14 @@ class OfficialPhotoSection extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Official school photo',
+          l10n.studentRosterOfficialPhotoSectionTitle,
           style: theme.textTheme.titleSmall?.copyWith(
             fontWeight: FontWeight.w600,
           ),
         ),
         const SizedBox(height: 8),
         Text(
-          'Permanent school record for faculty and admins. Stored separately '
-          'from any personal photo the student may add in Settings (when '
-          'allowed). A student personal badge never replaces or deletes this '
-          'official image.',
+          l10n.studentRosterOfficialPhotoSectionHint,
           style: theme.textTheme.bodySmall?.copyWith(
             color: theme.colorScheme.onSurfaceVariant,
           ),
@@ -71,7 +72,9 @@ class OfficialPhotoSection extends ConsumerWidget {
                   );
               if (context.mounted && ok) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Official photo updated')),
+                  SnackBar(
+                    content: Text(l10n.studentRosterOfficialPhotoUpdated),
+                  ),
                 );
               }
             },
@@ -84,7 +87,9 @@ class OfficialPhotoSection extends ConsumerWidget {
                   );
               if (context.mounted && ok) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Official photo removed')),
+                  SnackBar(
+                    content: Text(l10n.studentRosterOfficialPhotoRemoved),
+                  ),
                 );
               }
             },

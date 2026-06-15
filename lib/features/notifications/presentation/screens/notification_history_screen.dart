@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:speakup_connect/core/constants/route_constants.dart';
+import 'package:speakup_connect/core/l10n/app_localizations_extension.dart';
 import 'package:speakup_connect/features/notifications/domain/entities/notification_history_entity.dart';
 import 'package:speakup_connect/features/notifications/presentation/providers/notification_history_provider.dart';
 
@@ -11,6 +12,7 @@ class NotificationHistoryScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final historyAsync = ref.watch(notificationHistoryProvider);
     final theme = Theme.of(context);
 
@@ -20,11 +22,12 @@ class NotificationHistoryScreen extends ConsumerWidget {
           onPressed: () =>
               context.canPop() ? context.pop() : context.go(Routes.alerts),
         ),
-        title: const Text('Notification history'),
+        title: Text(l10n.notificationHistoryTitle),
       ),
       body: historyAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Failed to load history: $e')),
+        error: (e, _) =>
+            Center(child: Text(l10n.notificationHistoryFailedToLoad('$e'))),
         data: (items) {
           if (items.isEmpty) {
             return Center(

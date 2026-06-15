@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:speakup_connect/core/constants/route_constants.dart';
+import 'package:speakup_connect/core/l10n/app_localizations_extension.dart';
 import 'package:speakup_connect/features/reminders/presentation/providers/reminder_provider.dart';
 import 'package:speakup_connect/features/reminders/presentation/providers/reminder_response_provider.dart';
 import 'package:speakup_connect/features/reminders/presentation/widgets/expiration_picker_section.dart'
@@ -15,6 +16,7 @@ class ReminderResponsesScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final reminderAsync = ref.watch(reminderByIdProvider(reminderId));
     final responsesAsync = ref.watch(reminderResponsesProvider(reminderId));
     final theme = Theme.of(context);
@@ -25,30 +27,31 @@ class ReminderResponsesScreen extends ConsumerWidget {
           onPressed: () =>
               context.canPop() ? context.pop() : context.go(Routes.myBroadcasts),
         ),
-        title: const Text('Responses'),
+        title: Text(l10n.announcementsResponsesTitle),
       ),
       body: reminderAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Failed to load reminder: $e')),
+        error: (e, _) => Center(child: Text(l10n.reminderDetailLoadFailed('$e'))),
         data: (reminder) {
           if (reminder == null) {
-            return const Center(child: Text('Reminder not found'));
+            return Center(child: Text(l10n.reminderDetailNotFound));
           }
           final config = reminder.responseConfig;
           if (config == null || !config.enabled) {
-            return const Center(child: Text('This reminder has no responses.'));
+            return Center(child: Text(l10n.reminderResponsesNoResponses));
           }
 
           return responsesAsync.when(
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (e, _) => Center(child: Text('Failed to load responses: $e')),
+            error: (e, _) =>
+                Center(child: Text(l10n.announcementsFailedToLoadResponses('$e'))),
             data: (responses) {
               if (responses.isEmpty) {
                 return Center(
                   child: Padding(
                     padding: const EdgeInsets.all(32),
                     child: Text(
-                      'No responses yet.',
+                      l10n.reminderResponsesNoResponsesYet,
                       style: theme.textTheme.bodyLarge?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),

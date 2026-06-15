@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:speakup_connect/core/constants/route_constants.dart';
+import 'package:speakup_connect/core/l10n/app_localizations_extension.dart';
 import 'package:speakup_connect/features/announcements/domain/entities/bulletin_entity.dart';
 import 'package:speakup_connect/features/announcements/presentation/providers/announcement_provider.dart';
 
@@ -26,17 +27,18 @@ class _AnnouncementsScreenState extends ConsumerState<AnnouncementsScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
     final bulletinsAsync = ref.watch(publishedBulletinsProvider);
     final canPost = ref.watch(canPostAnnouncementsProvider);
 
     return Scaffold(
       appBar: AppBar(
         leading: BackButton(onPressed: () => context.pop()),
-        title: const Text('Announcements'),
+        title: Text(l10n.announcementsTitle),
         actions: [
           if (canPost)
             IconButton(
-              tooltip: 'My announcements',
+              tooltip: l10n.announcementsMyTooltip,
               icon: const Icon(Icons.outbox_outlined),
               onPressed: () => context.push(Routes.myAnnouncements),
             ),
@@ -46,7 +48,7 @@ class _AnnouncementsScreenState extends ConsumerState<AnnouncementsScreen> {
           ? FloatingActionButton.extended(
               onPressed: () => context.push(Routes.composeAnnouncement),
               icon: const Icon(Icons.campaign_outlined),
-              label: const Text('Post'),
+              label: Text(l10n.announcementsPost),
             )
           : null,
       body: bulletinsAsync.when(
@@ -54,7 +56,7 @@ class _AnnouncementsScreenState extends ConsumerState<AnnouncementsScreen> {
         error: (e, _) => Center(
           child: Padding(
             padding: const EdgeInsets.all(24),
-            child: Text('Failed to load announcements: $e'),
+            child: Text(l10n.announcementsFailedToLoadList('$e')),
           ),
         ),
         data: (bulletins) {

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:speakup_connect/core/l10n/app_localizations_extension.dart';
 import 'package:speakup_connect/core/utils/picked_image_file.dart';
 import 'package:speakup_connect/shared/widgets/app_avatar.dart';
 
@@ -31,40 +32,44 @@ class ProfilePhotoPicker extends StatelessWidget {
   Future<void> _showSourceSheet(BuildContext context) async {
     if (isLoading || onPick == null) return;
 
+    final l10n = context.l10n;
     final action = await showModalBottomSheet<_PhotoPickerAction>(
       context: context,
-      builder: (ctx) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.photo_library_outlined),
-              title: const Text('Choose from gallery'),
-              onTap: () => Navigator.of(ctx).pop(_PhotoPickerAction.gallery),
-            ),
-            ListTile(
-              leading: const Icon(Icons.photo_camera_outlined),
-              title: const Text('Take a photo'),
-              onTap: () => Navigator.of(ctx).pop(_PhotoPickerAction.camera),
-            ),
-            if (showRemove &&
-                onRemove != null &&
-                avatarUrl != null &&
-                avatarUrl!.isNotEmpty)
+      builder: (ctx) {
+        final sheetL10n = ctx.l10n;
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
               ListTile(
-                leading: Icon(
-                  Icons.delete_outline,
-                  color: Theme.of(ctx).colorScheme.error,
-                ),
-                title: Text(
-                  'Remove photo',
-                  style: TextStyle(color: Theme.of(ctx).colorScheme.error),
-                ),
-                onTap: () => Navigator.of(ctx).pop(_PhotoPickerAction.remove),
+                leading: const Icon(Icons.photo_library_outlined),
+                title: Text(sheetL10n.commonChooseFromGallery),
+                onTap: () => Navigator.of(ctx).pop(_PhotoPickerAction.gallery),
               ),
-          ],
-        ),
-      ),
+              ListTile(
+                leading: const Icon(Icons.photo_camera_outlined),
+                title: Text(sheetL10n.commonTakePhoto),
+                onTap: () => Navigator.of(ctx).pop(_PhotoPickerAction.camera),
+              ),
+              if (showRemove &&
+                  onRemove != null &&
+                  avatarUrl != null &&
+                  avatarUrl!.isNotEmpty)
+                ListTile(
+                  leading: Icon(
+                    Icons.delete_outline,
+                    color: Theme.of(ctx).colorScheme.error,
+                  ),
+                  title: Text(
+                    sheetL10n.commonRemovePhoto,
+                    style: TextStyle(color: Theme.of(ctx).colorScheme.error),
+                  ),
+                  onTap: () => Navigator.of(ctx).pop(_PhotoPickerAction.remove),
+                ),
+            ],
+          ),
+        );
+      },
     );
 
     if (action == null || !context.mounted) return;
@@ -88,8 +93,8 @@ class ProfilePhotoPicker extends StatelessWidget {
     if (path == null) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Could not load that image. Try another photo.'),
+          SnackBar(
+            content: Text(l10n.composeAnnouncementImageLoadFailed),
           ),
         );
       }
@@ -101,6 +106,7 @@ class ProfilePhotoPicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     final hasPhoto =
         (avatarUrl != null && avatarUrl!.isNotEmpty) ||
@@ -108,7 +114,9 @@ class ProfilePhotoPicker extends StatelessWidget {
 
     return Semantics(
       button: true,
-      label: hasPhoto ? 'Change profile photo' : 'Add profile photo',
+      label: hasPhoto
+          ? l10n.commonChangeProfilePhoto
+          : l10n.commonAddProfilePhoto,
       child: InkWell(
         onTap: isLoading ? null : () => _showSourceSheet(context),
         customBorder: const CircleBorder(),

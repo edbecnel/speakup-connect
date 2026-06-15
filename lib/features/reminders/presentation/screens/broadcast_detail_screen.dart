@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:speakup_connect/core/l10n/app_localizations_extension.dart';
 import 'package:speakup_connect/features/notifications/domain/entities/app_notification_entity.dart';
 import 'package:speakup_connect/features/notifications/domain/entities/notification_attention.dart';
 import 'package:speakup_connect/features/notifications/presentation/providers/notification_provider.dart';
@@ -12,6 +13,7 @@ import 'package:speakup_connect/features/reminders/presentation/screens/reminder
 import 'package:speakup_connect/features/reminders/presentation/widgets/reminder_response_form.dart';
 import 'package:speakup_connect/features/reminders/presentation/widgets/expiration_picker_section.dart'
     show formatDateTime;
+import 'package:speakup_connect/l10n/app_localizations.dart';
 
 /// Full-screen view of a broadcast reminder.
 ///
@@ -77,14 +79,15 @@ class _BroadcastDetailScreenState extends ConsumerState<BroadcastDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final reminderId = _reminderId;
     if (reminderId == null) {
       return Scaffold(
         appBar: AppBar(
           leading: BackButton(onPressed: () => Navigator.of(context).pop()),
-          title: const Text('Reminder'),
+          title: Text(l10n.reminderDetailTitle),
         ),
-        body: const Center(child: Text('Reminder not found')),
+        body: Center(child: Text(l10n.reminderDetailNotFound)),
       );
     }
 
@@ -97,25 +100,25 @@ class _BroadcastDetailScreenState extends ConsumerState<BroadcastDetailScreen> {
       loading: () => Scaffold(
         appBar: AppBar(
           leading: BackButton(onPressed: () => Navigator.of(context).pop()),
-          title: const Text('Reminder'),
+          title: Text(l10n.reminderDetailTitle),
         ),
         body: const Center(child: CircularProgressIndicator()),
       ),
       error: (e, _) => Scaffold(
         appBar: AppBar(
           leading: BackButton(onPressed: () => Navigator.of(context).pop()),
-          title: const Text('Reminder'),
+          title: Text(l10n.reminderDetailTitle),
         ),
-        body: Center(child: Text('Failed to load reminder: $e')),
+        body: Center(child: Text(l10n.reminderDetailLoadFailed('$e'))),
       ),
       data: (reminder) {
         if (reminder == null) {
           return Scaffold(
             appBar: AppBar(
               leading: BackButton(onPressed: () => Navigator.of(context).pop()),
-              title: const Text('Reminder'),
+              title: Text(l10n.reminderDetailTitle),
             ),
-            body: const Center(child: Text('Reminder not found')),
+            body: Center(child: Text(l10n.reminderDetailNotFound)),
           );
         }
         return _buildScaffold(context, reminder, widget.notification);
@@ -128,6 +131,7 @@ class _BroadcastDetailScreenState extends ConsumerState<BroadcastDetailScreen> {
     ReminderEntity reminder,
     AppNotificationEntity? notification,
   ) {
+    final l10n = context.l10n;
     final canRespond = reminder.isPublished &&
         !reminder.isExpired &&
         reminder.acceptsResponses;
@@ -149,11 +153,11 @@ class _BroadcastDetailScreenState extends ConsumerState<BroadcastDetailScreen> {
     return Scaffold(
       appBar: AppBar(
         leading: BackButton(onPressed: () => Navigator.of(context).pop()),
-        title: const Text('Reminder'),
+        title: Text(l10n.reminderDetailTitle),
         actions: [
           if (canViewResponses)
             IconButton(
-              tooltip: 'View responses',
+              tooltip: l10n.announcementsViewResponses,
               icon: const Icon(Icons.poll_outlined),
               onPressed: () {
                 Navigator.of(context).push(
@@ -197,7 +201,7 @@ class _BroadcastDetailScreenState extends ConsumerState<BroadcastDetailScreen> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          _formatReceivedAt(receivedAt),
+                          _formatReceivedAt(l10n, receivedAt),
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: theme.colorScheme.onSurfaceVariant,
                           ),
@@ -209,29 +213,29 @@ class _BroadcastDetailScreenState extends ConsumerState<BroadcastDetailScreen> {
               ),
               const SizedBox(height: 24),
               _DetailRow(
-                label: 'Audience',
+                label: l10n.reminderComposeAudienceLabel,
                 value: reminder.audience.displayLabel,
                 icon: Icons.groups_outlined,
               ),
               if (reminder.scheduledAt != null) ...[
                 const SizedBox(height: 12),
                 _DetailRow(
-                  label: 'Scheduled',
+                  label: l10n.reminderDetailScheduledLabel,
                   value: formatDateTime(reminder.scheduledAt!),
                   icon: Icons.schedule,
                 ),
               ],
               const SizedBox(height: 12),
               _DetailRow(
-                label: 'Expires',
+                label: l10n.reminderDetailExpiresLabel,
                 value: expiresAt != null
                     ? formatDateTime(expiresAt)
-                    : 'Does not expire',
+                    : l10n.reminderDetailDoesNotExpire,
                 icon: Icons.timer_outlined,
               ),
               const SizedBox(height: 28),
               Text(
-                'Message',
+                l10n.commonMessage,
                 style: theme.textTheme.titleSmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
@@ -259,8 +263,7 @@ class _BroadcastDetailScreenState extends ConsumerState<BroadcastDetailScreen> {
                         const SizedBox(width: 10),
                         Expanded(
                           child: Text(
-                            'Response required — submit your answer to dismiss '
-                            'this alert.',
+                            l10n.reminderDetailResponseRequiredBanner,
                             style: theme.textTheme.bodySmall?.copyWith(
                               color: theme.colorScheme.onTertiaryContainer,
                             ),
@@ -278,7 +281,8 @@ class _BroadcastDetailScreenState extends ConsumerState<BroadcastDetailScreen> {
                     : myResponseAsync.when(
                         loading: () =>
                             const Center(child: CircularProgressIndicator()),
-                        error: (e, _) => Text('Failed to load response: $e'),
+                        error: (e, _) =>
+                            Text(l10n.announcementsFailedToLoadResponse('$e')),
                         data: (existing) => ReminderResponseForm(
                           organizationId: AppConfig.defaultOrganizationId,
                           reminderId: reminder.reminderId,
@@ -334,12 +338,12 @@ class _DetailRow extends StatelessWidget {
   }
 }
 
-String _formatReceivedAt(DateTime dt) {
+String _formatReceivedAt(AppLocalizations l10n, DateTime dt) {
   final now = DateTime.now();
   final diff = now.difference(dt);
-  if (diff.inMinutes < 1) return 'Just now';
-  if (diff.inHours < 1) return '${diff.inMinutes} min ago';
-  if (diff.inDays < 1) return '${diff.inHours} hr ago';
-  if (diff.inDays < 7) return '${diff.inDays} d ago';
+  if (diff.inMinutes < 1) return l10n.reminderDetailJustNow;
+  if (diff.inHours < 1) return l10n.reminderDetailMinutesAgo(diff.inMinutes);
+  if (diff.inDays < 1) return l10n.reminderDetailHoursAgo(diff.inHours);
+  if (diff.inDays < 7) return l10n.reminderDetailDaysAgo(diff.inDays);
   return formatDateTime(dt);
 }

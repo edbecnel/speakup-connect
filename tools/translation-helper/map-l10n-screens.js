@@ -246,7 +246,13 @@ function resolveScreen(key) {
   return screenLabelFromKey(key);
 }
 
-module.exports = { resolveScreen, keyToScreens, screenLabelFromKey, keyBasedScreen };
+module.exports = {
+  resolveScreen,
+  keyToScreens,
+  screenLabelFromKey,
+  keyBasedScreen,
+  screenLabelFromFile,
+};
 
 if (require.main === module) {
   const keys = [...keyToScreens.keys()].sort();

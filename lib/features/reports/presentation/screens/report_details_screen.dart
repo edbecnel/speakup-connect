@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:speakup_connect/config/app_config.dart';
+import 'package:speakup_connect/core/l10n/app_localizations_extension.dart';
 import 'package:speakup_connect/features/reports/domain/entities/report_entity.dart';
 import 'package:speakup_connect/features/reports/presentation/providers/report_provider.dart';
 import 'package:speakup_connect/shared/widgets/app_error_widget.dart';
@@ -16,17 +17,18 @@ class ReportDetailsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final reportAsync = ref.watch(reportByIdProvider(reportId));
 
     return Scaffold(
       appBar: AppBar(
         leading: BackButton(onPressed: () => context.pop()),
-        title: const Text('Report Details'),
+        title: Text(l10n.reportDetailsTitle),
       ),
       body: reportAsync.when(
-        loading: () => const AppLoadingIndicator(message: 'Loading report...'),
+        loading: () => AppLoadingIndicator(message: l10n.reportDetailsLoading),
         error: (e, _) => AppErrorWidget(
-          message: 'Failed to load report',
+          message: l10n.reportDetailsLoadFailed,
           onRetry: () => ref.invalidate(reportByIdProvider(reportId)),
         ),
         data: (report) => _ReportDetailView(report: report),
@@ -42,6 +44,7 @@ class _ReportDetailView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     final categoryLabel = ref.watch(reportCategoriesProvider).maybeWhen(
       data: (cats) => cats
@@ -101,7 +104,7 @@ class _ReportDetailView extends ConsumerWidget {
                   ],
                   const SizedBox(height: 8),
                   Text(
-                    'Submitted ${_formatDate(report.createdAt)}',
+                    l10n.adminReportDetailSubmittedDate(_formatDate(report.createdAt)),
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
@@ -117,7 +120,7 @@ class _ReportDetailView extends ConsumerWidget {
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          'Submitted anonymously',
+                          l10n.reportDetailsSubmittedAnonymously,
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: theme.colorScheme.onSurfaceVariant,
                           ),
@@ -133,14 +136,16 @@ class _ReportDetailView extends ConsumerWidget {
           const SizedBox(height: 16),
 
           // Description
-          const _SectionHeader(title: 'Description'),
+          _SectionHeader(title: l10n.commonDescription),
           const SizedBox(height: 8),
           Text(report.description, style: theme.textTheme.bodyMedium),
 
           // Photos
           if (report.hasPhotos) ...[
             const SizedBox(height: 24),
-            _SectionHeader(title: 'Photos (${report.photoUrls.length})'),
+            _SectionHeader(
+              title: l10n.adminReportDetailPhotos(report.photoUrls.length),
+            ),
             const SizedBox(height: 8),
             SizedBox(
               height: 120,
@@ -177,7 +182,7 @@ class _ReportDetailView extends ConsumerWidget {
           // Status Timeline
           if (report.statusHistory.isNotEmpty) ...[
             const SizedBox(height: 24),
-            const _SectionHeader(title: 'Status History'),
+            _SectionHeader(title: l10n.adminReportDetailStatusHistory),
             const SizedBox(height: 8),
             ...report.statusHistory.reversed.map(
               (entry) => _TimelineEntry(entry: entry),

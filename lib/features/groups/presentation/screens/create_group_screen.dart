@@ -112,14 +112,14 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
                   : (v) => setState(() {
                         _definePositions = v;
                         if (v && _positionRoles.isEmpty) {
-                          _positionRoles = const [
+                          _positionRoles = [
                             GroupPositionRole(
                               id: 'president',
-                              label: 'President',
+                              label: l10n.groupsDefaultPresident,
                             ),
                             GroupPositionRole(
                               id: 'vice-president',
-                              label: 'Vice President',
+                              label: l10n.groupsDefaultVicePresident,
                             ),
                           ];
                         }

@@ -51,8 +51,8 @@ class _ApplyToJoinScreenState extends ConsumerState<ApplyToJoinScreen> {
     if (!_formKey.currentState!.validate()) return;
     if (!_termsAccepted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please accept the terms to continue.'),
+        SnackBar(
+          content: Text(context.l10n.authApplyAcceptTermsSnackbar),
         ),
       );
       return;
@@ -75,6 +75,7 @@ class _ApplyToJoinScreenState extends ConsumerState<ApplyToJoinScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final orgConfig = ref.watch(organizationConfigProvider);
     final orgName = orgConfig.asData?.value?.displayName ?? AppConfig.appName;
 
@@ -97,7 +98,7 @@ class _ApplyToJoinScreenState extends ConsumerState<ApplyToJoinScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Join $orgName'),
+        title: Text(l10n.authJoinOrgTitle(orgName)),
         centerTitle: true,
         // User just signed up — sign out is available via the trailing action.
         actions: [
@@ -105,7 +106,7 @@ class _ApplyToJoinScreenState extends ConsumerState<ApplyToJoinScreen> {
             onPressed: () async {
               await ref.read(authProvider.notifier).signOut();
             },
-            child: const Text('Sign Out'),
+            child: Text(l10n.settingsSignOut),
           ),
         ],
       ),
@@ -123,13 +124,13 @@ class _ApplyToJoinScreenState extends ConsumerState<ApplyToJoinScreen> {
               ),
               const SizedBox(height: 16),
               Text(
-                'Request to Join',
+                l10n.groupsRequestToJoin,
                 style: context.textTheme.headlineSmall,
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 8),
               Text(
-                'Your details will be reviewed by an admin before you can access $orgName.',
+                l10n.authApplyReviewMessage(orgName),
                 style: context.textTheme.bodyMedium?.copyWith(
                   color: context.colorScheme.onSurfaceVariant,
                 ),
@@ -145,21 +146,21 @@ class _ApplyToJoinScreenState extends ConsumerState<ApplyToJoinScreen> {
                   children: [
                     AppTextField(
                       controller: _fullNameController,
-                      label: 'Full Name',
-                      hint: 'e.g. Juan Dela Cruz',
+                      label: l10n.authFullName,
+                      hint: l10n.authFullNameExampleHint,
                       prefixIcon: Icons.person_outline,
                       keyboardType: TextInputType.name,
                       textInputAction: TextInputAction.next,
                       validator: (v) => context.l10n.validateRequired(
                         v,
-                        fieldName: 'Full name',
+                        fieldName: l10n.authFullName,
                       ),
                     ),
                     const SizedBox(height: 16),
                     AppTextField(
                       controller: _studentIdController,
-                      label: 'Student / Member ID',
-                      hint: 'Your school-issued ID number',
+                      label: l10n.authStudentMemberId,
+                      hint: l10n.authStudentMemberIdHint,
                       prefixIcon: Icons.badge_outlined,
                       keyboardType: TextInputType.text,
                       textInputAction: TextInputAction.done,
@@ -185,7 +186,7 @@ class _ApplyToJoinScreenState extends ConsumerState<ApplyToJoinScreen> {
                             child: Padding(
                               padding: const EdgeInsets.only(top: 12),
                               child: Text(
-                                'I confirm that the information I provided is accurate.',
+                                l10n.authApplyConfirmAccurate,
                                 style: context.textTheme.bodySmall,
                               ),
                             ),
@@ -197,7 +198,7 @@ class _ApplyToJoinScreenState extends ConsumerState<ApplyToJoinScreen> {
 
                     // --- Submit ---
                     AppButton.primary(
-                      label: 'Submit Application',
+                      label: l10n.authSubmitApplication,
                       isLoading: submissionState.isLoading,
                       onPressed: submissionState.isLoading ? null : _submit,
                     ),

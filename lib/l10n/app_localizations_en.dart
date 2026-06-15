@@ -847,6 +847,34 @@ class AppLocalizationsEn extends AppLocalizations {
       'Sign in with your student ID or contact email and your password.';
 
   @override
+  String get settingsUsernameStudentId => 'Username / student ID';
+
+  @override
+  String get settingsContactEmail => 'Contact email';
+
+  @override
+  String get settingsChangeEmail => 'Change email';
+
+  @override
+  String get settingsAddEmail => 'Add email';
+
+  @override
+  String get settingsContactEmailRemoved => 'Contact email removed';
+
+  @override
+  String get settingsContactEmailUpdated => 'Contact email updated';
+
+  @override
+  String get settingsContactEmailUpdateFailed => 'Could not update email';
+
+  @override
+  String get settingsContactEmailDialogIntro =>
+      'Used for notifications and sign-in. Your student ID remains your username for school accounts.';
+
+  @override
+  String get settingsEmailOptional => 'Email (optional)';
+
+  @override
   String get settingsNotificationPreferences => 'Notification Preferences';
 
   @override
@@ -1358,6 +1386,16 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String commonUpdateFailed(String error) {
+    return 'Update failed: $error';
+  }
+
+  @override
+  String commonDeleteFailed(String error) {
+    return 'Delete failed: $error';
+  }
+
+  @override
   String commonFailedToLoad(String error) {
     return 'Failed to load: $error';
   }
@@ -1439,6 +1477,30 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get commonContinueButton => 'Continue';
+
+  @override
+  String get commonChooseFromGallery => 'Choose from gallery';
+
+  @override
+  String get commonTakePhoto => 'Take a photo';
+
+  @override
+  String get commonRemovePhoto => 'Remove photo';
+
+  @override
+  String get commonAddProfilePhoto => 'Add profile photo';
+
+  @override
+  String get commonChangeProfilePhoto => 'Change profile photo';
+
+  @override
+  String get commonShowPassword => 'Show password';
+
+  @override
+  String get commonHidePassword => 'Hide password';
+
+  @override
+  String get commonNotSet => 'Not set';
 
   @override
   String get changePasswordIntro =>
@@ -1586,6 +1648,88 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get composeAnnouncementValidationResponse =>
       'Complete the optional response settings or turn them off.';
+
+  @override
+  String get announcementsTitle => 'Announcements';
+
+  @override
+  String get announcementsDetailTitle => 'Announcement';
+
+  @override
+  String get announcementsMyTitle => 'My Announcements';
+
+  @override
+  String get announcementsMyTooltip => 'My announcements';
+
+  @override
+  String get announcementsPost => 'Post';
+
+  @override
+  String get announcementsNotFound => 'Announcement not found.';
+
+  @override
+  String get announcementsNotFoundShort => 'Announcement not found';
+
+  @override
+  String announcementsFailedToLoadList(String error) {
+    return 'Failed to load announcements: $error';
+  }
+
+  @override
+  String announcementsFailedToLoadAnnouncement(String error) {
+    return 'Failed to load announcement: $error';
+  }
+
+  @override
+  String announcementsFailedToLoadResponses(String error) {
+    return 'Failed to load responses: $error';
+  }
+
+  @override
+  String announcementsFailedToLoadResponse(String error) {
+    return 'Failed to load response: $error';
+  }
+
+  @override
+  String get announcementsResponsesTitle => 'Responses';
+
+  @override
+  String get announcementsNoResponses => 'This announcement has no responses.';
+
+  @override
+  String get announcementsEmptyMine =>
+      'You have not posted any announcements yet.';
+
+  @override
+  String get announcementsViewResponses => 'View responses';
+
+  @override
+  String get announcementsDeleteTitle => 'Delete announcement?';
+
+  @override
+  String get announcementsEditTitle => 'Edit announcement';
+
+  @override
+  String get announcementsAddImage => 'Add image';
+
+  @override
+  String get announcementsChooseFromGallery => 'Choose from gallery';
+
+  @override
+  String get announcementsTakePhoto => 'Take a photo';
+
+  @override
+  String get announcementsRemoveImage => 'Remove image';
+
+  @override
+  String get announcementsPreparingImage => 'Preparing image…';
+
+  @override
+  String get announcementsChangePhoto => 'Change photo';
+
+  @override
+  String get announcementsExpirationMustBeFuture =>
+      'Expiration must be in the future';
 
   @override
   String get schoolGradesIntro => 'Define which grade levels your school uses.';
@@ -2101,6 +2245,149 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get memberManagementEditMemberTitle => 'Edit Member';
+
+  @override
+  String get memberManagementEditMemberIntro =>
+      'Update login username (student ID), contact email, grade, and display name. Changing a student ID also updates their sign-in username.';
+
+  @override
+  String memberManagementLoadMemberFailed(String error) {
+    return 'Could not load member: $error';
+  }
+
+  @override
+  String get memberManagementMemberNotFound => 'Member not found';
+
+  @override
+  String get memberManagementUpdateFailed => 'Could not update member';
+
+  @override
+  String get memberManagementStudentPersonalBadge => 'Student personal badge';
+
+  @override
+  String get memberManagementStudentPersonalBadgeHint =>
+      'Optional photo the student chose in Settings. This does not replace the official school photo above.';
+
+  @override
+  String get memberManagementFullNameLabel => 'Full name';
+
+  @override
+  String get memberManagementFullNameHint => 'Legal / roster name';
+
+  @override
+  String get memberManagementFullNameExample => 'e.g. Juan Dela Cruz';
+
+  @override
+  String get memberManagementStudentIdUsernameLabel => 'Student ID (username)';
+
+  @override
+  String get memberManagementStudentIdLabel => 'Student ID';
+
+  @override
+  String get memberManagementStudentIdSignInHint =>
+      'School-issued ID for sign-in';
+
+  @override
+  String get memberManagementStudentIdProvisionHint =>
+      'School-issued ID (min. 6 characters)';
+
+  @override
+  String get memberManagementContactEmailOptionalLabel =>
+      'Contact email (optional)';
+
+  @override
+  String get memberManagementContactEmailHint =>
+      'For notifications; can also sign in if set';
+
+  @override
+  String get memberManagementContactEmailFutureHint =>
+      'Contact email for future login';
+
+  @override
+  String get memberManagementNoGrade => 'No grade';
+
+  @override
+  String get memberManagementSaveChanges => 'Save changes';
+
+  @override
+  String get memberManagementPasswordSection => 'Password';
+
+  @override
+  String get memberManagementPasswordSectionHint =>
+      'Set a new sign-in password for this member. Their current session stays active until they sign out.';
+
+  @override
+  String get memberManagementConfirmPasswordResetTitle =>
+      'Confirm password reset';
+
+  @override
+  String memberManagementConfirmPasswordResetMessage(String name) {
+    return 'Set a new sign-in password for $name? They will need it the next time they sign in.';
+  }
+
+  @override
+  String get memberManagementResetPasswordAction => 'Reset password';
+
+  @override
+  String memberManagementPasswordResetSuccess(String name) {
+    return 'Password reset for $name';
+  }
+
+  @override
+  String get memberManagementPasswordResetFailed => 'Could not reset password';
+
+  @override
+  String memberManagementResetPasswordDialogTitle(String name) {
+    return 'Reset password for $name';
+  }
+
+  @override
+  String get memberManagementResetPasswordIntro =>
+      'Choose a new sign-in password. Use the shortcuts below or enter one manually.';
+
+  @override
+  String get memberManagementUseUsernamePassword => 'Use username / student ID';
+
+  @override
+  String get memberManagementGenerate8DigitPassword =>
+      'Generate 8-digit password';
+
+  @override
+  String get memberManagementPasswordMinHint => 'At least 6 characters';
+
+  @override
+  String get memberManagementConfirmPasswordLabel => 'Confirm password';
+
+  @override
+  String memberManagementAppliedAt(String date) {
+    return 'Applied $date';
+  }
+
+  @override
+  String memberManagementStudentIdWithValue(String id) {
+    return 'Student ID: $id';
+  }
+
+  @override
+  String get memberManagementViewOnlyNoPermission =>
+      'View only — you do not have permission to approve applications.';
+
+  @override
+  String get memberManagementRejectApplication => 'Reject application';
+
+  @override
+  String get memberManagementRejectApplicationHint =>
+      'Let the applicant know why…';
+
+  @override
+  String get memberManagementNoPendingApplications => 'No pending applications';
+
+  @override
+  String get memberManagementNoPendingApplicationsHint =>
+      'When someone signs up and completes the Join form, their request will appear here.';
+
+  @override
   String get studentRosterSearchHint => 'Search by name or student ID…';
 
   @override
@@ -2108,6 +2395,47 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get studentRosterAddStudent => 'Add Student';
+
+  @override
+  String get studentRosterAddStudentIntro =>
+      'Creates a pre-approved account. The student signs in using their school ID in both fields until email auth is enabled.';
+
+  @override
+  String get studentRosterSelectGrade => 'Select a grade';
+
+  @override
+  String get studentRosterAdding => 'Adding…';
+
+  @override
+  String studentRosterAddedSuccess(String name) {
+    return 'Added $name. They can sign in with their student ID as the password.';
+  }
+
+  @override
+  String get studentRosterAddFailed => 'Could not add student';
+
+  @override
+  String studentRosterGradeStatusLine(String grade, String status) {
+    return '$grade · $status';
+  }
+
+  @override
+  String get studentRosterOfficialPhotoUpdated => 'Official photo updated';
+
+  @override
+  String get studentRosterOfficialPhotoRemoved => 'Official photo removed';
+
+  @override
+  String get studentRosterOfficialPhotoSectionTitle => 'Official school photo';
+
+  @override
+  String get studentRosterOfficialPhotoSectionHint =>
+      'Permanent school record for faculty and admins. Stored separately from any personal photo the student may add in Settings (when allowed). A student personal badge never replaces or deletes this official image.';
+
+  @override
+  String studentRosterPhotoUpdateFailed(String error) {
+    return 'Photo update failed: $error';
+  }
 
   @override
   String get studentRosterAssignGradeTitle => 'Assign grade';
@@ -2661,6 +2989,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get commonEdit => 'Edit';
+
+  @override
+  String get commonDelete => 'Delete';
 
   @override
   String get commonRequired => 'Required';
@@ -3304,4 +3635,342 @@ class AppLocalizationsEn extends AppLocalizations {
   String translationModeReviewSaveAllSuccess(int count) {
     return 'Saved $count translations.';
   }
+
+  @override
+  String get alertsTitle => 'Alerts';
+
+  @override
+  String get alertsReminderApprovalsTooltip => 'Reminder approvals';
+
+  @override
+  String get alertsMoreTooltip => 'More';
+
+  @override
+  String get alertsMarkAllRead => 'Mark all read';
+
+  @override
+  String alertsFailedToLoad(String error) {
+    return 'Failed to load alerts: $error';
+  }
+
+  @override
+  String get alertsClearAllTitle => 'Clear all alerts?';
+
+  @override
+  String get alertsAlertDismissed => 'Alert dismissed';
+
+  @override
+  String get alertsSubmitBeforeDismiss =>
+      'Submit your response before dismissing this alert.';
+
+  @override
+  String get alertsDeleteAlertTitle => 'Delete alert?';
+
+  @override
+  String get alertsDeleteBroadcastTitle => 'Delete broadcast?';
+
+  @override
+  String get alertsDeleteAnnouncementTitle => 'Delete announcement?';
+
+  @override
+  String get notificationHistoryTitle => 'Notification history';
+
+  @override
+  String notificationHistoryFailedToLoad(String error) {
+    return 'Failed to load history: $error';
+  }
+
+  @override
+  String get commonCopy => 'Copy';
+
+  @override
+  String get commonTryAgain => 'Try Again';
+
+  @override
+  String get commonSomethingWentWrong => 'Something went wrong';
+
+  @override
+  String get commonMoveUp => 'Move up';
+
+  @override
+  String get commonMoveDown => 'Move down';
+
+  @override
+  String get commonReason => 'Reason';
+
+  @override
+  String get authAccountRestrictedTitle => 'Account Restricted';
+
+  @override
+  String get authAccountRestrictedMessage =>
+      'Your access to this organization has been suspended.';
+
+  @override
+  String get authAccountUnenrolledTitle => 'No Longer Enrolled';
+
+  @override
+  String get authAccountUnenrolledMessage =>
+      'Your membership in this organization has ended.';
+
+  @override
+  String get authAccountReasonLabel => 'Reason';
+
+  @override
+  String get authAccountBlockedDefaultReason =>
+      'Contact your administrator for help.';
+
+  @override
+  String get authAccountUnenrolledDefaultReason =>
+      'Contact your administrator if you need access.';
+
+  @override
+  String get authApplyAcceptTermsSnackbar =>
+      'Please accept the terms to continue.';
+
+  @override
+  String authJoinOrgTitle(String orgName) {
+    return 'Join $orgName';
+  }
+
+  @override
+  String authApplyReviewMessage(String orgName) {
+    return 'Your details will be reviewed by an admin before you can access $orgName.';
+  }
+
+  @override
+  String get authFullNameExampleHint => 'e.g. Juan Dela Cruz';
+
+  @override
+  String get authStudentMemberId => 'Student / Member ID';
+
+  @override
+  String get authStudentMemberIdHint => 'Your school-issued ID number';
+
+  @override
+  String get authApplyConfirmAccurate =>
+      'I confirm that the information I provided is accurate.';
+
+  @override
+  String get authSubmitApplication => 'Submit Application';
+
+  @override
+  String get authPendingRejectedTitle => 'Application Rejected';
+
+  @override
+  String get authPendingSubmittedTitle => 'Application Submitted!';
+
+  @override
+  String get authPendingRejectedMessage =>
+      'Your application was not approved. Please contact your administrator for more information.';
+
+  @override
+  String get authPendingReviewMessage =>
+      'Your application is under review. You\'ll receive a notification once an admin approves your account.';
+
+  @override
+  String get authEditApplication => 'Edit Application';
+
+  @override
+  String get authSubmittedDetails => 'Submitted Details';
+
+  @override
+  String get authStudentId => 'Student ID';
+
+  @override
+  String get reminderDetailTitle => 'Reminder';
+
+  @override
+  String get reminderDetailNotFound => 'Reminder not found';
+
+  @override
+  String reminderDetailLoadFailed(String error) {
+    return 'Failed to load reminder: $error';
+  }
+
+  @override
+  String get reminderDetailScheduledLabel => 'Scheduled';
+
+  @override
+  String get reminderDetailExpiresLabel => 'Expires';
+
+  @override
+  String get reminderDetailDoesNotExpire => 'Does not expire';
+
+  @override
+  String get reminderDetailResponseRequiredBanner =>
+      'Response required — submit your answer to dismiss this alert.';
+
+  @override
+  String get reminderDetailJustNow => 'Just now';
+
+  @override
+  String reminderDetailMinutesAgo(int count) {
+    return '$count min ago';
+  }
+
+  @override
+  String reminderDetailHoursAgo(int count) {
+    return '$count hr ago';
+  }
+
+  @override
+  String reminderDetailDaysAgo(int count) {
+    return '$count d ago';
+  }
+
+  @override
+  String reminderMyBroadcastsUpdateFailed(String error) {
+    return 'Update failed: $error';
+  }
+
+  @override
+  String reminderMyBroadcastsUpdatedWithAlerts(int count) {
+    return 'Broadcast updated — $count alert(s) refreshed.';
+  }
+
+  @override
+  String get reminderMyBroadcastsUpdated => 'Broadcast updated.';
+
+  @override
+  String reminderMyBroadcastsRecallFailed(String error) {
+    return 'Recall failed: $error';
+  }
+
+  @override
+  String reminderMyBroadcastsRecalledWithAlerts(int count) {
+    return 'Reminder recalled — $count delivered alert(s) removed.';
+  }
+
+  @override
+  String get reminderMyBroadcastsDeleted => 'Reminder deleted.';
+
+  @override
+  String reminderMyBroadcastsExpiresAt(String dateTime) {
+    return 'Expires $dateTime';
+  }
+
+  @override
+  String get reminderMyBroadcastsRecallTitle => 'Recall this broadcast?';
+
+  @override
+  String get reminderMyBroadcastsDeleteTitle => 'Delete broadcast?';
+
+  @override
+  String get reminderMyBroadcastsRecallMessage =>
+      'This deletes the reminder and removes it from every recipient\'s alerts feed. This cannot be undone.';
+
+  @override
+  String get reminderMyBroadcastsDeleteMessage =>
+      'This permanently deletes the reminder. This cannot be undone.';
+
+  @override
+  String get reminderMyBroadcastsRecall => 'Recall';
+
+  @override
+  String get reminderMyBroadcastsEmptyLeader => 'No group alerts sent yet';
+
+  @override
+  String get reminderMyBroadcastsEmpty =>
+      'You haven\'t sent any broadcasts yet';
+
+  @override
+  String get reminderMyBroadcastsEmptyLeaderHint =>
+      'Send an alert from My Groups & Clubs, then return here to view member responses.';
+
+  @override
+  String get reminderEditBroadcastTitle => 'Edit broadcast';
+
+  @override
+  String get reminderEditEnterTitle => 'Enter a title';
+
+  @override
+  String get reminderEditEnterMessage => 'Enter a message';
+
+  @override
+  String get reminderResponsesNoResponses => 'This reminder has no responses.';
+
+  @override
+  String get reminderResponsesNoResponsesYet => 'No responses yet.';
+
+  @override
+  String get reminderResponseSubmitted => 'Response submitted';
+
+  @override
+  String get reminderResponseYourResponse => 'Your response';
+
+  @override
+  String get reminderResponseAlreadyResponded =>
+      'You already responded. Update your answer below if needed.';
+
+  @override
+  String get reminderResponseTypeHint => 'Type your response…';
+
+  @override
+  String reminderResponseMaxCharacters(int count) {
+    return 'Max $count characters';
+  }
+
+  @override
+  String get reminderResponseAdditionalComments =>
+      'Additional comments (optional)';
+
+  @override
+  String get reminderResponseAdditionalHint => 'Add an explanation if needed…';
+
+  @override
+  String get reminderResponseUpdate => 'Update response';
+
+  @override
+  String get reminderResponseSubmit => 'Submit response';
+
+  @override
+  String reminderResponseFailed(String error) {
+    return 'Failed: $error';
+  }
+
+  @override
+  String get reminderResponseSubmittedLabel => 'Submitted';
+
+  @override
+  String get reminderResponseLocked =>
+      'Your answer is locked and cannot be changed.';
+
+  @override
+  String get reportConfirmationThankYou => 'Thank You!';
+
+  @override
+  String get reportConfirmationMessage =>
+      'Your report has been submitted successfully. We\'ll look into it and keep you posted.';
+
+  @override
+  String get reportConfirmationReferenceLabel => 'Reference Number';
+
+  @override
+  String get reportConfirmationCopied => 'Reference number copied!';
+
+  @override
+  String get reportConfirmationGoToMyReports => 'Go to My Reports';
+
+  @override
+  String get reportConfirmationBackToHome => 'Back to Home';
+
+  @override
+  String get reportDetailsSubmittedAnonymously => 'Submitted anonymously';
+
+  @override
+  String get groupsDefaultPresident => 'President';
+
+  @override
+  String get groupsDefaultVicePresident => 'Vice President';
+
+  @override
+  String get groupsNoPositionsYet => 'No positions defined yet.';
+
+  @override
+  String groupsPositionNumber(int number) {
+    return 'Position $number';
+  }
+
+  @override
+  String get groupsPositionExampleHint => 'e.g. Vice President';
 }

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:speakup_connect/config/app_config.dart';
+import 'package:speakup_connect/core/l10n/app_localizations_extension.dart';
 import 'package:speakup_connect/features/announcements/domain/entities/bulletin_entity.dart';
 import 'package:speakup_connect/features/announcements/presentation/providers/announcement_provider.dart';
 import 'package:speakup_connect/features/announcements/presentation/providers/bulletin_response_provider.dart';
@@ -67,6 +68,7 @@ class _AnnouncementDetailScreenState
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
     final bulletinAsync = ref.watch(bulletinByIdProvider(widget.bulletinId));
     final canManageAsync =
         ref.watch(canManageAnnouncementProvider(widget.bulletinId));
@@ -78,7 +80,7 @@ class _AnnouncementDetailScreenState
       if (prev?.isLoading == true && !next.isLoading && mounted) {
         if (next.hasError) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text('Update failed: ${next.error}'),
+            content: Text(l10n.commonUpdateFailed('${next.error}')),
             backgroundColor: theme.colorScheme.error,
           ));
         } else {
@@ -99,7 +101,7 @@ class _AnnouncementDetailScreenState
       if (prev?.isLoading == true && !next.isLoading && mounted) {
         if (next.hasError) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text('Delete failed: ${next.error}'),
+            content: Text(l10n.commonDeleteFailed('${next.error}')),
             backgroundColor: theme.colorScheme.error,
           ));
         } else {
@@ -120,11 +122,11 @@ class _AnnouncementDetailScreenState
     return Scaffold(
       appBar: AppBar(
         leading: BackButton(onPressed: () => context.pop()),
-        title: const Text('Announcement'),
+        title: Text(l10n.announcementsDetailTitle),
         actions: [
           if (canManage) ...[
             IconButton(
-              tooltip: 'Edit',
+              tooltip: l10n.commonEdit,
               icon: const Icon(Icons.edit_outlined),
               onPressed: busy
                   ? null
@@ -137,7 +139,7 @@ class _AnnouncementDetailScreenState
                       ),
             ),
             IconButton(
-              tooltip: 'Delete',
+              tooltip: l10n.commonDelete,
               icon: const Icon(Icons.delete_outline_rounded),
               onPressed: busy ? null : () => _confirmDelete(context),
             ),
@@ -146,10 +148,10 @@ class _AnnouncementDetailScreenState
       ),
       body: bulletinAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Failed to load: $e')),
+        error: (e, _) => Center(child: Text(l10n.commonFailedToLoad('$e'))),
         data: (bulletin) {
           if (bulletin == null) {
-            return const Center(child: Text('Announcement not found.'));
+            return Center(child: Text(l10n.announcementsNotFound));
           }
           return _AnnouncementBody(
             bulletin: bulletin,
@@ -189,10 +191,11 @@ class _AnnouncementDetailScreenState
   }
 
   Future<void> _confirmDelete(BuildContext context) async {
+    final l10n = context.l10n;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Delete announcement?'),
+        title: Text(l10n.announcementsDeleteTitle),
         content: const Text(
           'This deletes the announcement and removes it from every '
           'member\'s alerts feed. This cannot be undone.',
@@ -200,11 +203,11 @@ class _AnnouncementDetailScreenState
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Cancel'),
+            child: Text(l10n.commonCancel),
           ),
           FilledButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Delete'),
+            child: Text(l10n.commonDelete),
           ),
         ],
       ),
@@ -229,6 +232,7 @@ class _AnnouncementBody extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
     final date = bulletin.publishedAt ?? bulletin.createdAt;
     final dateLabel = DateFormat.yMMMMd().add_jm().format(date);
     final canRespond = bulletin.isPublished &&
@@ -259,7 +263,7 @@ class _AnnouncementBody extends ConsumerWidget {
                   );
                 },
                 icon: const Icon(Icons.poll_outlined, size: 18),
-                label: const Text('View responses'),
+                label: Text(l10n.announcementsViewResponses),
               ),
             ),
           if (bulletin.isPinned)
@@ -348,7 +352,7 @@ class _AnnouncementBody extends ConsumerWidget {
             OutlinedButton.icon(
               onPressed: onEdit,
               icon: const Icon(Icons.add_photo_alternate_outlined, size: 18),
-              label: const Text('Add image'),
+              label: Text(l10n.announcementsAddImage),
             ),
           ],
           if (bulletin.expiresAt != null) ...[
@@ -395,7 +399,7 @@ class _AnnouncementBody extends ConsumerWidget {
                 : myResponseAsync.when(
                     loading: () =>
                         const Center(child: CircularProgressIndicator()),
-                    error: (e, _) => Text('Failed to load response: $e'),
+                    error: (e, _) => Text(l10n.announcementsFailedToLoadResponse('$e')),
                     data: (existing) => ReminderResponseForm(
                       organizationId: AppConfig.defaultOrganizationId,
                       bulletinId: bulletin.bulletinId,

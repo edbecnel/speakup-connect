@@ -1,0 +1,7 @@
+[
+  {
+    "file": "lib/features/auth/presentation/screens/splash_screen.dart",
+    "pattern": "Speakup",
+    "comment": "Flavor-specific display name from config until keyed"
+  }
+]

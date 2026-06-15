@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:speakup_connect/core/l10n/app_localizations_extension.dart';
 import 'package:speakup_connect/features/auth/presentation/providers/auth_provider.dart';
 import 'package:speakup_connect/features/organization/presentation/providers/user_profile_provider.dart';
 import 'package:speakup_connect/shared/widgets/app_button.dart';
@@ -10,10 +11,11 @@ class UnenrolledAccountScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     final profile = ref.watch(userProfileProvider).value;
     final reason =
-        profile?.unenrollReason ?? 'Contact your administrator if you need access.';
+        profile?.unenrollReason ?? l10n.authAccountUnenrolledDefaultReason;
 
     return Scaffold(
       body: SafeArea(
@@ -30,13 +32,13 @@ class UnenrolledAccountScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 24),
               Text(
-                'No Longer Enrolled',
+                l10n.authAccountUnenrolledTitle,
                 style: theme.textTheme.headlineMedium,
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 12),
               Text(
-                'Your membership in this organization has ended.',
+                l10n.authAccountUnenrolledMessage,
                 style: theme.textTheme.bodyLarge?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
@@ -50,7 +52,7 @@ class UnenrolledAccountScreen extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Reason',
+                        l10n.authAccountReasonLabel,
                         style: theme.textTheme.labelLarge?.copyWith(
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
@@ -63,7 +65,7 @@ class UnenrolledAccountScreen extends ConsumerWidget {
               ),
               const Spacer(),
               AppButton.text(
-                label: 'Sign Out',
+                label: l10n.settingsSignOut,
                 icon: Icons.logout,
                 onPressed: () async {
                   await ref.read(authProvider.notifier).signOut();

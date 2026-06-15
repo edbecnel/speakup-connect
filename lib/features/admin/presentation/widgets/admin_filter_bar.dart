@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:speakup_connect/core/l10n/app_localizations_extension.dart';
 import 'package:speakup_connect/features/reports/domain/entities/report_category_entity.dart';
 import 'package:speakup_connect/features/reports/presentation/providers/report_provider.dart';
 
@@ -80,6 +81,7 @@ class _ChipRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     final allSelected = selectedCategories.isEmpty;
 
@@ -94,7 +96,7 @@ class _ChipRow extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(right: 8),
               child: FilterChip(
-                label: const Text('All'),
+                label: Text(l10n.commonAll),
                 selected: allSelected,
                 onSelected: (_) => onClearAll(),
               ),

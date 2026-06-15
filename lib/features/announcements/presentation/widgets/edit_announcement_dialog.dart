@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:speakup_connect/core/l10n/app_localizations_extension.dart';
 import 'package:speakup_connect/core/utils/picked_image_file.dart';
 import 'package:speakup_connect/features/announcements/domain/entities/bulletin_entity.dart';
 import 'package:speakup_connect/features/announcements/presentation/widgets/announcement_image_section.dart';
@@ -105,8 +106,8 @@ class _EditAnnouncementDialogState extends State<EditAnnouncementDialog> {
       if (!mounted) return;
       if (path == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Could not load that image. Try another photo.'),
+          SnackBar(
+            content: Text(context.l10n.composeAnnouncementImageLoadFailed),
           ),
         );
         return;
@@ -133,16 +134,16 @@ class _EditAnnouncementDialogState extends State<EditAnnouncementDialog> {
     final resolved = _expiration.resolve();
     if (_expiration.isEnabled && !_expiration.isValid()) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Expiration must be in the future')),
+        SnackBar(
+          content: Text(context.l10n.announcementsExpirationMustBeFuture),
+        ),
       );
       return;
     }
     if (!_responseConfig.isValid) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Complete the optional response settings or turn them off.',
-          ),
+        SnackBar(
+          content: Text(context.l10n.composeAnnouncementValidationResponse),
         ),
       );
       return;
@@ -167,8 +168,9 @@ class _EditAnnouncementDialogState extends State<EditAnnouncementDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return AlertDialog(
-      title: const Text('Edit announcement'),
+      title: Text(l10n.announcementsEditTitle),
       content: Form(
         key: _formKey,
         child: SingleChildScrollView(
@@ -177,7 +179,7 @@ class _EditAnnouncementDialogState extends State<EditAnnouncementDialog> {
             children: [
               AppTextField(
                 controller: _titleController,
-                label: 'Title',
+                label: l10n.commonTitle,
                 textInputAction: TextInputAction.next,
                 validator: (v) {
                   if (v == null || v.trim().isEmpty) {
@@ -189,7 +191,7 @@ class _EditAnnouncementDialogState extends State<EditAnnouncementDialog> {
               const SizedBox(height: 12),
               AppTextField(
                 controller: _bodyController,
-                label: 'Message',
+                label: l10n.commonMessage,
                 maxLines: 4,
                 validator: (v) {
                   if (v == null || v.trim().isEmpty) {
@@ -223,10 +225,10 @@ class _EditAnnouncementDialogState extends State<EditAnnouncementDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text(l10n.commonCancel),
         ),
         AppButton.primary(
-          label: 'Save',
+          label: l10n.commonSave,
           onPressed: _submit,
         ),
       ],

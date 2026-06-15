@@ -1544,6 +1544,60 @@ abstract class AppLocalizations {
   /// **'Sign in with your student ID or contact email and your password.'**
   String get settingsMemberSignInHint;
 
+  /// No description provided for @settingsUsernameStudentId.
+  ///
+  /// In en, this message translates to:
+  /// **'Username / student ID'**
+  String get settingsUsernameStudentId;
+
+  /// No description provided for @settingsContactEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact email'**
+  String get settingsContactEmail;
+
+  /// No description provided for @settingsChangeEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Change email'**
+  String get settingsChangeEmail;
+
+  /// No description provided for @settingsAddEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Add email'**
+  String get settingsAddEmail;
+
+  /// No description provided for @settingsContactEmailRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact email removed'**
+  String get settingsContactEmailRemoved;
+
+  /// No description provided for @settingsContactEmailUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact email updated'**
+  String get settingsContactEmailUpdated;
+
+  /// No description provided for @settingsContactEmailUpdateFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not update email'**
+  String get settingsContactEmailUpdateFailed;
+
+  /// No description provided for @settingsContactEmailDialogIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Used for notifications and sign-in. Your student ID remains your username for school accounts.'**
+  String get settingsContactEmailDialogIntro;
+
+  /// No description provided for @settingsEmailOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Email (optional)'**
+  String get settingsEmailOptional;
+
   /// No description provided for @settingsNotificationPreferences.
   ///
   /// In en, this message translates to:
@@ -2421,6 +2475,18 @@ abstract class AppLocalizations {
   /// **'Action failed: {error}'**
   String commonActionFailed(String error);
 
+  /// No description provided for @commonUpdateFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Update failed: {error}'**
+  String commonUpdateFailed(String error);
+
+  /// No description provided for @commonDeleteFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete failed: {error}'**
+  String commonDeleteFailed(String error);
+
   /// No description provided for @commonFailedToLoad.
   ///
   /// In en, this message translates to:
@@ -2570,6 +2636,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Continue'**
   String get commonContinueButton;
+
+  /// No description provided for @commonChooseFromGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose from gallery'**
+  String get commonChooseFromGallery;
+
+  /// No description provided for @commonTakePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Take a photo'**
+  String get commonTakePhoto;
+
+  /// No description provided for @commonRemovePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove photo'**
+  String get commonRemovePhoto;
+
+  /// No description provided for @commonAddProfilePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Add profile photo'**
+  String get commonAddProfilePhoto;
+
+  /// No description provided for @commonChangeProfilePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Change profile photo'**
+  String get commonChangeProfilePhoto;
+
+  /// No description provided for @commonShowPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Show password'**
+  String get commonShowPassword;
+
+  /// No description provided for @commonHidePassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide password'**
+  String get commonHidePassword;
+
+  /// No description provided for @commonNotSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Not set'**
+  String get commonNotSet;
 
   /// No description provided for @changePasswordIntro.
   ///
@@ -2822,6 +2936,150 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Complete the optional response settings or turn them off.'**
   String get composeAnnouncementValidationResponse;
+
+  /// No description provided for @announcementsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Announcements'**
+  String get announcementsTitle;
+
+  /// No description provided for @announcementsDetailTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Announcement'**
+  String get announcementsDetailTitle;
+
+  /// No description provided for @announcementsMyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'My Announcements'**
+  String get announcementsMyTitle;
+
+  /// No description provided for @announcementsMyTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'My announcements'**
+  String get announcementsMyTooltip;
+
+  /// No description provided for @announcementsPost.
+  ///
+  /// In en, this message translates to:
+  /// **'Post'**
+  String get announcementsPost;
+
+  /// No description provided for @announcementsNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Announcement not found.'**
+  String get announcementsNotFound;
+
+  /// No description provided for @announcementsNotFoundShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Announcement not found'**
+  String get announcementsNotFoundShort;
+
+  /// No description provided for @announcementsFailedToLoadList.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load announcements: {error}'**
+  String announcementsFailedToLoadList(String error);
+
+  /// No description provided for @announcementsFailedToLoadAnnouncement.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load announcement: {error}'**
+  String announcementsFailedToLoadAnnouncement(String error);
+
+  /// No description provided for @announcementsFailedToLoadResponses.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load responses: {error}'**
+  String announcementsFailedToLoadResponses(String error);
+
+  /// No description provided for @announcementsFailedToLoadResponse.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load response: {error}'**
+  String announcementsFailedToLoadResponse(String error);
+
+  /// No description provided for @announcementsResponsesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Responses'**
+  String get announcementsResponsesTitle;
+
+  /// No description provided for @announcementsNoResponses.
+  ///
+  /// In en, this message translates to:
+  /// **'This announcement has no responses.'**
+  String get announcementsNoResponses;
+
+  /// No description provided for @announcementsEmptyMine.
+  ///
+  /// In en, this message translates to:
+  /// **'You have not posted any announcements yet.'**
+  String get announcementsEmptyMine;
+
+  /// No description provided for @announcementsViewResponses.
+  ///
+  /// In en, this message translates to:
+  /// **'View responses'**
+  String get announcementsViewResponses;
+
+  /// No description provided for @announcementsDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete announcement?'**
+  String get announcementsDeleteTitle;
+
+  /// No description provided for @announcementsEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit announcement'**
+  String get announcementsEditTitle;
+
+  /// No description provided for @announcementsAddImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Add image'**
+  String get announcementsAddImage;
+
+  /// No description provided for @announcementsChooseFromGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose from gallery'**
+  String get announcementsChooseFromGallery;
+
+  /// No description provided for @announcementsTakePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Take a photo'**
+  String get announcementsTakePhoto;
+
+  /// No description provided for @announcementsRemoveImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove image'**
+  String get announcementsRemoveImage;
+
+  /// No description provided for @announcementsPreparingImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing image…'**
+  String get announcementsPreparingImage;
+
+  /// No description provided for @announcementsChangePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Change photo'**
+  String get announcementsChangePhoto;
+
+  /// No description provided for @announcementsExpirationMustBeFuture.
+  ///
+  /// In en, this message translates to:
+  /// **'Expiration must be in the future'**
+  String get announcementsExpirationMustBeFuture;
 
   /// No description provided for @schoolGradesIntro.
   ///
@@ -3658,6 +3916,240 @@ abstract class AppLocalizations {
   /// **'…and {count} more'**
   String memberManagementPreviewAndMore(int count);
 
+  /// No description provided for @memberManagementEditMemberTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Member'**
+  String get memberManagementEditMemberTitle;
+
+  /// No description provided for @memberManagementEditMemberIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Update login username (student ID), contact email, grade, and display name. Changing a student ID also updates their sign-in username.'**
+  String get memberManagementEditMemberIntro;
+
+  /// No description provided for @memberManagementLoadMemberFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load member: {error}'**
+  String memberManagementLoadMemberFailed(String error);
+
+  /// No description provided for @memberManagementMemberNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Member not found'**
+  String get memberManagementMemberNotFound;
+
+  /// No description provided for @memberManagementUpdateFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not update member'**
+  String get memberManagementUpdateFailed;
+
+  /// No description provided for @memberManagementStudentPersonalBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Student personal badge'**
+  String get memberManagementStudentPersonalBadge;
+
+  /// No description provided for @memberManagementStudentPersonalBadgeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional photo the student chose in Settings. This does not replace the official school photo above.'**
+  String get memberManagementStudentPersonalBadgeHint;
+
+  /// No description provided for @memberManagementFullNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Full name'**
+  String get memberManagementFullNameLabel;
+
+  /// No description provided for @memberManagementFullNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Legal / roster name'**
+  String get memberManagementFullNameHint;
+
+  /// No description provided for @memberManagementFullNameExample.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Juan Dela Cruz'**
+  String get memberManagementFullNameExample;
+
+  /// No description provided for @memberManagementStudentIdUsernameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Student ID (username)'**
+  String get memberManagementStudentIdUsernameLabel;
+
+  /// No description provided for @memberManagementStudentIdLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Student ID'**
+  String get memberManagementStudentIdLabel;
+
+  /// No description provided for @memberManagementStudentIdSignInHint.
+  ///
+  /// In en, this message translates to:
+  /// **'School-issued ID for sign-in'**
+  String get memberManagementStudentIdSignInHint;
+
+  /// No description provided for @memberManagementStudentIdProvisionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'School-issued ID (min. 6 characters)'**
+  String get memberManagementStudentIdProvisionHint;
+
+  /// No description provided for @memberManagementContactEmailOptionalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact email (optional)'**
+  String get memberManagementContactEmailOptionalLabel;
+
+  /// No description provided for @memberManagementContactEmailHint.
+  ///
+  /// In en, this message translates to:
+  /// **'For notifications; can also sign in if set'**
+  String get memberManagementContactEmailHint;
+
+  /// No description provided for @memberManagementContactEmailFutureHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact email for future login'**
+  String get memberManagementContactEmailFutureHint;
+
+  /// No description provided for @memberManagementNoGrade.
+  ///
+  /// In en, this message translates to:
+  /// **'No grade'**
+  String get memberManagementNoGrade;
+
+  /// No description provided for @memberManagementSaveChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Save changes'**
+  String get memberManagementSaveChanges;
+
+  /// No description provided for @memberManagementPasswordSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get memberManagementPasswordSection;
+
+  /// No description provided for @memberManagementPasswordSectionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Set a new sign-in password for this member. Their current session stays active until they sign out.'**
+  String get memberManagementPasswordSectionHint;
+
+  /// No description provided for @memberManagementConfirmPasswordResetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm password reset'**
+  String get memberManagementConfirmPasswordResetTitle;
+
+  /// No description provided for @memberManagementConfirmPasswordResetMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Set a new sign-in password for {name}? They will need it the next time they sign in.'**
+  String memberManagementConfirmPasswordResetMessage(String name);
+
+  /// No description provided for @memberManagementResetPasswordAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset password'**
+  String get memberManagementResetPasswordAction;
+
+  /// No description provided for @memberManagementPasswordResetSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Password reset for {name}'**
+  String memberManagementPasswordResetSuccess(String name);
+
+  /// No description provided for @memberManagementPasswordResetFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not reset password'**
+  String get memberManagementPasswordResetFailed;
+
+  /// No description provided for @memberManagementResetPasswordDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset password for {name}'**
+  String memberManagementResetPasswordDialogTitle(String name);
+
+  /// No description provided for @memberManagementResetPasswordIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a new sign-in password. Use the shortcuts below or enter one manually.'**
+  String get memberManagementResetPasswordIntro;
+
+  /// No description provided for @memberManagementUseUsernamePassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Use username / student ID'**
+  String get memberManagementUseUsernamePassword;
+
+  /// No description provided for @memberManagementGenerate8DigitPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate 8-digit password'**
+  String get memberManagementGenerate8DigitPassword;
+
+  /// No description provided for @memberManagementPasswordMinHint.
+  ///
+  /// In en, this message translates to:
+  /// **'At least 6 characters'**
+  String get memberManagementPasswordMinHint;
+
+  /// No description provided for @memberManagementConfirmPasswordLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm password'**
+  String get memberManagementConfirmPasswordLabel;
+
+  /// No description provided for @memberManagementAppliedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Applied {date}'**
+  String memberManagementAppliedAt(String date);
+
+  /// No description provided for @memberManagementStudentIdWithValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Student ID: {id}'**
+  String memberManagementStudentIdWithValue(String id);
+
+  /// No description provided for @memberManagementViewOnlyNoPermission.
+  ///
+  /// In en, this message translates to:
+  /// **'View only — you do not have permission to approve applications.'**
+  String get memberManagementViewOnlyNoPermission;
+
+  /// No description provided for @memberManagementRejectApplication.
+  ///
+  /// In en, this message translates to:
+  /// **'Reject application'**
+  String get memberManagementRejectApplication;
+
+  /// No description provided for @memberManagementRejectApplicationHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Let the applicant know why…'**
+  String get memberManagementRejectApplicationHint;
+
+  /// No description provided for @memberManagementNoPendingApplications.
+  ///
+  /// In en, this message translates to:
+  /// **'No pending applications'**
+  String get memberManagementNoPendingApplications;
+
+  /// No description provided for @memberManagementNoPendingApplicationsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'When someone signs up and completes the Join form, their request will appear here.'**
+  String get memberManagementNoPendingApplicationsHint;
+
   /// No description provided for @studentRosterSearchHint.
   ///
   /// In en, this message translates to:
@@ -3675,6 +4167,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Add Student'**
   String get studentRosterAddStudent;
+
+  /// No description provided for @studentRosterAddStudentIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Creates a pre-approved account. The student signs in using their school ID in both fields until email auth is enabled.'**
+  String get studentRosterAddStudentIntro;
+
+  /// No description provided for @studentRosterSelectGrade.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a grade'**
+  String get studentRosterSelectGrade;
+
+  /// No description provided for @studentRosterAdding.
+  ///
+  /// In en, this message translates to:
+  /// **'Adding…'**
+  String get studentRosterAdding;
+
+  /// No description provided for @studentRosterAddedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Added {name}. They can sign in with their student ID as the password.'**
+  String studentRosterAddedSuccess(String name);
+
+  /// No description provided for @studentRosterAddFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not add student'**
+  String get studentRosterAddFailed;
+
+  /// No description provided for @studentRosterGradeStatusLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{grade} · {status}'**
+  String studentRosterGradeStatusLine(String grade, String status);
+
+  /// No description provided for @studentRosterOfficialPhotoUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Official photo updated'**
+  String get studentRosterOfficialPhotoUpdated;
+
+  /// No description provided for @studentRosterOfficialPhotoRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Official photo removed'**
+  String get studentRosterOfficialPhotoRemoved;
+
+  /// No description provided for @studentRosterOfficialPhotoSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Official school photo'**
+  String get studentRosterOfficialPhotoSectionTitle;
+
+  /// No description provided for @studentRosterOfficialPhotoSectionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Permanent school record for faculty and admins. Stored separately from any personal photo the student may add in Settings (when allowed). A student personal badge never replaces or deletes this official image.'**
+  String get studentRosterOfficialPhotoSectionHint;
+
+  /// No description provided for @studentRosterPhotoUpdateFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo update failed: {error}'**
+  String studentRosterPhotoUpdateFailed(String error);
 
   /// No description provided for @studentRosterAssignGradeTitle.
   ///
@@ -4584,6 +5142,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Edit'**
   String get commonEdit;
+
+  /// No description provided for @commonDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get commonDelete;
 
   /// No description provided for @commonRequired.
   ///
@@ -5706,6 +6270,582 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Saved {count} translations.'**
   String translationModeReviewSaveAllSuccess(int count);
+
+  /// No description provided for @alertsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Alerts'**
+  String get alertsTitle;
+
+  /// No description provided for @alertsReminderApprovalsTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminder approvals'**
+  String get alertsReminderApprovalsTooltip;
+
+  /// No description provided for @alertsMoreTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get alertsMoreTooltip;
+
+  /// No description provided for @alertsMarkAllRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark all read'**
+  String get alertsMarkAllRead;
+
+  /// No description provided for @alertsFailedToLoad.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load alerts: {error}'**
+  String alertsFailedToLoad(String error);
+
+  /// No description provided for @alertsClearAllTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear all alerts?'**
+  String get alertsClearAllTitle;
+
+  /// No description provided for @alertsAlertDismissed.
+  ///
+  /// In en, this message translates to:
+  /// **'Alert dismissed'**
+  String get alertsAlertDismissed;
+
+  /// No description provided for @alertsSubmitBeforeDismiss.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit your response before dismissing this alert.'**
+  String get alertsSubmitBeforeDismiss;
+
+  /// No description provided for @alertsDeleteAlertTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete alert?'**
+  String get alertsDeleteAlertTitle;
+
+  /// No description provided for @alertsDeleteBroadcastTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete broadcast?'**
+  String get alertsDeleteBroadcastTitle;
+
+  /// No description provided for @alertsDeleteAnnouncementTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete announcement?'**
+  String get alertsDeleteAnnouncementTitle;
+
+  /// No description provided for @notificationHistoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification history'**
+  String get notificationHistoryTitle;
+
+  /// No description provided for @notificationHistoryFailedToLoad.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load history: {error}'**
+  String notificationHistoryFailedToLoad(String error);
+
+  /// No description provided for @commonCopy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get commonCopy;
+
+  /// No description provided for @commonTryAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Try Again'**
+  String get commonTryAgain;
+
+  /// No description provided for @commonSomethingWentWrong.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong'**
+  String get commonSomethingWentWrong;
+
+  /// No description provided for @commonMoveUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Move up'**
+  String get commonMoveUp;
+
+  /// No description provided for @commonMoveDown.
+  ///
+  /// In en, this message translates to:
+  /// **'Move down'**
+  String get commonMoveDown;
+
+  /// No description provided for @commonReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason'**
+  String get commonReason;
+
+  /// No description provided for @authAccountRestrictedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Account Restricted'**
+  String get authAccountRestrictedTitle;
+
+  /// No description provided for @authAccountRestrictedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your access to this organization has been suspended.'**
+  String get authAccountRestrictedMessage;
+
+  /// No description provided for @authAccountUnenrolledTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No Longer Enrolled'**
+  String get authAccountUnenrolledTitle;
+
+  /// No description provided for @authAccountUnenrolledMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your membership in this organization has ended.'**
+  String get authAccountUnenrolledMessage;
+
+  /// No description provided for @authAccountReasonLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason'**
+  String get authAccountReasonLabel;
+
+  /// No description provided for @authAccountBlockedDefaultReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact your administrator for help.'**
+  String get authAccountBlockedDefaultReason;
+
+  /// No description provided for @authAccountUnenrolledDefaultReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact your administrator if you need access.'**
+  String get authAccountUnenrolledDefaultReason;
+
+  /// No description provided for @authApplyAcceptTermsSnackbar.
+  ///
+  /// In en, this message translates to:
+  /// **'Please accept the terms to continue.'**
+  String get authApplyAcceptTermsSnackbar;
+
+  /// No description provided for @authJoinOrgTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Join {orgName}'**
+  String authJoinOrgTitle(String orgName);
+
+  /// No description provided for @authApplyReviewMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your details will be reviewed by an admin before you can access {orgName}.'**
+  String authApplyReviewMessage(String orgName);
+
+  /// No description provided for @authFullNameExampleHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Juan Dela Cruz'**
+  String get authFullNameExampleHint;
+
+  /// No description provided for @authStudentMemberId.
+  ///
+  /// In en, this message translates to:
+  /// **'Student / Member ID'**
+  String get authStudentMemberId;
+
+  /// No description provided for @authStudentMemberIdHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Your school-issued ID number'**
+  String get authStudentMemberIdHint;
+
+  /// No description provided for @authApplyConfirmAccurate.
+  ///
+  /// In en, this message translates to:
+  /// **'I confirm that the information I provided is accurate.'**
+  String get authApplyConfirmAccurate;
+
+  /// No description provided for @authSubmitApplication.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit Application'**
+  String get authSubmitApplication;
+
+  /// No description provided for @authPendingRejectedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Application Rejected'**
+  String get authPendingRejectedTitle;
+
+  /// No description provided for @authPendingSubmittedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Application Submitted!'**
+  String get authPendingSubmittedTitle;
+
+  /// No description provided for @authPendingRejectedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your application was not approved. Please contact your administrator for more information.'**
+  String get authPendingRejectedMessage;
+
+  /// No description provided for @authPendingReviewMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your application is under review. You\'ll receive a notification once an admin approves your account.'**
+  String get authPendingReviewMessage;
+
+  /// No description provided for @authEditApplication.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Application'**
+  String get authEditApplication;
+
+  /// No description provided for @authSubmittedDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Submitted Details'**
+  String get authSubmittedDetails;
+
+  /// No description provided for @authStudentId.
+  ///
+  /// In en, this message translates to:
+  /// **'Student ID'**
+  String get authStudentId;
+
+  /// No description provided for @reminderDetailTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminder'**
+  String get reminderDetailTitle;
+
+  /// No description provided for @reminderDetailNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminder not found'**
+  String get reminderDetailNotFound;
+
+  /// No description provided for @reminderDetailLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load reminder: {error}'**
+  String reminderDetailLoadFailed(String error);
+
+  /// No description provided for @reminderDetailScheduledLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Scheduled'**
+  String get reminderDetailScheduledLabel;
+
+  /// No description provided for @reminderDetailExpiresLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Expires'**
+  String get reminderDetailExpiresLabel;
+
+  /// No description provided for @reminderDetailDoesNotExpire.
+  ///
+  /// In en, this message translates to:
+  /// **'Does not expire'**
+  String get reminderDetailDoesNotExpire;
+
+  /// No description provided for @reminderDetailResponseRequiredBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Response required — submit your answer to dismiss this alert.'**
+  String get reminderDetailResponseRequiredBanner;
+
+  /// No description provided for @reminderDetailJustNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Just now'**
+  String get reminderDetailJustNow;
+
+  /// No description provided for @reminderDetailMinutesAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} min ago'**
+  String reminderDetailMinutesAgo(int count);
+
+  /// No description provided for @reminderDetailHoursAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} hr ago'**
+  String reminderDetailHoursAgo(int count);
+
+  /// No description provided for @reminderDetailDaysAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} d ago'**
+  String reminderDetailDaysAgo(int count);
+
+  /// No description provided for @reminderMyBroadcastsUpdateFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Update failed: {error}'**
+  String reminderMyBroadcastsUpdateFailed(String error);
+
+  /// No description provided for @reminderMyBroadcastsUpdatedWithAlerts.
+  ///
+  /// In en, this message translates to:
+  /// **'Broadcast updated — {count} alert(s) refreshed.'**
+  String reminderMyBroadcastsUpdatedWithAlerts(int count);
+
+  /// No description provided for @reminderMyBroadcastsUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Broadcast updated.'**
+  String get reminderMyBroadcastsUpdated;
+
+  /// No description provided for @reminderMyBroadcastsRecallFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Recall failed: {error}'**
+  String reminderMyBroadcastsRecallFailed(String error);
+
+  /// No description provided for @reminderMyBroadcastsRecalledWithAlerts.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminder recalled — {count} delivered alert(s) removed.'**
+  String reminderMyBroadcastsRecalledWithAlerts(int count);
+
+  /// No description provided for @reminderMyBroadcastsDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminder deleted.'**
+  String get reminderMyBroadcastsDeleted;
+
+  /// No description provided for @reminderMyBroadcastsExpiresAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Expires {dateTime}'**
+  String reminderMyBroadcastsExpiresAt(String dateTime);
+
+  /// No description provided for @reminderMyBroadcastsRecallTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recall this broadcast?'**
+  String get reminderMyBroadcastsRecallTitle;
+
+  /// No description provided for @reminderMyBroadcastsDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete broadcast?'**
+  String get reminderMyBroadcastsDeleteTitle;
+
+  /// No description provided for @reminderMyBroadcastsRecallMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This deletes the reminder and removes it from every recipient\'s alerts feed. This cannot be undone.'**
+  String get reminderMyBroadcastsRecallMessage;
+
+  /// No description provided for @reminderMyBroadcastsDeleteMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This permanently deletes the reminder. This cannot be undone.'**
+  String get reminderMyBroadcastsDeleteMessage;
+
+  /// No description provided for @reminderMyBroadcastsRecall.
+  ///
+  /// In en, this message translates to:
+  /// **'Recall'**
+  String get reminderMyBroadcastsRecall;
+
+  /// No description provided for @reminderMyBroadcastsEmptyLeader.
+  ///
+  /// In en, this message translates to:
+  /// **'No group alerts sent yet'**
+  String get reminderMyBroadcastsEmptyLeader;
+
+  /// No description provided for @reminderMyBroadcastsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'You haven\'t sent any broadcasts yet'**
+  String get reminderMyBroadcastsEmpty;
+
+  /// No description provided for @reminderMyBroadcastsEmptyLeaderHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Send an alert from My Groups & Clubs, then return here to view member responses.'**
+  String get reminderMyBroadcastsEmptyLeaderHint;
+
+  /// No description provided for @reminderEditBroadcastTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit broadcast'**
+  String get reminderEditBroadcastTitle;
+
+  /// No description provided for @reminderEditEnterTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a title'**
+  String get reminderEditEnterTitle;
+
+  /// No description provided for @reminderEditEnterMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a message'**
+  String get reminderEditEnterMessage;
+
+  /// No description provided for @reminderResponsesNoResponses.
+  ///
+  /// In en, this message translates to:
+  /// **'This reminder has no responses.'**
+  String get reminderResponsesNoResponses;
+
+  /// No description provided for @reminderResponsesNoResponsesYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No responses yet.'**
+  String get reminderResponsesNoResponsesYet;
+
+  /// No description provided for @reminderResponseSubmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'Response submitted'**
+  String get reminderResponseSubmitted;
+
+  /// No description provided for @reminderResponseYourResponse.
+  ///
+  /// In en, this message translates to:
+  /// **'Your response'**
+  String get reminderResponseYourResponse;
+
+  /// No description provided for @reminderResponseAlreadyResponded.
+  ///
+  /// In en, this message translates to:
+  /// **'You already responded. Update your answer below if needed.'**
+  String get reminderResponseAlreadyResponded;
+
+  /// No description provided for @reminderResponseTypeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Type your response…'**
+  String get reminderResponseTypeHint;
+
+  /// No description provided for @reminderResponseMaxCharacters.
+  ///
+  /// In en, this message translates to:
+  /// **'Max {count} characters'**
+  String reminderResponseMaxCharacters(int count);
+
+  /// No description provided for @reminderResponseAdditionalComments.
+  ///
+  /// In en, this message translates to:
+  /// **'Additional comments (optional)'**
+  String get reminderResponseAdditionalComments;
+
+  /// No description provided for @reminderResponseAdditionalHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add an explanation if needed…'**
+  String get reminderResponseAdditionalHint;
+
+  /// No description provided for @reminderResponseUpdate.
+  ///
+  /// In en, this message translates to:
+  /// **'Update response'**
+  String get reminderResponseUpdate;
+
+  /// No description provided for @reminderResponseSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit response'**
+  String get reminderResponseSubmit;
+
+  /// No description provided for @reminderResponseFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed: {error}'**
+  String reminderResponseFailed(String error);
+
+  /// No description provided for @reminderResponseSubmittedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Submitted'**
+  String get reminderResponseSubmittedLabel;
+
+  /// No description provided for @reminderResponseLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Your answer is locked and cannot be changed.'**
+  String get reminderResponseLocked;
+
+  /// No description provided for @reportConfirmationThankYou.
+  ///
+  /// In en, this message translates to:
+  /// **'Thank You!'**
+  String get reportConfirmationThankYou;
+
+  /// No description provided for @reportConfirmationMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your report has been submitted successfully. We\'ll look into it and keep you posted.'**
+  String get reportConfirmationMessage;
+
+  /// No description provided for @reportConfirmationReferenceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Reference Number'**
+  String get reportConfirmationReferenceLabel;
+
+  /// No description provided for @reportConfirmationCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Reference number copied!'**
+  String get reportConfirmationCopied;
+
+  /// No description provided for @reportConfirmationGoToMyReports.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to My Reports'**
+  String get reportConfirmationGoToMyReports;
+
+  /// No description provided for @reportConfirmationBackToHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to Home'**
+  String get reportConfirmationBackToHome;
+
+  /// No description provided for @reportDetailsSubmittedAnonymously.
+  ///
+  /// In en, this message translates to:
+  /// **'Submitted anonymously'**
+  String get reportDetailsSubmittedAnonymously;
+
+  /// No description provided for @groupsDefaultPresident.
+  ///
+  /// In en, this message translates to:
+  /// **'President'**
+  String get groupsDefaultPresident;
+
+  /// No description provided for @groupsDefaultVicePresident.
+  ///
+  /// In en, this message translates to:
+  /// **'Vice President'**
+  String get groupsDefaultVicePresident;
+
+  /// No description provided for @groupsNoPositionsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No positions defined yet.'**
+  String get groupsNoPositionsYet;
+
+  /// No description provided for @groupsPositionNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Position {number}'**
+  String groupsPositionNumber(int number);
+
+  /// No description provided for @groupsPositionExampleHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Vice President'**
+  String get groupsPositionExampleHint;
 }
 
 class _AppLocalizationsDelegate

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:speakup_connect/core/l10n/app_localizations_extension.dart';
 
 /// Displays an error message with an optional retry button.
 /// Used when an [AsyncValue] is in the error state.
@@ -14,6 +15,7 @@ class AppErrorWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
 
     return Center(
@@ -29,7 +31,7 @@ class AppErrorWidget extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              'Something went wrong',
+              l10n.commonSomethingWentWrong,
               style: theme.textTheme.titleMedium,
               textAlign: TextAlign.center,
             ),
@@ -46,7 +48,7 @@ class AppErrorWidget extends StatelessWidget {
               OutlinedButton.icon(
                 onPressed: onRetry,
                 icon: const Icon(Icons.refresh_rounded),
-                label: const Text('Try Again'),
+                label: Text(l10n.commonTryAgain),
               ),
             ],
           ],

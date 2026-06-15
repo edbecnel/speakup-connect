@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:speakup_connect/core/constants/route_constants.dart';
+import 'package:speakup_connect/core/l10n/app_localizations_extension.dart';
 import 'package:speakup_connect/shared/widgets/app_button.dart';
 
 /// Confirmation screen shown after a successful report submission.
@@ -20,6 +21,7 @@ class ReportConfirmationScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     final refNum = referenceNumber ?? '—';
 
@@ -50,7 +52,7 @@ class ReportConfirmationScreen extends StatelessWidget {
                 const SizedBox(height: 24),
 
                 Text(
-                  'Thank You!',
+                  l10n.reportConfirmationThankYou,
                   style: theme.textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.w700,
                     color: theme.colorScheme.primary,
@@ -58,8 +60,7 @@ class ReportConfirmationScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  'Your report has been submitted successfully. '
-                  'We\'ll look into it and keep you posted.',
+                  l10n.reportConfirmationMessage,
                   textAlign: TextAlign.center,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
@@ -84,7 +85,7 @@ class ReportConfirmationScreen extends StatelessWidget {
                   child: Column(
                     children: [
                       Text(
-                        'Reference Number',
+                        l10n.reportConfirmationReferenceLabel,
                         style: theme.textTheme.labelMedium?.copyWith(
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
@@ -103,14 +104,14 @@ class ReportConfirmationScreen extends StatelessWidget {
                         onPressed: () {
                           Clipboard.setData(ClipboardData(text: refNum));
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Reference number copied!'),
-                              duration: Duration(seconds: 2),
+                            SnackBar(
+                              content: Text(l10n.reportConfirmationCopied),
+                              duration: const Duration(seconds: 2),
                             ),
                           );
                         },
                         icon: const Icon(Icons.copy_rounded, size: 16),
-                        label: const Text('Copy'),
+                        label: Text(l10n.commonCopy),
                       ),
                     ],
                   ),
@@ -119,12 +120,12 @@ class ReportConfirmationScreen extends StatelessWidget {
                 const SizedBox(height: 40),
 
                 AppButton.primary(
-                  label: 'Go to My Reports',
+                  label: l10n.reportConfirmationGoToMyReports,
                   onPressed: () => context.go(Routes.myReports),
                 ),
                 const SizedBox(height: 12),
                 AppButton.text(
-                  label: 'Back to Home',
+                  label: l10n.reportConfirmationBackToHome,
                   onPressed: () => context.go(Routes.home),
                 ),
               ],

@@ -386,6 +386,15 @@
   "settingsSectionAccount": "Account",
   "settingsChangePassword": "Change Password",
   "settingsMemberSignInHint": "Sign in with your student ID or contact email and your password.",
+  "settingsUsernameStudentId": "Username / student ID",
+  "settingsContactEmail": "Contact email",
+  "settingsChangeEmail": "Change email",
+  "settingsAddEmail": "Add email",
+  "settingsContactEmailRemoved": "Contact email removed",
+  "settingsContactEmailUpdated": "Contact email updated",
+  "settingsContactEmailUpdateFailed": "Could not update email",
+  "settingsContactEmailDialogIntro": "Used for notifications and sign-in. Your student ID remains your username for school accounts.",
+  "settingsEmailOptional": "Email (optional)",
   "settingsNotificationPreferences": "Notification Preferences",
   "settingsNotificationsComingSoon": "Notifications — coming soon",
   "settingsSectionHelp": "Help & Support",
@@ -634,6 +643,18 @@
       "error": { "type": "String" }
     }
   },
+  "commonUpdateFailed": "Update failed: {error}",
+  "@commonUpdateFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "commonDeleteFailed": "Delete failed: {error}",
+  "@commonDeleteFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
   "commonFailedToLoad": "Failed to load: {error}",
   "@commonFailedToLoad": {
     "placeholders": {
@@ -679,6 +700,14 @@
   "commonSection": "Section",
   "commonIdLabel": "ID",
   "commonContinueButton": "Continue",
+  "commonChooseFromGallery": "Choose from gallery",
+  "commonTakePhoto": "Take a photo",
+  "commonRemovePhoto": "Remove photo",
+  "commonAddProfilePhoto": "Add profile photo",
+  "commonChangeProfilePhoto": "Change profile photo",
+  "commonShowPassword": "Show password",
+  "commonHidePassword": "Hide password",
+  "commonNotSet": "Not set",
 
   "changePasswordIntro": "Enter your current password, then choose a new password.",
   "changePasswordCurrentLabel": "Current password",
@@ -734,6 +763,51 @@
   "composeAnnouncementValidationMessageMin": "Message must be at least 5 characters.",
   "composeAnnouncementValidationExpiration": "Set a valid expiration date and time.",
   "composeAnnouncementValidationResponse": "Complete the optional response settings or turn them off.",
+
+  "announcementsTitle": "Announcements",
+  "announcementsDetailTitle": "Announcement",
+  "announcementsMyTitle": "My Announcements",
+  "announcementsMyTooltip": "My announcements",
+  "announcementsPost": "Post",
+  "announcementsNotFound": "Announcement not found.",
+  "announcementsNotFoundShort": "Announcement not found",
+  "announcementsFailedToLoadList": "Failed to load announcements: {error}",
+  "@announcementsFailedToLoadList": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "announcementsFailedToLoadAnnouncement": "Failed to load announcement: {error}",
+  "@announcementsFailedToLoadAnnouncement": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "announcementsFailedToLoadResponses": "Failed to load responses: {error}",
+  "@announcementsFailedToLoadResponses": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "announcementsFailedToLoadResponse": "Failed to load response: {error}",
+  "@announcementsFailedToLoadResponse": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "announcementsResponsesTitle": "Responses",
+  "announcementsNoResponses": "This announcement has no responses.",
+  "announcementsEmptyMine": "You have not posted any announcements yet.",
+  "announcementsViewResponses": "View responses",
+  "announcementsDeleteTitle": "Delete announcement?",
+  "announcementsEditTitle": "Edit announcement",
+  "announcementsAddImage": "Add image",
+  "announcementsChooseFromGallery": "Choose from gallery",
+  "announcementsTakePhoto": "Take a photo",
+  "announcementsRemoveImage": "Remove image",
+  "announcementsPreparingImage": "Preparing image…",
+  "announcementsChangePhoto": "Change photo",
+  "announcementsExpirationMustBeFuture": "Expiration must be in the future",
 
   "schoolGradesIntro": "Define which grade levels your school uses.",
   "schoolGradesIntroWhereUsed": "These appear in {studentRoster} and {memberManagement} filters.",
@@ -1046,10 +1120,106 @@
       "count": { "type": "int" }
     }
   },
+  "memberManagementEditMemberTitle": "Edit Member",
+  "memberManagementEditMemberIntro": "Update login username (student ID), contact email, grade, and display name. Changing a student ID also updates their sign-in username.",
+  "memberManagementLoadMemberFailed": "Could not load member: {error}",
+  "@memberManagementLoadMemberFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "memberManagementMemberNotFound": "Member not found",
+  "memberManagementUpdateFailed": "Could not update member",
+  "memberManagementStudentPersonalBadge": "Student personal badge",
+  "memberManagementStudentPersonalBadgeHint": "Optional photo the student chose in Settings. This does not replace the official school photo above.",
+  "memberManagementFullNameLabel": "Full name",
+  "memberManagementFullNameHint": "Legal / roster name",
+  "memberManagementFullNameExample": "e.g. Juan Dela Cruz",
+  "memberManagementStudentIdUsernameLabel": "Student ID (username)",
+  "memberManagementStudentIdLabel": "Student ID",
+  "memberManagementStudentIdSignInHint": "School-issued ID for sign-in",
+  "memberManagementStudentIdProvisionHint": "School-issued ID (min. 6 characters)",
+  "memberManagementContactEmailOptionalLabel": "Contact email (optional)",
+  "memberManagementContactEmailHint": "For notifications; can also sign in if set",
+  "memberManagementContactEmailFutureHint": "Contact email for future login",
+  "memberManagementNoGrade": "No grade",
+  "memberManagementSaveChanges": "Save changes",
+  "memberManagementPasswordSection": "Password",
+  "memberManagementPasswordSectionHint": "Set a new sign-in password for this member. Their current session stays active until they sign out.",
+  "memberManagementConfirmPasswordResetTitle": "Confirm password reset",
+  "memberManagementConfirmPasswordResetMessage": "Set a new sign-in password for {name}? They will need it the next time they sign in.",
+  "@memberManagementConfirmPasswordResetMessage": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "memberManagementResetPasswordAction": "Reset password",
+  "memberManagementPasswordResetSuccess": "Password reset for {name}",
+  "@memberManagementPasswordResetSuccess": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "memberManagementPasswordResetFailed": "Could not reset password",
+  "memberManagementResetPasswordDialogTitle": "Reset password for {name}",
+  "@memberManagementResetPasswordDialogTitle": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "memberManagementResetPasswordIntro": "Choose a new sign-in password. Use the shortcuts below or enter one manually.",
+  "memberManagementUseUsernamePassword": "Use username / student ID",
+  "memberManagementGenerate8DigitPassword": "Generate 8-digit password",
+  "memberManagementPasswordMinHint": "At least 6 characters",
+  "memberManagementConfirmPasswordLabel": "Confirm password",
+  "memberManagementAppliedAt": "Applied {date}",
+  "@memberManagementAppliedAt": {
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
+  "memberManagementStudentIdWithValue": "Student ID: {id}",
+  "@memberManagementStudentIdWithValue": {
+    "placeholders": {
+      "id": { "type": "String" }
+    }
+  },
+  "memberManagementViewOnlyNoPermission": "View only — you do not have permission to approve applications.",
+  "memberManagementRejectApplication": "Reject application",
+  "memberManagementRejectApplicationHint": "Let the applicant know why…",
+  "memberManagementNoPendingApplications": "No pending applications",
+  "memberManagementNoPendingApplicationsHint": "When someone signs up and completes the Join form, their request will appear here.",
 
   "studentRosterSearchHint": "Search by name or student ID…",
   "studentRosterAssignSelected": "Assign grade to selected",
   "studentRosterAddStudent": "Add Student",
+  "studentRosterAddStudentIntro": "Creates a pre-approved account. The student signs in using their school ID in both fields until email auth is enabled.",
+  "studentRosterSelectGrade": "Select a grade",
+  "studentRosterAdding": "Adding…",
+  "studentRosterAddedSuccess": "Added {name}. They can sign in with their student ID as the password.",
+  "@studentRosterAddedSuccess": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "studentRosterAddFailed": "Could not add student",
+  "studentRosterGradeStatusLine": "{grade} · {status}",
+  "@studentRosterGradeStatusLine": {
+    "placeholders": {
+      "grade": { "type": "String" },
+      "status": { "type": "String" }
+    }
+  },
+  "studentRosterOfficialPhotoUpdated": "Official photo updated",
+  "studentRosterOfficialPhotoRemoved": "Official photo removed",
+  "studentRosterOfficialPhotoSectionTitle": "Official school photo",
+  "studentRosterOfficialPhotoSectionHint": "Permanent school record for faculty and admins. Stored separately from any personal photo the student may add in Settings (when allowed). A student personal badge never replaces or deletes this official image.",
+  "studentRosterPhotoUpdateFailed": "Photo update failed: {error}",
+  "@studentRosterPhotoUpdateFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
   "studentRosterAssignGradeTitle": "Assign grade",
   "studentRosterAllSelected": "All {count} selected",
   "@studentRosterAllSelected": {
@@ -1361,6 +1531,7 @@
 
   "commonClose": "Close",
   "commonEdit": "Edit",
+  "commonDelete": "Delete",
   "commonRequired": "Required",
   "commonErrorPrefix": "Error: {error}",
   "@commonErrorPrefix": {
@@ -1726,5 +1897,188 @@
     "placeholders": {
       "count": { "type": "int" }
     }
-  }
+  },
+
+  "alertsTitle": "Alerts",
+  "alertsReminderApprovalsTooltip": "Reminder approvals",
+  "alertsMoreTooltip": "More",
+  "alertsMarkAllRead": "Mark all read",
+  "alertsFailedToLoad": "Failed to load alerts: {error}",
+  "@alertsFailedToLoad": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "alertsClearAllTitle": "Clear all alerts?",
+  "alertsAlertDismissed": "Alert dismissed",
+  "alertsSubmitBeforeDismiss": "Submit your response before dismissing this alert.",
+  "alertsDeleteAlertTitle": "Delete alert?",
+  "alertsDeleteBroadcastTitle": "Delete broadcast?",
+  "alertsDeleteAnnouncementTitle": "Delete announcement?",
+
+  "notificationHistoryTitle": "Notification history",
+  "notificationHistoryFailedToLoad": "Failed to load history: {error}",
+  "@notificationHistoryFailedToLoad": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+
+  "commonCopy": "Copy",
+  "commonTryAgain": "Try Again",
+  "commonSomethingWentWrong": "Something went wrong",
+  "commonMoveUp": "Move up",
+  "commonMoveDown": "Move down",
+  "commonReason": "Reason",
+
+  "authAccountRestrictedTitle": "Account Restricted",
+  "authAccountRestrictedMessage": "Your access to this organization has been suspended.",
+  "authAccountUnenrolledTitle": "No Longer Enrolled",
+  "authAccountUnenrolledMessage": "Your membership in this organization has ended.",
+  "authAccountReasonLabel": "Reason",
+  "authAccountBlockedDefaultReason": "Contact your administrator for help.",
+  "authAccountUnenrolledDefaultReason": "Contact your administrator if you need access.",
+  "authApplyAcceptTermsSnackbar": "Please accept the terms to continue.",
+  "authJoinOrgTitle": "Join {orgName}",
+  "@authJoinOrgTitle": {
+    "placeholders": {
+      "orgName": { "type": "String" }
+    }
+  },
+  "authApplyReviewMessage": "Your details will be reviewed by an admin before you can access {orgName}.",
+  "@authApplyReviewMessage": {
+    "placeholders": {
+      "orgName": { "type": "String" }
+    }
+  },
+  "authFullNameExampleHint": "e.g. Juan Dela Cruz",
+  "authStudentMemberId": "Student / Member ID",
+  "authStudentMemberIdHint": "Your school-issued ID number",
+  "authApplyConfirmAccurate": "I confirm that the information I provided is accurate.",
+  "authSubmitApplication": "Submit Application",
+  "authPendingRejectedTitle": "Application Rejected",
+  "authPendingSubmittedTitle": "Application Submitted!",
+  "authPendingRejectedMessage": "Your application was not approved. Please contact your administrator for more information.",
+  "authPendingReviewMessage": "Your application is under review. You'll receive a notification once an admin approves your account.",
+  "authEditApplication": "Edit Application",
+  "authSubmittedDetails": "Submitted Details",
+  "authStudentId": "Student ID",
+
+  "reminderDetailTitle": "Reminder",
+  "reminderDetailNotFound": "Reminder not found",
+  "reminderDetailLoadFailed": "Failed to load reminder: {error}",
+  "@reminderDetailLoadFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "reminderDetailScheduledLabel": "Scheduled",
+  "reminderDetailExpiresLabel": "Expires",
+  "reminderDetailDoesNotExpire": "Does not expire",
+  "reminderDetailResponseRequiredBanner": "Response required — submit your answer to dismiss this alert.",
+  "reminderDetailJustNow": "Just now",
+  "reminderDetailMinutesAgo": "{count} min ago",
+  "@reminderDetailMinutesAgo": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "reminderDetailHoursAgo": "{count} hr ago",
+  "@reminderDetailHoursAgo": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "reminderDetailDaysAgo": "{count} d ago",
+  "@reminderDetailDaysAgo": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "reminderMyBroadcastsUpdateFailed": "Update failed: {error}",
+  "@reminderMyBroadcastsUpdateFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "reminderMyBroadcastsUpdatedWithAlerts": "Broadcast updated — {count} alert(s) refreshed.",
+  "@reminderMyBroadcastsUpdatedWithAlerts": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "reminderMyBroadcastsUpdated": "Broadcast updated.",
+  "reminderMyBroadcastsRecallFailed": "Recall failed: {error}",
+  "@reminderMyBroadcastsRecallFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "reminderMyBroadcastsRecalledWithAlerts": "Reminder recalled — {count} delivered alert(s) removed.",
+  "@reminderMyBroadcastsRecalledWithAlerts": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "reminderMyBroadcastsDeleted": "Reminder deleted.",
+  "reminderMyBroadcastsExpiresAt": "Expires {dateTime}",
+  "@reminderMyBroadcastsExpiresAt": {
+    "placeholders": {
+      "dateTime": { "type": "String" }
+    }
+  },
+  "reminderMyBroadcastsRecallTitle": "Recall this broadcast?",
+  "reminderMyBroadcastsDeleteTitle": "Delete broadcast?",
+  "reminderMyBroadcastsRecallMessage": "This deletes the reminder and removes it from every recipient's alerts feed. This cannot be undone.",
+  "reminderMyBroadcastsDeleteMessage": "This permanently deletes the reminder. This cannot be undone.",
+  "reminderMyBroadcastsRecall": "Recall",
+  "reminderMyBroadcastsEmptyLeader": "No group alerts sent yet",
+  "reminderMyBroadcastsEmpty": "You haven't sent any broadcasts yet",
+  "reminderMyBroadcastsEmptyLeaderHint": "Send an alert from My Groups & Clubs, then return here to view member responses.",
+  "reminderEditBroadcastTitle": "Edit broadcast",
+  "reminderEditEnterTitle": "Enter a title",
+  "reminderEditEnterMessage": "Enter a message",
+  "reminderResponsesNoResponses": "This reminder has no responses.",
+  "reminderResponsesNoResponsesYet": "No responses yet.",
+  "reminderResponseSubmitted": "Response submitted",
+  "reminderResponseYourResponse": "Your response",
+  "reminderResponseAlreadyResponded": "You already responded. Update your answer below if needed.",
+  "reminderResponseTypeHint": "Type your response…",
+  "reminderResponseMaxCharacters": "Max {count} characters",
+  "@reminderResponseMaxCharacters": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "reminderResponseAdditionalComments": "Additional comments (optional)",
+  "reminderResponseAdditionalHint": "Add an explanation if needed…",
+  "reminderResponseUpdate": "Update response",
+  "reminderResponseSubmit": "Submit response",
+  "reminderResponseFailed": "Failed: {error}",
+  "@reminderResponseFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "reminderResponseSubmittedLabel": "Submitted",
+  "reminderResponseLocked": "Your answer is locked and cannot be changed.",
+
+  "reportConfirmationThankYou": "Thank You!",
+  "reportConfirmationMessage": "Your report has been submitted successfully. We'll look into it and keep you posted.",
+  "reportConfirmationReferenceLabel": "Reference Number",
+  "reportConfirmationCopied": "Reference number copied!",
+  "reportConfirmationGoToMyReports": "Go to My Reports",
+  "reportConfirmationBackToHome": "Back to Home",
+  "reportDetailsSubmittedAnonymously": "Submitted anonymously",
+
+  "groupsDefaultPresident": "President",
+  "groupsDefaultVicePresident": "Vice President",
+  "groupsNoPositionsYet": "No positions defined yet.",
+  "groupsPositionNumber": "Position {number}",
+  "@groupsPositionNumber": {
+    "placeholders": {
+      "number": { "type": "int" }
+    }
+  },
+  "groupsPositionExampleHint": "e.g. Vice President"
 }

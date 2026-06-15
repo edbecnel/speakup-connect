@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:speakup_connect/core/constants/route_constants.dart';
+import 'package:speakup_connect/core/l10n/app_localizations_extension.dart';
 import 'package:speakup_connect/core/permissions/providers/permission_provider.dart';
 import 'package:speakup_connect/shared/widgets/notification_badge_icon.dart';
 import 'package:speakup_connect/features/groups/presentation/providers/group_provider.dart';
@@ -23,6 +24,7 @@ class AlertsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final notificationsAsync = ref.watch(notificationsProvider);
     final unread = ref.watch(unreadNotificationCountProvider);
     final canBroadcast = ref.watch(canComposeRemindersProvider);
@@ -37,7 +39,7 @@ class AlertsScreen extends ConsumerWidget {
         if (next.hasError) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Update failed: ${next.error}'),
+              content: Text(l10n.commonUpdateFailed('${next.error}')),
               backgroundColor: Theme.of(context).colorScheme.error,
             ),
           );
@@ -61,7 +63,7 @@ class AlertsScreen extends ConsumerWidget {
         if (next.hasError) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Delete failed: ${next.error}'),
+              content: Text(l10n.commonDeleteFailed('${next.error}')),
               backgroundColor: Theme.of(context).colorScheme.error,
             ),
           );
@@ -86,7 +88,7 @@ class AlertsScreen extends ConsumerWidget {
         messenger.hideCurrentSnackBar();
         if (next.hasError) {
           messenger.showSnackBar(SnackBar(
-            content: Text('Delete failed: ${next.error}'),
+            content: Text(l10n.commonDeleteFailed('${next.error}')),
             backgroundColor: Theme.of(context).colorScheme.error,
           ));
         } else {
@@ -109,7 +111,7 @@ class AlertsScreen extends ConsumerWidget {
         messenger.hideCurrentSnackBar();
         if (next.hasError) {
           messenger.showSnackBar(SnackBar(
-            content: Text('Update failed: ${next.error}'),
+            content: Text(l10n.commonUpdateFailed('${next.error}')),
             backgroundColor: Theme.of(context).colorScheme.error,
           ));
         } else {
@@ -132,11 +134,11 @@ class AlertsScreen extends ConsumerWidget {
           onPressed: () =>
               context.canPop() ? context.pop() : context.go(Routes.home),
         ),
-        title: const Text('Alerts'),
+        title: Text(l10n.alertsTitle),
         actions: [
           if (canViewHistory)
             IconButton(
-              tooltip: 'Notification history',
+              tooltip: l10n.notificationHistoryTitle,
               icon: const Icon(Icons.history),
               onPressed: () => context.push(Routes.notificationHistory),
             ),
@@ -148,7 +150,7 @@ class AlertsScreen extends ConsumerWidget {
             ),
           if (canApprove)
             IconButton(
-              tooltip: 'Reminder approvals',
+              tooltip: l10n.alertsReminderApprovalsTooltip,
               onPressed: () => context.push(Routes.reminderApprovals),
               icon: NotificationBadgeIcon(
                 icon: Icons.fact_check_outlined,
@@ -157,7 +159,7 @@ class AlertsScreen extends ConsumerWidget {
             ),
           if (count > 0)
             PopupMenuButton<String>(
-              tooltip: 'More',
+              tooltip: l10n.alertsMoreTooltip,
               onSelected: (value) {
                 final actions = ref.read(notificationActionsProvider.notifier);
                 if (value == 'read') {
@@ -168,25 +170,25 @@ class AlertsScreen extends ConsumerWidget {
               },
               itemBuilder: (_) => [
                 if (unread > 0)
-                  const PopupMenuItem(
+                  PopupMenuItem(
                     value: 'read',
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.done_all),
-                        SizedBox(width: 12),
-                        Text('Mark all read'),
+                        const Icon(Icons.done_all),
+                        const SizedBox(width: 12),
+                        Text(l10n.alertsMarkAllRead),
                       ],
                     ),
                   ),
-                const PopupMenuItem(
+                PopupMenuItem(
                   value: 'clear',
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.delete_sweep_outlined),
-                      SizedBox(width: 12),
-                      Text('Clear all'),
+                      const Icon(Icons.delete_sweep_outlined),
+                      const SizedBox(width: 12),
+                      Text(l10n.commonClearAll),
                     ],
                   ),
                 ),
@@ -203,7 +205,8 @@ class AlertsScreen extends ConsumerWidget {
           : null,
       body: notificationsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Failed to load alerts: $e')),
+        error: (e, _) =>
+            Center(child: Text(l10n.alertsFailedToLoad('$e'))),
         data: (items) {
           if (items.isEmpty) return const _EmptyFeed();
           return ListView.separated(
@@ -218,10 +221,11 @@ class AlertsScreen extends ConsumerWidget {
   }
 
   Future<void> _confirmClearAll(BuildContext context, WidgetRef ref) async {
+    final l10n = context.l10n;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Clear all alerts?'),
+        title: Text(l10n.alertsClearAllTitle),
         content: const Text(
           'This permanently removes all alerts from your feed. '
           'This cannot be undone.',
@@ -229,11 +233,11 @@ class AlertsScreen extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Cancel'),
+            child: Text(l10n.commonCancel),
           ),
           FilledButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Clear all'),
+            child: Text(l10n.commonClearAll),
           ),
         ],
       ),
@@ -251,6 +255,7 @@ class _NotificationRow extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final reminderId = notification.type == 'reminder'
         ? reminderIdFromNotificationData(notification.data)
         : null;
@@ -334,10 +339,8 @@ class _NotificationRow extends ConsumerWidget {
         confirmDismiss: (_) async {
           if (!attention.canDismiss) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text(
-                  'Submit your response before dismissing this alert.',
-                ),
+              SnackBar(
+                content: Text(l10n.alertsSubmitBeforeDismiss),
               ),
             );
             return false;
@@ -349,7 +352,7 @@ class _NotificationRow extends ConsumerWidget {
           ScaffoldMessenger.of(context)
             ..hideCurrentSnackBar()
             ..showSnackBar(
-              const SnackBar(content: Text('Alert dismissed')),
+              SnackBar(content: Text(l10n.alertsAlertDismissed)),
             );
         },
         child: tile,
@@ -477,28 +480,29 @@ class _NotificationRow extends ConsumerWidget {
 
     if (!canDismiss) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Submit your response before dismissing this alert.'),
+        SnackBar(
+          content: Text(context.l10n.alertsSubmitBeforeDismiss),
         ),
       );
       return;
     }
 
+    final l10n = context.l10n;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Delete alert?'),
+        title: Text(l10n.alertsDeleteAlertTitle),
         content: const Text(
           'This removes the alert from your feed only.',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Cancel'),
+            child: Text(l10n.commonCancel),
           ),
           FilledButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Delete'),
+            child: Text(l10n.commonDelete),
           ),
         ],
       ),
@@ -523,10 +527,11 @@ class _NotificationRow extends ConsumerWidget {
     WidgetRef ref,
     String reminderId,
   ) async {
+    final l10n = context.l10n;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Delete broadcast?'),
+        title: Text(l10n.alertsDeleteBroadcastTitle),
         content: const Text(
           'This deletes the broadcast and removes it from every '
           'recipient\'s alerts feed. This cannot be undone.',
@@ -534,11 +539,11 @@ class _NotificationRow extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Cancel'),
+            child: Text(l10n.commonCancel),
           ),
           FilledButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Delete'),
+            child: Text(l10n.commonDelete),
           ),
         ],
       ),
@@ -560,10 +565,11 @@ class _NotificationRow extends ConsumerWidget {
     WidgetRef ref,
     String bulletinId,
   ) async {
+    final l10n = context.l10n;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Delete announcement?'),
+        title: Text(l10n.alertsDeleteAnnouncementTitle),
         content: const Text(
           'This deletes the announcement and removes it from every '
           'member\'s alerts feed. This cannot be undone.',
@@ -571,11 +577,11 @@ class _NotificationRow extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Cancel'),
+            child: Text(l10n.commonCancel),
           ),
           FilledButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Delete'),
+            child: Text(l10n.commonDelete),
           ),
         ],
       ),
@@ -616,6 +622,7 @@ class _NotificationTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     final isUnread = needsAttention;
     final icon = switch (notification.type) {
@@ -695,25 +702,25 @@ class _NotificationTile extends ConsumerWidget {
               },
               itemBuilder: (_) => [
                 if (onEdit != null)
-                  const PopupMenuItem(
+                  PopupMenuItem(
                     value: 'edit',
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.edit_outlined),
-                        SizedBox(width: 12),
-                        Text('Edit'),
+                        const Icon(Icons.edit_outlined),
+                        const SizedBox(width: 12),
+                        Text(l10n.commonEdit),
                       ],
                     ),
                   ),
-                const PopupMenuItem(
+                PopupMenuItem(
                   value: 'delete',
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.delete_outline),
-                      SizedBox(width: 12),
-                      Text('Delete'),
+                      const Icon(Icons.delete_outline),
+                      const SizedBox(width: 12),
+                      Text(l10n.commonDelete),
                     ],
                   ),
                 ),

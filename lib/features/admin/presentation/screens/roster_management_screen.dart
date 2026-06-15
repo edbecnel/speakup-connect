@@ -567,7 +567,7 @@ class _RosterTile extends StatelessWidget {
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('$gradeLabel · $statusLabel'),
+            Text(l10n.studentRosterGradeStatusLine(gradeLabel, statusLabel)),
             Text('${l10n.commonIdLabel}: ${entry.studentId}'),
             if (entry.section != null)
               Text(l10n.studentRosterSectionLabel(entry.section!)),

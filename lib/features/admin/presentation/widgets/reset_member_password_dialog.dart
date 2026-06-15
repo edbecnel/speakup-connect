@@ -14,6 +14,7 @@ Future<bool> showResetMemberPasswordDialog({
   required String memberName,
   String? studentId,
 }) async {
+  final l10n = context.l10n;
   final newPassword = await showDialog<String>(
     context: context,
     barrierDismissible: false,
@@ -28,23 +29,25 @@ Future<bool> showResetMemberPasswordDialog({
   final confirmed = await showDialog<bool>(
     context: context,
     barrierDismissible: false,
-    builder: (ctx) => AlertDialog(
-      title: const Text('Confirm password reset'),
-      content: Text(
-        'Set a new sign-in password for $memberName? '
-        'They will need it the next time they sign in.',
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(ctx, false),
-          child: const Text('Cancel'),
+    builder: (ctx) {
+      final dialogL10n = ctx.l10n;
+      return AlertDialog(
+        title: Text(dialogL10n.memberManagementConfirmPasswordResetTitle),
+        content: Text(
+          dialogL10n.memberManagementConfirmPasswordResetMessage(memberName),
         ),
-        FilledButton(
-          onPressed: () => Navigator.pop(ctx, true),
-          child: const Text('Reset password'),
-        ),
-      ],
-    ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(dialogL10n.commonCancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(dialogL10n.memberManagementResetPasswordAction),
+          ),
+        ],
+      );
+    },
   );
 
   if (confirmed != true || !context.mounted) return false;
@@ -58,13 +61,13 @@ Future<bool> showResetMemberPasswordDialog({
 
   if (ok) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Password reset for $memberName')),
+      SnackBar(content: Text(l10n.memberManagementPasswordResetSuccess(memberName))),
     );
   } else {
     final error = ref.read(resetOrgMemberPasswordProvider).error;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(error?.toString() ?? 'Could not reset password'),
+        content: Text(error?.toString() ?? l10n.memberManagementPasswordResetFailed),
         backgroundColor: Theme.of(context).colorScheme.error,
       ),
     );
@@ -133,6 +136,7 @@ class _ResetMemberPasswordDialogState extends State<_ResetMemberPasswordDialog> 
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final studentId = widget.studentId?.trim();
     final theme = Theme.of(context);
 
@@ -146,7 +150,7 @@ class _ResetMemberPasswordDialogState extends State<_ResetMemberPasswordDialog> 
         data: MediaQuery.of(context).copyWith(viewInsets: EdgeInsets.zero),
         child: AlertDialog(
           scrollable: true,
-          title: Text('Reset password for ${widget.memberName}'),
+          title: Text(l10n.memberManagementResetPasswordDialogTitle(widget.memberName)),
           content: Form(
             key: _formKey,
             child: Column(
@@ -154,8 +158,7 @@ class _ResetMemberPasswordDialogState extends State<_ResetMemberPasswordDialog> 
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
-                  'Choose a new sign-in password. Use the shortcuts below '
-                  'or enter one manually.',
+                  l10n.memberManagementResetPasswordIntro,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
@@ -169,28 +172,28 @@ class _ResetMemberPasswordDialogState extends State<_ResetMemberPasswordDialog> 
                       OutlinedButton.icon(
                         onPressed: _applyStudentIdPassword,
                         icon: const Icon(Icons.badge_outlined),
-                        label: const Text('Use username / student ID'),
+                        label: Text(l10n.memberManagementUseUsernamePassword),
                       ),
                     OutlinedButton.icon(
                       onPressed: _applyRandomPassword,
                       icon: const Icon(Icons.pin_outlined),
-                      label: const Text('Generate 8-digit password'),
+                      label: Text(l10n.memberManagementGenerate8DigitPassword),
                     ),
                   ],
                 ),
                 const SizedBox(height: 16),
                 AppTextField(
                   controller: _passwordController,
-                  label: 'New password',
-                  hint: 'At least 6 characters',
+                  label: l10n.changePasswordNewLabel,
+                  hint: l10n.memberManagementPasswordMinHint,
                   prefixIcon: Icons.lock_outline,
                   obscureText: _obscurePassword,
                   textInputAction: TextInputAction.next,
-                  validator: (v) => context.l10n.validateLoginPassword(v),
+                  validator: (v) => l10n.validateLoginPassword(v),
                   suffixIcon: IconButton(
                     tooltip: _obscurePassword
-                        ? 'Show password'
-                        : 'Hide password',
+                        ? l10n.commonShowPassword
+                        : l10n.commonHidePassword,
                     icon: Icon(
                       _obscurePassword
                           ? Icons.visibility_outlined
@@ -204,19 +207,19 @@ class _ResetMemberPasswordDialogState extends State<_ResetMemberPasswordDialog> 
                 const SizedBox(height: 12),
                 AppTextField(
                   controller: _confirmController,
-                  label: 'Confirm password',
+                  label: l10n.memberManagementConfirmPasswordLabel,
                   prefixIcon: Icons.lock_outline,
                   obscureText: _obscurePassword,
                   textInputAction: TextInputAction.done,
-                  validator: (v) => context.l10n.validateConfirmPassword(
+                  validator: (v) => l10n.validateConfirmPassword(
                     v,
                     _passwordController.text,
                   ),
                   onFieldSubmitted: (_) => _submit(),
                   suffixIcon: IconButton(
                     tooltip: _obscurePassword
-                        ? 'Show password'
-                        : 'Hide password',
+                        ? l10n.commonShowPassword
+                        : l10n.commonHidePassword,
                     icon: Icon(
                       _obscurePassword
                           ? Icons.visibility_outlined
@@ -233,11 +236,11 @@ class _ResetMemberPasswordDialogState extends State<_ResetMemberPasswordDialog> 
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
+              child: Text(l10n.commonCancel),
             ),
             FilledButton(
               onPressed: _submit,
-              child: const Text('Continue'),
+              child: Text(l10n.commonContinue),
             ),
           ],
         ),

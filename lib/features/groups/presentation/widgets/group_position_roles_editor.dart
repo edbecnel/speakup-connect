@@ -113,7 +113,7 @@ class _GroupPositionRolesEditorState extends State<GroupPositionRolesEditor> {
         const SizedBox(height: 12),
         if (_items.isEmpty)
           Text(
-            'No positions defined yet.',
+            l10n.groupsNoPositionsYet,
             style: theme.textTheme.bodyMedium?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
@@ -130,8 +130,8 @@ class _GroupPositionRolesEditorState extends State<GroupPositionRolesEditor> {
                     controller: item.controller,
                     enabled: widget.enabled,
                     decoration: InputDecoration(
-                      labelText: 'Position ${i + 1}',
-                      hintText: 'e.g. Vice President',
+                      labelText: l10n.groupsPositionNumber(i + 1),
+                      hintText: l10n.groupsPositionExampleHint,
                       border: const OutlineInputBorder(),
                       isDense: true,
                     ),
@@ -143,7 +143,7 @@ class _GroupPositionRolesEditorState extends State<GroupPositionRolesEditor> {
                 Column(
                   children: [
                     IconButton(
-                      tooltip: 'Move up',
+                      tooltip: l10n.commonMoveUp,
                       onPressed: widget.enabled && i > 0
                           ? () => _move(i, -1)
                           : null,
@@ -151,7 +151,7 @@ class _GroupPositionRolesEditorState extends State<GroupPositionRolesEditor> {
                       visualDensity: VisualDensity.compact,
                     ),
                     IconButton(
-                      tooltip: 'Move down',
+                      tooltip: l10n.commonMoveDown,
                       onPressed: widget.enabled && i < _items.length - 1
                           ? () => _move(i, 1)
                           : null,
@@ -159,7 +159,7 @@ class _GroupPositionRolesEditorState extends State<GroupPositionRolesEditor> {
                       visualDensity: VisualDensity.compact,
                     ),
                     IconButton(
-                      tooltip: 'Remove',
+                      tooltip: l10n.commonRemove,
                       onPressed:
                           widget.enabled ? () => _removeAt(i) : null,
                       icon: const Icon(Icons.delete_outline, size: 20),

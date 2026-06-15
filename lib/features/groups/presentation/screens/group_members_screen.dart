@@ -48,7 +48,7 @@ class GroupMembersScreen extends ConsumerWidget {
               ),
               icon: pendingCount > 0
                   ? Badge(
-                      label: Text('$pendingCount'),
+                      label: Text(pendingCount.toString()),
                       child: const Icon(Icons.inbox_outlined),
                     )
                   : const Icon(Icons.inbox_outlined),

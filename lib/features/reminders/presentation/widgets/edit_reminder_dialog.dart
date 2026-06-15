@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:speakup_connect/core/l10n/app_localizations_extension.dart';
 import 'package:speakup_connect/features/reminders/presentation/widgets/expiration_picker_section.dart';
 import 'package:speakup_connect/shared/widgets/app_button.dart';
 import 'package:speakup_connect/shared/widgets/app_text_field.dart';
@@ -78,7 +79,7 @@ class _EditReminderDialogState extends State<EditReminderDialog> {
     final resolved = _expiration.resolve();
     if (_expiration.isEnabled && !_expiration.isValid()) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Expiration must be in the future')),
+        SnackBar(content: Text(context.l10n.announcementsExpirationMustBeFuture)),
       );
       return;
     }
@@ -93,8 +94,10 @@ class _EditReminderDialogState extends State<EditReminderDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return AlertDialog(
-      title: const Text('Edit broadcast'),
+      title: Text(l10n.reminderEditBroadcastTitle),
       content: Form(
         key: _formKey,
         child: SingleChildScrollView(
@@ -103,11 +106,11 @@ class _EditReminderDialogState extends State<EditReminderDialog> {
             children: [
               AppTextField(
                 controller: _titleController,
-                label: 'Title',
+                label: l10n.commonTitle,
                 textInputAction: TextInputAction.next,
                 validator: (v) {
                   if (v == null || v.trim().isEmpty) {
-                    return 'Enter a title';
+                    return l10n.reminderEditEnterTitle;
                   }
                   return null;
                 },
@@ -115,11 +118,11 @@ class _EditReminderDialogState extends State<EditReminderDialog> {
               const SizedBox(height: 12),
               AppTextField(
                 controller: _bodyController,
-                label: 'Message',
+                label: l10n.commonMessage,
                 maxLines: 4,
                 validator: (v) {
                   if (v == null || v.trim().isEmpty) {
-                    return 'Enter a message';
+                    return l10n.reminderEditEnterMessage;
                   }
                   return null;
                 },
@@ -136,10 +139,10 @@ class _EditReminderDialogState extends State<EditReminderDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text(l10n.commonCancel),
         ),
         AppButton.primary(
-          label: 'Save',
+          label: l10n.commonSave,
           onPressed: _submit,
         ),
       ],

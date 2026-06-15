@@ -40,14 +40,16 @@ class _MemberProfileAccountCard extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _AccountRow(
-            label: 'Username / student ID',
-            value: studentId?.isNotEmpty == true ? studentId! : 'Not set',
+            label: l10n.settingsUsernameStudentId,
+            value: studentId?.isNotEmpty == true
+                ? studentId!
+                : l10n.commonNotSet,
             icon: Icons.badge_outlined,
           ),
           const SizedBox(height: 10),
           _AccountRow(
-            label: 'Contact email',
-            value: email?.isNotEmpty == true ? email! : 'Not set',
+            label: l10n.settingsContactEmail,
+            value: email?.isNotEmpty == true ? email! : l10n.commonNotSet,
             icon: Icons.email_outlined,
           ),
           const SizedBox(height: 8),
@@ -65,7 +67,11 @@ class _MemberProfileAccountCard extends ConsumerWidget {
                   ? null
                   : () => _editEmail(context, ref, email),
               icon: const Icon(Icons.edit_outlined, size: 18),
-              label: Text(email?.isNotEmpty == true ? 'Change email' : 'Add email'),
+              label: Text(
+                email?.isNotEmpty == true
+                    ? l10n.settingsChangeEmail
+                    : l10n.settingsAddEmail,
+              ),
             ),
           ),
         ],
@@ -92,11 +98,14 @@ class _MemberProfileAccountCard extends ConsumerWidget {
 
     if (!context.mounted) return;
 
+    final l10n = context.l10n;
     if (ok) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            newEmail.isEmpty ? 'Contact email removed' : 'Contact email updated',
+            newEmail.isEmpty
+                ? l10n.settingsContactEmailRemoved
+                : l10n.settingsContactEmailUpdated,
           ),
         ),
       );
@@ -104,7 +113,9 @@ class _MemberProfileAccountCard extends ConsumerWidget {
       final error = ref.read(updateMemberContactEmailProvider).error;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(error?.toString() ?? 'Could not update email'),
+          content: Text(
+            error?.toString() ?? l10n.settingsContactEmailUpdateFailed,
+          ),
           backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
@@ -125,8 +136,9 @@ class _AccountRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
-    final isUnset = value == 'Not set';
+    final isUnset = value == l10n.commonNotSet;
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -188,6 +200,7 @@ class _EditContactEmailDialogState extends State<_EditContactEmailDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return AnimatedPadding(
       padding: EdgeInsets.only(
         bottom: MediaQuery.viewInsetsOf(context).bottom,
@@ -198,7 +211,7 @@ class _EditContactEmailDialogState extends State<_EditContactEmailDialog> {
         data: MediaQuery.of(context).copyWith(viewInsets: EdgeInsets.zero),
         child: AlertDialog(
           scrollable: true,
-          title: const Text('Contact email'),
+          title: Text(l10n.settingsContactEmail),
           content: Form(
             key: _formKey,
             child: Column(
@@ -206,8 +219,7 @@ class _EditContactEmailDialogState extends State<_EditContactEmailDialog> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
-                  'Used for notifications and sign-in. Your student ID remains '
-                  'your username for school accounts.',
+                  l10n.settingsContactEmailDialogIntro,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
@@ -215,12 +227,12 @@ class _EditContactEmailDialogState extends State<_EditContactEmailDialog> {
                 const SizedBox(height: 16),
                 AppTextField(
                   controller: _controller,
-                  label: 'Email (optional)',
-                  hint: 'you@school.edu',
+                  label: l10n.settingsEmailOptional,
+                  hint: l10n.authEmailHint,
                   prefixIcon: Icons.email_outlined,
                   keyboardType: TextInputType.emailAddress,
                   textInputAction: TextInputAction.done,
-                  validator: (v) => context.l10n.validateOptionalEmail(v),
+                  validator: (v) => l10n.validateOptionalEmail(v),
                 ),
               ],
             ),
@@ -229,18 +241,18 @@ class _EditContactEmailDialogState extends State<_EditContactEmailDialog> {
             if (widget.initialEmail?.isNotEmpty == true)
               TextButton(
                 onPressed: () => Navigator.pop(context, ''),
-                child: const Text('Remove'),
+                child: Text(l10n.commonRemove),
               ),
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
+              child: Text(l10n.commonCancel),
             ),
             FilledButton(
               onPressed: () {
                 if (!_formKey.currentState!.validate()) return;
                 Navigator.pop(context, _controller.text.trim());
               },
-              child: const Text('Save'),
+              child: Text(l10n.commonSave),
             ),
           ],
         ),

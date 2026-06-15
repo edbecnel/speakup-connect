@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:speakup_connect/core/constants/route_constants.dart';
+import 'package:speakup_connect/core/l10n/app_localizations_extension.dart';
 import 'package:speakup_connect/features/announcements/domain/entities/bulletin_entity.dart';
 import 'package:speakup_connect/features/announcements/presentation/providers/announcement_provider.dart';
 import 'package:speakup_connect/features/announcements/presentation/screens/announcement_responses_screen.dart';
@@ -14,6 +15,7 @@ class MyAnnouncementsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final bulletinsAsync = ref.watch(myBulletinsProvider);
 
     ref.listen(updateAnnouncementProvider, (prev, next) {
@@ -22,7 +24,7 @@ class MyAnnouncementsScreen extends ConsumerWidget {
         messenger.hideCurrentSnackBar();
         if (next.hasError) {
           messenger.showSnackBar(SnackBar(
-            content: Text('Update failed: ${next.error}'),
+            content: Text(l10n.commonUpdateFailed('${next.error}')),
             backgroundColor: Theme.of(context).colorScheme.error,
           ));
         } else {
@@ -45,7 +47,7 @@ class MyAnnouncementsScreen extends ConsumerWidget {
         messenger.hideCurrentSnackBar();
         if (next.hasError) {
           messenger.showSnackBar(SnackBar(
-            content: Text('Delete failed: ${next.error}'),
+            content: Text(l10n.commonDeleteFailed('${next.error}')),
             backgroundColor: Theme.of(context).colorScheme.error,
           ));
         } else {
@@ -65,15 +67,15 @@ class MyAnnouncementsScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         leading: BackButton(onPressed: () => context.pop()),
-        title: const Text('My Announcements'),
+        title: Text(l10n.announcementsMyTitle),
       ),
       body: bulletinsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Failed to load: $e')),
+        error: (e, _) => Center(child: Text(l10n.commonFailedToLoad('$e'))),
         data: (bulletins) {
           if (bulletins.isEmpty) {
-            return const Center(
-              child: Text('You have not posted any announcements yet.'),
+            return Center(
+              child: Text(l10n.announcementsEmptyMine),
             );
           }
 
@@ -97,6 +99,7 @@ class _MyAnnouncementCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
     final canManageAsync =
         ref.watch(canManageAnnouncementProvider(bulletin.bulletinId));
     final canManage = canManageAsync.asData?.value ?? false;
@@ -156,7 +159,7 @@ class _MyAnnouncementCard extends ConsumerWidget {
                       );
                     },
                     icon: const Icon(Icons.poll_outlined, size: 18),
-                    label: const Text('View responses'),
+                    label: Text(l10n.announcementsViewResponses),
                   ),
                 ),
               if (canManage)
@@ -167,12 +170,12 @@ class _MyAnnouncementCard extends ConsumerWidget {
                     TextButton.icon(
                       onPressed: busy ? null : () => _edit(context, ref),
                       icon: const Icon(Icons.edit_outlined, size: 18),
-                      label: const Text('Edit'),
+                      label: Text(l10n.commonEdit),
                     ),
                     TextButton.icon(
                       onPressed: busy ? null : () => _confirmDelete(context, ref),
                       icon: const Icon(Icons.delete_outline_rounded, size: 18),
-                      label: const Text('Delete'),
+                      label: Text(l10n.commonDelete),
                       style: TextButton.styleFrom(
                         foregroundColor: theme.colorScheme.error,
                       ),
@@ -219,10 +222,11 @@ class _MyAnnouncementCard extends ConsumerWidget {
   }
 
   Future<void> _confirmDelete(BuildContext context, WidgetRef ref) async {
+    final l10n = context.l10n;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Delete announcement?'),
+        title: Text(l10n.announcementsDeleteTitle),
         content: Text(
           bulletin.isPublished
               ? 'This deletes the announcement and removes it from every '
@@ -233,11 +237,11 @@ class _MyAnnouncementCard extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Cancel'),
+            child: Text(l10n.commonCancel),
           ),
           FilledButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Delete'),
+            child: Text(l10n.commonDelete),
           ),
         ],
       ),

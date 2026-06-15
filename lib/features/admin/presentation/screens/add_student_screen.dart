@@ -42,12 +42,12 @@ class _AddStudentScreenState extends ConsumerState<AddStudentScreen> {
 
     if (!mounted) return;
 
+    final l10n = context.l10n;
     if (ok) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Added ${_nameController.text.trim()}. '
-            'They can sign in with their student ID as the password.',
+            l10n.studentRosterAddedSuccess(_nameController.text.trim()),
           ),
         ),
       );
@@ -56,7 +56,7 @@ class _AddStudentScreenState extends ConsumerState<AddStudentScreen> {
       final error = ref.read(provisionStudentProvider).error;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(error?.toString() ?? 'Could not add student'),
+          content: Text(error?.toString() ?? l10n.studentRosterAddFailed),
           backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
@@ -65,13 +65,14 @@ class _AddStudentScreenState extends ConsumerState<AddStudentScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final isLoading = ref.watch(provisionStudentProvider).isLoading;
     final gradeLevels = ref.watch(orgGradeLevelsProvider);
     final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add Student'),
+        title: Text(l10n.studentRosterAddStudent),
       ),
       body: Form(
         key: _formKey,
@@ -79,8 +80,7 @@ class _AddStudentScreenState extends ConsumerState<AddStudentScreen> {
           padding: const EdgeInsets.all(16),
           children: [
             Text(
-              'Creates a pre-approved account. The student signs in using '
-              'their school ID in both fields until email auth is enabled.',
+              l10n.studentRosterAddStudentIntro,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
@@ -88,57 +88,59 @@ class _AddStudentScreenState extends ConsumerState<AddStudentScreen> {
             const SizedBox(height: 20),
             AppTextField(
               controller: _nameController,
-              label: 'Full name',
-              hint: 'e.g. Juan Dela Cruz',
+              label: l10n.memberManagementFullNameLabel,
+              hint: l10n.memberManagementFullNameExample,
               prefixIcon: Icons.person_outline,
               textInputAction: TextInputAction.next,
               autofocus: true,
-              validator: (v) => context.l10n.validateRequired(
+              validator: (v) => l10n.validateRequired(
                 v,
-                fieldName: 'Full name',
+                fieldName: l10n.memberManagementFullNameLabel,
               ),
             ),
             const SizedBox(height: 16),
             AppTextField(
               controller: _studentIdController,
-              label: 'Student ID',
-              hint: 'School-issued ID (min. 6 characters)',
+              label: l10n.memberManagementStudentIdLabel,
+              hint: l10n.memberManagementStudentIdProvisionHint,
               prefixIcon: Icons.badge_outlined,
               textInputAction: TextInputAction.next,
-              validator: (v) => context.l10n.validateStudentId(v),
+              validator: (v) => l10n.validateStudentId(v),
             ),
             const SizedBox(height: 16),
             AppTextField(
               controller: _emailController,
-              label: 'Email (optional)',
-              hint: 'Contact email for future login',
+              label: l10n.settingsEmailOptional,
+              hint: l10n.memberManagementContactEmailFutureHint,
               prefixIcon: Icons.email_outlined,
               keyboardType: TextInputType.emailAddress,
               textInputAction: TextInputAction.next,
-              validator: (v) => context.l10n.validateOptionalEmail(v),
+              validator: (v) => l10n.validateOptionalEmail(v),
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<int>(
               initialValue: _gradeLevel,
-              decoration: const InputDecoration(
-                labelText: 'Grade',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: l10n.commonGrade,
+                border: const OutlineInputBorder(),
               ),
               items: gradeLevels
                   .map(
                     (g) => DropdownMenuItem(
                       value: g,
-                      child: Text('Grade $g'),
+                      child: Text(l10n.schoolGradesGradeChip(g)),
                     ),
                   )
                   .toList(),
               onChanged: isLoading ? null : (v) => setState(() => _gradeLevel = v),
               validator: (v) =>
-                  v == null ? 'Select a grade' : null,
+                  v == null ? l10n.studentRosterSelectGrade : null,
             ),
             const SizedBox(height: 28),
             AppButton.primary(
-              label: isLoading ? 'Adding…' : 'Add Student',
+              label: isLoading
+                  ? l10n.studentRosterAdding
+                  : l10n.studentRosterAddStudent,
               onPressed: isLoading ? null : _submit,
               isLoading: isLoading,
             ),

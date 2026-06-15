@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:speakup_connect/core/constants/route_constants.dart';
 import 'package:speakup_connect/core/extensions/context_extensions.dart';
+import 'package:speakup_connect/core/l10n/app_localizations_extension.dart';
 import 'package:speakup_connect/features/auth/presentation/providers/auth_provider.dart';
 import 'package:speakup_connect/features/organization/domain/entities/user_profile_entity.dart';
 import 'package:speakup_connect/features/organization/presentation/providers/user_profile_provider.dart';
@@ -48,6 +49,7 @@ class _Body extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final isRejected = profile?.isRejected ?? false;
 
     return Padding(
@@ -71,7 +73,9 @@ class _Body extends StatelessWidget {
 
           // --- Title ---
           Text(
-            isRejected ? 'Application Rejected' : 'Application Submitted!',
+            isRejected
+                ? l10n.authPendingRejectedTitle
+                : l10n.authPendingSubmittedTitle,
             style: context.textTheme.headlineMedium,
             textAlign: TextAlign.center,
           ),
@@ -80,8 +84,8 @@ class _Body extends StatelessWidget {
           // --- Message ---
           Text(
             isRejected
-                ? 'Your application was not approved. Please contact your administrator for more information.'
-                : 'Your application is under review. You\'ll receive a notification once an admin approves your account.',
+                ? l10n.authPendingRejectedMessage
+                : l10n.authPendingReviewMessage,
             style: context.textTheme.bodyMedium?.copyWith(
               color: context.colorScheme.onSurfaceVariant,
             ),
@@ -98,13 +102,13 @@ class _Body extends StatelessWidget {
           // --- Actions ---
           if (isRejected)
             AppButton.secondary(
-              label: 'Edit Application',
+              label: l10n.authEditApplication,
               icon: Icons.edit_outlined,
               onPressed: () => context.go(Routes.applyToJoin),
             ),
           const SizedBox(height: 12),
           AppButton.text(
-            label: 'Sign Out',
+            label: l10n.settingsSignOut,
             icon: Icons.logout,
             onPressed: () async {
               await ref.read(authProvider.notifier).signOut();
@@ -123,6 +127,8 @@ class _ProfileSummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -130,17 +136,17 @@ class _ProfileSummaryCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Submitted Details',
+              l10n.authSubmittedDetails,
               style: context.textTheme.labelLarge?.copyWith(
                 color: context.colorScheme.onSurfaceVariant,
               ),
             ),
             const SizedBox(height: 12),
-            _Row(label: 'Full Name', value: profile.fullName),
+            _Row(label: l10n.authFullName, value: profile.fullName),
             if (profile.studentId != null)
-              _Row(label: 'Student ID', value: profile.studentId!),
+              _Row(label: l10n.authStudentId, value: profile.studentId!),
             if (profile.email != null)
-              _Row(label: 'Email', value: profile.email!),
+              _Row(label: l10n.commonEmail, value: profile.email!),
           ],
         ),
       ),

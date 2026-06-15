@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:speakup_connect/core/constants/route_constants.dart';
+import 'package:speakup_connect/core/l10n/app_localizations_extension.dart';
 import 'package:speakup_connect/features/groups/presentation/providers/group_provider.dart';
 import 'package:speakup_connect/features/reminders/domain/entities/reminder_entity.dart';
 import 'package:speakup_connect/features/auth/presentation/providers/auth_provider.dart';
@@ -22,6 +23,7 @@ class MyBroadcastsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final canAccess = ref.watch(canComposeRemindersProvider);
     final leaderOnly = ref.watch(isGroupLeaderOnlyComposerProvider);
     final canViewHistory = ref.watch(canViewNotificationHistoryProvider);
@@ -33,7 +35,7 @@ class MyBroadcastsScreen extends ConsumerWidget {
         messenger.hideCurrentSnackBar();
         if (next.hasError) {
           messenger.showSnackBar(SnackBar(
-            content: Text('Update failed: ${next.error}'),
+            content: Text(l10n.reminderMyBroadcastsUpdateFailed('${next.error}')),
             backgroundColor: Theme.of(context).colorScheme.error,
           ));
         } else {
@@ -41,8 +43,8 @@ class MyBroadcastsScreen extends ConsumerWidget {
           messenger.showSnackBar(SnackBar(
             content: Text(
               updated > 0
-                  ? 'Broadcast updated — $updated alert(s) refreshed.'
-                  : 'Broadcast updated.',
+                  ? l10n.reminderMyBroadcastsUpdatedWithAlerts(updated)
+                  : l10n.reminderMyBroadcastsUpdated,
             ),
             backgroundColor: Colors.green.shade700,
           ));
@@ -56,7 +58,7 @@ class MyBroadcastsScreen extends ConsumerWidget {
         messenger.hideCurrentSnackBar();
         if (next.hasError) {
           messenger.showSnackBar(SnackBar(
-            content: Text('Recall failed: ${next.error}'),
+            content: Text(l10n.reminderMyBroadcastsRecallFailed('${next.error}')),
             backgroundColor: Theme.of(context).colorScheme.error,
           ));
         } else {
@@ -64,8 +66,8 @@ class MyBroadcastsScreen extends ConsumerWidget {
           messenger.showSnackBar(SnackBar(
             content: Text(
               removed > 0
-                  ? 'Reminder recalled — $removed delivered alert(s) removed.'
-                  : 'Reminder deleted.',
+                  ? l10n.reminderMyBroadcastsRecalledWithAlerts(removed)
+                  : l10n.reminderMyBroadcastsDeleted,
             ),
             backgroundColor: Colors.green.shade700,
           ));
@@ -79,21 +81,21 @@ class MyBroadcastsScreen extends ConsumerWidget {
           onPressed: () =>
               context.canPop() ? context.pop() : context.go(Routes.alerts),
         ),
-        title: Text(leaderOnly ? 'Sent Group Alerts' : 'My Broadcasts'),
+        title: Text(leaderOnly ? l10n.settingsSentGroupAlerts : l10n.settingsMyBroadcasts),
         actions: [
           if (canViewHistory)
             IconButton(
-              tooltip: 'Notification history',
+              tooltip: l10n.notificationHistoryTitle,
               icon: const Icon(Icons.history),
               onPressed: () => context.push(Routes.notificationHistory),
             ),
         ],
       ),
       body: !canAccess
-          ? const _NoAccessPlaceholder()
+          ? _NoAccessPlaceholder()
           : mineAsync.when(
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, _) => Center(child: Text('Failed to load: $e')),
+              error: (e, _) => Center(child: Text(l10n.commonFailedToLoad('$e'))),
               data: (reminders) {
                 if (reminders.isEmpty) {
                   return _EmptyState(leaderOnly: leaderOnly);
@@ -118,6 +120,7 @@ class _BroadcastCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     final busy = ref.watch(recallReminderProvider).isLoading ||
         ref.watch(updateReminderProvider).isLoading;
@@ -126,7 +129,6 @@ class _BroadcastCard extends ConsumerWidget {
     final canManage =
         reminder.createdBy == user?.uid || (profile?.isAdmin ?? false);
     final isPublished = reminder.status == ReminderStatus.published;
-    final actionLabel = isPublished ? 'Delete' : 'Delete';
 
     return Card(
       margin: EdgeInsets.zero,
@@ -176,7 +178,9 @@ class _BroadcastCard extends ConsumerWidget {
                 if (reminder.expiresAt != null)
                   _MetaItem(
                     icon: Icons.timer_outlined,
-                    label: 'Expires ${_formatDateTime(reminder.expiresAt!)}',
+                    label: l10n.reminderMyBroadcastsExpiresAt(
+                      _formatDateTime(reminder.expiresAt!),
+                    ),
                   ),
               ],
             ),
@@ -195,7 +199,7 @@ class _BroadcastCard extends ConsumerWidget {
                     );
                   },
                   icon: const Icon(Icons.poll_outlined, size: 18),
-                  label: const Text('View responses'),
+                  label: Text(l10n.announcementsViewResponses),
                 ),
               ),
             if (canManage)
@@ -206,13 +210,15 @@ class _BroadcastCard extends ConsumerWidget {
                   TextButton.icon(
                     onPressed: busy ? null : () => _edit(context, ref),
                     icon: const Icon(Icons.edit_outlined, size: 18),
-                    label: const Text('Edit'),
+                    label: Text(l10n.commonEdit),
                   ),
                   TextButton.icon(
                     onPressed:
                         busy ? null : () => _confirm(context, ref, isPublished),
                     icon: const Icon(Icons.delete_outline_rounded, size: 18),
-                    label: Text(actionLabel),
+                    label: Text(
+                      isPublished ? l10n.reminderMyBroadcastsRecall : l10n.commonDelete,
+                    ),
                     style: TextButton.styleFrom(
                       foregroundColor: theme.colorScheme.error,
                     ),
@@ -249,24 +255,30 @@ class _BroadcastCard extends ConsumerWidget {
     WidgetRef ref,
     bool isPublished,
   ) async {
+    final l10n = context.l10n;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(isPublished ? 'Recall this broadcast?' : 'Delete broadcast?'),
+        title: Text(
+          isPublished
+              ? l10n.reminderMyBroadcastsRecallTitle
+              : l10n.reminderMyBroadcastsDeleteTitle,
+        ),
         content: Text(
           isPublished
-              ? 'This deletes the reminder and removes it from every '
-                  'recipient\'s alerts feed. This cannot be undone.'
-              : 'This permanently deletes the reminder. This cannot be undone.',
+              ? l10n.reminderMyBroadcastsRecallMessage
+              : l10n.reminderMyBroadcastsDeleteMessage,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Cancel'),
+            child: Text(l10n.commonCancel),
           ),
           FilledButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text(isPublished ? 'Recall' : 'Delete'),
+            child: Text(
+              isPublished ? l10n.reminderMyBroadcastsRecall : l10n.commonDelete,
+            ),
           ),
         ],
       ),
@@ -351,6 +363,7 @@ class _EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     return Center(
       child: Padding(
@@ -363,8 +376,8 @@ class _EmptyState extends StatelessWidget {
             const SizedBox(height: 12),
             Text(
               leaderOnly
-                  ? 'No group alerts sent yet'
-                  : 'You haven\'t sent any broadcasts yet',
+                  ? l10n.reminderMyBroadcastsEmptyLeader
+                  : l10n.reminderMyBroadcastsEmpty,
               textAlign: TextAlign.center,
               style: theme.textTheme.titleMedium
                   ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
@@ -372,8 +385,7 @@ class _EmptyState extends StatelessWidget {
             if (leaderOnly) ...[
               const SizedBox(height: 8),
               Text(
-                'Send an alert from My Groups & Clubs, then return here '
-                'to view member responses.',
+                l10n.reminderMyBroadcastsEmptyLeaderHint,
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
@@ -392,6 +404,7 @@ class _NoAccessPlaceholder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     return Center(
       child: Padding(
@@ -403,7 +416,7 @@ class _NoAccessPlaceholder extends StatelessWidget {
                 size: 48, color: theme.colorScheme.onSurfaceVariant),
             const SizedBox(height: 12),
             Text(
-              'You don\'t have permission to broadcast reminders.',
+              l10n.reminderComposeNoPermission,
               textAlign: TextAlign.center,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,

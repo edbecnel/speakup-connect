@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:speakup_connect/core/l10n/app_localizations_extension.dart';
 import 'package:speakup_connect/features/announcements/presentation/providers/bulletin_response_provider.dart';
 import 'package:speakup_connect/features/reminders/domain/entities/reminder_response_config.dart';
 import 'package:speakup_connect/features/reminders/domain/entities/reminder_response_entity.dart';
@@ -111,13 +112,14 @@ class _ReminderResponseFormState extends ConsumerState<ReminderResponseForm> {
 
     if (ok && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Response submitted')),
+        SnackBar(content: Text(context.l10n.reminderResponseSubmitted)),
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     final submitState = widget.bulletinId != null
         ? ref.watch(submitBulletinResponseProvider)
@@ -137,7 +139,7 @@ class _ReminderResponseFormState extends ConsumerState<ReminderResponseForm> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Your response',
+          l10n.reminderResponseYourResponse,
           style: theme.textTheme.titleSmall?.copyWith(
             color: theme.colorScheme.onSurfaceVariant,
           ),
@@ -147,7 +149,7 @@ class _ReminderResponseFormState extends ConsumerState<ReminderResponseForm> {
           Padding(
             padding: const EdgeInsets.only(bottom: 12),
             child: Text(
-              'You already responded. Update your answer below if needed.',
+              l10n.reminderResponseAlreadyResponded,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.primary,
               ),
@@ -159,10 +161,11 @@ class _ReminderResponseFormState extends ConsumerState<ReminderResponseForm> {
               maxLines: 4,
               maxLength: widget.config.maxTextLength,
               decoration: InputDecoration(
-                hintText: 'Type your response…',
+                hintText: l10n.reminderResponseTypeHint,
                 border: const OutlineInputBorder(),
-                counterText:
-                    'Max ${widget.config.maxTextLength} characters',
+                counterText: l10n.reminderResponseMaxCharacters(
+                  widget.config.maxTextLength,
+                ),
               ),
               onChanged: (_) => setState(() {}),
             ),
@@ -204,17 +207,21 @@ class _ReminderResponseFormState extends ConsumerState<ReminderResponseForm> {
             maxLines: 3,
             maxLength: widget.config.maxTextLength,
             decoration: InputDecoration(
-              labelText: 'Additional comments (optional)',
-              hintText: 'Add an explanation if needed…',
+              labelText: l10n.reminderResponseAdditionalComments,
+              hintText: l10n.reminderResponseAdditionalHint,
               border: const OutlineInputBorder(),
-              counterText: 'Max ${widget.config.maxTextLength} characters',
+              counterText: l10n.reminderResponseMaxCharacters(
+                widget.config.maxTextLength,
+              ),
             ),
             onChanged: (_) => setState(() {}),
           ),
         ],
         const SizedBox(height: 12),
         AppButton.primary(
-          label: hasExisting ? 'Update response' : 'Submit response',
+          label: hasExisting
+              ? l10n.reminderResponseUpdate
+              : l10n.reminderResponseSubmit,
           isLoading: submitState.isLoading,
           onPressed: _canSubmit && !submitState.isLoading ? _submit : null,
         ),
@@ -222,7 +229,7 @@ class _ReminderResponseFormState extends ConsumerState<ReminderResponseForm> {
           Padding(
             padding: const EdgeInsets.only(top: 8),
             child: Text(
-              'Failed: ${submitState.error}',
+              l10n.reminderResponseFailed('${submitState.error}'),
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.error,
               ),
@@ -244,6 +251,7 @@ class _LockedResponseView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     final answer = existing.displayValue(config);
 
@@ -251,7 +259,7 @@ class _LockedResponseView extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Your response',
+          l10n.reminderResponseYourResponse,
           style: theme.textTheme.titleSmall?.copyWith(
             color: theme.colorScheme.onSurfaceVariant,
           ),
@@ -276,12 +284,14 @@ class _LockedResponseView extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        answer.isNotEmpty ? answer : 'Submitted',
+                        answer.isNotEmpty
+                            ? answer
+                            : l10n.reminderResponseSubmittedLabel,
                         style: theme.textTheme.bodyMedium,
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        'Your answer is locked and cannot be changed.',
+                        l10n.reminderResponseLocked,
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: theme.colorScheme.onSurfaceVariant,
                         ),

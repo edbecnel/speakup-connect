@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:speakup_connect/core/l10n/app_localizations_extension.dart';
 
 /// Optional single-image attachment for announcements.
 class AnnouncementImageSection extends StatelessWidget {
@@ -22,6 +23,7 @@ class AnnouncementImageSection extends StatelessWidget {
 
   Future<void> _showImageSourceSheet(BuildContext context) async {
     if (isLoading) return;
+    final l10n = context.l10n;
     final source = await showModalBottomSheet<ImageSource>(
       context: context,
       builder: (ctx) => SafeArea(
@@ -30,12 +32,12 @@ class AnnouncementImageSection extends StatelessWidget {
           children: [
             ListTile(
               leading: const Icon(Icons.photo_library_outlined),
-              title: const Text('Choose from gallery'),
+              title: Text(l10n.announcementsChooseFromGallery),
               onTap: () => Navigator.of(ctx).pop(ImageSource.gallery),
             ),
             ListTile(
               leading: const Icon(Icons.photo_camera_outlined),
-              title: const Text('Take a photo'),
+              title: Text(l10n.announcementsTakePhoto),
               onTap: () => Navigator.of(ctx).pop(ImageSource.camera),
             ),
           ],
@@ -86,7 +88,7 @@ class AnnouncementImageSection extends StatelessWidget {
           top: 8,
           right: 8,
           child: IconButton.filledTonal(
-            tooltip: 'Remove image',
+            tooltip: context.l10n.announcementsRemoveImage,
             onPressed: onRemove,
             icon: const Icon(Icons.close),
           ),
@@ -110,6 +112,7 @@ class AnnouncementImageSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
     final hasLocal = imagePath != null && imagePath!.isNotEmpty;
     final hasRemote =
         !hasLocal && existingImageUrl != null && existingImageUrl!.isNotEmpty;
@@ -138,12 +141,12 @@ class AnnouncementImageSection extends StatelessWidget {
               color: theme.colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Column(
+            child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                CircularProgressIndicator(),
-                SizedBox(height: 12),
-                Text('Preparing image…'),
+                const CircularProgressIndicator(),
+                const SizedBox(height: 12),
+                Text(l10n.announcementsPreparingImage),
               ],
             ),
           )
@@ -154,7 +157,7 @@ class AnnouncementImageSection extends StatelessWidget {
             child: TextButton.icon(
               onPressed: () => _showImageSourceSheet(context),
               icon: const Icon(Icons.swap_horiz, size: 18),
-              label: const Text('Change photo'),
+              label: Text(l10n.announcementsChangePhoto),
             ),
           ),
         ]
@@ -162,7 +165,7 @@ class AnnouncementImageSection extends StatelessWidget {
           OutlinedButton.icon(
             onPressed: () => _showImageSourceSheet(context),
             icon: const Icon(Icons.add_photo_alternate_outlined),
-            label: const Text('Add image'),
+            label: Text(l10n.announcementsAddImage),
           ),
       ],
     );

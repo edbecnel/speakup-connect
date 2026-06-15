@@ -43,9 +43,11 @@ if (window.USE_FUNCTIONS_EMULATOR === true) {
 const call = (name) => httpsCallable(functions, name);
 
 const els = {
-  authSection: document.getElementById('auth-section'),
   workspace: document.getElementById('workspace'),
   authStatus: document.getElementById('auth-status'),
+  authPopover: document.getElementById('auth-popover'),
+  headerSignInBtn: document.getElementById('header-sign-in-btn'),
+  headerAuth: document.getElementById('header-auth'),
   email: document.getElementById('email'),
   password: document.getElementById('password'),
   passwordToggleBtn: document.getElementById('password-toggle-btn'),
@@ -108,23 +110,25 @@ let workspaceAccess = {
   canBatchAi: false,
 };
 
+function resolveOrgIdFromConfig() {
+  return workspaceAccess.organizationId || window.ORGANIZATION_ID || null;
+}
+
 function orgPayload(extra = {}) {
+  const orgId = resolveOrgIdFromConfig();
   if (workspaceAccess.isPlatformSuperAdmin) {
-    return { ...extra };
+    return orgId ? { organizationId: orgId, ...extra } : { ...extra };
   }
-  const orgId =
-    workspaceAccess.organizationId ||
-    window.ORGANIZATION_ID ||
-    null;
   return { organizationId: orgId, ...extra };
 }
 
 async function callPayload(extra = {}) {
+  const orgId = resolveOrgIdFromConfig();
   const user = auth.currentUser;
   if (user) {
     const token = await user.getIdTokenResult();
     if (token.claims.role === 'super_admin') {
-      return { ...extra };
+      return orgId ? { organizationId: orgId, ...extra } : { ...extra };
     }
   }
   return orgPayload(extra);
@@ -196,6 +200,13 @@ function formatError(err) {
       : details != null
         ? JSON.stringify(details)
         : '';
+  if (code === 'functions/already-exists') {
+    const conflict = details?.conflictingScreenName;
+    const hint = conflict
+      ? ` Look for "${conflict}" in the Screen names catalog — you may have two entries for the same app screen (e.g. "Browse Groups" and "Browse Groups / My Groups"). Delete the unassigned duplicate or pick a unique name.`
+      : ' Reload the page to reset the name field, then check the catalog for another entry with that name.';
+    return `${code}: ${message}${hint}`;
+  }
   if (code === 'functions/internal') {
     const serverHint =
       message && message !== 'internal' ? message : detailText;
@@ -398,7 +409,13 @@ function renderTable() {
       ? `<div class="verified-meta">${escapeHtml(verifiedText)}</div>`
       : '<span class="verified-meta muted">—</span>';
     const screen = (entry.context ?? '').trim();
-    const contextOptions = screenNamesPanel.buildContextSelectOptions(screen);
+    const extraContexts = entries
+      .map((e) => (e.context ?? '').trim())
+      .filter(Boolean);
+    const contextOptions = screenNamesPanel.buildContextSelectOptions(
+      screen,
+      extraContexts,
+    );
     return `
       <tr data-key="${entry.stringKey}">
         <td class="key">${entry.stringKey}<br><small>${parseFeature(entry.stringKey)}</small></td>
@@ -460,7 +477,9 @@ function showWorkspaceView(view) {
   els.operationsPanel?.classList.toggle('hidden', !isStrings);
   document.body.classList.toggle('screen-names-view', !isStrings);
   if (!isStrings) {
-    screenNamesPanel.loadScreens().catch(showError);
+    refreshAccess()
+      .then(() => screenNamesPanel.loadScreens())
+      .catch(showError);
   }
 }
 
@@ -1034,11 +1053,45 @@ async function importCsvFile(file) {
   await loadEntries({ clearReviewMeta: false, resetWorkspaceStatus: false });
 }
 
+function setAuthPopoverOpen(open) {
+  if (!els.authPopover) return;
+  els.authPopover.hidden = !open;
+  els.authPopover.classList.toggle('hidden', !open);
+  els.headerSignInBtn?.setAttribute('aria-expanded', open ? 'true' : 'false');
+}
+
+function setAuthButtonsSignedIn(signedIn) {
+  els.headerSignInBtn?.classList.toggle('hidden', signedIn);
+  els.signOutBtn.classList.toggle('hidden', !signedIn);
+  if (signedIn) {
+    setAuthPopoverOpen(false);
+  }
+}
+
+els.headerSignInBtn?.addEventListener('click', (e) => {
+  e.stopPropagation();
+  const open = els.authPopover?.hidden !== false;
+  setAuthPopoverOpen(open);
+});
+
+document.addEventListener('click', (e) => {
+  if (!els.headerAuth?.contains(e.target)) {
+    setAuthPopoverOpen(false);
+  }
+});
+
 els.signInBtn.addEventListener('click', async () => {
   try {
     await signInWithEmailAndPassword(auth, els.email.value.trim(), els.password.value);
+    setAuthPopoverOpen(false);
   } catch (err) {
     setStatus(err.message ?? String(err), 'error');
+  }
+});
+
+els.password?.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    els.signInBtn.click();
   }
 });
 
@@ -1146,11 +1199,8 @@ onAuthStateChanged(auth, async (user) => {
   if (!user) {
     setWorkspaceActive(false);
     els.workspace.classList.add('hidden');
-    els.signOutBtn.classList.add('hidden');
+    setAuthButtonsSignedIn(false);
     els.helpToggleBtn?.classList.add('hidden');
-    if (els.authSection?.tagName === 'DETAILS') {
-      els.authSection.open = true;
-    }
     setStatus('Not signed in');
     return;
   }
@@ -1171,11 +1221,9 @@ onAuthStateChanged(auth, async (user) => {
   }
   setWorkspaceActive(true);
   els.workspace.classList.remove('hidden');
-  els.signOutBtn.classList.remove('hidden');
+  setAuthButtonsSignedIn(true);
+  els.signOutBtn.title = user.email ?? '';
   els.helpToggleBtn?.classList.remove('hidden');
-  if (els.authSection?.tagName === 'DETAILS') {
-    els.authSection.open = false;
-  }
   try {
     await loadEntries();
   } catch (err) {
