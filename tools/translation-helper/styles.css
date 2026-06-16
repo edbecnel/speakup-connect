@@ -704,6 +704,30 @@ body.screen-names-view .app-shell {
   font-size: 1rem;
 }
 
+.screen-names-section .screen-names-panel > summary.collapsible-summary.collapsible-summary--with-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.screen-names-section .screen-names-panel > summary.collapsible-summary .collapsible-summary-title {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.screen-names-section .screen-names-panel > summary.collapsible-summary .collapsible-summary-actions {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.screen-names-section .screen-names-panel > summary.collapsible-summary .collapsible-summary-action-btn {
+  padding: 0.35rem 0.6rem;
+  font-size: 0.85rem;
+  line-height: 1.1;
+}
+
 .screen-names-section .screen-names-panel .collapsible-body > .hint:first-child {
   margin-top: 0;
 }

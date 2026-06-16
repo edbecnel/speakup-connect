@@ -43,6 +43,8 @@ export function createScreenNamesPanel(deps) {
     routesBodyScroll: document.getElementById('screen-routes-body-scroll'),
     routesBody: document.getElementById('screen-routes-body'),
     refreshBtn: document.getElementById('screen-names-refresh-btn'),
+    catalogRefreshBtn: document.getElementById('screen-names-catalog-refresh-btn'),
+    routesRefreshBtn: document.getElementById('screen-names-routes-refresh-btn'),
     importBtn: document.getElementById('screen-names-import-btn'),
   };
 
@@ -533,7 +535,19 @@ export function createScreenNamesPanel(deps) {
     els.newName?.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') createScreen();
     });
-    els.refreshBtn?.addEventListener('click', () => loadScreens());
+    els.refreshBtn?.addEventListener('click', () => loadScreens().catch(() => {}));
+
+    function handleSummaryRefreshClick(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      loadScreens().catch((err) => {
+        // loadScreens already sets status; avoid unhandled rejection
+        console.warn('Header refresh failed', err);
+      });
+    }
+
+    els.catalogRefreshBtn?.addEventListener('click', handleSummaryRefreshClick);
+    els.routesRefreshBtn?.addEventListener('click', handleSummaryRefreshClick);
     els.importBtn?.addEventListener('click', () => importFromStringTags());
 
     els.namesBody?.addEventListener('click', (e) => {

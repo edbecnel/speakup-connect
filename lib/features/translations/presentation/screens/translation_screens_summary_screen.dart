@@ -81,7 +81,26 @@ class _TranslationScreensSummaryScreenState
             if (!_badgesOnly) return true;
             final screen = screensState.screenForRoute(r.route);
             return screen?.badgeEnabled == true;
-          }).toList(growable: false);
+          }).toList();
+
+          items.sort((a, b) {
+            final aName = (screensState.screenForRoute(a.route)?.name ?? '').trim();
+            final bName = (screensState.screenForRoute(b.route)?.name ?? '').trim();
+
+            final aHas = aName.isNotEmpty;
+            final bHas = bName.isNotEmpty;
+            if (aHas != bHas) return aHas ? -1 : 1;
+
+            final byName =
+                aName.toLowerCase().compareTo(bName.toLowerCase());
+            if (byName != 0) return byName;
+
+            final byLabel =
+                a.label.toLowerCase().compareTo(b.label.toLowerCase());
+            if (byLabel != 0) return byLabel;
+
+            return a.route.compareTo(b.route);
+          });
 
           final assignedCount = assignableRoutes
               .where((r) => screensState.screenForRoute(r.route) != null)
