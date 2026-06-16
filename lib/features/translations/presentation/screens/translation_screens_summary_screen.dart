@@ -270,11 +270,17 @@ class _RouteSummaryTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final theme = Theme.of(context);
+    final deviceWidth = MediaQuery.sizeOf(context).width;
 
     final screenName = (screen?.name.trim().isNotEmpty ?? false)
         ? screen!.name.trim()
         : l10n.translationScreensSummaryUnassigned;
     final badgesOn = screen?.badgeEnabled == true;
+    final rightMaxWidth = switch (deviceWidth) {
+      < 380 => 200.0,
+      < 460 => 230.0,
+      _ => 260.0,
+    };
 
     return Card(
       child: Padding(
@@ -295,7 +301,7 @@ class _RouteSummaryTile extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     routePath,
-                    maxLines: 2,
+                    maxLines: 3,
                     overflow: TextOverflow.ellipsis,
                     style: theme.textTheme.bodySmall,
                   ),
@@ -304,14 +310,24 @@ class _RouteSummaryTile extends StatelessWidget {
             ),
             const SizedBox(width: 12),
             ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 240),
+              constraints: BoxConstraints(maxWidth: rightMaxWidth),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  _CompactChip(
-                    label: screenName,
-                    icon: Icons.route_outlined,
+                  SizedBox(
+                    width: double.infinity,
+                    child: _CompactChip(
+                      label: screenName,
+                      icon: Icons.route_outlined,
+                      maxLines: 2,
+                      iconSize: 12,
+                      textStyle: theme.textTheme.labelSmall?.copyWith(
+                        fontSize: 11,
+                        height: 1.1,
+                      ),
+                      expand: true,
+                    ),
                   ),
                   const SizedBox(height: 6),
                   Column(
@@ -376,10 +392,18 @@ class _CompactChip extends StatelessWidget {
   const _CompactChip({
     required this.label,
     required this.icon,
+    this.maxLines = 1,
+    this.iconSize = 14,
+    this.textStyle,
+    this.expand = false,
   });
 
   final String label;
   final IconData icon;
+  final int maxLines;
+  final double iconSize;
+  final TextStyle? textStyle;
+  final bool expand;
 
   @override
   Widget build(BuildContext context) {
@@ -388,6 +412,8 @@ class _CompactChip extends StatelessWidget {
 
     final Color bg = colors.surfaceContainerHighest;
     final Color fg = colors.onSurfaceVariant;
+    final effectiveTextStyle =
+        (textStyle ?? theme.textTheme.labelSmall)?.copyWith(color: fg);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -396,16 +422,16 @@ class _CompactChip extends StatelessWidget {
         borderRadius: BorderRadius.circular(999),
       ),
       child: Row(
-        mainAxisSize: MainAxisSize.min,
+        mainAxisSize: expand ? MainAxisSize.max : MainAxisSize.min,
         children: [
-          Icon(icon, size: 14, color: fg),
+          Icon(icon, size: iconSize, color: fg),
           const SizedBox(width: 6),
           Flexible(
             child: Text(
               label,
-              maxLines: 1,
+              maxLines: maxLines,
               overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.labelSmall?.copyWith(color: fg),
+              style: effectiveTextStyle,
             ),
           ),
         ],
