@@ -25,7 +25,11 @@ class _BrowseGroupsScreenState extends ConsumerState<BrowseGroupsScreen> {
     super.dispose();
   }
 
-  Future<void> _requestJoin(String groupId, String groupName) async {
+  Future<void> _requestJoin(GroupBrowseEntry entry) async {
+    if (entry.status != GroupBrowseStatus.canRequestJoin) return;
+
+    final groupId = entry.group.groupId;
+    final groupName = entry.group.name;
     final message = await showDialog<String>(
       context: context,
       builder: (_) => _JoinRequestDialog(groupName: groupName),
@@ -121,7 +125,7 @@ class _BrowseGroupsScreenState extends ConsumerState<BrowseGroupsScreen> {
                       entry: entry,
                       isBusy: isBusy,
                       onRequestJoin: () =>
-                          _requestJoin(entry.group.groupId, entry.group.name),
+                          _requestJoin(entry),
                       onCancelRequest: () =>
                           _cancelJoinRequest(entry.group.groupId),
                     );

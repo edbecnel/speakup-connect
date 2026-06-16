@@ -44,6 +44,11 @@ Suggested next sprint after Sprint 13 closure: **Sprint 16 — i18n Phase 2** ([
 - [ ] `GroupMembershipRequestsScreen` (Join | Leave tabs) + badges
 - [ ] Membership notifications (removed, leave denied with reason) + help guides
 
+#### 🧹 Fixes (June 16, 2026)
+- [x] Approve join request is **idempotent** when requester is already on roster (stale pending request)
+- [x] Browse list waits for memberships to load before showing **Request to Join** (prevents leader/member false negatives)
+- [x] Requests screen surfaces **real backend error messages** instead of only “Action failed”
+
 #### 🚫 Out of scope
 - Instant self-join without approval
 - Class/homeroom enrollment

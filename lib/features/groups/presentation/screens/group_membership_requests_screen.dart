@@ -60,10 +60,12 @@ class _GroupMembershipRequestsScreenState
           rejectionReason: reason,
         );
     if (mounted) {
+      final error =
+          ref.read(groupMembershipActionsProvider.notifier).lastErrorMessage;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            ok ? l10n.groupsJoinRequestUpdated : l10n.groupsActionFailed,
+            ok ? l10n.groupsJoinRequestUpdated : (error ?? l10n.groupsActionFailed),
           ),
         ),
       );
@@ -95,10 +97,12 @@ class _GroupMembershipRequestsScreenState
           rejectionReason: reason,
         );
     if (mounted) {
+      final error =
+          ref.read(groupMembershipActionsProvider.notifier).lastErrorMessage;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            ok ? l10n.groupsLeaveRequestUpdated : l10n.groupsActionFailed,
+            ok ? l10n.groupsLeaveRequestUpdated : (error ?? l10n.groupsActionFailed),
           ),
         ),
       );

@@ -65,30 +65,42 @@ enum GroupBrowseStatus {
 final groupBrowseEntriesProvider =
     Provider.autoDispose<AsyncValue<List<GroupBrowseEntry>>>((ref) {
   final groupsAsync = ref.watch(orgGroupsProvider);
-  final memberships =
-      ref.watch(myGroupMembershipsProvider).asData?.value ?? const [];
+  final membershipsAsync = ref.watch(myGroupMembershipsProvider);
+
+  if (groupsAsync.isLoading || membershipsAsync.isLoading) {
+    return const AsyncLoading();
+  }
+  if (groupsAsync.hasError) {
+    return AsyncError(groupsAsync.error!, groupsAsync.stackTrace!);
+  }
+  if (membershipsAsync.hasError) {
+    return AsyncError(membershipsAsync.error!, membershipsAsync.stackTrace!);
+  }
+
+  final groups = groupsAsync.requireValue;
+  final memberships = membershipsAsync.requireValue;
   final memberIds = memberships.map((m) => m.group.groupId).toSet();
 
-  return groupsAsync.whenData((groups) {
-    return groups.map((group) {
-      final isMember = memberIds.contains(group.groupId);
-      GroupBrowseStatus status;
-      if (isMember) {
-        status = GroupBrowseStatus.member;
+  final entries = groups.map((group) {
+    final isMember = memberIds.contains(group.groupId);
+    GroupBrowseStatus status;
+    if (isMember) {
+      status = GroupBrowseStatus.member;
+    } else {
+      final joinReq =
+          ref.watch(myJoinRequestForGroupProvider(group.groupId)).asData?.value;
+      if (joinReq?.status.isPending == true) {
+        status = GroupBrowseStatus.joinPending;
+      } else if (group.allowJoinRequests) {
+        status = GroupBrowseStatus.canRequestJoin;
       } else {
-        final joinReq =
-            ref.watch(myJoinRequestForGroupProvider(group.groupId)).asData?.value;
-        if (joinReq?.status.isPending == true) {
-          status = GroupBrowseStatus.joinPending;
-        } else if (group.allowJoinRequests) {
-          status = GroupBrowseStatus.canRequestJoin;
-        } else {
-          status = GroupBrowseStatus.invitationOnly;
-        }
+        status = GroupBrowseStatus.invitationOnly;
       }
-      return GroupBrowseEntry(group: group, status: status);
-    }).toList();
-  });
+    }
+    return GroupBrowseEntry(group: group, status: status);
+  }).toList();
+
+  return AsyncData(entries);
 });
 
 class GroupBrowseEntry {

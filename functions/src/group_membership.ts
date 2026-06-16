@@ -434,13 +434,29 @@ export const reviewGroupJoinRequest = onCall(async (request) => {
   const groupName = (reqData['groupName'] as string | undefined) ?? 'Group';
 
   if (action === 'approve') {
-    await addMemberToGroup(
-      orgId,
-      groupId,
-      userId,
-      (reqData['displayName'] as string | undefined) ?? 'Member',
-      reviewerUid,
-    );
+    let added = false;
+    try {
+      await addMemberToGroup(
+        orgId,
+        groupId,
+        userId,
+        (reqData['displayName'] as string | undefined) ?? 'Member',
+        reviewerUid,
+      );
+      added = true;
+    } catch (err) {
+      if (err instanceof HttpsError && err.code === 'already-exists') {
+        // Stale request (member already added manually / index delay).
+        logger.info('reviewGroupJoinRequest: requester already on roster', {
+          orgId,
+          groupId,
+          userId,
+          reviewerUid,
+        });
+      } else {
+        throw err;
+      }
+    }
     await reqRef.update({
       status: 'approved',
       reviewedBy: reviewerUid,
@@ -448,12 +464,14 @@ export const reviewGroupJoinRequest = onCall(async (request) => {
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
     });
     await adjustPendingCount(orgId, groupId, 'pendingJoinRequestCount', -1);
-    await sendMembershipNotification(orgId, userId, {
-      title: 'Added to group',
-      body: `You were added to ${groupName}.`,
-      groupId,
-      event: 'join_approved',
-    });
+    if (added) {
+      await sendMembershipNotification(orgId, userId, {
+        title: 'Added to group',
+        body: `You were added to ${groupName}.`,
+        groupId,
+        event: 'join_approved',
+      });
+    }
   } else {
     const reason = (rejectionReason ?? '').trim();
     await reqRef.update({
