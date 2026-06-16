@@ -1,0 +1,14 @@
+---
+alwaysApply: true
+---
+
+Firestore guardrails (align with docs/DATABASE_DESIGN.md):
+- Treat `docs/DATABASE_DESIGN.md` as source of truth for schema fields and collection paths.
+- Denormalized orgId fields exist for rules validation; keep them consistent.
+- Append-only histories (e.g., report statusHistory / adminNotes): never delete past entries.
+- Any privileged actions should be server-authoritative (Cloud Functions / Admin SDK), especially:
+  - audit logs
+  - notification fanout / feed copies
+  - actions that bypass owner-only deletes
+- Prefer pagination / bounded reads; avoid unbounded list reads.
+- If changing schema, update docs first, then implement.

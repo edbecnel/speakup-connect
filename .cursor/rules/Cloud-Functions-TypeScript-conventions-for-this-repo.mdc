@@ -1,0 +1,13 @@
+---
+alwaysApply: true
+---
+
+Firebase Cloud Functions (functions/, Node 20, TS strict):
+- Use `firebase-functions/v2` APIs (onCall, Firestore triggers, scheduler) and `HttpsError` for client-facing errors.
+- Validate inputs early; return clear `invalid-argument` / `failed-precondition` / `permission-denied`.
+- Enforce org scoping in every callable/trigger (orgId from token/body + membership verification).
+- Never log secrets or raw tokens. Avoid logging PII unless necessary.
+- Prefer idempotent, transactional “claim” patterns for scheduled/triggered fanout work (deliveries, publishing).
+- Keep batch sizes under Firestore limits (use chunking; e.g., 450 writes/batch, 500 FCM tokens/multicast).
+- Secrets:
+  - Translation AI key must come from env (`TRANSLATION_AI_API_KEY`); never hardcode.

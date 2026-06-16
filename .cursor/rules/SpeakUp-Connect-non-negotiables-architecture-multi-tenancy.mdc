@@ -1,0 +1,16 @@
+---
+alwaysApply: true
+---
+
+Project: SpeakUp Connect (Flutter/Dart + Firebase). Always follow Clean Architecture + feature-based modular structure.
+
+Non-negotiables:
+- Multi-tenancy: ALL data access is scoped to `organizationId`.
+  - Firestore paths must be under `organizations/{organizationId}/...`
+  - Never introduce cross-org queries or global collections for tenant data.
+- Dependency direction: Presentation → Domain ← Data.
+  - Domain must NOT import from Flutter, Riverpod, Firebase, or Data/Presentation.
+- No direct Firebase calls in UI/providers/screens.
+  - Firebase calls live in datasources (data layer) → repository impl → domain repo interface → use case → provider/UI.
+- Features must NOT import other features directly (use shared/core/router/providers patterns).
+- Never hardcode organization-specific names/IDs/branding logic in code.
