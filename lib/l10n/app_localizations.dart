@@ -2679,6 +2679,12 @@ abstract class AppLocalizations {
   /// **'Hide password'**
   String get commonHidePassword;
 
+  /// No description provided for @commonNone.
+  ///
+  /// In en, this message translates to:
+  /// **'(none)'**
+  String get commonNone;
+
   /// No description provided for @commonNotSet.
   ///
   /// In en, this message translates to:
@@ -6378,6 +6384,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Mark all read'**
   String get alertsMarkAllRead;
+
+  /// No description provided for @alertsSelectAlerts.
+  ///
+  /// In en, this message translates to:
+  /// **'Select alerts'**
+  String get alertsSelectAlerts;
+
+  /// No description provided for @alertsClearSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear selected'**
+  String get alertsClearSelected;
+
+  /// No description provided for @alertsSelectedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} selected'**
+  String alertsSelectedCount(int count);
+
+  /// No description provided for @alertsSwipeClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get alertsSwipeClear;
+
+  /// No description provided for @alertsClearedSelectedSnackbar.
+  ///
+  /// In en, this message translates to:
+  /// **'Cleared {cleared, plural, =1{1 alert} other{{cleared} alerts}}'**
+  String alertsClearedSelectedSnackbar(int cleared);
+
+  /// No description provided for @alertsClearedSelectedSnackbarWithSkipped.
+  ///
+  /// In en, this message translates to:
+  /// **'Cleared {cleared, plural, =1{1 alert} other{{cleared} alerts}} · {skipped, plural, =1{1 kept (response required)} other{{skipped} kept (response required)}}'**
+  String alertsClearedSelectedSnackbarWithSkipped(int cleared, int skipped);
 
   /// No description provided for @alertsFailedToLoad.
   ///

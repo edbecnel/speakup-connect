@@ -526,6 +526,60 @@ class BulletinRepositoryImpl implements BulletinRepository {
       final data = Map<String, dynamic>.from(result.data as Map);
       return (data['deletedNotifications'] as num?)?.toInt() ?? 0;
     } on FirebaseFunctionsException catch (e) {
+      // Backwards compatibility:
+      // If deleteBulletin callable is not deployed yet, gracefully fall back
+      // to direct Firestore deletion when safe.
+      if (e.code == 'not-found') {
+        return _deleteBulletinFallback(
+          organizationId: organizationId,
+          bulletinId: bulletinId,
+        );
+      }
+      if (e.code == 'permission-denied') throw const PermissionException();
+      throw DatabaseException(
+        message: e.message ?? 'Failed to delete announcement',
+        code: e.code,
+      );
+    } on FirebaseException catch (e) {
+      if (e.code == 'permission-denied') throw const PermissionException();
+      throw DatabaseException(
+        message: e.message ?? 'Failed to delete announcement',
+        code: e.code,
+      );
+    }
+  }
+
+  Future<int> _deleteBulletinFallback({
+    required String organizationId,
+    required String bulletinId,
+  }) async {
+    try {
+      final docRef = _bulletinsRef(organizationId).doc(bulletinId);
+      final snap = await docRef.get();
+
+      if (!snap.exists || snap.data() == null) {
+        throw const DatabaseException(
+          message: 'Announcement not found.',
+          code: 'not-found',
+        );
+      }
+
+      final data = snap.data()!;
+      final deliveredAt = data['deliveredAt'];
+
+      // If already delivered, only server-side callable can remove all feed copies.
+      if (deliveredAt != null) {
+        throw const DatabaseException(
+          message:
+              'This announcement was already delivered. '
+              'Deploy the latest Cloud Functions to delete it and remove feed copies.',
+          code: 'failed-precondition',
+        );
+      }
+
+      await docRef.delete();
+      return 0;
+    } on FirebaseException catch (e) {
       if (e.code == 'permission-denied') throw const PermissionException();
       throw DatabaseException(
         message: e.message ?? 'Failed to delete announcement',

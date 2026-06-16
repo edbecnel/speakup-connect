@@ -196,6 +196,7 @@ class ComposeAnnouncementNotifier extends Notifier<ComposeAnnouncementState> {
   void setSourceGroup({required String id, required String label}) {
     state = state.copyWith(sourceGroupId: id, sourceGroupLabel: label);
   }
+  void clearSourceGroup() => state = state.copyWith(clearSourceGroup: true);
 
   void setPinned(bool value) => state = state.copyWith(isPinned: value);
   void setSchedule(DateTime? when) => state = when == null

@@ -868,6 +868,148 @@ export const dismissNotification = onCall(async (request) => {
   return { ok: true };
 });
 
+// ── Callable: dismissNotifications (bulk) ──────────────────────────────────────
+
+/**
+ * Archives and removes multiple notifications from the caller's feed.
+ *
+ * Mirrors the response-required skip logic used by clearNotificationFeed so a
+ * bulk operation returns a summary rather than failing midway.
+ *
+ * Returns: { ok: true, cleared: number, skipped: number, notFound: number }
+ */
+export const dismissNotifications = onCall(async (request) => {
+  if (!request.auth) {
+    throw new HttpsError('unauthenticated', 'Sign in required.');
+  }
+
+  const { orgId, notificationIds } = (request.data ?? {}) as {
+    orgId?: string;
+    notificationIds?: unknown;
+  };
+  if (!orgId) {
+    throw new HttpsError('invalid-argument', 'orgId is required.');
+  }
+
+  if (!Array.isArray(notificationIds)) {
+    throw new HttpsError(
+      'invalid-argument',
+      'notificationIds must be an array of strings.',
+    );
+  }
+
+  const ids = [
+    ...new Set(
+      notificationIds
+        .filter((v): v is string => typeof v === 'string')
+        .map((s) => s.trim())
+        .filter((s) => Boolean(s)),
+    ),
+  ];
+  if (ids.length === 0) {
+    throw new HttpsError(
+      'invalid-argument',
+      'notificationIds must contain at least one id.',
+    );
+  }
+  if (ids.length > 200) {
+    throw new HttpsError(
+      'invalid-argument',
+      'notificationIds must contain at most 200 ids per request.',
+    );
+  }
+
+  const uid = request.auth.uid;
+  const feedRef = db
+    .collection('organizations').doc(orgId)
+    .collection('users').doc(uid)
+    .collection('notifications');
+
+  const responseRequiredCache = new Map<string, boolean>();
+  const respondedCache = new Map<string, boolean>();
+
+  let cleared = 0;
+  let skipped = 0;
+  let notFound = 0;
+
+  // ≤200 ids; each cleared item is 2 write ops (history + delete) → ≤400 ops.
+  let batch = db.batch();
+  let writesInBatch = 0;
+
+  for (const notificationId of ids) {
+    const ref = feedRef.doc(notificationId);
+    const snap = await ref.get();
+    if (!snap.exists) {
+      notFound++;
+      continue;
+    }
+
+    const data = (snap.data() ?? {}) as Record<string, unknown>;
+    const payload =
+      (data['data'] as Record<string, unknown> | undefined) ?? {};
+    const reminderId = payload['reminderId'] as string | undefined;
+
+    let responseRequired =
+      payload['responseRequired'] === true;
+    if (!responseRequired && reminderId) {
+      const cached = responseRequiredCache.get(reminderId);
+      if (cached != null) {
+        responseRequired = cached;
+      } else {
+        const required = await isResponseRequiredForReminder(orgId, reminderId);
+        responseRequiredCache.set(reminderId, required);
+        responseRequired = required;
+      }
+    }
+
+    if (responseRequired && reminderId) {
+      const cached = respondedCache.get(reminderId);
+      const responded =
+        cached ?? await userHasReminderResponse(orgId, reminderId, uid);
+      respondedCache.set(reminderId, responded);
+      if (!responded) {
+        skipped++;
+        continue;
+      }
+    }
+
+    const historyRef = db
+      .collection('organizations').doc(orgId)
+      .collection('notification_history')
+      .doc();
+    batch.set(historyRef, {
+      organizationId: orgId,
+      sourceType: 'notification',
+      sourceId: notificationId,
+      reminderId: (payload['reminderId'] as string | undefined) ?? null,
+      userId: uid,
+      title: (data['title'] as string | undefined) ?? '',
+      body: (data['body'] as string | undefined) ?? '',
+      type: (data['type'] as string | undefined) ?? 'general',
+      expiresAt: data['expiresAt'] ?? null,
+      removedAt: admin.firestore.FieldValue.serverTimestamp(),
+      removalReason: 'user_dismissed',
+      removedBy: uid,
+    });
+    batch.delete(ref);
+    writesInBatch += 2;
+    cleared++;
+
+    // Defensive: keep well under Firestore's 500-op batch limit.
+    if (writesInBatch >= 400) {
+      await batch.commit();
+      batch = db.batch();
+      writesInBatch = 0;
+    }
+  }
+
+  if (writesInBatch > 0) {
+    await batch.commit();
+  }
+
+  return { ok: true, cleared, skipped, notFound };
+});
+
 // ── Callable: clearNotificationFeed ───────────────────────────────────────────
 
 /**

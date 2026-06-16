@@ -1500,6 +1500,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get commonHidePassword => 'Hide password';
 
   @override
+  String get commonNone => '(none)';
+
+  @override
   String get commonNotSet => 'Not set';
 
   @override
@@ -3702,6 +3705,48 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get alertsMarkAllRead => 'Mark all read';
+
+  @override
+  String get alertsSelectAlerts => 'Select alerts';
+
+  @override
+  String get alertsClearSelected => 'Clear selected';
+
+  @override
+  String alertsSelectedCount(int count) {
+    return '$count selected';
+  }
+
+  @override
+  String get alertsSwipeClear => 'Clear';
+
+  @override
+  String alertsClearedSelectedSnackbar(int cleared) {
+    String _temp0 = intl.Intl.pluralLogic(
+      cleared,
+      locale: localeName,
+      other: '$cleared alerts',
+      one: '1 alert',
+    );
+    return 'Cleared $_temp0';
+  }
+
+  @override
+  String alertsClearedSelectedSnackbarWithSkipped(int cleared, int skipped) {
+    String _temp0 = intl.Intl.pluralLogic(
+      cleared,
+      locale: localeName,
+      other: '$cleared alerts',
+      one: '1 alert',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      skipped,
+      locale: localeName,
+      other: '$skipped kept (response required)',
+      one: '1 kept (response required)',
+    );
+    return 'Cleared $_temp0 · $_temp1';
+  }
 
   @override
   String alertsFailedToLoad(String error) {

@@ -195,6 +195,7 @@
   "commonMessage": "Mensahe",
   "commonNameRequired": "Kinahanglan ang ngalan",
   "commonNext": "Sunod",
+  "commonNone": "(none)",
   "commonNoGradeAssigned": "Walay grado nga gihatag",
   "commonNoReasonProvided": "Walay gihatag nga rason",
   "commonNotRegistered": "Wala magparehistro",

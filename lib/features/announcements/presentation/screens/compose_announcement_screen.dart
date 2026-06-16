@@ -33,6 +33,7 @@ class _ComposeAnnouncementScreenState
   final _titleCtrl = TextEditingController();
   final _bodyCtrl = TextEditingController();
   var _didPresetGroup = false;
+  var _scheduledPreset = false;
   var _pickingImage = false;
   String? _previewImagePath;
 
@@ -54,22 +55,31 @@ class _ComposeAnnouncementScreenState
     final notifier = ref.read(composeAnnouncementProvider.notifier);
     final submitState = ref.watch(submitAnnouncementProvider);
     final ledGroups = ref.watch(ledGroupMembershipsProvider);
+    final allMembershipsAsync = ref.watch(myGroupMembershipsProvider);
+    final allMemberships =
+        allMembershipsAsync.asData?.value ?? const <MyGroupMembership>[];
 
-    if (!_didPresetGroup) {
+    if (!_scheduledPreset) {
+      _scheduledPreset = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
-        if (widget.initialGroupId != null) {
-          _presetGroup(widget.initialGroupId!, ledGroups);
-        } else if (leaderOnly &&
-            form.sourceGroupId == null &&
-            ledGroups.isNotEmpty) {
-          final m = ledGroups.first;
-          ref.read(composeAnnouncementProvider.notifier).setSourceGroup(
-                id: m.group.groupId,
-                label: m.group.name,
-              );
-        }
-        _didPresetGroup = true;
+        _tryPresetGroup();
+      });
+    }
+
+    if (leaderOnly) {
+      ref.listen(myGroupMembershipsProvider, (prev, next) {
+        if (_didPresetGroup || next.isLoading) return;
+        _tryPresetGroup();
+      });
+      ref.listen(ledGroupMembershipsProvider, (prev, next) {
+        if (_didPresetGroup) return;
+        _tryPresetGroup();
+      });
+    } else if (widget.initialGroupId != null) {
+      ref.listen(myGroupMembershipsProvider, (prev, next) {
+        if (_didPresetGroup || next.isLoading) return;
+        _tryPresetGroup();
       });
     }
 
@@ -152,15 +162,16 @@ class _ComposeAnnouncementScreenState
               ),
             ],
             const SizedBox(height: 20),
-            if (leaderOnly || ledGroups.isNotEmpty) ...[
+            if (leaderOnly || allMemberships.isNotEmpty) ...[
               _GroupPicker(
-                memberships: ledGroups,
+                memberships: leaderOnly ? ledGroups : allMemberships,
                 selectedId: form.sourceGroupId,
                 required: leaderOnly,
                 onSelected: (m) => notifier.setSourceGroup(
                   id: m.group.groupId,
                   label: m.group.name,
                 ),
+                onCleared: notifier.clearSourceGroup,
               ),
               const SizedBox(height: 16),
             ],
@@ -242,14 +253,46 @@ class _ComposeAnnouncementScreenState
     );
   }
 
-  void _presetGroup(String groupId, List<MyGroupMembership> led) {
-    final match = led.where((m) => m.group.groupId == groupId).firstOrNull;
-    if (match != null) {
-      ref.read(composeAnnouncementProvider.notifier).setSourceGroup(
-            id: match.group.groupId,
-            label: match.group.name,
-          );
+  void _tryPresetGroup() {
+    if (_didPresetGroup) return;
+
+    final leaderOnly = ref.read(isGroupLeaderOnlyAnnouncementComposerProvider);
+    final notifier = ref.read(composeAnnouncementProvider.notifier);
+    final form = ref.read(composeAnnouncementProvider);
+    final ledGroups = ref.read(ledGroupMembershipsProvider);
+    final membershipsAsync = ref.read(myGroupMembershipsProvider);
+    final allMemberships = membershipsAsync.asData?.value;
+
+    final initialGroupId = widget.initialGroupId;
+    if (initialGroupId != null) {
+      // Wait until group memberships are loaded before finalizing the preset.
+      if (membershipsAsync.isLoading) return;
+
+      final source = leaderOnly
+          ? ledGroups
+          : (allMemberships ?? const <MyGroupMembership>[]);
+      final match =
+          source.where((m) => m.group.groupId == initialGroupId).firstOrNull;
+      if (match != null) {
+        notifier.setSourceGroup(
+          id: match.group.groupId,
+          label: match.group.name,
+        );
+      }
+      _didPresetGroup = true;
+      return;
     }
+
+    if (leaderOnly && form.sourceGroupId == null) {
+      if (ledGroups.isEmpty) return;
+      final m = ledGroups.first;
+      notifier.setSourceGroup(
+        id: m.group.groupId,
+        label: m.group.name,
+      );
+    }
+
+    _didPresetGroup = true;
   }
 
   Future<void> _pickImage(ImageSource source) async {
@@ -292,12 +335,14 @@ class _GroupPicker extends StatelessWidget {
     required this.selectedId,
     required this.required,
     required this.onSelected,
+    required this.onCleared,
   });
 
   final List<MyGroupMembership> memberships;
   final String? selectedId;
   final bool required;
   final void Function(MyGroupMembership) onSelected;
+  final VoidCallback onCleared;
 
   @override
   Widget build(BuildContext context) {
@@ -305,6 +350,7 @@ class _GroupPicker extends StatelessWidget {
     final l10n = context.l10n;
 
     if (memberships.isEmpty) {
+      if (!required) return const SizedBox.shrink();
       return Text(
         l10n.composeAnnouncementGroupRequired,
         style: theme.textTheme.bodySmall?.copyWith(
@@ -313,31 +359,49 @@ class _GroupPicker extends StatelessWidget {
       );
     }
 
-    return DropdownButtonFormField<String>(
+    final selectedValue = (selectedId != null &&
+            memberships.any((m) => m.group.groupId == selectedId))
+        ? selectedId
+        : null;
+
+    final items = <DropdownMenuItem<String?>>[
+      if (!required)
+        DropdownMenuItem<String?>(
+          value: null,
+          child: Text(l10n.commonNone),
+        ),
+      ...memberships.map(
+        (m) => DropdownMenuItem<String?>(
+          value: m.group.groupId,
+          child: Text(
+            m.group.name,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ),
+    ];
+
+    return DropdownButtonFormField<String?>(
       isExpanded: true,
-      value: selectedId ?? memberships.first.group.groupId,
+      value: required
+          ? (selectedValue ?? memberships.first.group.groupId)
+          : selectedValue,
       decoration: InputDecoration(
         labelText: required
             ? l10n.composeAnnouncementOnBehalfOf
             : l10n.composeAnnouncementGroupOptional,
         prefixIcon: const Icon(Icons.groups_outlined),
       ),
-      items: memberships
-          .map(
-            (m) => DropdownMenuItem(
-              value: m.group.groupId,
-              child: Text(
-                m.group.name,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          )
-          .toList(),
       onChanged: (id) {
+        if (id == null) {
+          if (!required) onCleared();
+          return;
+        }
         final match =
             memberships.where((m) => m.group.groupId == id).firstOrNull;
         if (match != null) onSelected(match);
       },
+      items: items,
     );
   }
 }

@@ -1,21 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:go_router/go_router.dart';
 import 'package:speakup_connect/core/constants/route_constants.dart';
 import 'package:speakup_connect/core/l10n/app_localizations_extension.dart';
 import 'package:speakup_connect/core/permissions/providers/permission_provider.dart';
-import 'package:speakup_connect/shared/widgets/notification_badge_icon.dart';
+import 'package:speakup_connect/features/announcements/presentation/providers/announcement_provider.dart';
+import 'package:speakup_connect/features/announcements/presentation/screens/announcement_detail_screen.dart';
+import 'package:speakup_connect/features/announcements/presentation/widgets/edit_announcement_dialog.dart';
 import 'package:speakup_connect/features/groups/presentation/providers/group_provider.dart';
 import 'package:speakup_connect/features/notifications/domain/entities/app_notification_entity.dart';
+import 'package:speakup_connect/features/notifications/presentation/providers/alerts_selection_provider.dart';
 import 'package:speakup_connect/features/notifications/presentation/providers/notification_history_provider.dart';
 import 'package:speakup_connect/features/notifications/presentation/providers/notification_provider.dart';
 import 'package:speakup_connect/features/notifications/presentation/screens/notification_detail_screen.dart';
-import 'package:speakup_connect/features/reminders/presentation/screens/broadcast_detail_screen.dart';
-import 'package:speakup_connect/features/announcements/presentation/screens/announcement_detail_screen.dart';
-import 'package:speakup_connect/features/announcements/presentation/providers/announcement_provider.dart';
 import 'package:speakup_connect/features/reminders/presentation/providers/reminder_provider.dart';
-import 'package:speakup_connect/features/announcements/presentation/widgets/edit_announcement_dialog.dart';
+import 'package:speakup_connect/features/reminders/presentation/screens/broadcast_detail_screen.dart';
 import 'package:speakup_connect/features/reminders/presentation/widgets/edit_reminder_dialog.dart';
+import 'package:speakup_connect/shared/widgets/notification_badge_icon.dart';
 
 /// Alerts — the in-app notification feed. Lists reminders and other
 /// notifications delivered to the current user, with read/unread state.
@@ -33,6 +35,10 @@ class AlertsScreen extends ConsumerWidget {
     final pendingApprovalCount = ref.watch(pendingReminderCountProvider);
     final canViewHistory = ref.watch(canViewNotificationHistoryProvider);
     final count = notificationsAsync.asData?.value.length ?? 0;
+    final selection = ref.watch(alertsSelectionProvider);
+    final isSelecting = selection.isSelecting;
+    final selectedCount = selection.selectedIds.length;
+    final actionsLoading = ref.watch(notificationActionsProvider).isLoading;
 
     ref.listen(updateReminderProvider, (prev, next) {
       if (prev?.isLoading == true && !next.isLoading && context.mounted) {
@@ -128,94 +134,158 @@ class AlertsScreen extends ConsumerWidget {
       }
     });
 
-    return Scaffold(
-      appBar: AppBar(
-        leading: BackButton(
-          onPressed: () =>
-              context.canPop() ? context.pop() : context.go(Routes.home),
-        ),
-        title: Text(l10n.alertsTitle),
-        actions: [
-          if (canViewHistory)
-            IconButton(
-              tooltip: l10n.notificationHistoryTitle,
-              icon: const Icon(Icons.history),
-              onPressed: () => context.push(Routes.notificationHistory),
-            ),
-          if (canBroadcast)
-            IconButton(
-              tooltip: leaderOnly ? 'Sent group alerts' : 'My broadcasts',
-              icon: const Icon(Icons.outbox_outlined),
-              onPressed: () => context.push(Routes.myBroadcasts),
-            ),
-          if (canApprove)
-            IconButton(
-              tooltip: l10n.alertsReminderApprovalsTooltip,
-              onPressed: () => context.push(Routes.reminderApprovals),
-              icon: NotificationBadgeIcon(
-                icon: Icons.fact_check_outlined,
-                unreadCount: pendingApprovalCount,
+    return PopScope(
+      canPop: !isSelecting,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+        if (!isSelecting) return;
+        ref.read(alertsSelectionProvider.notifier).exitSelection();
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          leading: isSelecting
+              ? IconButton(
+                  tooltip: l10n.commonCancel,
+                  icon: const Icon(Icons.close),
+                  onPressed: () =>
+                      ref.read(alertsSelectionProvider.notifier).exitSelection(),
+                )
+              : BackButton(
+                  onPressed: () =>
+                      context.canPop() ? context.pop() : context.go(Routes.home),
+                ),
+          title: Text(
+            isSelecting ? l10n.alertsSelectedCount(selectedCount) : l10n.alertsTitle,
+          ),
+          actions: [
+            if (isSelecting) ...[
+              IconButton(
+                tooltip: l10n.alertsClearSelected,
+                onPressed: selectedCount == 0 || actionsLoading
+                    ? null
+                    : () async {
+                        final messenger = ScaffoldMessenger.of(context);
+                        messenger.hideCurrentSnackBar();
+                        try {
+                          final result = await ref
+                              .read(notificationActionsProvider.notifier)
+                              .clearSelected(selection.selectedIds);
+                          ref
+                              .read(alertsSelectionProvider.notifier)
+                              .exitSelection();
+                          final message = result.skipped > 0
+                              ? l10n.alertsClearedSelectedSnackbarWithSkipped(
+                                  result.cleared,
+                                  result.skipped,
+                                )
+                              : l10n.alertsClearedSelectedSnackbar(result.cleared);
+                          messenger.showSnackBar(SnackBar(content: Text(message)));
+                        } catch (e) {
+                          messenger.showSnackBar(
+                            SnackBar(content: Text(e.toString())),
+                          );
+                        }
+                      },
+                icon: const Icon(Icons.delete_sweep_outlined),
               ),
-            ),
-          if (count > 0)
-            PopupMenuButton<String>(
-              tooltip: l10n.alertsMoreTooltip,
-              onSelected: (value) {
-                final actions = ref.read(notificationActionsProvider.notifier);
-                if (value == 'read') {
-                  actions.markAllRead();
-                } else if (value == 'clear') {
-                  _confirmClearAll(context, ref);
-                }
-              },
-              itemBuilder: (_) => [
-                if (unread > 0)
-                  PopupMenuItem(
-                    value: 'read',
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(Icons.done_all),
-                        const SizedBox(width: 12),
-                        Text(l10n.alertsMarkAllRead),
-                      ],
-                    ),
-                  ),
-                PopupMenuItem(
-                  value: 'clear',
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.delete_sweep_outlined),
-                      const SizedBox(width: 12),
-                      Text(l10n.commonClearAll),
-                    ],
+            ] else ...[
+              if (canViewHistory)
+                IconButton(
+                  tooltip: l10n.notificationHistoryTitle,
+                  icon: const Icon(Icons.history),
+                  onPressed: () => context.push(Routes.notificationHistory),
+                ),
+              if (canBroadcast)
+                IconButton(
+                  tooltip: leaderOnly ? 'Sent group alerts' : 'My broadcasts',
+                  icon: const Icon(Icons.outbox_outlined),
+                  onPressed: () => context.push(Routes.myBroadcasts),
+                ),
+              if (canApprove)
+                IconButton(
+                  tooltip: l10n.alertsReminderApprovalsTooltip,
+                  onPressed: () => context.push(Routes.reminderApprovals),
+                  icon: NotificationBadgeIcon(
+                    icon: Icons.fact_check_outlined,
+                    unreadCount: pendingApprovalCount,
                   ),
                 ),
-              ],
-            ),
-        ],
-      ),
-      floatingActionButton: canBroadcast
-          ? FloatingActionButton.extended(
-              onPressed: () => context.push(Routes.composeReminder),
-              icon: const Icon(Icons.campaign_outlined),
-              label: Text(leaderOnly ? 'Group Alert' : 'Reminder'),
-            )
-          : null,
-      body: notificationsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) =>
-            Center(child: Text(l10n.alertsFailedToLoad('$e'))),
-        data: (items) {
-          if (items.isEmpty) return const _EmptyFeed();
-          return ListView.separated(
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            itemCount: items.length,
-            separatorBuilder: (_, __) => const Divider(height: 1),
-            itemBuilder: (_, i) => _NotificationRow(notification: items[i]),
-          );
-        },
+              if (count > 0)
+                PopupMenuButton<String>(
+                  tooltip: l10n.alertsMoreTooltip,
+                  onSelected: (value) {
+                    final actions =
+                        ref.read(notificationActionsProvider.notifier);
+                    if (value == 'read') {
+                      actions.markAllRead();
+                    } else if (value == 'clear') {
+                      _confirmClearAll(context, ref);
+                    } else if (value == 'select') {
+                      ref.read(alertsSelectionProvider.notifier).enterSelection();
+                    }
+                  },
+                  itemBuilder: (_) => [
+                    if (unread > 0)
+                      PopupMenuItem(
+                        value: 'read',
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.done_all),
+                            const SizedBox(width: 12),
+                            Text(l10n.alertsMarkAllRead),
+                          ],
+                        ),
+                      ),
+                    PopupMenuItem(
+                      value: 'select',
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.checklist_outlined),
+                          const SizedBox(width: 12),
+                          Text(l10n.alertsSelectAlerts),
+                        ],
+                      ),
+                    ),
+                    PopupMenuItem(
+                      value: 'clear',
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.delete_sweep_outlined),
+                          const SizedBox(width: 12),
+                          Text(l10n.commonClearAll),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+            ],
+          ],
+        ),
+        floatingActionButton: isSelecting
+            ? null
+            : canBroadcast
+                ? FloatingActionButton.extended(
+                    onPressed: () => context.push(Routes.composeReminder),
+                    icon: const Icon(Icons.campaign_outlined),
+                    label: Text(leaderOnly ? 'Group Alert' : 'Reminder'),
+                  )
+                : null,
+        body: notificationsAsync.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (e, _) => Center(child: Text(l10n.alertsFailedToLoad('$e'))),
+          data: (items) {
+            if (items.isEmpty) return const _EmptyFeed();
+            return ListView.separated(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              itemCount: items.length,
+              separatorBuilder: (_, __) => const Divider(height: 1),
+              itemBuilder: (_, i) => _NotificationRow(notification: items[i]),
+            );
+          },
+        ),
       ),
     );
   }
@@ -256,6 +326,8 @@ class _NotificationRow extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
+    final selection = ref.watch(alertsSelectionProvider);
+    final isSelecting = selection.isSelecting;
     final reminderId = notification.type == 'reminder'
         ? reminderIdFromNotificationData(notification.data)
         : null;
@@ -276,6 +348,17 @@ class _NotificationRow extends ConsumerWidget {
         ref.watch(deleteAnnouncementProvider).isLoading ||
         ref.watch(updateAnnouncementProvider).isLoading;
     final attention = ref.watch(notificationAttentionProvider(notification));
+    final isSelectable = !isSynthetic && attention.canDismiss;
+    final isSelected = selection.selectedIds.contains(notification.id);
+
+    void manageDelete() => _deleteNotification(
+          context,
+          ref,
+          reminderId: reminderId,
+          bulletinId: bulletinId,
+          canManage: canManage,
+          canDismiss: attention.canDismiss,
+        );
 
     final tile = _NotificationTile(
       notification: notification,
@@ -283,78 +366,118 @@ class _NotificationRow extends ConsumerWidget {
       busy: busy,
       needsAttention: attention.needsAttention,
       responsePending: attention.responsePending,
-      onTap: () => _openNotificationDetail(context, ref, notification),
+      isSelecting: isSelecting,
+      isSelected: isSelected,
+      isSelectable: isSelectable,
+      onToggleSelected: isSelecting && isSelectable
+          ? () => ref
+              .read(alertsSelectionProvider.notifier)
+              .toggle(notification.id)
+          : null,
+      onTap: () {
+        if (!isSelecting) {
+          _openNotificationDetail(context, ref, notification);
+          return;
+        }
+        if (isSelectable) {
+          ref.read(alertsSelectionProvider.notifier).toggle(notification.id);
+          return;
+        }
+        if (!attention.canDismiss) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(l10n.alertsSubmitBeforeDismiss)),
+          );
+        }
+      },
       onEdit: reminderId != null && canManage
           ? () => _editBroadcast(context, ref, reminderId)
           : bulletinId != null && canManage
               ? () => _editAnnouncement(context, ref, bulletinId)
               : null,
-      onDelete: () => _deleteNotification(
-        context,
-        ref,
-        reminderId: reminderId,
-        bulletinId: bulletinId,
-        canManage: canManage,
-        canDismiss: attention.canDismiss,
-      ),
+      onDelete: manageDelete,
     );
 
+    if (isSelecting) {
+      return tile;
+    }
+
+    Future<void> clearFromMyFeed() async {
+      final messenger = ScaffoldMessenger.of(context);
+      messenger.hideCurrentSnackBar();
+      if (isSynthetic) return;
+      if (!attention.canDismiss) {
+        messenger.showSnackBar(
+          SnackBar(content: Text(l10n.alertsSubmitBeforeDismiss)),
+        );
+        return;
+      }
+      try {
+        final ok = await ref
+            .read(notificationActionsProvider.notifier)
+            .delete(notification.id);
+        if (ok) {
+          messenger.showSnackBar(
+            SnackBar(content: Text(l10n.alertsAlertDismissed)),
+          );
+        }
+      } catch (e) {
+        messenger.showSnackBar(SnackBar(content: Text(e.toString())));
+      }
+    }
+
     if (canManage && (reminderId != null || bulletinId != null)) {
-      return Dismissible(
+      final theme = Theme.of(context);
+      final endLabel = l10n.commonDelete;
+      return Slidable(
         key: ValueKey(notification.id),
-        direction: DismissDirection.endToStart,
-        background: Container(
-          alignment: Alignment.centerRight,
-          color: Theme.of(context).colorScheme.errorContainer,
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Icon(
-            Icons.delete_outline_rounded,
-            color: Theme.of(context).colorScheme.onErrorContainer,
-          ),
+        startActionPane: isSynthetic
+            ? null
+            : ActionPane(
+                motion: const DrawerMotion(),
+                children: [
+                  SlidableAction(
+                    onPressed: (_) => clearFromMyFeed(),
+                    backgroundColor: theme.colorScheme.errorContainer,
+                    foregroundColor: theme.colorScheme.onErrorContainer,
+                    icon: Icons.delete_outline_rounded,
+                    label: l10n.alertsSwipeClear,
+                  ),
+                ],
+              ),
+        endActionPane: ActionPane(
+          motion: const DrawerMotion(),
+          children: [
+            SlidableAction(
+              onPressed: (_) => manageDelete(),
+              backgroundColor: theme.colorScheme.errorContainer,
+              foregroundColor: theme.colorScheme.onErrorContainer,
+              icon: Icons.delete_outline_rounded,
+              label: endLabel,
+            ),
+          ],
         ),
-        onDismissed: (_) {
-          if (reminderId != null) {
-            _recallBroadcast(ref, reminderId);
-          } else if (bulletinId != null) {
-            _deleteAnnouncement(ref, bulletinId);
-          }
-        },
         child: tile,
       );
     }
 
     if (!isSynthetic) {
-      return Dismissible(
+      final theme = Theme.of(context);
+      return Slidable(
         key: ValueKey(notification.id),
-        direction: DismissDirection.endToStart,
-        background: Container(
-          alignment: Alignment.centerRight,
-          color: Theme.of(context).colorScheme.errorContainer,
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Icon(
-            Icons.delete_outline_rounded,
-            color: Theme.of(context).colorScheme.onErrorContainer,
-          ),
+        startActionPane: ActionPane(
+          motion: const DrawerMotion(),
+          children: [
+            SlidableAction(
+              onPressed: (_) async {
+                await clearFromMyFeed();
+              },
+              backgroundColor: theme.colorScheme.errorContainer,
+              foregroundColor: theme.colorScheme.onErrorContainer,
+              icon: Icons.delete_outline_rounded,
+              label: l10n.alertsSwipeClear,
+            ),
+          ],
         ),
-        confirmDismiss: (_) async {
-          if (!attention.canDismiss) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(l10n.alertsSubmitBeforeDismiss),
-              ),
-            );
-            return false;
-          }
-          return true;
-        },
-        onDismissed: (_) {
-          ref.read(notificationActionsProvider.notifier).delete(notification.id);
-          ScaffoldMessenger.of(context)
-            ..hideCurrentSnackBar()
-            ..showSnackBar(
-              SnackBar(content: Text(l10n.alertsAlertDismissed)),
-            );
-        },
         child: tile,
       );
     }
@@ -606,8 +729,12 @@ class _NotificationTile extends ConsumerWidget {
     required this.busy,
     required this.needsAttention,
     required this.responsePending,
+    required this.isSelecting,
+    required this.isSelected,
+    required this.isSelectable,
     required this.onTap,
     required this.onDelete,
+    this.onToggleSelected,
     this.onEdit,
   });
 
@@ -616,8 +743,12 @@ class _NotificationTile extends ConsumerWidget {
   final bool busy;
   final bool needsAttention;
   final bool responsePending;
+  final bool isSelecting;
+  final bool isSelected;
+  final bool isSelectable;
   final VoidCallback onTap;
   final VoidCallback onDelete;
+  final VoidCallback? onToggleSelected;
   final VoidCallback? onEdit;
 
   @override
@@ -675,59 +806,81 @@ class _NotificationTile extends ConsumerWidget {
         ],
       ),
       isThreeLine: true,
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (isUnread)
-            Container(
-              width: 10,
-              height: 10,
-              margin: const EdgeInsets.only(right: 4),
-              decoration: BoxDecoration(
-                color: responsePending
-                    ? theme.colorScheme.error
-                    : theme.colorScheme.primary,
-                shape: BoxShape.circle,
-              ),
-            ),
-          if (canManage)
-            PopupMenuButton<String>(
-              enabled: !busy,
-              onSelected: (value) {
-                if (value == 'edit') {
-                  onEdit?.call();
-                } else if (value == 'delete') {
-                  onDelete();
-                }
-              },
-              itemBuilder: (_) => [
-                if (onEdit != null)
-                  PopupMenuItem(
-                    value: 'edit',
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(Icons.edit_outlined),
-                        const SizedBox(width: 12),
-                        Text(l10n.commonEdit),
-                      ],
+      trailing: isSelecting
+          ? Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (isUnread)
+                  Container(
+                    width: 10,
+                    height: 10,
+                    margin: const EdgeInsets.only(right: 4),
+                    decoration: BoxDecoration(
+                      color: responsePending
+                          ? theme.colorScheme.error
+                          : theme.colorScheme.primary,
+                      shape: BoxShape.circle,
                     ),
                   ),
-                PopupMenuItem(
-                  value: 'delete',
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.delete_outline),
-                      const SizedBox(width: 12),
-                      Text(l10n.commonDelete),
-                    ],
-                  ),
+                Checkbox(
+                  value: isSelected,
+                  onChanged: isSelectable ? (_) => onToggleSelected?.call() : null,
                 ),
               ],
+            )
+          : Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (isUnread)
+                  Container(
+                    width: 10,
+                    height: 10,
+                    margin: const EdgeInsets.only(right: 4),
+                    decoration: BoxDecoration(
+                      color: responsePending
+                          ? theme.colorScheme.error
+                          : theme.colorScheme.primary,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                if (canManage)
+                  PopupMenuButton<String>(
+                    enabled: !busy,
+                    onSelected: (value) {
+                      if (value == 'edit') {
+                        onEdit?.call();
+                      } else if (value == 'delete') {
+                        onDelete();
+                      }
+                    },
+                    itemBuilder: (_) => [
+                      if (onEdit != null)
+                        PopupMenuItem(
+                          value: 'edit',
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.edit_outlined),
+                              const SizedBox(width: 12),
+                              Text(l10n.commonEdit),
+                            ],
+                          ),
+                        ),
+                      PopupMenuItem(
+                        value: 'delete',
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.delete_outline),
+                            const SizedBox(width: 12),
+                            Text(l10n.commonDelete),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+              ],
             ),
-        ],
-      ),
     );
   }
 }

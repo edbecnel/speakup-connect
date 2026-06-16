@@ -163,6 +163,31 @@ class NotificationActions extends Notifier<AsyncValue<void>> {
       state = AsyncError(e, st);
     }
   }
+
+  Future<({int cleared, int skipped, int notFound})> clearSelected(
+    Set<String> notificationIds,
+  ) async {
+    final user = ref.read(currentUserProvider);
+    if (user == null) return (cleared: 0, skipped: 0, notFound: 0);
+    final ids = notificationIds
+        .where((id) => id.isNotEmpty && !id.startsWith('broadcast-'))
+        .toList(growable: false);
+    if (ids.isEmpty) return (cleared: 0, skipped: 0, notFound: 0);
+
+    state = const AsyncLoading();
+    try {
+      final result = await ref.read(notificationRepositoryProvider).clearSelected(
+            organizationId: AppConfig.defaultOrganizationId,
+            userId: user.uid,
+            notificationIds: ids,
+          );
+      state = const AsyncData(null);
+      return result;
+    } catch (e, st) {
+      state = AsyncError(e, st);
+      rethrow;
+    }
+  }
 }
 
 final notificationActionsProvider =

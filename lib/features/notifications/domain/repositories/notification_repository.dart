@@ -40,4 +40,13 @@ abstract class NotificationRepository {
     required String organizationId,
     required String userId,
   });
+
+  /// Permanently removes a set of notifications from the user's feed.
+  ///
+  /// Returns a summary of what was cleared vs skipped.
+  Future<({int cleared, int skipped, int notFound})> clearSelected({
+    required String organizationId,
+    required String userId,
+    required List<String> notificationIds,
+  });
 }

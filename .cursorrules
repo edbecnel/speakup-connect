@@ -1,0 +1,32 @@
+# Agent Operational Guardrails (HITL Policy)
+
+## Terminal and Execution Loop Limits
+1. If a terminal command, test execution, or build step returns an error, you are permitted exactly ONE (1) autonomous attempt to fix the issue.
+2. If your first self-healing code adjustment still results in a terminal error, or generates a new error, you must **STOP ALL EXECUTION IMMEDIATELY**.
+3. Do not attempt a second autonomous fix. Do not run any further terminal commands.
+
+## Interruption Protocol
+When the loop limit is reached, output a summary in the chat window using this exact format:
+- **Status**: 🛑 Paused (HITL Required)
+- **Error Encountered**: [Paste the brief terminal error here]
+- **What I Tried**: [Briefly list the 1 fix you attempted]
+- **Blocker**: [Explain why you think it failed]
+
+End your message by explicitly asking the user: "How would you like me to proceed?" and wait for a manual response.
+
+# Circuit Breaker Protocol (Anti-Loop Guardrail)
+
+## Self-History Verification
+Before submitting ANY code modification, terminal execution, or self-healing prompt to resolve an error, you must explicitly review the entire conversation history of this session.
+
+## Trigger Conditions
+You must trip the "Circuit Breaker" and abort execution immediately if EITHER of the following conditions is met:
+1. **Identical Terminal Error**: The terminal or compiler returns the exact same error code or error message string twice in a row.
+2. **Strategy Repetition (>80% Similarity)**: Your proposed code fix relies on the same logic, changes the same lines of code, or uses the same architectural approach as a previous attempt in this chat history by an estimated 80% similarity or greater. (e.g., changing a variable name back and forth, or repeatedly adding/removing the same try-catch block).
+
+## Circuit Breaker Action
+If a condition is triggered, you are strictly forbidden from writing code or running terminal commands. You must execute this fallback sequence:
+1. **Declare the Break**: Output a bold message: "🚨 CIRCUIT BREAKER TRIGGERED: Repetitive Loop Detected."
+2. **Failure Analysis**: Provide a 2-sentence breakdown explaining why the repeated approach failed and why you are stuck.
+3. **Strategy Pivot Requirement**: Explicitly state TWO completely different alternative strategies that you have NOT tried yet in this session.
+4. **Halt**: Stop generation and wait for the user to select one of the two strategies or provide a new direction.

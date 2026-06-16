@@ -259,4 +259,77 @@ class NotificationRepositoryImpl implements NotificationRepository {
       );
     }
   }
+
+  @override
+  Future<({int cleared, int skipped, int notFound})> clearSelected({
+    required String organizationId,
+    required String userId,
+    required List<String> notificationIds,
+  }) async {
+    try {
+      final callable =
+          FirebaseFunctions.instance.httpsCallable('dismissNotifications');
+      final result = await callable.call<Map<String, dynamic>>({
+        'orgId': organizationId,
+        'notificationIds': notificationIds,
+      });
+      final data = result.data;
+      return (
+        cleared: (data['cleared'] as num?)?.toInt() ?? 0,
+        skipped: (data['skipped'] as num?)?.toInt() ?? 0,
+        notFound: (data['notFound'] as num?)?.toInt() ?? 0,
+      );
+    } on FirebaseFunctionsException catch (e) {
+      // Dev/backwards-compat: if the bulk callable isn't deployed yet, fall back
+      // to per-notification dismissal (slower, but avoids a hard failure).
+      if (e.code == 'not-found') {
+        return _clearSelectedFallback(
+          organizationId: organizationId,
+          notificationIds: notificationIds,
+        );
+      }
+      if (e.code == 'permission-denied') throw const PermissionException();
+      throw DatabaseException(
+        message: e.message ?? 'Failed to clear selected notifications',
+        code: e.code,
+      );
+    }
+  }
+
+  Future<({int cleared, int skipped, int notFound})> _clearSelectedFallback({
+    required String organizationId,
+    required List<String> notificationIds,
+  }) async {
+    final callable =
+        FirebaseFunctions.instance.httpsCallable('dismissNotification');
+    var cleared = 0;
+    var skipped = 0;
+    var notFound = 0;
+
+    for (final id in notificationIds) {
+      try {
+        await callable.call<Map<String, dynamic>>({
+          'orgId': organizationId,
+          'notificationId': id,
+        });
+        cleared++;
+      } on FirebaseFunctionsException catch (e) {
+        if (e.code == 'permission-denied') throw const PermissionException();
+        if (e.code == 'failed-precondition') {
+          skipped++;
+          continue;
+        }
+        if (e.code == 'not-found') {
+          notFound++;
+          continue;
+        }
+        throw DatabaseException(
+          message: e.message ?? 'Failed to delete notification',
+          code: e.code,
+        );
+      }
+    }
+
+    return (cleared: cleared, skipped: skipped, notFound: notFound);
+  }
 }
