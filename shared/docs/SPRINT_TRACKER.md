@@ -1,7 +1,7 @@
 # Sprint Tracker — SpeakUp Connect
 
-> Last Updated: June 13, 2026  
-> Current Sprint: **Sprint 13** (Group Membership Requests) — design complete; implementation not started  
+> Last Updated: June 17, 2026  
+> Current Sprint: **Sprint 13** (Group Membership Requests) — implementation in progress (reliability hardening shipped)  
 > Last completed: **Sprint 15** (i18n Phase 1 + 1b) — June 2026  
 > Sprint Duration: 2 weeks  
 > **GitHub Issues synced:** June 13, 2026 — closed stale MVP issues (#1–#21 except #13); filed #47–#56 for active work
@@ -49,6 +49,9 @@ Suggested next sprint after Sprint 13 closure: **Sprint 16 — i18n Phase 2** ([
 - [x] Browse list waits for memberships to load before showing **Request to Join** (prevents leader/member false negatives)
 - [x] Requests screen surfaces **real backend error messages** instead of only “Action failed”
 
+#### 🔎 Needs confirmation
+- [ ] Sprint 13 core flow completion status still needs human confirmation (commit range shows reliability hardening only; checklist items for full join/leave workflow remain intentionally unchecked)
+
 #### 🚫 Out of scope
 - Instant self-join without approval
 - Class/homeroom enrollment
@@ -88,12 +91,36 @@ Suggested next sprint after Sprint 13 closure: **Sprint 16 — i18n Phase 2** ([
 - [x] `shared/docs/help/` synced with language UI; CODING_STANDARDS.md requires new UI text → `app_en.arb`
 
 #### 📋 Remaining (Epic 2.5 — see MASTER_TASK_LIST)
-- [ ] Translation Helper MVP + AI draft callables — [#48](https://github.com/edbecnel/speakup-connect/issues/48)
+- [x] Translation Helper MVP + AI draft callables — [#48](https://github.com/edbecnel/speakup-connect/issues/48)
 - [ ] Real Cebuano copy in `app_ceb.arb` + `member_guide_ceb.md` — [#49](https://github.com/edbecnel/speakup-connect/issues/49)
 - [ ] `app_fil.arb` + Tagalog help + `kLanguageNativeLabels` — [#50](https://github.com/edbecnel/speakup-connect/issues/50)
 - [ ] Feature extraction (reports, admin, groups, announcements, reminders, roles, …) — [#51](https://github.com/edbecnel/speakup-connect/issues/51)
 - [ ] `validators.dart` → l10n; CI ARB key parity — [#52](https://github.com/edbecnel/speakup-connect/issues/52)
 - [ ] `locale_resolution.dart`; `preferredLanguage` Firestore sync; org language admin — [#53](https://github.com/edbecnel/speakup-connect/issues/53)
+
+#### ✅ Follow-up delivered June 15–16, 2026 (post Sprint 15)
+- **Commits:** `536a150`, `b8fc709`, `27bef8b`, `f24eafa`, `1ebe5c8`, `540aec9`, `471bbc9`, `ed927e0`, `a1c2b07`, `753240e`
+- [x] Translation hardcoded-string extraction tooling landed (scanner + allowlist + route alias generator + catalog hardening)
+- [x] Translation screens summary shipped and iterated (layout, sorting, loading/error handling, collapsible summary actions)
+- [x] Translation Workspace and Translation Mode UX refined (shell/widget/workspace improvements)
+- [ ] Needs confirmation: whether current extraction pass is complete enough to close all Epic 2.5 Phase-2 per-feature checklist rows (commit evidence shows broad progress but not guaranteed full completion across every screen)
+
+---
+
+### Delivered June 16, 2026 — Alerts bulk dismissal UX
+- **Commit:** `327ee74`
+- [x] Multi-select alert state and bulk dismiss action added to Alerts UI
+- [x] Notification repository/provider flow updated to support batched dismiss operations
+- [x] Localization strings updated for bulk-dismiss interactions
+
+---
+
+### Delivered June 17, 2026 — Repository restructuring + workspace conventions
+- **Commits:** `bc08cd0`, `c9be73e`, `2e06d03`
+- [x] Repository reorganized into `shared/`, `speakup_connect_app/`, and `speakup_connect_web/`
+- [x] Follow-up path/config/generated-file alignment completed after move (including helper tooling package lock updates)
+- [x] Icon assets relocated to new app/web structure and stale old-root copies removed
+- [ ] Needs confirmation: whether any external automation scripts/CI references outside this repo still point to pre-restructure paths
 
 ---
 

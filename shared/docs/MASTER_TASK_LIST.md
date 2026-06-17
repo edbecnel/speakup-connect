@@ -570,6 +570,7 @@ Suggested implementation order: **i18n → messaging → parents** (messaging is
 - [ ] Audit `intl` date/number formatting — pass active locale, not hardcoded `en_US` (INTERNATIONALIZATION.md §13)
 - [ ] CI: fail build if `app_ceb.arb` or `app_fil.arb` missing keys from `app_en.arb`
 - [ ] CI or custom lint: ban new hardcoded user-facing strings in `lib/features/**/presentation/`
+- [x] Add hardcoded UI string audit tooling for extraction workflow (`find-hardcoded-ui-strings.js`, allowlist, route-alias generator, and catalog mapping updates in Translation Helper)
 
 **Translation Helper tool** (see INTERNATIONALIZATION.md §12)
 - [x] MVP: web or admin UI — import `app_en.arb`, list all keys with US English source
@@ -585,7 +586,8 @@ Suggested implementation order: **i18n → messaging → parents** (messaging is
 - [x] In-app Translation Workspace (`/admin/translations`) for org admins and translation moderators
 - [x] In-app translation mode — browse app, EN/target toggle, session review → Firestore; admin-configurable badges per app screen (Screen names)
 - [x] Screen names registry — CRUD, route assignment, string `context`, Translation badges toggle (app + web)
-- [ ] Expand `TranslationAnchor` instrumentation to more screens in code
+- [x] Expand `TranslationAnchor` instrumentation to more screens in code
+- [x] Translation screens summary view + summary UX improvements (layout, loading/error handling, sorting, collapsible actions in app/web tooling)
 - [ ] Phase 2: Firestore-backed workflow (`languages/{code}/strings` + export job)
 
 **Cebuano (Bisaya) — 1st add-on**
@@ -854,6 +856,7 @@ Optional expiration, notification history, broadcast management, full-screen det
 - [x] Callables `dismissNotification`, `clearNotificationFeed` — archive before delete
 - [x] `NotificationHistoryScreen` — author/admin read access via Firestore rules
 - [x] Firestore composite index: `notification_history(createdBy ASC, removedAt DESC)`
+- [x] Bulk notification dismissal from Alerts inbox (multi-select state + batch dismiss action wired through repository/callables)
 
 **Broadcast management UX**
 - [x] Callable `updateReminder` — author/admin edit title, body, expiration; propagates to feed copies
@@ -1082,7 +1085,7 @@ Optional expiration, notification history, broadcast management, full-screen det
 > Builds on [Translation Helper](INTERNATIONALIZATION.md#12-translation-helper-tool) (Epic 2.5). Cebuano + Tagalog ship in 2.5.
 
 - [x] Translation Helper: in-context preview (MVP — in-app translation mode; expand badge coverage)
-- [ ] Translation Helper: completion dashboard (% approved per locale)
+- [x] Translation Helper: completion dashboard (% approved per locale) — shipped as translation screens summary views and summary refinements in app/web tooling
 - [ ] Community / contractor interpreter accounts (language-scoped)
 - [ ] Additional language packs via same pipeline (Hiligaynon, Ilocano, Spanish, …)
 - [ ] Org-level language enablement (subset of platform languages)
@@ -1174,6 +1177,7 @@ Optional expiration, notification history, broadcast management, full-screen det
 ### Dart / Flutter
 
 - [ ] Remove debug logging from `lib/features/settings/presentation/screens/settings_screen.dart` (profile debug `print` statements added in commit `17f6fdb`)
+- [x] Repository split complete: app code moved to `speakup_connect_app/`, shared assets/docs/functions/scripts to `shared/`, and tooling/web artifacts to `speakup_connect_web/` (follow-up config/generated path updates landed)
 
 ### Data / Firebase
 
