@@ -112,7 +112,7 @@ final class OrganizationConfigProvider extends $AsyncNotifierProvider<
 }
 
 String _$organizationConfigHash() =>
-    r'94171dd26dea4b58da131568a2dbe4afa91b6e60';
+    r'98f6e5a09fdb8307d2bd21276dde1335ed6954c0';
 
 /// Loads and caches the active organization's configuration.
 ///
@@ -131,7 +131,7 @@ abstract class _$OrganizationConfig
   FutureOr<OrganizationConfigEntity> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref
         as $Ref<AsyncValue<OrganizationConfigEntity>, OrganizationConfigEntity>;
     final element = ref.element as $ClassProviderElement<
@@ -140,6 +140,6 @@ abstract class _$OrganizationConfig
         AsyncValue<OrganizationConfigEntity>,
         Object?,
         Object?>;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

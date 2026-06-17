@@ -47,7 +47,7 @@ final class ThemeModeNotifierProvider
   }
 }
 
-String _$themeModeNotifierHash() => r'87143c96a83e6f5530dbfa4ceb3dd91ad29d0516';
+String _$themeModeNotifierHash() => r'c124d25ed25b547354eacc56a9a06e662a3b3f10';
 
 /// Persists and exposes the app-wide [ThemeMode].
 /// Watched by `app.dart` to switch light/dark/system mode.
@@ -56,10 +56,10 @@ abstract class _$ThemeModeNotifier extends $Notifier<ThemeMode> {
   ThemeMode build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<ThemeMode, ThemeMode>;
     final element = ref.element as $ClassProviderElement<
         AnyNotifier<ThemeMode, ThemeMode>, ThemeMode, Object?, Object?>;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

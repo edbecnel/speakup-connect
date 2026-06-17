@@ -16,7 +16,7 @@ The platform is designed as a **multi-tenant SaaS solution**, meaning a single c
 
 > **Current Phase:** Sprint 1 — Foundation & Architecture  
 > **Stage:** Documentation & Project Setup  
-> See [docs/SPRINT_TRACKER.md](docs/SPRINT_TRACKER.md) for live sprint status.
+> See [shared/docs/SPRINT_TRACKER.md](shared/docs/SPRINT_TRACKER.md) for live sprint status.
 
 ---
 
@@ -48,21 +48,21 @@ The platform is designed as a **multi-tenant SaaS solution**, meaning a single c
 
 | Document | Description |
 |---|---|
-| [docs/PROJECT_OVERVIEW.md](docs/PROJECT_OVERVIEW.md) | Full platform description & vision |
-| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | System architecture & design decisions |
-| [docs/FOLDER_STRUCTURE.md](docs/FOLDER_STRUCTURE.md) | Folder organization & conventions |
-| [docs/DATABASE_DESIGN.md](docs/DATABASE_DESIGN.md) | Firestore schema & data models |
-| [docs/SECURITY_AND_PRIVACY.md](docs/SECURITY_AND_PRIVACY.md) | Privacy, security, and moderation |
-| [docs/ROADMAP.md](docs/ROADMAP.md) | MVP, pilot, and long-term goals |
-| [docs/SPRINT_TRACKER.md](docs/SPRINT_TRACKER.md) | Active sprint tracking |
-| [docs/MASTER_TASK_LIST.md](docs/MASTER_TASK_LIST.md) | Full project task breakdown |
-| [docs/CODING_STANDARDS.md](docs/CODING_STANDARDS.md) | Coding conventions & standards |
-| [docs/AI_DEVELOPMENT_WORKFLOW.md](docs/AI_DEVELOPMENT_WORKFLOW.md) | AI-assisted development process |
-| [docs/ONBOARDING_NEW_SCHOOL.md](docs/ONBOARDING_NEW_SCHOOL.md) | **Onboarding a new school** — client app name, flavors, checklist |
-| [docs/CLIENT_BUILDS.md](docs/CLIENT_BUILDS.md) | Gradle/iOS flavors, CI/CD, git branching for client builds |
-| [docs/help/README.md](docs/help/README.md) | Per-organization in-app help layout |
-| [docs/help/orgs/monhs-ph-001/](docs/help/orgs/monhs-ph-001/) | MONHS school-specific member & admin guides |
-| [docs/help/_default/](docs/help/_default/) | Generic fallback guides for new tenants |
+| [shared/docs/PROJECT_OVERVIEW.md](shared/docs/PROJECT_OVERVIEW.md) | Full platform description & vision |
+| [shared/docs/ARCHITECTURE.md](shared/docs/ARCHITECTURE.md) | System architecture & design decisions |
+| [shared/docs/FOLDER_STRUCTURE.md](shared/docs/FOLDER_STRUCTURE.md) | Folder organization & conventions |
+| [shared/docs/DATABASE_DESIGN.md](shared/docs/DATABASE_DESIGN.md) | Firestore schema & data models |
+| [shared/docs/SECURITY_AND_PRIVACY.md](shared/docs/SECURITY_AND_PRIVACY.md) | Privacy, security, and moderation |
+| [shared/docs/ROADMAP.md](shared/docs/ROADMAP.md) | MVP, pilot, and long-term goals |
+| [shared/docs/SPRINT_TRACKER.md](shared/docs/SPRINT_TRACKER.md) | Active sprint tracking |
+| [shared/docs/MASTER_TASK_LIST.md](shared/docs/MASTER_TASK_LIST.md) | Full project task breakdown |
+| [shared/docs/CODING_STANDARDS.md](shared/docs/CODING_STANDARDS.md) | Coding conventions & standards |
+| [shared/docs/AI_DEVELOPMENT_WORKFLOW.md](shared/docs/AI_DEVELOPMENT_WORKFLOW.md) | AI-assisted development process |
+| [shared/docs/ONBOARDING_NEW_SCHOOL.md](shared/docs/ONBOARDING_NEW_SCHOOL.md) | **Onboarding a new school** — client app name, flavors, checklist |
+| [shared/docs/CLIENT_BUILDS.md](shared/docs/CLIENT_BUILDS.md) | Gradle/iOS flavors, CI/CD, git branching for client builds |
+| [shared/docs/help/README.md](shared/docs/help/README.md) | Per-organization in-app help layout |
+| [shared/docs/help/orgs/monhs-ph-001/](shared/docs/help/orgs/monhs-ph-001/) | MONHS school-specific member & admin guides |
+| [shared/docs/help/_default/](shared/docs/help/_default/) | Generic fallback guides for new tenants |
 
 ---
 
@@ -82,6 +82,7 @@ The platform is designed as a **multi-tenant SaaS solution**, meaning a single c
 # 1. Clone the repository
 git clone https://github.com/your-org/speakup-connect.git
 cd speakup-connect
+cd speakup_connect_app
 
 # 2. Install Flutter dependencies
 flutter pub get
@@ -100,7 +101,7 @@ Copy the environment template and fill in your values:
 cp .env.example .env
 ```
 
-See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for full environment configuration details.
+See [shared/docs/ARCHITECTURE.md](shared/docs/ARCHITECTURE.md) for full environment configuration details.
 
 ---
 
@@ -116,8 +117,8 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for full environment configurat
 
 | File | Where it goes | What it does |
 |---|---|---|
-| `google-services.json` | `android/app/google-services.json` | Connects the Android app to Firebase |
-| `firebase_options.dart` | `lib/config/firebase_options.dart` | Dart-side Firebase initialization config |
+| `google-services.json` | `speakup_connect_app/android/app/google-services.json` | Connects the Android app to Firebase |
+| `firebase_options.dart` | `speakup_connect_app/lib/config/firebase_options.dart` | Dart-side Firebase initialization config |
 
 ### How to generate them
 
@@ -140,7 +141,7 @@ This writes both files to the correct locations automatically.
 
 1. Go to [Firebase Console](https://console.firebase.google.com) → project **speakup-connect-891dd**
 2. **Project Settings → Your Apps → Android app** → Download `google-services.json`
-3. Place it at `android/app/google-services.json`
+3. Place it at `speakup_connect_app/android/app/google-services.json`
 4. For `firebase_options.dart`, Option A is still required (it cannot be downloaded manually)
 
 ### CI/CD (GitHub Actions)
@@ -150,21 +151,21 @@ Store the file contents as repository secrets and write them before building:
 ```yaml
 - name: Write Firebase config
   run: |
-    echo "${{ secrets.GOOGLE_SERVICES_JSON }}" > android/app/google-services.json
-    echo "${{ secrets.FIREBASE_OPTIONS_DART }}" > lib/config/firebase_options.dart
+    echo "${{ secrets.GOOGLE_SERVICES_JSON }}" > speakup_connect_app/android/app/google-services.json
+    echo "${{ secrets.FIREBASE_OPTIONS_DART }}" > speakup_connect_app/lib/config/firebase_options.dart
 ```
 
 Required secrets to add in **GitHub → Settings → Secrets and variables → Actions**:
-- `GOOGLE_SERVICES_JSON` — full content of `android/app/google-services.json`
-- `FIREBASE_OPTIONS_DART` — full content of `lib/config/firebase_options.dart`
+- `GOOGLE_SERVICES_JSON` — full content of `speakup_connect_app/android/app/google-services.json`
+- `FIREBASE_OPTIONS_DART` — full content of `speakup_connect_app/lib/config/firebase_options.dart`
 
 ### Verify your setup
 
 Before running, confirm both files exist:
 
 ```powershell
-Test-Path android\app\google-services.json   # must return True
-Test-Path lib\config\firebase_options.dart    # must return True
+Test-Path speakup_connect_app\android\app\google-services.json   # must return True
+Test-Path speakup_connect_app\lib\config\firebase_options.dart    # must return True
 ```
 
 ---
@@ -185,7 +186,7 @@ lib/
 └── shared/         # Shared widgets, models, and utilities
 ```
 
-See [docs/FOLDER_STRUCTURE.md](docs/FOLDER_STRUCTURE.md) and [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the full breakdown.
+See [shared/docs/FOLDER_STRUCTURE.md](shared/docs/FOLDER_STRUCTURE.md) and [shared/docs/ARCHITECTURE.md](shared/docs/ARCHITECTURE.md) for the full breakdown.
 
 ---
 
@@ -193,7 +194,7 @@ See [docs/FOLDER_STRUCTURE.md](docs/FOLDER_STRUCTURE.md) and [docs/ARCHITECTURE.
 
 Every piece of data is scoped to an `organizationId`. There are no hard-coded organization names anywhere in the codebase. Organizations are configured via Firestore and loaded at runtime.
 
-See [docs/DATABASE_DESIGN.md](docs/DATABASE_DESIGN.md) for the isolation strategy.
+See [shared/docs/DATABASE_DESIGN.md](shared/docs/DATABASE_DESIGN.md) for the isolation strategy.
 
 ---
 
@@ -201,9 +202,9 @@ See [docs/DATABASE_DESIGN.md](docs/DATABASE_DESIGN.md) for the isolation strateg
 
 This project uses an agile sprint-based workflow. Before contributing:
 
-1. Read [docs/CODING_STANDARDS.md](docs/CODING_STANDARDS.md)
-2. Read [docs/AI_DEVELOPMENT_WORKFLOW.md](docs/AI_DEVELOPMENT_WORKFLOW.md)
-3. Check [docs/SPRINT_TRACKER.md](docs/SPRINT_TRACKER.md) for current priorities
+1. Read [shared/docs/CODING_STANDARDS.md](shared/docs/CODING_STANDARDS.md)
+2. Read [shared/docs/AI_DEVELOPMENT_WORKFLOW.md](shared/docs/AI_DEVELOPMENT_WORKFLOW.md)
+3. Check [shared/docs/SPRINT_TRACKER.md](shared/docs/SPRINT_TRACKER.md) for current priorities
 4. Follow the clean architecture guidelines strictly
 
 ---

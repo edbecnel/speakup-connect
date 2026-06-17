@@ -48,7 +48,7 @@ final class AuthRepositoryProvider
   }
 }
 
-String _$authRepositoryHash() => r'767e84b35706fb47939a21ada2289ef5471908e5';
+String _$authRepositoryHash() => r'31b406052f8be70152c52c5bb253820367819658';
 
 /// Watches the Firebase Auth state. Emits [UserEntity] when signed in, null when signed out.
 /// Used by the router to enforce auth guards.
@@ -174,7 +174,7 @@ final class AuthNotifierProvider
   }
 }
 
-String _$authNotifierHash() => r'6f4562121190f70dc15da729ebd1263d951c2526';
+String _$authNotifierHash() => r'34f73a73f6ce45b4d86998b512640e9d6ee5d7c2';
 
 /// Manages authentication operations: sign-in, sign-up, anonymous sign-in, sign-out.
 
@@ -182,13 +182,13 @@ abstract class _$AuthNotifier extends $Notifier<AsyncValue<void>> {
   AsyncValue<void> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AsyncValue<void>, AsyncValue<void>>;
     final element = ref.element as $ClassProviderElement<
         AnyNotifier<AsyncValue<void>, AsyncValue<void>>,
         AsyncValue<void>,
         Object?,
         Object?>;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

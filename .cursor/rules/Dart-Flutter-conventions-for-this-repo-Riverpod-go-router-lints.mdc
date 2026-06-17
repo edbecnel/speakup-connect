@@ -12,7 +12,7 @@ Dart/Flutter standards:
   - Use named routes/constants; no stringly-typed path concatenation in widgets.
 - Localization:
   - No hardcoded user-facing strings in widgets.
-  - Add English keys to `lib/l10n/app_en.arb` and use `context.l10n.<key>()`.
+  - Add English keys to `speakup_connect_app/lib/l10n/app_en.arb` and use `context.l10n.<key>()`.
 - Error handling:
   - Catch Firebase exceptions in datasource/repository and translate to domain Failure types; don’t leak raw Firebase exceptions to UI.
 - Keep files/classes small (target ≤300 lines/file, ≤200 lines/class); split when needed.

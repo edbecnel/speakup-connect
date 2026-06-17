@@ -2,9 +2,9 @@
 alwaysApply: true
 ---
 
-Workflow rules (docs/AI_DEVELOPMENT_WORKFLOW.md):
+Workflow rules (shared/docs/AI_DEVELOPMENT_WORKFLOW.md):
 - Don’t implement a feature until the documentation exists (or is updated first).
-- Only work on tasks in the active sprint (check docs/SPRINT_TRACKER.md).
-- Before implementing Firestore logic: re-check docs/DATABASE_DESIGN.md.
+- Only work on tasks in the active sprint (check shared/docs/SPRINT_TRACKER.md).
+- Before implementing Firestore logic: re-check shared/docs/DATABASE_DESIGN.md.
 - Before committing/merging: `flutter analyze` should be clean; no lint regressions.
-- After finishing a task: update docs/SPRINT_TRACKER.md and any affected docs/ADRs/schema docs.
+- After finishing a task: update shared/docs/SPRINT_TRACKER.md and any affected docs/ADRs/schema docs.

@@ -1,5 +1,5 @@
 # Translation Helper local Firebase web config (copy from firebase-config.example.js)
-tools/translation-helper/firebase-config.js
+speakup_connect_web/tools/translation-helper/firebase-config.js
 
 *.class
 *.log
@@ -18,7 +18,7 @@ All .md files.md
 **/node_modules/
 /Temp/
 /temp/
-tools/translation-helper/hardcoded-report*.json
+speakup_connect_web/tools/translation-helper/hardcoded-report*.json
 
 # Temporary / backup files
 *~
@@ -56,6 +56,12 @@ Desktop.ini
 .pub-cache/
 .pub/
 /build/
+speakup_connect_app/.dart_tool/
+speakup_connect_app/.flutter-plugins
+speakup_connect_app/.flutter-plugins-dependencies
+speakup_connect_app/.pub-cache/
+speakup_connect_app/.pub/
+speakup_connect_app/build/
 
 # Symbolication related
 app.*.symbols
@@ -64,48 +70,48 @@ app.*.symbols
 app.*.map.json
 
 # Android Studio will place build artifacts here
-/android/build/
-/android/app/debug
-/android/app/profile
-/android/app/release
+**/android/build/
+**/android/app/debug
+**/android/app/profile
+**/android/app/release
 
 # Kotlin compiler cache
-android/.kotlin/
+**/android/.kotlin/
 
 # Firebase
-google-services.json
-GoogleService-Info.plist
-lib/config/firebase_options.dart
-scripts/service-account.json
+**/google-services.json
+**/GoogleService-Info.plist
+speakup_connect_app/lib/config/firebase_options.dart
+shared/scripts/service-account.json
 **/service-account*.json
 
 # Environment files
-.env
-.env.local
-.env.staging
-.env.production
-.env.*
-!.env.example
+**/.env
+**/.env.local
+**/.env.staging
+**/.env.production
+**/.env.*
+**/.env.example
 
 # Test / analysis output
-coverage/
-.test_coverage.dart
+**/coverage/
+**/.test_coverage.dart
 
 # Flutter gen-l10n missing-key report (CI only; not shipped)
-lib/l10n/untranslated.json
+speakup_connect_app/lib/l10n/untranslated.json
 
 # FVM (Flutter Version Management) — local SDK pin
-.fvm/
+**/.fvm/
 
 # Local release / field-test binaries
-*.apk
-*.aab
-*.ipa
+**/*.apk
+**/*.aab
+**/*.ipa
 
 # Firebase CLI / emulator logs
-firebase-debug.log
-firestore-debug.log
-ui-debug.log
+**/firebase-debug.log
+**/firestore-debug.log
+**/ui-debug.log
 
 # Code generation — *.g.dart and *.freezed.dart are committed in this repo.
 # Mark as generated in GitHub: *.g.dart linguist-generated=true

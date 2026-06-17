@@ -26,7 +26,7 @@
   - `lib/features/join_requests/presentation/providers/join_requests_provider.dart`
   - `lib/features/join_requests/presentation/screens/join_requests_screen.dart`
 - Modify (only if required):
-  - `lib/l10n/app_en.arb` (added keys only)
+  - `speakup_connect_app/lib/l10n/app_en.arb` (added keys only)
 
 ## Example 2 — Domain + Data + Presentation (repository impl included)
 
@@ -49,5 +49,5 @@
   - `lib/features/feedback/presentation/providers/feedback_provider.dart`
   - `lib/features/feedback/presentation/screens/feedback_screen.dart`
 - Modify (only if required):
-  - `lib/l10n/app_en.arb` (added keys only)
+  - `speakup_connect_app/lib/l10n/app_en.arb` (added keys only)
 

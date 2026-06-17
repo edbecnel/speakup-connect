@@ -16,12 +16,12 @@ Output: strictly the files needed (entities/usecases/repos/providers/screens), n
 ## Operating rules (hard constraints)
 
 1. **Docs-first source of truth**
-   - Use `docs/` as authoritative for folder placement, layer boundaries, naming conventions, Riverpod usage, and localization workflow.
+   - Use `shared/docs/` as authoritative for folder placement, layer boundaries, naming conventions, Riverpod usage, and localization workflow.
    - Minimum docs to consult:
-     - `docs/ARCHITECTURE.md`
-     - `docs/FOLDER_STRUCTURE.md`
-     - `docs/CODING_STANDARDS.md`
-     - `docs/INTERNATIONALIZATION.md` (if any UI strings are involved)
+     - `shared/docs/ARCHITECTURE.md`
+     - `shared/docs/FOLDER_STRUCTURE.md`
+     - `shared/docs/CODING_STANDARDS.md`
+     - `shared/docs/INTERNATIONALIZATION.md` (if any UI strings are involved)
 2. **Clean Architecture dependency direction**
    - Dependencies flow inward only: **Presentation → Domain ← Data**.
    - **Domain** must not import from **Data** or **Presentation**.
@@ -40,7 +40,7 @@ Output: strictly the files needed (entities/usecases/repos/providers/screens), n
 5. **All user-facing strings localized**
    - No hardcoded user-facing strings in screens/providers.
    - Use `context.l10n.<key>` (extension in `lib/core/l10n/app_localizations_extension.dart`).
-   - If new strings are required, include a **minimal** edit to `lib/l10n/app_en.arb` (US English source of truth) and reference only those keys in Dart.
+   - If new strings are required, include a **minimal** edit to `speakup_connect_app/lib/l10n/app_en.arb` (US English source of truth) and reference only those keys in Dart.
 
 ## Inputs (what to ask for / accept)
 
@@ -60,7 +60,7 @@ Accept a single message containing:
   - Example:
     - `organizations/{orgId}/groups/{groupId}: { name: string, createdAt: timestamp, ... }`
 
-If information is missing, choose the smallest reasonable default that fits `docs/` (do not invent large new concepts).
+If information is missing, choose the smallest reasonable default that fits `shared/docs/` (do not invent large new concepts).
 
 ## Workflow (implementation steps)
 
@@ -85,13 +85,13 @@ If information is missing, choose the smallest reasonable default that fits `doc
    - Screens live in `presentation/screens/`.
    - Handle async UI using `AsyncValue.when(...)` and shared widgets from `lib/shared/widgets/` where appropriate.
 6. **Localization**
-   - If the screen needs any visible text (titles, button labels, empty/error copy), add keys to `lib/l10n/app_en.arb` and reference via `context.l10n`.
+   - If the screen needs any visible text (titles, button labels, empty/error copy), add keys to `speakup_connect_app/lib/l10n/app_en.arb` and reference via `context.l10n`.
    - Prefer reusing existing `common*` keys when they semantically match.
 7. **Self-check before returning**
    - No imports from other feature folders.
    - Domain imports no data/presentation.
    - No hardcoded user-facing strings in presentation files.
-   - File paths match `docs/FOLDER_STRUCTURE.md`.
+   - File paths match `shared/docs/FOLDER_STRUCTURE.md`.
 
 ## Output format (produce exactly this shape)
 
@@ -104,7 +104,7 @@ Return a single markdown response with **only** these sections, in this order:
 
 ### Modify (only if required)
 
-- List repo-relative file paths to modify (typically only `lib/l10n/app_en.arb`).
+- List repo-relative file paths to modify (typically only `speakup_connect_app/lib/l10n/app_en.arb`).
 - Include the smallest possible patch-like snippet (added keys only) and nothing else.
 
 ### Notes (only if truly necessary)

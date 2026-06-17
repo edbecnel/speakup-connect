@@ -166,14 +166,14 @@ abstract class _$MyReportsStatusFilter extends $Notifier<ReportStatus?> {
   ReportStatus? build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<ReportStatus?, ReportStatus?>;
     final element = ref.element as $ClassProviderElement<
         AnyNotifier<ReportStatus?, ReportStatus?>,
         ReportStatus?,
         Object?,
         Object?>;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }
 
@@ -223,14 +223,14 @@ abstract class _$SubmitReportFormNotifier
   SubmitReportFormState build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<SubmitReportFormState, SubmitReportFormState>;
     final element = ref.element as $ClassProviderElement<
         AnyNotifier<SubmitReportFormState, SubmitReportFormState>,
         SubmitReportFormState,
         Object?,
         Object?>;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }
 
@@ -274,7 +274,7 @@ abstract class _$SubmitReportNotifier
   AsyncValue<ReportEntity?> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref =
         this.ref as $Ref<AsyncValue<ReportEntity?>, AsyncValue<ReportEntity?>>;
     final element = ref.element as $ClassProviderElement<
@@ -282,6 +282,6 @@ abstract class _$SubmitReportNotifier
         AsyncValue<ReportEntity?>,
         Object?,
         Object?>;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

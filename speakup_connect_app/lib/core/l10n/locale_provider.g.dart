@@ -43,7 +43,7 @@ final class AppLocaleProvider extends $NotifierProvider<AppLocale, Locale> {
   }
 }
 
-String _$appLocaleHash() => r'190342fbb45323716f1ab9124680240e2abd1e0e';
+String _$appLocaleHash() => r'e11656fe2bbbe1ec972c875c03835c5da6ceeeab';
 
 /// Persists and exposes the active app [Locale] for ARB and help markdown.
 
@@ -51,10 +51,10 @@ abstract class _$AppLocale extends $Notifier<Locale> {
   Locale build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<Locale, Locale>;
     final element = ref.element as $ClassProviderElement<
         AnyNotifier<Locale, Locale>, Locale, Object?, Object?>;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

@@ -2,7 +2,7 @@
 alwaysApply: true
 ---
 
-Firebase Cloud Functions (functions/, Node 20, TS strict):
+Firebase Cloud Functions (shared/functions/, Node 20, TS strict):
 - Use `firebase-functions/v2` APIs (onCall, Firestore triggers, scheduler) and `HttpsError` for client-facing errors.
 - Validate inputs early; return clear `invalid-argument` / `failed-precondition` / `permission-denied`.
 - Enforce org scoping in every callable/trigger (orgId from token/body + membership verification).
