@@ -925,6 +925,13 @@ class AppLocalizationsCeb extends AppLocalizations {
   String get settingsAboutLegalese => '© 2026 SpeakUp Connect';
 
   @override
+  String get settingsAboutOrganizationIdLabel => 'ID sa Organisasyon';
+
+  @override
+  String get settingsAboutOrganizationIdCopied =>
+      'Nakopya ang ID sa organisasyon';
+
+  @override
   String get settingsSectionAdmin => 'Administrasyon';
 
   @override
@@ -1554,6 +1561,9 @@ class AppLocalizationsCeb extends AppLocalizations {
 
   @override
   String get commonNotSet => 'Not set';
+
+  @override
+  String get commonNotAvailable => 'Dili magamit';
 
   @override
   String get changePasswordIntro =>
@@ -2860,6 +2870,21 @@ class AppLocalizationsCeb extends AppLocalizations {
   @override
   String get orgSettingsOrgNameSubtitle =>
       'Ipakita sa splash screen nga \"SpeakUp [Name]\".';
+
+  @override
+  String get orgSettingsOrganizationIdTitle => 'ID sa Organisasyon';
+
+  @override
+  String get orgSettingsOrganizationIdSubtitle =>
+      'Talagsaon nga ilhanan nga gigamit para niining organisasyon.';
+
+  @override
+  String get orgSettingsOrganizationIdLabel =>
+      'Kasalukuyang ID sa organisasyon';
+
+  @override
+  String get orgSettingsOrganizationIdCopied =>
+      'Nakopya ang ID sa organisasyon';
 
   @override
   String get orgSettingsBrandColorsTitle => 'Mga Kulay sa Brand';

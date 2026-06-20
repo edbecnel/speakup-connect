@@ -1695,3 +1695,132 @@ Required actions:
 ### Role hygiene check
 - [ ] least-privilege roles applied
 - [ ] no unnecessary elevated
+
+## Module 11 - Student roster operations
+
+### Goal
+Use Student Roster to maintain accurate student records, profile photos, and grade assignments with minimal cleanup later.
+
+### Who can do this
+- **Org Admin**
+- **Delegated staff** with roster/member-management access
+- If you do not see **Student Roster**, ask an Org Admin to verify your role/capabilities.
+
+### What you will learn
+- how to locate and verify student records
+- when to update profile data vs roster data
+- how to manage official school photos correctly
+- how to avoid common roster mistakes
+
+### Before you start
+Confirm these first:
+1. Your school’s naming and student-ID conventions are defined.
+2. You know which fields are required (name format, student ID, grade, contact email).
+3. You have a policy for handling duplicates and identity conflicts.
+
+---
+
+### Core concept: roster integrity first
+Accurate roster data reduces:
+- duplicate accounts
+- wrong grade assignments
+- login confusion
+- support tickets during enrollment periods
+
+---
+
+### Step 1 - Open and search Student Roster
+1. Open **Settings -> Administration -> Student Roster**.
+2. Search by student name or student ID.
+3. Open the student record and verify identity before editing.
+
+---
+
+### Step 2 - Verify core fields
+Check and correct as needed:
+- Full name
+- Student ID
+- Grade level
+- Contact email (if used)
+
+Only change identity fields when confirmed by school records.
+
+---
+
+### Step 3 - Manage official school photo
+Use Student Roster for **official** school photos (admin-managed record):
+1. Open a student row.
+2. Tap avatar/photo action.
+3. Upload/update official school photo.
+4. Verify the saved photo appears correctly.
+
+Important:
+- Official photo is a school record.
+- Member personal profile photo (if enabled) is separate and does not replace official school photo.
+
+---
+
+### Step 4 - Handle grade updates safely
+When moving students between grades:
+1. Confirm with official class records.
+2. Apply grade changes in roster/member flow.
+3. Spot-check affected accounts for correct display/filters.
+4. Avoid bulk edits without verification.
+
+---
+
+### Step 5 - Resolve duplicates/conflicts
+If two records appear to represent the same student:
+1. Pause edits on both records.
+2. Confirm authoritative student ID with school records owner.
+3. Keep one canonical record; avoid parallel active duplicates.
+4. Complete cleanup in Member Management if needed.
+
+---
+
+### If you do not see Student Roster
+Check in this order:
+1. Correct account signed in?
+2. Required admin/roster capability assigned?
+3. Sign out/sign in after recent role changes?
+4. Feature enabled for this organization type?
+
+---
+
+### Troubleshooting: "Roster update saved but app still shows old data"
+1. Re-open the same student record and confirm saved value.
+2. Check for duplicate student record with conflicting data.
+3. Refresh session (sign out/sign in) if permissions changed.
+4. Verify you edited the correct organization context.
+5. Escalate with student ID + timestamp if mismatch persists.
+
+---
+
+### Common mistakes to avoid
+- Editing the wrong student due to similar names.
+- Changing student ID without school-record confirmation.
+- Treating personal profile photo as official school photo.
+- Bulk grade updates without post-change verification.
+- Leaving duplicates unresolved.
+
+---
+
+### Quick checklist (per student update)
+- [ ] Identity verified
+- [ ] Correct record selected
+- [ ] Required fields validated
+- [ ] Official photo handled (if needed)
+- [ ] No duplicate conflict introduced
+
+---
+
+### Scenario check
+A student appears twice in roster search with slightly different names but similar IDs.
+
+What should you do first?
+
+**Expected response order:**
+1. Pause edits and verify identity against school records.
+2. Determine the canonical student ID/account.
+3. Keep one authoritative record and clean up duplicates.
+4. Re-check grade/photo data on final record.

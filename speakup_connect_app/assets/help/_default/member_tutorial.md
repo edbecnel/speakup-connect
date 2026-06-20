@@ -1,34 +1,54 @@
 # Member Tutorial
 
-Audience: first-time approved members.
+Audience: First-time students and staff members.
 
-This fallback tutorial is used when an organization-type tutorial bundle is unavailable.
-
----
-
-## Start here
-
-1. Open **Help Center** and read **Member Guide** first.
-2. Confirm you can sign in with your assigned credentials.
-3. Practice the core member flows:
-   - submit a report
-   - read announcements
-   - view and respond to alerts
-   - manage language and profile settings
+Complete modules in order. This tutorial is self-sufficient and can be finished in-app.
 
 ---
 
-## Troubleshooting quick checks
+## Module 1 - Sign in
 
-If something is missing or does not work:
-
-1. Verify your account is approved and active.
-2. Verify you are in the correct organization.
-3. Refresh app session (sign out/sign in) if access changed recently.
-4. Contact your organization administrator for local policy rules.
+1. Sign in with student ID or contact email.
+2. Confirm you can open Home.
+3. Identify where to get help for pending/blocked account states.
 
 ---
 
-## Need school-specific steps?
+## Module 2 - Home and language
 
-Use the organization-type tutorial when available (for example, school tutorial bundles) or ask your organization administrator for local operating procedures.
+1. Open **Home** and locate quick actions.
+2. Change language using the globe selector.
+3. Confirm language control in **Settings -> Appearance -> Language**.
+
+---
+
+## Module 3 - Reports
+
+1. Open **Submit a Concern**.
+2. Complete required fields.
+3. Submit and verify entry in **My Reports**.
+
+---
+
+## Module 4 - Alerts
+
+1. Open **Alerts**.
+2. Read one alert.
+3. Submit response when requested.
+
+---
+
+## Module 5 - Groups and clubs
+
+1. Open **Browse Groups & Clubs**.
+2. Request to join one group (if available).
+3. Open **My Groups & Clubs** and review memberships.
+
+---
+
+## Module 6 - Help and support
+
+1. Open **Settings -> Help Center**.
+2. Open **Member Guide** for deeper reference.
+3. Record who to contact for school policy and account issues.
+

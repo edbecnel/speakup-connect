@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:speakup_connect/config/app_config.dart';
@@ -6,10 +7,10 @@ import 'package:speakup_connect/core/errors/app_exception.dart';
 import 'package:speakup_connect/core/l10n/app_localizations_extension.dart';
 import 'package:speakup_connect/core/theme/app_theme.dart';
 import 'package:speakup_connect/features/admin/presentation/providers/admin_branding_provider.dart';
-import 'package:speakup_connect/features/roles/presentation/l10n/roles_ui_l10n.dart';
 import 'package:speakup_connect/features/organization/domain/entities/organization_config_entity.dart';
 import 'package:speakup_connect/features/organization/presentation/providers/organization_provider.dart';
 import 'package:speakup_connect/features/reports/presentation/providers/report_provider.dart';
+import 'package:speakup_connect/features/roles/presentation/l10n/roles_ui_l10n.dart';
 import 'package:speakup_connect/features/translations/presentation/widgets/translation_anchor.dart';
 
 /// Admin screen for updating the organization's display name and brand colors.
@@ -62,6 +63,7 @@ class _AdminBrandingScreenState extends ConsumerState<AdminBrandingScreen> {
     final theme = Theme.of(context);
     final savingState = ref.watch(adminBrandingProvider);
     final isSaving = savingState.isLoading;
+    final organizationId = ref.watch(activeOrganizationIdProvider);
 
     // Show a snackbar when save succeeds or fails.
     ref.listen(adminBrandingProvider, (prev, next) {
@@ -101,6 +103,8 @@ class _AdminBrandingScreenState extends ConsumerState<AdminBrandingScreen> {
             children: [
               const _OrganizationTypeCard(),
               const SizedBox(height: 32),
+              _OrganizationIdCard(organizationId: organizationId),
+              const SizedBox(height: 32),
               _SectionHeader(
                 icon: Icons.business_outlined,
                 titleKey: 'orgSettingsOrgNameTitle',
@@ -117,10 +121,9 @@ class _AdminBrandingScreenState extends ConsumerState<AdminBrandingScreen> {
                   border: const OutlineInputBorder(),
                 ),
                 textCapitalization: TextCapitalization.characters,
-                validator: (v) =>
-                    (v == null || v.trim().isEmpty)
-                        ? context.l10n.orgSettingsRequired
-                        : null,
+                validator: (v) => (v == null || v.trim().isEmpty)
+                    ? context.l10n.orgSettingsRequired
+                    : null,
               ),
               const SizedBox(height: 32),
               _SectionHeader(
@@ -163,7 +166,9 @@ class _AdminBrandingScreenState extends ConsumerState<AdminBrandingScreen> {
                           ),
                         )
                       : const Icon(Icons.save_outlined),
-                  label: Text(isSaving ? l10n.orgSettingsSaving : l10n.orgSettingsSaveBranding),
+                  label: Text(isSaving
+                      ? l10n.orgSettingsSaving
+                      : l10n.orgSettingsSaveBranding),
                 ),
               ),
               const SizedBox(height: 24),
@@ -197,7 +202,8 @@ class _AdminBrandingScreenState extends ConsumerState<AdminBrandingScreen> {
     }
 
     final primary = Color(int.parse('FF${primaryHex.substring(1)}', radix: 16));
-    final secondary = Color(int.parse('FF${secondaryHex.substring(1)}', radix: 16));
+    final secondary =
+        Color(int.parse('FF${secondaryHex.substring(1)}', radix: 16));
 
     // Approximate M3 surface colors for each theme mode.
     const lightSurface = Color(0xFFFFFBFE);
@@ -205,14 +211,17 @@ class _AdminBrandingScreenState extends ConsumerState<AdminBrandingScreen> {
 
     // Warn whenever the primary itself fails — even if secondary can rescue it
     // at runtime, the admin should know their brand color isn't truly visible.
-    final lightIssue = AppTheme.primaryNeedsContrastWarning(primary, lightSurface);
-    final darkIssue = AppTheme.primaryNeedsContrastWarning(primary, darkSurface);
+    final lightIssue =
+        AppTheme.primaryNeedsContrastWarning(primary, lightSurface);
+    final darkIssue =
+        AppTheme.primaryNeedsContrastWarning(primary, darkSurface);
 
     if (lightIssue || darkIssue) {
       // Does secondary at least provide a fallback for the affected surface(s)?
-      final secondaryCanResolve =
-          (lightIssue && !AppTheme.primaryNeedsContrastWarning(secondary, lightSurface)) ||
-          (darkIssue && !AppTheme.primaryNeedsContrastWarning(secondary, darkSurface));
+      final secondaryCanResolve = (lightIssue &&
+              !AppTheme.primaryNeedsContrastWarning(secondary, lightSurface)) ||
+          (darkIssue &&
+              !AppTheme.primaryNeedsContrastWarning(secondary, darkSurface));
       _showContrastWarningDialog(
         primaryHex: primaryHex,
         secondaryHex: secondaryHex,
@@ -289,9 +298,12 @@ class _AdminBrandingScreenState extends ConsumerState<AdminBrandingScreen> {
                   : const Color(0xFF141218);
               final adjusted =
                   AppTheme.autoAdjustForContrast(primary, adjustSurface);
-              final r = (adjusted.r * 255).round().toRadixString(16).padLeft(2, '0');
-              final g = (adjusted.g * 255).round().toRadixString(16).padLeft(2, '0');
-              final b = (adjusted.b * 255).round().toRadixString(16).padLeft(2, '0');
+              final r =
+                  (adjusted.r * 255).round().toRadixString(16).padLeft(2, '0');
+              final g =
+                  (adjusted.g * 255).round().toRadixString(16).padLeft(2, '0');
+              final b =
+                  (adjusted.b * 255).round().toRadixString(16).padLeft(2, '0');
               final adjustedHex = '#$r$g$b'.toUpperCase();
               setState(() => _primaryCtrl.text = adjustedHex);
               _performSave(adjustedHex, secondaryHex);
@@ -368,6 +380,61 @@ class _SectionHeader extends StatelessWidget {
           stringKey: subtitleKey,
           text: subtitle,
           style: subtitleStyle,
+        ),
+      ],
+    );
+  }
+}
+
+class _OrganizationIdCard extends StatelessWidget {
+  const _OrganizationIdCard({required this.organizationId});
+
+  final String organizationId;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final resolvedId = organizationId.trim();
+    final displayId = resolvedId.isEmpty ? l10n.commonNotAvailable : resolvedId;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _SectionHeader(
+          icon: Icons.fingerprint_outlined,
+          titleKey: 'orgSettingsOrganizationIdTitle',
+          subtitleKey: 'orgSettingsOrganizationIdSubtitle',
+          title: l10n.orgSettingsOrganizationIdTitle,
+          subtitle: l10n.orgSettingsOrganizationIdSubtitle,
+        ),
+        const SizedBox(height: 12),
+        Card(
+          child: ListTile(
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            title: TranslationAnchor(
+              stringKey: 'orgSettingsOrganizationIdLabel',
+              text: l10n.orgSettingsOrganizationIdLabel,
+            ),
+            subtitle: SelectableText(displayId),
+            trailing: IconButton(
+              tooltip: l10n.commonCopy,
+              onPressed: resolvedId.isEmpty
+                  ? null
+                  : () async {
+                      await Clipboard.setData(ClipboardData(text: resolvedId));
+                      if (!context.mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: TranslationAnchor(
+                            stringKey: 'orgSettingsOrganizationIdCopied',
+                            text: l10n.orgSettingsOrganizationIdCopied,
+                          ),
+                        ),
+                      );
+                    },
+              icon: const Icon(Icons.copy_rounded),
+            ),
+          ),
         ),
       ],
     );
@@ -713,8 +780,7 @@ class _OrganizationTypeCardState extends ConsumerState<_OrganizationTypeCard> {
     final l10n = context.l10n;
     final theme = Theme.of(context);
     final orgAsync = ref.watch(organizationConfigProvider);
-    final currentType =
-        orgAsync.asData?.value.type ?? OrganizationType.other;
+    final currentType = orgAsync.asData?.value.type ?? OrganizationType.other;
     final selectedType = _selectedType ?? currentType;
     final hasChanges = selectedType != currentType;
 
@@ -743,9 +809,8 @@ class _OrganizationTypeCardState extends ConsumerState<_OrganizationTypeCard> {
                 ),
               )
               .toList(),
-          onChanged: _saving
-              ? null
-              : (value) => setState(() => _selectedType = value),
+          onChanged:
+              _saving ? null : (value) => setState(() => _selectedType = value),
         ),
         const SizedBox(height: 8),
         Text(
@@ -758,9 +823,8 @@ class _OrganizationTypeCardState extends ConsumerState<_OrganizationTypeCard> {
         Align(
           alignment: Alignment.centerRight,
           child: FilledButton(
-            onPressed: _saving || !hasChanges
-                ? null
-                : () => _saveType(currentType),
+            onPressed:
+                _saving || !hasChanges ? null : () => _saveType(currentType),
             child: _saving
                 ? const SizedBox(
                     width: 18,
@@ -808,7 +872,7 @@ class _MemberProfilePhotosCardState
           .read(organizationConfigProvider.notifier)
           .refreshFromServer();
       if (config.allowMemberProfilePhotos != value) {
-        throw StateError(context.l10n.orgSettingsProfilePhotoSaveFailed);
+        throw StateError(l10n.orgSettingsProfilePhotoSaveFailed);
       }
       if (mounted) {
         setState(() => _localOverride = null);
@@ -928,7 +992,7 @@ class _ReminderApprovalCardState extends ConsumerState<_ReminderApprovalCard> {
           .read(organizationConfigProvider.notifier)
           .refreshFromServer();
       if (config.requireReminderApproval != value) {
-        throw StateError(context.l10n.orgSettingsReminderApprovalSaveFailed);
+        throw StateError(l10n.orgSettingsReminderApprovalSaveFailed);
       }
       if (mounted) {
         setState(() => _localOverride = null);
@@ -966,8 +1030,7 @@ class _ReminderApprovalCardState extends ConsumerState<_ReminderApprovalCard> {
     final l10n = context.l10n;
     final theme = Theme.of(context);
     final orgAsync = ref.watch(organizationConfigProvider);
-    final remoteValue =
-        orgAsync.asData?.value.requireReminderApproval ?? false;
+    final remoteValue = orgAsync.asData?.value.requireReminderApproval ?? false;
 
     ref.listen(organizationConfigProvider, (prev, next) {
       final nextValue = next.asData?.value.requireReminderApproval;
@@ -1003,8 +1066,7 @@ class _ReminderApprovalCardState extends ConsumerState<_ReminderApprovalCard> {
               color: requireApproval
                   ? theme.colorScheme.primary
                   : theme.colorScheme.onSurfaceVariant,
-              fontWeight:
-                  requireApproval ? FontWeight.w600 : FontWeight.normal,
+              fontWeight: requireApproval ? FontWeight.w600 : FontWeight.normal,
             ),
           ),
           value: requireApproval,
@@ -1021,4 +1083,3 @@ class _ReminderApprovalCardState extends ConsumerState<_ReminderApprovalCard> {
     );
   }
 }
-

@@ -902,6 +902,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsAboutLegalese => '© 2026 SpeakUp Connect';
 
   @override
+  String get settingsAboutOrganizationIdLabel => 'Organization ID';
+
+  @override
+  String get settingsAboutOrganizationIdCopied => 'Organization ID copied';
+
+  @override
   String get settingsSectionAdmin => 'Administration';
 
   @override
@@ -1518,6 +1524,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get commonNotSet => 'Not set';
+
+  @override
+  String get commonNotAvailable => 'Not available';
 
   @override
   String get changePasswordIntro =>
@@ -2796,6 +2805,19 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get orgSettingsOrgNameSubtitle =>
       'Displayed on the splash screen as \"SpeakUp [Name]\".';
+
+  @override
+  String get orgSettingsOrganizationIdTitle => 'Organization ID';
+
+  @override
+  String get orgSettingsOrganizationIdSubtitle =>
+      'Unique identifier used for this organization.';
+
+  @override
+  String get orgSettingsOrganizationIdLabel => 'Current organization ID';
+
+  @override
+  String get orgSettingsOrganizationIdCopied => 'Organization ID copied';
 
   @override
   String get orgSettingsBrandColorsTitle => 'Brand Colors';

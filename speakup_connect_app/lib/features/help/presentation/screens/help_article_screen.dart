@@ -21,7 +21,7 @@ class HelpArticleScreen extends ConsumerWidget {
     final l10n = context.l10n;
     final article = HelpArticles.byId(articleId);
     final canViewAdmin = ref.watch(canViewAdminHelpProvider);
-    final organizationType = ref.watch(activeHelpOrganizationTypeProvider);
+    final organizationTypeAsync = ref.watch(activeHelpOrganizationTypeProvider);
     final languageCode = helpLanguageCodeForLocale(ref.watch(appLocaleProvider));
 
     if (article == null) {
@@ -44,6 +44,17 @@ class HelpArticleScreen extends ConsumerWidget {
       );
     }
 
+    if (organizationTypeAsync.isLoading) {
+      return Scaffold(
+        appBar: AppBar(
+          leading: BackButton(onPressed: () => context.pop()),
+          title: Text(article.title(l10n)),
+        ),
+        body: const AppLoadingIndicator(),
+      );
+    }
+
+    final organizationType = organizationTypeAsync.asData?.value;
     final theme = Theme.of(context);
     final contentFuture = HelpAssetResolver.loadMarkdown(
       organizationType: organizationType,

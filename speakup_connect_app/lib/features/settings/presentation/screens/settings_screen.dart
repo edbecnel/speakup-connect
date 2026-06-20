@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:speakup_connect/config/app_config.dart';
@@ -47,12 +48,17 @@ class SettingsScreen extends ConsumerWidget {
     final leaderOnlyAlerts = ref.watch(isGroupLeaderOnlyComposerProvider);
 
     final l10n = context.l10n;
-    final orgName = orgConfigAsync.value?.displayName ?? l10n.settingsOrgUnavailable;
+    final orgName =
+        orgConfigAsync.value?.displayName ?? l10n.settingsOrgUnavailable;
     final theme = Theme.of(context);
     final photoBusy = ref.watch(profilePhotoProvider).isLoading;
     final allowPersonalPhotos = ref.watch(allowMemberProfilePhotosProvider);
+    final activeOrganizationId = ref.watch(activeOrganizationIdProvider);
     final displayName =
         user?.displayName ?? profile?.fullName ?? l10n.settingsAnonymous;
+    final aboutOrganizationId = activeOrganizationId.trim().isEmpty
+        ? l10n.commonNotAvailable
+        : activeOrganizationId.trim();
 
     ref.listen(profilePhotoProvider, (prev, next) {
       if (prev?.isLoading == true && !next.isLoading && next.hasError) {
@@ -122,7 +128,8 @@ class SettingsScreen extends ConsumerWidget {
                           if (context.mounted && ok) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text(l10n.settingsPersonalPhotoRemoved),
+                                content:
+                                    Text(l10n.settingsPersonalPhotoRemoved),
                               ),
                             );
                           }
@@ -222,7 +229,8 @@ class SettingsScreen extends ConsumerWidget {
             leading: const Icon(Icons.language_outlined),
             title: Text(l10n.settingsLanguage),
             subtitle: Text(
-              kLanguageNativeLabels[ref.watch(appLocaleProvider).languageCode] ??
+              kLanguageNativeLabels[
+                      ref.watch(appLocaleProvider).languageCode] ??
                   l10n.settingsLanguageEnglish,
             ),
             trailing: const Icon(Icons.chevron_right_rounded),
@@ -279,11 +287,56 @@ class SettingsScreen extends ConsumerWidget {
             title: Text(l10n.settingsAboutApp(AppConfig.appName)),
             trailing: const Icon(Icons.chevron_right_rounded),
             onTap: () {
+              final messenger = ScaffoldMessenger.of(context);
               showAboutDialog(
                 context: context,
                 applicationName: l10n.settingsSpeakUpOrg(orgName),
                 applicationVersion: '1.0.0',
                 applicationLegalese: l10n.settingsAboutLegalese,
+                children: [
+                  const SizedBox(height: 8),
+                  TranslationAnchor(
+                    stringKey: 'settingsAboutOrganizationIdLabel',
+                    text: l10n.settingsAboutOrganizationIdLabel,
+                  ),
+                  const SizedBox(height: 4),
+                  InkWell(
+                    onTap: aboutOrganizationId == l10n.commonNotAvailable
+                        ? null
+                        : () async {
+                            await Clipboard.setData(
+                              ClipboardData(text: aboutOrganizationId),
+                            );
+                            if (!context.mounted) return;
+                            messenger.showSnackBar(
+                              SnackBar(
+                                content: TranslationAnchor(
+                                  stringKey:
+                                      'settingsAboutOrganizationIdCopied',
+                                  text: l10n.settingsAboutOrganizationIdCopied,
+                                ),
+                              ),
+                            );
+                          },
+                    borderRadius: BorderRadius.circular(8),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 4,
+                        horizontal: 2,
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(child: SelectableText(aboutOrganizationId)),
+                          if (aboutOrganizationId != l10n.commonNotAvailable)
+                            const Padding(
+                              padding: EdgeInsets.only(left: 8),
+                              child: Icon(Icons.copy_rounded, size: 18),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
               );
             },
           ),
@@ -441,7 +494,6 @@ class SettingsScreen extends ConsumerWidget {
       ),
     );
   }
-
 }
 
 String _themeModeLabel(AppLocalizations l10n, ThemeMode mode) => switch (mode) {
@@ -479,4 +531,3 @@ class _SectionHeader extends StatelessWidget {
     );
   }
 }
-

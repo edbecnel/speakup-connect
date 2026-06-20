@@ -1646,6 +1646,18 @@ abstract class AppLocalizations {
   /// **'© 2026 SpeakUp Connect'**
   String get settingsAboutLegalese;
 
+  /// No description provided for @settingsAboutOrganizationIdLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Organization ID'**
+  String get settingsAboutOrganizationIdLabel;
+
+  /// No description provided for @settingsAboutOrganizationIdCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Organization ID copied'**
+  String get settingsAboutOrganizationIdCopied;
+
   /// No description provided for @settingsSectionAdmin.
   ///
   /// In en, this message translates to:
@@ -2714,6 +2726,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Not set'**
   String get commonNotSet;
+
+  /// No description provided for @commonNotAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Not available'**
+  String get commonNotAvailable;
 
   /// No description provided for @changePasswordIntro.
   ///
@@ -4822,6 +4840,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Displayed on the splash screen as \"SpeakUp [Name]\".'**
   String get orgSettingsOrgNameSubtitle;
+
+  /// No description provided for @orgSettingsOrganizationIdTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Organization ID'**
+  String get orgSettingsOrganizationIdTitle;
+
+  /// No description provided for @orgSettingsOrganizationIdSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Unique identifier used for this organization.'**
+  String get orgSettingsOrganizationIdSubtitle;
+
+  /// No description provided for @orgSettingsOrganizationIdLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Current organization ID'**
+  String get orgSettingsOrganizationIdLabel;
+
+  /// No description provided for @orgSettingsOrganizationIdCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Organization ID copied'**
+  String get orgSettingsOrganizationIdCopied;
 
   /// No description provided for @orgSettingsBrandColorsTitle.
   ///

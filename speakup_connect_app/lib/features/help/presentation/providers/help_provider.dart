@@ -1,27 +1,48 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:speakup_connect/config/app_config.dart';
 import 'package:speakup_connect/core/permissions/providers/permission_provider.dart';
 import 'package:speakup_connect/features/groups/presentation/providers/group_provider.dart';
 import 'package:speakup_connect/features/help/domain/help_article.dart';
+import 'package:speakup_connect/features/organization/domain/entities/organization_config_entity.dart';
 import 'package:speakup_connect/features/organization/presentation/providers/organization_provider.dart';
 import 'package:speakup_connect/features/organization/presentation/providers/user_profile_provider.dart';
 import 'package:speakup_connect/features/translations/presentation/providers/translation_provider.dart';
+import 'package:speakup_connect/flavor_config.dart';
 
 /// Organization type whose bundled help assets should be loaded.
 ///
 /// When unavailable, resolver falls back to `_default` assets only.
-final activeHelpOrganizationTypeProvider = Provider<String?>((ref) {
-  final orgConfig = ref.watch(organizationConfigProvider).value;
-  final type = orgConfig?.type.value.trim().toLowerCase();
-  if (type == null || type.isEmpty) {
-    return null;
+final activeHelpOrganizationTypeProvider = FutureProvider<String?>((ref) async {
+  final profile = ref.watch(userProfileProvider).value;
+  final profileOrgId = profile?.organizationId.trim();
+  final orgId = (profileOrgId != null && profileOrgId.isNotEmpty)
+      ? profileOrgId
+      : AppConfig.defaultOrganizationId;
+
+  String? flavorFallback() {
+    final bakedType = FlavorConfig.instance.orgDefaults?.type;
+    return bakedType == OrganizationType.school ? 'school' : null;
   }
 
-  // Help bundles are currently maintained for school organizations only.
-  // Unknown/unsupported org types should fall back to `_default`.
-  if (type == 'school') {
-    return type;
+  if (orgId.isEmpty) {
+    return flavorFallback() ?? 'school';
   }
-  return null;
+
+  // Current supported production scenario is school tenants.
+  // If org type is missing/other, prefer school bundle then resolver fallback.
+  String preferSchoolFallback(OrganizationType? type) {
+    if (type == OrganizationType.school) return 'school';
+    final flavor = flavorFallback();
+    return flavor ?? 'school';
+  }
+
+  final repo = ref.read(organizationRepositoryProvider);
+  try {
+    final config = await repo.getOrganizationConfig(orgId);
+    return preferSchoolFallback(config.type);
+  } catch (_) {
+    return preferSchoolFallback(null);
+  }
 });
 
 /// Whether the signed-in user should see administration help content.

@@ -9,6 +9,7 @@ import 'package:speakup_connect/features/organization/data/repositories/organiza
 import 'package:speakup_connect/features/organization/data/services/org_config_cache_service.dart';
 import 'package:speakup_connect/features/organization/domain/entities/organization_config_entity.dart';
 import 'package:speakup_connect/features/organization/domain/repositories/organization_repository.dart';
+import 'package:speakup_connect/features/organization/presentation/providers/user_profile_provider.dart';
 import 'package:speakup_connect/flavor_config.dart';
 
 part 'organization_provider.g.dart';
@@ -78,9 +79,8 @@ class OrganizationConfig extends _$OrganizationConfig {
         return OrganizationConfigModel(
           organizationId: orgId,
           displayName: cached.displayName,
-          type: cached.organizationType ??
-              baked?.type ??
-              OrganizationType.other,
+          type:
+              cached.organizationType ?? baked?.type ?? OrganizationType.other,
           themeColors: cached.colors,
           allowAnonymousReports: true,
           reportCodePrefix:
@@ -119,7 +119,10 @@ class OrganizationConfig extends _$OrganizationConfig {
 
 /// Whether members may upload a personal profile badge in Settings.
 final allowMemberProfilePhotosProvider = Provider<bool>((ref) {
-  return ref.watch(organizationConfigProvider).value?.allowMemberProfilePhotos ??
+  return ref
+          .watch(organizationConfigProvider)
+          .value
+          ?.allowMemberProfilePhotos ??
       false;
 });
 
@@ -136,6 +139,19 @@ final orgGradeLevelsProvider = Provider<List<int>>((ref) {
     return List<int>.from(kDefaultSchoolGradeLevels);
   }
   return config.effectiveGradeLevels;
+});
+
+/// Active organization ID for the current session.
+///
+/// Prefers the signed-in profile's organizationId when available, and falls
+/// back to the app's default organization id otherwise.
+final activeOrganizationIdProvider = Provider<String>((ref) {
+  final profileOrgId =
+      ref.watch(userProfileProvider).value?.organizationId.trim();
+  if (profileOrgId != null && profileOrgId.isNotEmpty) {
+    return profileOrgId;
+  }
+  return AppConfig.defaultOrganizationId;
 });
 
 class SchoolGradesActionNotifier extends Notifier<AsyncValue<void>> {

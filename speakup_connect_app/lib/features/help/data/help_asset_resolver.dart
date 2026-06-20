@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/services.dart';
 
 /// Resolves bundled markdown help assets per organization type and locale.
@@ -10,6 +12,8 @@ import 'package:flutter/services.dart';
 ///
 /// If [organizationType] is null/empty, resolution uses `_default` only.
 abstract class HelpAssetResolver {
+  static Set<String>? _assetManifestKeysCache;
+
   static String organizationTypePath(
     String organizationType,
     String articleName, {
@@ -74,11 +78,13 @@ abstract class HelpAssetResolver {
       articleName: articleName,
       languageCode: languageCode,
     );
+    final attempted = <String>[];
 
     Object? lastError;
     for (final path in candidates) {
       try {
-        return await rootBundle.loadString(path);
+        attempted.add(path);
+        return await _loadStringWithCaseInsensitiveFallback(path);
       } catch (e) {
         lastError = e;
       }
@@ -88,8 +94,44 @@ abstract class HelpAssetResolver {
       organizationType: organizationType,
       articleName: articleName,
       languageCode: languageCode,
+      attemptedCandidates: attempted,
       cause: lastError,
     );
+  }
+
+  static Future<String> _loadStringWithCaseInsensitiveFallback(String path) async {
+    Object? originalError;
+    try {
+      return await rootBundle.loadString(path);
+    } catch (e) {
+      originalError = e;
+    }
+
+    final keys = await _assetManifestKeys();
+    final matched = keys.lookup(path) ??
+        keys.firstWhere(
+          (k) => k.toLowerCase() == path.toLowerCase(),
+          orElse: () => '',
+        );
+    if (matched.isEmpty) {
+      throw originalError ?? StateError('Asset not found: $path');
+    }
+    return rootBundle.loadString(matched);
+  }
+
+  static Future<Set<String>> _assetManifestKeys() async {
+    final cached = _assetManifestKeysCache;
+    if (cached != null) return cached;
+
+    final raw = await rootBundle.loadString('AssetManifest.json');
+    final decoded = jsonDecode(raw);
+    if (decoded is! Map<String, dynamic>) {
+      _assetManifestKeysCache = <String>{};
+      return _assetManifestKeysCache!;
+    }
+
+    _assetManifestKeysCache = decoded.keys.toSet();
+    return _assetManifestKeysCache!;
   }
 }
 
@@ -98,16 +140,18 @@ class HelpAssetNotFoundException implements Exception {
     this.organizationType,
     required this.articleName,
     required this.languageCode,
+    this.attemptedCandidates = const <String>[],
     this.cause,
   });
 
   final String? organizationType;
   final String articleName;
   final String languageCode;
+  final List<String> attemptedCandidates;
   final Object? cause;
 
   @override
   String toString() =>
       'No help article found for orgType "${organizationType ?? '_default'}" article "$articleName" '
-      'language "$languageCode"';
+      'language "$languageCode". Tried: ${attemptedCandidates.join(', ')}';
 }

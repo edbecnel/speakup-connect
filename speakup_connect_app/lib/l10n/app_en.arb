@@ -408,6 +408,8 @@
     }
   },
   "settingsAboutLegalese": "© 2026 SpeakUp Connect",
+  "settingsAboutOrganizationIdLabel": "Organization ID",
+  "settingsAboutOrganizationIdCopied": "Organization ID copied",
   "settingsSectionAdmin": "Administration",
   "settingsAdminDashboard": "Admin Dashboard",
   "settingsAdminDashboardSubtitle": "Review and manage submitted reports",
@@ -713,6 +715,7 @@
   "commonHidePassword": "Hide password",
   "commonNone": "(none)",
   "commonNotSet": "Not set",
+  "commonNotAvailable": "Not available",
 
   "changePasswordIntro": "Enter your current password, then choose a new password.",
   "changePasswordCurrentLabel": "Current password",
@@ -1458,6 +1461,10 @@
   "orgSettingsRequireApproval": "Require approval before publishing",
   "orgSettingsOrgNameTitle": "Organization Name",
   "orgSettingsOrgNameSubtitle": "Displayed on the splash screen as \"SpeakUp [Name]\".",
+  "orgSettingsOrganizationIdTitle": "Organization ID",
+  "orgSettingsOrganizationIdSubtitle": "Unique identifier used for this organization.",
+  "orgSettingsOrganizationIdLabel": "Current organization ID",
+  "orgSettingsOrganizationIdCopied": "Organization ID copied",
   "orgSettingsBrandColorsTitle": "Brand Colors",
   "orgSettingsBrandColorsSubtitle": "Enter 6-digit hex codes from the organization's brand guide (e.g. #1A73E8). Changes apply to all connected devices in real time and are cached locally for instant startup.",
   "orgSettingsPrimaryColor": "Primary Color",
