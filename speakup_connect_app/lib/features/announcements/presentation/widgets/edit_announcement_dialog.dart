@@ -46,7 +46,12 @@ class EditAnnouncementDialog extends StatefulWidget {
         })>(
       context: context,
       barrierDismissible: false,
-      builder: (_) => EditAnnouncementDialog(bulletin: bulletin),
+      builder: (_) => EditAnnouncementDialog(
+        key: ValueKey(
+          '${bulletin.bulletinId}:${bulletin.updatedAt.microsecondsSinceEpoch}',
+        ),
+        bulletin: bulletin,
+      ),
     );
   }
 
@@ -69,13 +74,32 @@ class _EditAnnouncementDialogState extends State<EditAnnouncementDialog> {
   @override
   void initState() {
     super.initState();
-    final bulletin = widget.bulletin;
-    _titleController = TextEditingController(text: bulletin.title);
-    _bodyController = TextEditingController(text: bulletin.body);
+    _titleController = TextEditingController();
+    _bodyController = TextEditingController();
+    _seedFromBulletin(widget.bulletin);
+  }
+
+  void _seedFromBulletin(BulletinEntity bulletin) {
+    _titleController.text = bulletin.title;
+    _bodyController.text = bulletin.body;
     _expiration = ExpirationPickerValue.fromExpiresAt(bulletin.expiresAt);
     _hadExpiration = bulletin.expiresAt != null;
     _responseConfig = bulletin.responseConfig ?? const ReminderResponseConfig();
     _initialResponseEnabled = bulletin.responseConfig?.enabled ?? false;
+    _previewImagePath = null;
+    _clearedImage = false;
+  }
+
+  @override
+  void didUpdateWidget(covariant EditAnnouncementDialog oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final idChanged =
+        oldWidget.bulletin.bulletinId != widget.bulletin.bulletinId;
+    final updatedAtChanged =
+        oldWidget.bulletin.updatedAt != widget.bulletin.updatedAt;
+    if (idChanged || updatedAtChanged) {
+      _seedFromBulletin(widget.bulletin);
+    }
   }
 
   @override
@@ -169,59 +193,76 @@ class _EditAnnouncementDialogState extends State<EditAnnouncementDialog> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final mediaQuery = MediaQuery.of(context);
+    final dialogMaxHeight = mediaQuery.size.height * 0.88;
     return AlertDialog(
+      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       title: Text(l10n.announcementsEditTitle),
-      content: Form(
-        key: _formKey,
-        child: SingleChildScrollView(
+      contentPadding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
+      content: SizedBox(
+        height: dialogMaxHeight,
+        width: mediaQuery.size.width * 0.9,
+        child: Form(
+          key: _formKey,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              AppTextField(
-                controller: _titleController,
-                label: l10n.commonTitle,
-                textInputAction: TextInputAction.next,
-                validator: (v) {
-                  if (v == null || v.trim().isEmpty) {
-                    return 'Enter a title';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 12),
-              AppTextField(
-                controller: _bodyController,
-                label: l10n.commonMessage,
-                maxLines: 4,
-                validator: (v) {
-                  if (v == null || v.trim().isEmpty) {
-                    return 'Enter a message';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 8),
-              ExpirationPickerSection(
-                value: _expiration,
-                onChanged: (v) => setState(() => _expiration = v),
-              ),
-              const SizedBox(height: 16),
-              AnnouncementImageSection(
-                imagePath: _previewImagePath,
-                existingImageUrl: _existingImageUrl,
-                isLoading: _pickingImage,
-                onPick: _pickImage,
-                onRemove: _removeImage,
-              ),
-              const SizedBox(height: 16),
-              ResponseConfigSection(
-                value: _responseConfig,
-                onChanged: (v) => setState(() => _responseConfig = v),
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      AppTextField(
+                        controller: _titleController,
+                        label: l10n.commonTitle,
+                        textInputAction: TextInputAction.next,
+                        validator: (v) {
+                          if (v == null || v.trim().isEmpty) {
+                            return 'Enter a title';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 12),
+                      AppTextField(
+                        controller: _bodyController,
+                        label: l10n.commonMessage,
+                        minLines: 7,
+                        maxLines: 7,
+                        validator: (v) {
+                          if (v == null || v.trim().isEmpty) {
+                            return 'Enter a message';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 8),
+                      ExpirationPickerSection(
+                        value: _expiration,
+                        onChanged: (v) => setState(() => _expiration = v),
+                      ),
+                      const SizedBox(height: 16),
+                      AnnouncementImageSection(
+                        imagePath: _previewImagePath,
+                        existingImageUrl: _existingImageUrl,
+                        isLoading: _pickingImage,
+                        onPick: _pickImage,
+                        onRemove: _removeImage,
+                      ),
+                      const SizedBox(height: 16),
+                      ResponseConfigSection(
+                        value: _responseConfig,
+                        onChanged: (v) => setState(() => _responseConfig = v),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ],
           ),
         ),
       ),
+      actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),

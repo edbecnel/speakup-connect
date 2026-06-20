@@ -168,9 +168,18 @@ class _AnnouncementDetailScreenState
     BuildContext context,
     BulletinEntity bulletin,
   ) async {
+    BulletinEntity initialBulletin = bulletin;
+    try {
+      initialBulletin = await ref
+              .read(bulletinByIdProvider(widget.bulletinId).future) ??
+          bulletin;
+    } catch (_) {
+      initialBulletin = bulletin;
+    }
+
     final edited = await EditAnnouncementDialog.show(
       context,
-      bulletin: bulletin,
+      bulletin: initialBulletin,
     );
     if (edited == null || !context.mounted) return;
 
@@ -187,6 +196,7 @@ class _AnnouncementDetailScreenState
         );
     if (ok && mounted) {
       ref.invalidate(bulletinByIdProvider(widget.bulletinId));
+      ref.invalidate(myBulletinsProvider);
     }
   }
 

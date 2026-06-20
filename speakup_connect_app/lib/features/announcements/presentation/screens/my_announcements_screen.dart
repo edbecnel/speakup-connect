@@ -199,14 +199,23 @@ class _MyAnnouncementCard extends ConsumerWidget {
   }
 
   Future<void> _edit(BuildContext context, WidgetRef ref) async {
+    final bulletinId = bulletin.bulletinId;
+    BulletinEntity initialBulletin = bulletin;
+    try {
+      initialBulletin =
+          await ref.read(bulletinByIdProvider(bulletinId).future) ?? bulletin;
+    } catch (_) {
+      initialBulletin = bulletin;
+    }
+
     final edited = await EditAnnouncementDialog.show(
       context,
-      bulletin: bulletin,
+      bulletin: initialBulletin,
     );
     if (edited == null || !context.mounted) return;
 
     final ok = await ref.read(updateAnnouncementProvider.notifier).update(
-          bulletinId: bulletin.bulletinId,
+          bulletinId: bulletinId,
           title: edited.title,
           body: edited.body,
           expiresAt: edited.expiresAt,
@@ -217,7 +226,8 @@ class _MyAnnouncementCard extends ConsumerWidget {
           clearResponseConfig: edited.clearResponseConfig,
         );
     if (ok && context.mounted) {
-      ref.invalidate(bulletinByIdProvider(bulletin.bulletinId));
+      ref.invalidate(bulletinByIdProvider(bulletinId));
+      ref.invalidate(myBulletinsProvider);
     }
   }
 
