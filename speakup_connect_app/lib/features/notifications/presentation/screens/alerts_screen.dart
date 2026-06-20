@@ -30,6 +30,8 @@ class AlertsScreen extends ConsumerWidget {
     final notificationsAsync = ref.watch(notificationsProvider);
     final unread = ref.watch(unreadNotificationCountProvider);
     final canBroadcast = ref.watch(canComposeRemindersProvider);
+    final canPostAnnouncements = ref.watch(canPostAnnouncementsProvider);
+    final canViewOutbox = canBroadcast || canPostAnnouncements;
     final leaderOnly = ref.watch(isGroupLeaderOnlyComposerProvider);
     final canApprove = ref.watch(canReviewPendingRemindersProvider);
     final pendingApprovalCount = ref.watch(pendingReminderCountProvider);
@@ -195,9 +197,9 @@ class AlertsScreen extends ConsumerWidget {
                   icon: const Icon(Icons.history),
                   onPressed: () => context.push(Routes.notificationHistory),
                 ),
-              if (canBroadcast)
+              if (canViewOutbox)
                 IconButton(
-                  tooltip: leaderOnly ? 'Sent group alerts' : 'My broadcasts',
+                  tooltip: l10n.settingsMyBroadcasts,
                   icon: const Icon(Icons.outbox_outlined),
                   onPressed: () => context.push(Routes.myBroadcasts),
                 ),

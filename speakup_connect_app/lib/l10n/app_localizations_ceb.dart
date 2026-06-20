@@ -842,7 +842,7 @@ class AppLocalizationsCeb extends AppLocalizations {
 
   @override
   String get settingsMyBroadcastsSubtitle =>
-      'Pagdumala sa gipadala nga mga pahimangno ug tan-awa ang mga tubag';
+      'Pagdumala sa gipadala nga mga pahimangno ug mga pahibalo';
 
   @override
   String get settingsSectionAppearance => 'Hitsura';
@@ -4100,6 +4100,12 @@ class AppLocalizationsCeb extends AppLocalizations {
   @override
   String get reminderMyBroadcastsEmptyLeaderHint =>
       'Send an alert from My Groups & Clubs, then return here to view member responses.';
+
+  @override
+  String get myBroadcastsRemindersTab => 'Mga pahimangno';
+
+  @override
+  String get myBroadcastsAnnouncementsTab => 'Mga pahibalo';
 
   @override
   String get reminderEditBroadcastTitle => 'Edit broadcast';

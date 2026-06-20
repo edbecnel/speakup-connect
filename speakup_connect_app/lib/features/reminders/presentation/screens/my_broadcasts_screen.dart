@@ -1,17 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:speakup_connect/core/constants/route_constants.dart';
 import 'package:speakup_connect/core/l10n/app_localizations_extension.dart';
-import 'package:speakup_connect/features/groups/presentation/providers/group_provider.dart';
-import 'package:speakup_connect/features/reminders/domain/entities/reminder_entity.dart';
+import 'package:speakup_connect/features/announcements/domain/entities/bulletin_entity.dart';
+import 'package:speakup_connect/features/announcements/presentation/providers/announcement_provider.dart';
+import 'package:speakup_connect/features/announcements/presentation/screens/announcement_responses_screen.dart';
+import 'package:speakup_connect/features/announcements/presentation/widgets/edit_announcement_dialog.dart';
 import 'package:speakup_connect/features/auth/presentation/providers/auth_provider.dart';
-import 'package:speakup_connect/features/reminders/presentation/providers/reminder_provider.dart';
+import 'package:speakup_connect/features/groups/presentation/providers/group_provider.dart';
 import 'package:speakup_connect/features/notifications/presentation/providers/notification_history_provider.dart';
+import 'package:speakup_connect/features/organization/presentation/providers/user_profile_provider.dart';
+import 'package:speakup_connect/features/reminders/domain/entities/reminder_entity.dart';
+import 'package:speakup_connect/features/reminders/presentation/providers/reminder_provider.dart';
 import 'package:speakup_connect/features/reminders/presentation/screens/broadcast_detail_screen.dart';
 import 'package:speakup_connect/features/reminders/presentation/screens/reminder_responses_screen.dart';
 import 'package:speakup_connect/features/reminders/presentation/widgets/edit_reminder_dialog.dart';
-import 'package:speakup_connect/features/organization/presentation/providers/user_profile_provider.dart';
 
 /// My Broadcasts — lists the reminders the current user has sent and lets them
 /// recall (delete) any of them. Recalling a *published* reminder also removes
@@ -24,10 +29,10 @@ class MyBroadcastsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
-    final canAccess = ref.watch(canComposeRemindersProvider);
+    final canAccess = ref.watch(canComposeRemindersProvider) ||
+        ref.watch(canPostAnnouncementsProvider);
     final leaderOnly = ref.watch(isGroupLeaderOnlyComposerProvider);
     final canViewHistory = ref.watch(canViewNotificationHistoryProvider);
-    final mineAsync = ref.watch(myRemindersProvider);
 
     ref.listen(updateReminderProvider, (prev, next) {
       if (prev?.isLoading == true && !next.isLoading) {
@@ -75,40 +80,124 @@ class MyBroadcastsScreen extends ConsumerWidget {
       }
     });
 
-    return Scaffold(
-      appBar: AppBar(
-        leading: BackButton(
-          onPressed: () =>
-              context.canPop() ? context.pop() : context.go(Routes.alerts),
+    ref.listen(updateAnnouncementProvider, (prev, next) {
+      if (prev?.isLoading == true && !next.isLoading) {
+        final messenger = ScaffoldMessenger.of(context);
+        messenger.hideCurrentSnackBar();
+        if (next.hasError) {
+          messenger.showSnackBar(SnackBar(
+            content: Text(l10n.commonUpdateFailed('${next.error}')),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ));
+        } else {
+          final updated = next.asData?.value ?? 0;
+          messenger.showSnackBar(SnackBar(
+            content: Text(
+              updated > 0
+                  ? 'Announcement updated — $updated alert(s) refreshed.'
+                  : 'Announcement updated.',
+            ),
+            backgroundColor: Colors.green.shade700,
+          ));
+        }
+      }
+    });
+
+    ref.listen(deleteAnnouncementProvider, (prev, next) {
+      if (prev?.isLoading == true && !next.isLoading) {
+        final messenger = ScaffoldMessenger.of(context);
+        messenger.hideCurrentSnackBar();
+        if (next.hasError) {
+          messenger.showSnackBar(SnackBar(
+            content: Text(l10n.commonDeleteFailed('${next.error}')),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ));
+        } else {
+          final removed = next.asData?.value ?? 0;
+          messenger.showSnackBar(SnackBar(
+            content: Text(
+              removed > 0
+                  ? 'Announcement deleted — $removed alert(s) removed.'
+                  : 'Announcement deleted.',
+            ),
+            backgroundColor: Colors.green.shade700,
+          ));
+        }
+      }
+    });
+
+    if (!canAccess) {
+      return Scaffold(
+        appBar: AppBar(
+          leading: BackButton(
+            onPressed: () =>
+                context.canPop() ? context.pop() : context.go(Routes.alerts),
+          ),
+          title: Text(l10n.settingsMyBroadcasts),
         ),
-        title: Text(leaderOnly ? l10n.settingsSentGroupAlerts : l10n.settingsMyBroadcasts),
-        actions: [
-          if (canViewHistory)
-            IconButton(
-              tooltip: l10n.notificationHistoryTitle,
-              icon: const Icon(Icons.history),
-              onPressed: () => context.push(Routes.notificationHistory),
-            ),
-        ],
+        body: const _NoAccessPlaceholder(),
+      );
+    }
+
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        appBar: AppBar(
+          leading: BackButton(
+            onPressed: () =>
+                context.canPop() ? context.pop() : context.go(Routes.alerts),
+          ),
+          title: Text(l10n.settingsMyBroadcasts),
+          actions: [
+            if (canViewHistory)
+              IconButton(
+                tooltip: l10n.notificationHistoryTitle,
+                icon: const Icon(Icons.history),
+                onPressed: () => context.push(Routes.notificationHistory),
+              ),
+          ],
+          bottom: TabBar(
+            tabs: [
+              Tab(text: l10n.myBroadcastsRemindersTab),
+              Tab(text: l10n.myBroadcastsAnnouncementsTab),
+            ],
+          ),
+        ),
+        body: TabBarView(
+          children: [
+            _RemindersTab(leaderOnly: leaderOnly),
+            const _AnnouncementsTab(),
+          ],
+        ),
       ),
-      body: !canAccess
-          ? _NoAccessPlaceholder()
-          : mineAsync.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, _) => Center(child: Text(l10n.commonFailedToLoad('$e'))),
-              data: (reminders) {
-                if (reminders.isEmpty) {
-                  return _EmptyState(leaderOnly: leaderOnly);
-                }
-                return ListView.separated(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: reminders.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 12),
-                  itemBuilder: (_, i) =>
-                      _BroadcastCard(reminder: reminders[i]),
-                );
-              },
-            ),
+    );
+  }
+}
+
+class _RemindersTab extends ConsumerWidget {
+  const _RemindersTab({required this.leaderOnly});
+
+  final bool leaderOnly;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final mineAsync = ref.watch(myRemindersProvider);
+
+    return mineAsync.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (e, _) => Center(child: Text(l10n.commonFailedToLoad('$e'))),
+      data: (reminders) {
+        if (reminders.isEmpty) {
+          return _EmptyState(leaderOnly: leaderOnly);
+        }
+        return ListView.separated(
+          padding: const EdgeInsets.all(16),
+          itemCount: reminders.length,
+          separatorBuilder: (_, __) => const SizedBox(height: 12),
+          itemBuilder: (_, i) => _BroadcastCard(reminder: reminders[i]),
+        );
+      },
     );
   }
 }
@@ -291,6 +380,196 @@ class _BroadcastCard extends ConsumerWidget {
   }
 }
 
+class _AnnouncementsTab extends ConsumerWidget {
+  const _AnnouncementsTab();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final bulletinsAsync = ref.watch(myBulletinsProvider);
+
+    return bulletinsAsync.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (e, _) => Center(child: Text(l10n.commonFailedToLoad('$e'))),
+      data: (bulletins) {
+        if (bulletins.isEmpty) {
+          return Center(
+            child: Text(
+              l10n.announcementsEmptyMine,
+              textAlign: TextAlign.center,
+            ),
+          );
+        }
+        return ListView.separated(
+          padding: const EdgeInsets.all(16),
+          itemCount: bulletins.length,
+          separatorBuilder: (_, __) => const SizedBox(height: 12),
+          itemBuilder: (_, i) => _AnnouncementCard(bulletin: bulletins[i]),
+        );
+      },
+    );
+  }
+}
+
+class _AnnouncementCard extends ConsumerWidget {
+  const _AnnouncementCard({required this.bulletin});
+
+  final BulletinEntity bulletin;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final l10n = context.l10n;
+    final canManageAsync =
+        ref.watch(canManageAnnouncementProvider(bulletin.bulletinId));
+    final canManage = canManageAsync.asData?.value ?? false;
+    final busy = ref.watch(updateAnnouncementProvider).isLoading ||
+        ref.watch(deleteAnnouncementProvider).isLoading;
+
+    return Card(
+      margin: EdgeInsets.zero,
+      child: InkWell(
+        onTap: () => context.push(
+          Routes.announcementDetailPath(bulletin.bulletinId),
+        ),
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                bulletin.title,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                '${_announcementStatusLabel(bulletin)} · '
+                '${DateFormat.yMMMd().format(bulletin.createdAt)}',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+              if (bulletin.scheduledAt != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: Text(
+                    'Scheduled ${formatDateTime(bulletin.scheduledAt!)}',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.primary,
+                    ),
+                  ),
+                ),
+              if (bulletin.acceptsResponses)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: TextButton.icon(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => AnnouncementResponsesScreen(
+                            bulletinId: bulletin.bulletinId,
+                          ),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.poll_outlined, size: 18),
+                    label: Text(l10n.announcementsViewResponses),
+                  ),
+                ),
+              if (canManage)
+                Wrap(
+                  alignment: WrapAlignment.end,
+                  spacing: 4,
+                  children: [
+                    TextButton.icon(
+                      onPressed: busy ? null : () => _edit(context, ref),
+                      icon: const Icon(Icons.edit_outlined, size: 18),
+                      label: Text(l10n.commonEdit),
+                    ),
+                    TextButton.icon(
+                      onPressed: busy ? null : () => _confirmDelete(context, ref),
+                      icon: const Icon(Icons.delete_outline_rounded, size: 18),
+                      label: Text(l10n.commonDelete),
+                      style: TextButton.styleFrom(
+                        foregroundColor: theme.colorScheme.error,
+                      ),
+                    ),
+                  ],
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  String _announcementStatusLabel(BulletinEntity value) {
+    return switch (value.status) {
+      BulletinStatus.pending => 'Pending approval',
+      BulletinStatus.published => value.isScheduled ? 'Scheduled' : 'Published',
+      BulletinStatus.rejected => 'Rejected',
+    };
+  }
+
+  Future<void> _edit(BuildContext context, WidgetRef ref) async {
+    final edited = await EditAnnouncementDialog.show(
+      context,
+      bulletin: bulletin,
+    );
+    if (edited == null || !context.mounted) return;
+
+    final ok = await ref.read(updateAnnouncementProvider.notifier).update(
+          bulletinId: bulletin.bulletinId,
+          title: edited.title,
+          body: edited.body,
+          expiresAt: edited.expiresAt,
+          clearExpiration: edited.clearExpiration,
+          responseConfig: edited.responseConfig,
+          newImageLocalPath: edited.newImageLocalPath,
+          clearImage: edited.clearImage,
+          clearResponseConfig: edited.clearResponseConfig,
+        );
+    if (ok && context.mounted) {
+      ref.invalidate(bulletinByIdProvider(bulletin.bulletinId));
+    }
+  }
+
+  Future<void> _confirmDelete(BuildContext context, WidgetRef ref) async {
+    final l10n = context.l10n;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.announcementsDeleteTitle),
+        content: Text(
+          bulletin.isPublished
+              ? 'This deletes the announcement and removes it from every '
+                  'member\'s alerts feed. This cannot be undone.'
+              : 'This permanently deletes the announcement. '
+                  'This cannot be undone.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(l10n.commonCancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(l10n.commonDelete),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) {
+      await ref
+          .read(deleteAnnouncementProvider.notifier)
+          .delete(bulletin.bulletinId);
+    }
+  }
+}
+
 class _MetaItem extends StatelessWidget {
   const _MetaItem({required this.icon, required this.label});
 
@@ -434,4 +713,9 @@ String _formatDateTime(DateTime dt) {
   final h = dt.hour % 12 == 0 ? 12 : dt.hour % 12;
   final ampm = dt.hour < 12 ? 'AM' : 'PM';
   return '${dt.year}-${two(dt.month)}-${two(dt.day)} · $h:${two(dt.minute)} $ampm';
+}
+
+String formatDateTime(DateTime dt) {
+  final date = DateFormat.yMMMd().add_jm().format(dt.toLocal());
+  return date;
 }

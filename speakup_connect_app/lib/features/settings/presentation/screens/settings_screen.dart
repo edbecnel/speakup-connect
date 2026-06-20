@@ -8,6 +8,7 @@ import 'package:speakup_connect/core/errors/app_exception.dart';
 import 'package:speakup_connect/core/l10n/app_localizations_extension.dart';
 import 'package:speakup_connect/core/l10n/locale_provider.dart';
 import 'package:speakup_connect/core/permissions/providers/permission_provider.dart';
+import 'package:speakup_connect/features/announcements/presentation/providers/announcement_provider.dart';
 import 'package:speakup_connect/features/auth/presentation/providers/auth_provider.dart';
 import 'package:speakup_connect/features/groups/presentation/providers/group_membership_provider.dart';
 import 'package:speakup_connect/features/groups/presentation/providers/group_provider.dart';
@@ -45,7 +46,7 @@ class SettingsScreen extends ConsumerWidget {
     final canManageGroups = ref.watch(canManageGroupsProvider);
     final canManageTranslations = ref.watch(canManageTranslationsProvider);
     final canComposeAlerts = ref.watch(canComposeRemindersProvider);
-    final leaderOnlyAlerts = ref.watch(isGroupLeaderOnlyComposerProvider);
+    final canPostAnnouncements = ref.watch(canPostAnnouncementsProvider);
 
     final l10n = context.l10n;
     final orgName =
@@ -201,19 +202,11 @@ class SettingsScreen extends ConsumerWidget {
             trailing: const Icon(Icons.chevron_right_rounded),
             onTap: () => context.push(Routes.browseGroups),
           ),
-          if (canComposeAlerts)
+          if (canComposeAlerts || canPostAnnouncements)
             ListTile(
               leading: const Icon(Icons.outbox_outlined),
-              title: Text(
-                leaderOnlyAlerts
-                    ? l10n.settingsSentGroupAlerts
-                    : l10n.settingsMyBroadcasts,
-              ),
-              subtitle: Text(
-                leaderOnlyAlerts
-                    ? l10n.settingsSentGroupAlertsSubtitle
-                    : l10n.settingsMyBroadcastsSubtitle,
-              ),
+              title: Text(l10n.settingsMyBroadcasts),
+              subtitle: Text(l10n.settingsMyBroadcastsSubtitle),
               trailing: const Icon(Icons.chevron_right_rounded),
               onTap: () => context.push(Routes.myBroadcasts),
             ),

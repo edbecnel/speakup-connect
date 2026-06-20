@@ -1,9 +1,13 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:speakup_connect/l10n/app_localizations.dart';
 import 'package:uuid/uuid.dart';
 import 'package:speakup_connect/config/app_config.dart';
+import 'package:speakup_connect/core/errors/app_exception.dart';
 import 'package:speakup_connect/core/permissions/app_permission.dart';
 import 'package:speakup_connect/core/permissions/providers/permission_provider.dart';
 import 'package:speakup_connect/features/announcements/data/repositories/bulletin_repository_impl.dart';
@@ -227,6 +231,44 @@ class SubmitAnnouncementResult {
   final BulletinEntity bulletin;
 }
 
+const _announcementSubmitTimeout = Duration(seconds: 20);
+
+Future<T> _withSubmitTimeout<T>(Future<T> Function() action) {
+  return action().timeout(_announcementSubmitTimeout);
+}
+
+Object _mapSubmitError(Object error) {
+  if (error is AppException) return error;
+  if (error is TimeoutException) return const NetworkException();
+  if (error is SocketException) return const NetworkException();
+
+  if (error is FirebaseException) {
+    final code = error.code.toLowerCase();
+    final message = (error.message ?? '').toLowerCase();
+    if (code == 'unavailable' ||
+        code == 'network-request-failed' ||
+        code == 'deadline-exceeded' ||
+        message.contains('unable to resolve host') ||
+        message.contains('firestore.googleapis.com') ||
+        message.contains('unavailable')) {
+      return const NetworkException();
+    }
+    return DatabaseException(
+      message: error.message ?? 'Database error',
+      code: error.code,
+    );
+  }
+
+  final normalized = error.toString().toLowerCase();
+  if (normalized.contains('unable to resolve host') ||
+      normalized.contains('firestore.googleapis.com') ||
+      normalized.contains('unavailable')) {
+    return const NetworkException();
+  }
+
+  return DatabaseException(message: error.toString());
+}
+
 class SubmitAnnouncementNotifier
     extends Notifier<AsyncValue<SubmitAnnouncementResult?>> {
   @override
@@ -284,68 +326,74 @@ class SubmitAnnouncementNotifier
 
     state = const AsyncLoading();
     try {
-      final repo = ref.read(bulletinRepositoryProvider);
-      final orgId = AppConfig.defaultOrganizationId;
-      BulletinEntity finalBulletin;
+      final finalBulletin = await _withSubmitTimeout(() async {
+        final repo = ref.read(bulletinRepositoryProvider);
+        final orgId = AppConfig.defaultOrganizationId;
+        BulletinEntity finalBulletin;
 
-      if (leaderOnly) {
-        final bulletin = await repo.createGroupLeaderAnnouncement(
-          organizationId: orgId,
-          title: form.title.trim(),
-          body: form.body.trim(),
-          groupId: form.sourceGroupId!,
-          groupLabel: form.sourceGroupLabel,
-          authorId: user.uid,
-          scheduledAt: form.scheduledAt,
-          expiresAt: form.resolvedExpiresAt,
-          responseConfig: form.responseConfig.enabled ? form.responseConfig : null,
-        );
-        finalBulletin = bulletin;
-        if (resolvedImagePath != null) {
-          try {
-            final imageUrl = await repo.uploadAnnouncementImage(
+        if (leaderOnly) {
+          final bulletin = await repo.createGroupLeaderAnnouncement(
+            organizationId: orgId,
+            title: form.title.trim(),
+            body: form.body.trim(),
+            groupId: form.sourceGroupId!,
+            groupLabel: form.sourceGroupLabel,
+            authorId: user.uid,
+            scheduledAt: form.scheduledAt,
+            expiresAt: form.resolvedExpiresAt,
+            responseConfig:
+                form.responseConfig.enabled ? form.responseConfig : null,
+          );
+          finalBulletin = bulletin;
+          if (resolvedImagePath != null) {
+            try {
+              final imageUrl = await repo.uploadAnnouncementImage(
+                organizationId: orgId,
+                bulletinId: bulletin.bulletinId,
+                localPath: resolvedImagePath,
+              );
+              finalBulletin = await repo.setAnnouncementImageUrl(
+                organizationId: orgId,
+                bulletinId: bulletin.bulletinId,
+                imageUrl: imageUrl,
+              );
+            } catch (e) {
+              throw StateError(
+                'Announcement was posted but the image could not be attached: $e',
+              );
+            }
+          }
+        } else {
+          final bulletinId = const Uuid().v4();
+          String? imageUrl;
+          if (resolvedImagePath != null) {
+            imageUrl = await repo.uploadAnnouncementImage(
               organizationId: orgId,
-              bulletinId: bulletin.bulletinId,
+              bulletinId: bulletinId,
               localPath: resolvedImagePath,
             );
-            finalBulletin = await repo.setAnnouncementImageUrl(
-              organizationId: orgId,
-              bulletinId: bulletin.bulletinId,
-              imageUrl: imageUrl,
-            );
-          } catch (e) {
-            throw StateError(
-              'Announcement was posted but the image could not be attached: $e',
-            );
           }
-        }
-      } else {
-        final bulletinId = const Uuid().v4();
-        String? imageUrl;
-        if (resolvedImagePath != null) {
-          imageUrl = await repo.uploadAnnouncementImage(
+          finalBulletin = await repo.createBulletin(
             organizationId: orgId,
             bulletinId: bulletinId,
-            localPath: resolvedImagePath,
+            title: form.title.trim(),
+            body: form.body.trim(),
+            status: status,
+            authorId: user.uid,
+            authorName: authorName,
+            sourceGroupId: form.sourceGroupId,
+            sourceGroupName: form.sourceGroupLabel,
+            isPinned: form.isPinned,
+            scheduledAt: form.scheduledAt,
+            expiresAt: form.resolvedExpiresAt,
+            responseConfig:
+                form.responseConfig.enabled ? form.responseConfig : null,
+            imageUrl: imageUrl,
           );
         }
-        finalBulletin = await repo.createBulletin(
-          organizationId: orgId,
-          bulletinId: bulletinId,
-          title: form.title.trim(),
-          body: form.body.trim(),
-          status: status,
-          authorId: user.uid,
-          authorName: authorName,
-          sourceGroupId: form.sourceGroupId,
-          sourceGroupName: form.sourceGroupLabel,
-          isPinned: form.isPinned,
-          scheduledAt: form.scheduledAt,
-          expiresAt: form.resolvedExpiresAt,
-          responseConfig: form.responseConfig.enabled ? form.responseConfig : null,
-          imageUrl: imageUrl,
-        );
-      }
+
+        return finalBulletin;
+      });
 
       final result = SubmitAnnouncementResult(
         status: finalBulletin.status,
@@ -355,7 +403,7 @@ class SubmitAnnouncementNotifier
       ref.read(composeAnnouncementProvider.notifier).reset();
       return result;
     } catch (e, st) {
-      state = AsyncError(e, st);
+      state = AsyncError(_mapSubmitError(e), st);
       return null;
     }
   }

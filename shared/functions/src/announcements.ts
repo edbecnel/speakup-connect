@@ -3,6 +3,11 @@ import { onSchedule } from 'firebase-functions/v2/scheduler';
 import { onCall, HttpsError } from 'firebase-functions/v2/https';
 import { logger } from 'firebase-functions';
 import * as admin from 'firebase-admin';
+import {
+  buildBulletinRecipientIds,
+  shouldDeliverBulletin,
+  type DeliveryCheckReason,
+} from './announcements_delivery_utils';
 
 const db = admin.firestore();
 
@@ -38,6 +43,16 @@ type BulletinData = {
 };
 
 type RemovalReason = 'recalled' | 'expired';
+
+type DeliverClaimResult =
+  | {
+    kind: 'claimed';
+    bulletin: BulletinData;
+  }
+  | {
+    kind: 'skipped';
+    reason: DeliveryCheckReason;
+  };
 
 async function assertGroupLeader(
   orgId: string,
@@ -251,15 +266,15 @@ async function deliverBulletin(
     .collection('organizations').doc(orgId)
     .collection('bulletins').doc(bulletinId);
 
-  const claimed = await db.runTransaction<BulletinData | null>(async (tx) => {
+  const claimResult = await db.runTransaction<DeliverClaimResult>(async (tx) => {
     const snap = await tx.get(bulletinRef);
-    if (!snap.exists) return null;
+    if (!snap.exists) {
+      return { kind: 'skipped', reason: 'missing' };
+    }
     const data = snap.data() as BulletinData;
-
-    if (data.status !== 'published') return null;
-    if (data.deliveredAt) return null;
-    if (data.scheduledAt && data.scheduledAt.toMillis() > Date.now()) {
-      return null;
+    const check = shouldDeliverBulletin(data);
+    if (!check.shouldDeliver) {
+      return { kind: 'skipped', reason: check.reason };
     }
 
     tx.update(bulletinRef, {
@@ -267,19 +282,34 @@ async function deliverBulletin(
       publishedAt:
         data.publishedAt ?? admin.firestore.FieldValue.serverTimestamp(),
     });
-    return data;
+    return { kind: 'claimed', bulletin: data };
   });
 
-  if (!claimed) return false;
+  if (claimResult.kind === 'skipped') {
+    logger.info('deliverBulletin skipped', {
+      orgId,
+      bulletinId,
+      reason: claimResult.reason,
+    });
+    return false;
+  }
+
+  const claimed = claimResult.bulletin;
 
   const title = claimed.title ?? 'New announcement';
   const body = claimed.body ?? '';
-  let recipientIds = await resolveOrgMemberIds(orgId);
-
-  const authorId = claimed.authorId;
-  if (authorId && !recipientIds.includes(authorId)) {
-    recipientIds = [...recipientIds, authorId];
-  }
+  const baseRecipientIds = await resolveOrgMemberIds(orgId);
+  const recipientIds = buildBulletinRecipientIds(
+    baseRecipientIds,
+    claimed.authorId,
+  );
+  logger.info('deliverBulletin resolved recipients', {
+    orgId,
+    bulletinId,
+    orgMemberCount: baseRecipientIds.length,
+    finalRecipientCount: recipientIds.length,
+    authorIdIncluded: Boolean(claimed.authorId),
+  });
 
   if (recipientIds.length === 0) {
     logger.warn('deliverBulletin: no recipients — rolling back claim', {
@@ -915,17 +945,41 @@ export const deleteBulletin = onCall(async (request) => {
 export const onBulletinPublished = onDocumentWritten(
   'organizations/{orgId}/bulletins/{bulletinId}',
   async (event) => {
+    const { orgId, bulletinId } = event.params;
+    const before = event.data?.before.data() as BulletinData | undefined;
     const after = event.data?.after.data() as BulletinData | undefined;
-    if (!after) return;
-
-    if (after.status !== 'published') return;
-    if (after.deliveredAt) return;
-    if (after.scheduledAt && after.scheduledAt.toMillis() > Date.now()) {
+    if (!after) {
+      logger.info('onBulletinPublished skipped', {
+        orgId,
+        bulletinId,
+        reason: 'document_deleted_or_missing',
+      });
       return;
     }
 
-    const { orgId, bulletinId } = event.params;
-    await deliverBulletin(orgId, bulletinId);
+    const check = shouldDeliverBulletin(after);
+    if (!check.shouldDeliver) {
+      logger.info('onBulletinPublished skipped', {
+        orgId,
+        bulletinId,
+        reason: check.reason,
+        status: after.status ?? null,
+      });
+      return;
+    }
+
+    logger.info('onBulletinPublished delivery attempt', {
+      orgId,
+      bulletinId,
+      previousStatus: before?.status ?? null,
+      currentStatus: after.status ?? null,
+    });
+    const delivered = await deliverBulletin(orgId, bulletinId);
+    logger.info('onBulletinPublished delivery result', {
+      orgId,
+      bulletinId,
+      delivered,
+    });
   },
 );
 

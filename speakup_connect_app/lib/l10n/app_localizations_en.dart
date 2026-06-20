@@ -819,7 +819,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsMyBroadcastsSubtitle =>
-      'Manage sent reminders and view responses';
+      'Manage sent reminders and announcements';
 
   @override
   String get settingsSectionAppearance => 'Appearance';
@@ -4012,6 +4012,12 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get reminderMyBroadcastsEmptyLeaderHint =>
       'Send an alert from My Groups & Clubs, then return here to view member responses.';
+
+  @override
+  String get myBroadcastsRemindersTab => 'Reminders';
+
+  @override
+  String get myBroadcastsAnnouncementsTab => 'Announcements';
 
   @override
   String get reminderEditBroadcastTitle => 'Edit broadcast';

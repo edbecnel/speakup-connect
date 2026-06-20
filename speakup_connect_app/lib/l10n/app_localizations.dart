@@ -1493,7 +1493,7 @@ abstract class AppLocalizations {
   /// No description provided for @settingsMyBroadcastsSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Manage sent reminders and view responses'**
+  /// **'Manage sent reminders and announcements'**
   String get settingsMyBroadcastsSubtitle;
 
   /// No description provided for @settingsSectionAppearance.
@@ -6864,6 +6864,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Send an alert from My Groups & Clubs, then return here to view member responses.'**
   String get reminderMyBroadcastsEmptyLeaderHint;
+
+  /// No description provided for @myBroadcastsRemindersTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders'**
+  String get myBroadcastsRemindersTab;
+
+  /// No description provided for @myBroadcastsAnnouncementsTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Announcements'**
+  String get myBroadcastsAnnouncementsTab;
 
   /// No description provided for @reminderEditBroadcastTitle.
   ///
