@@ -276,10 +276,12 @@ class _LoginForm extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          const SizedBox(height: 8),
           AppTextField(
             controller: identifierController,
             label: l10n.authEmailOrStudentId,
             hint: l10n.authEmailOrStudentIdHint,
+            contentPadding: const EdgeInsets.fromLTRB(16, 24, 16, 10),
             prefixIcon: Icons.person_outline_rounded,
             keyboardType: TextInputType.text,
             textInputAction: TextInputAction.next,
@@ -290,6 +292,7 @@ class _LoginForm extends StatelessWidget {
             controller: passwordController,
             label: l10n.commonPassword,
             hint: l10n.authPasswordHintLogin,
+            contentPadding: const EdgeInsets.fromLTRB(16, 20, 16, 12),
             prefixIcon: Icons.lock_outline_rounded,
             obscureText: !passwordVisible,
             textInputAction: TextInputAction.done,

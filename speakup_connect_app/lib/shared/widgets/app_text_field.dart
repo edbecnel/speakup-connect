@@ -28,6 +28,7 @@ class AppTextField extends StatelessWidget {
     this.initialValue,
     this.readOnly = false,
     this.onTap,
+    this.contentPadding,
   });
 
   final TextEditingController? controller;
@@ -51,6 +52,7 @@ class AppTextField extends StatelessWidget {
   final String? initialValue;
   final bool readOnly;
   final VoidCallback? onTap;
+  final EdgeInsetsGeometry? contentPadding;
 
   @override
   Widget build(BuildContext context) {
@@ -76,6 +78,7 @@ class AppTextField extends StatelessWidget {
         hintText: hint,
         helperText: helperText,
         helperMaxLines: 2,
+        contentPadding: contentPadding,
         prefixIcon: prefixIcon != null ? Icon(prefixIcon) : null,
         suffixIcon: suffixIcon,
         counterText: maxLength != null ? null : '',
