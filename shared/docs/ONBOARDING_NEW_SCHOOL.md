@@ -234,13 +234,12 @@ flutter build appbundle --flavor {orgId} -t lib/main_{orgId}.dart --release
 
 ### 5.5b Organization-specific help (in-app)
 
-Each tenant ships its own Help Center content. For school onboarding, use the canonical school templates first, then tailor for local policies and enabled features.
+School Help Center uses canonical shared assets by default. Add per-org overrides only when truly needed.
 
-- [ ] Copy `shared/docs/help/templates/school/MEMBER_GUIDE.md` and `ADMIN_GUIDE.md` to `shared/docs/help/orgs/{orgId}/`
-- [ ] Optional: copy `shared/docs/help/templates/school/*_TUTORIAL.md` for internal training docs (not required for in-app Help Center)
-- [ ] Tailor copied docs for `{orgId}` and local school workflows; keep MONHS-specific data as labeled examples only
-- [ ] Copy to `assets/help/orgs/{orgId}/member_guide.md` and `admin_guide.md`
-- [ ] Register `assets/help/orgs/{orgId}/` in `pubspec.yaml`
+- [ ] Start from canonical source: `shared/docs/help/school/`
+- [ ] Keep org-specific docs only for true local policy differences in `shared/docs/help/orgs/{orgId}/`
+- [ ] If overrides are required, add matching `assets/help/orgs/{orgId}/` files (`member_guide.md`, `admin_guide.md`, optional tutorials)
+- [ ] Keep copy user-facing (for example, "Administrator Guide"), not filename-style wording
 - [ ] Remove or tailor school-only sections (student ID login, roster, grades) for non-school org types
 - [ ] Smoke-test **Settings → Help Center** on a device signed into `{orgId}`
 
@@ -270,7 +269,7 @@ These are configured in **Firestore** (`organizations/{orgId}`) or the **admin p
 | In-app org display name | `displayName` on org document (splash: "SpeakUp {displayName}") |
 | Report categories, roles, permissions | Admin screens |
 | Reminder approval toggle | Admin branding settings |
-| In-app Help Center text | `shared/docs/help/orgs/{orgId}/` + `assets/help/orgs/{orgId}/` (requires app rebuild to ship new assets) |
+| In-app Help Center text | Canonical `shared/docs/help/school/` + `assets/help/school/`, with optional org overrides under `orgs/{orgId}` |
 
 These **require a new client build** (or reinstall):
 

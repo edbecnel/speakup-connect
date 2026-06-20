@@ -1,14 +1,7 @@
-# MONHS help content (`monhs-ph-001`)
+# MONHS help notes (`monhs-ph-001`)
 
-School-specific in-app help for the MONHS pilot client build.
+Canonical school help now lives in `shared/docs/help/school/` and `speakup_connect_app/assets/help/school/`.
 
-For new school onboarding, start from `shared/docs/help/templates/school/` and then tailor to each organization. MONHS remains a concrete reference example.
+This folder is reserved for MONHS-only overrides when there is a true organization-specific policy difference.
 
-| File | Audience |
-|------|----------|
-| [MEMBER_GUIDE.md](MEMBER_GUIDE.md) | Students and staff — student ID login, reports, alerts |
-| [ADMIN_GUIDE.md](ADMIN_GUIDE.md) | Admins and delegated staff — roster, groups, SSLG positions |
-
-**In-app assets:** copy to `assets/help/orgs/monhs-ph-001/` as `member_guide.md` and `admin_guide.md`.
-
-Bundled automatically when `pubspec.yaml` lists `assets/help/orgs/monhs-ph-001/`.
+If no override is needed, rely on canonical school assets with `_default` fallback.

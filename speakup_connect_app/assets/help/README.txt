@@ -4,6 +4,14 @@ Help assets layout
 Org-specific guides (used by the app):
   orgs/{organizationId}/member_guide.md
   orgs/{organizationId}/admin_guide.md
+  orgs/{organizationId}/member_tutorial.md
+  orgs/{organizationId}/admin_tutorial.md
+
+Canonical school bundle (shared across school orgs):
+  school/member_guide.md
+  school/admin_guide.md
+  school/member_tutorial.md
+  school/admin_tutorial.md
 
 Fallback:
   _default/member_guide.md
@@ -16,7 +24,9 @@ Localized (phase 1b — English placeholders until translated):
   orgs/{organizationId}/admin_guide_ceb.md
 
 HelpAssetResolver tries {article}_guide_{locale}.md then {article}_guide.md
-(org-specific before _default). Sync docs/help/*_CEB.md when editing Cebuano copies.
+with this order:
+  orgs/{orgId} -> school -> _default
+Sync docs/help/*_CEB.md when editing Cebuano copies.
 
 Legacy flat files at this folder root (member_guide.md, admin_guide.md):
   Copies of _default — kept so Flutter hot restart does not fail after

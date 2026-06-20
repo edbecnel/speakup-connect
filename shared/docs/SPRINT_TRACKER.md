@@ -124,11 +124,11 @@ Suggested next sprint after Sprint 13 closure: **Sprint 16 — i18n Phase 2** ([
 
 ---
 
-### Delivered June 20, 2026 — School help template refactor
-- [x] Added canonical school templates under `shared/docs/help/templates/school/` (`README.md`, `ADMIN_GUIDE.md`, `MEMBER_GUIDE.md`, tutorials)
-- [x] Consolidated stray tutorial draft into canonical help template path and removed old `shared/docs/templates/schools/ADMIN_TUTORIAL.md`
-- [x] Updated `shared/docs/help/README.md` and `shared/docs/ONBOARDING_NEW_SCHOOL.md` to use school templates as onboarding source
-- [x] Kept MONHS org docs intact and usable while adding explicit template-source references
+### Delivered June 20, 2026 — School help canonicalization refactor
+- [x] Moved school help source-of-truth to `shared/docs/help/school/` (`README.md`, guides, tutorials, tutorial QA docs)
+- [x] Updated Help Center model to resolve `org -> school -> _default` assets without requiring per-org school duplication
+- [x] Added in-app school tutorial articles and user-facing labels (Member/Administrator Guide and Tutorial)
+- [x] Updated onboarding/help docs to point to canonical school source and optional org overrides only
 
 ---
 

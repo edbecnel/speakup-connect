@@ -1032,6 +1032,20 @@ class AppLocalizationsCeb extends AppLocalizations {
       'Lista, mga grupo, mga report, ug mga pahimangno';
 
   @override
+  String get helpMemberTutorialTitle => 'Tutorial sa Miyembro';
+
+  @override
+  String get helpMemberTutorialSubtitle =>
+      'Lakang-lakang nga onboarding para sa unang higayon nga mga miyembro';
+
+  @override
+  String get helpAdminTutorialTitle => 'Tutorial sa Administrator';
+
+  @override
+  String get helpAdminTutorialSubtitle =>
+      'Lakang-lakang nga onboarding para sa unang higayon nga mga administrador';
+
+  @override
   String get helpGuideNotFound => 'Wala makit-i ang giya nga kini.';
 
   @override

@@ -1,128 +1,67 @@
 # In-App Help — SpeakUp Connect
 
-Help content is **organization-specific**. Each tenant (school, LGU, NGO, company, etc.) ships its own guides describing **local setup, UI options, and enabled functionality**.
+Help content is organized around a reusable **canonical school source** with optional org overrides.
 
-Generic fallbacks live in [`_default/`](_default/) when an org has no custom bundle yet.
-Reusable school starter docs live in [`templates/school/`](templates/school/).
-
----
-
-## Directory layout
+## Canonical structure
 
 ```
 shared/docs/help/
-├── README.md                 ← this file
-├── _default/                 ← generic platform guides (fallback)
-│   ├── MEMBER_GUIDE.md
-│   └── ADMIN_GUIDE.md
-├── templates/
-│   └── school/               ← canonical school templates for new school onboarding
-│       ├── README.md
-│       ├── MEMBER_GUIDE.md
-│       ├── ADMIN_GUIDE.md
-│       └── *_TUTORIAL.md
-└── orgs/
-    └── {organizationId}/     ← one folder per tenant
-        ├── README.md         ← optional org notes
-        ├── MEMBER_GUIDE.md
-        └── ADMIN_GUIDE.md
+├── README.md
+├── _default/           ← platform fallback docs
+├── school/             ← canonical reusable school docs
+└── orgs/{orgId}/       ← optional org-specific overrides
 
-assets/help/                  ← same structure, lowercase filenames for the app
+speakup_connect_app/assets/help/
 ├── _default/
-│   ├── member_guide.md
-│   └── admin_guide.md
-└── orgs/
-    └── {organizationId}/
-        ├── member_guide.md
-        └── admin_guide.md
+├── school/
+└── orgs/{orgId}/       ← optional overrides only when necessary
 ```
 
-**Reference example:** [orgs/monhs-ph-001/](orgs/monhs-ph-001/) — MONHS school deployment.
+School source-of-truth: [`school/`](school/).
 
----
+## Help Center resolution order
 
-## How the app picks a guide
+`HelpAssetResolver` loads articles in this order:
 
-1. Resolve the signed-in user's `organizationId` (from profile, or `FlavorConfig.orgId` on client builds).
-2. Load `assets/help/orgs/{organizationId}/{article}_guide.md` (or `{article}_guide_{locale}.md` when locale is not English).
-3. If missing, fall back to `assets/help/_default/{article}_guide.md` (then localized `_default` name, then English).
+1. `assets/help/orgs/{organizationId}/{articleName}_{locale}.md`
+2. `assets/help/orgs/{organizationId}/{articleName}.md`
+3. `assets/help/school/{articleName}_{locale}.md`
+4. `assets/help/school/{articleName}.md`
+5. `assets/help/_default/{articleName}_{locale}.md`
+6. `assets/help/_default/{articleName}.md`
 
-Implementation: `lib/features/help/data/help_asset_resolver.dart`. Locale comes from `appLocaleProvider` (`en` → no suffix; `ceb` → `_ceb`).
+This preserves fallback behavior while removing the need for per-org school duplication.
 
-**Phase 1b:** `*_ceb.md` files may duplicate English until native speakers translate them. Same for `app_ceb.arb` UI strings.
+## Article labels and catalog
 
----
+Use user-facing labels in UI and documentation:
 
-## Audience-based guides (not per RBAC role)
+- Member Guide
+- Administrator Guide
+- Member Tutorial
+- Administrator Tutorial
 
-Within each organization, use **two guides** — not one file per custom role:
+## Onboarding guidance
 
-| Guide | Who sees it |
-|-------|-------------|
-| **Member Guide** | All approved members |
-| **Administrator Guide** | Org admins, translation moderators (`manageTranslations`), and staff with Administration menu access |
+For new schools:
 
-Custom org roles (Club Adviser, Guidance Counselor, **Cebuano Translator**, etc.) are covered **by topic** inside the Admin Guide, tagged with required capabilities. Do not fork help per role name. **UI translation editing** is documented only in the Administrator Guide — not the Member Guide.
+1. Start from `shared/docs/help/school/`.
+2. Add `shared/docs/help/orgs/{orgId}/` only for true org-specific policy differences.
+3. Add matching `assets/help/orgs/{orgId}/` assets only when overrides are required.
+4. Keep `_default/` as global safety fallback.
 
-Add a third guide only for a clearly different audience (e.g. applicants before approval).
+## Sync workflow
 
----
+When help content changes:
 
-## Onboarding a new organization
+1. Update canonical docs in `shared/docs/help/school/` (or `_default/` if global).
+2. Mirror corresponding in-app markdown under `speakup_connect_app/assets/help/`.
+3. Restart `flutter run` after asset path changes.
 
-1. Create `shared/docs/help/orgs/{organizationId}/`
-2. If this is a school org, copy from `shared/docs/help/templates/school/`:
-   - `MEMBER_GUIDE.md`
-   - `ADMIN_GUIDE.md`
-   - Optional tutorials for training (`*_TUTORIAL.md`)
-3. For non-school orgs, copy from `_default/` and tailor terminology
-4. Customize for org type and enabled features:
-   - **School:** student ID login, roster, grades, clubs
-   - **LGU / municipality:** citizen reports, bulletin workflows
-   - **NGO / company:** adjust terminology; omit school-only sections
-5. Copy guide files to `assets/help/orgs/{organizationId}/`
-6. Register the asset folder in `pubspec.yaml`:
-   ```yaml
-   flutter:
-     assets:
-       - assets/help/_default/
-       - assets/help/orgs/monhs-ph-001/
-       - assets/help/orgs/{new-org-id}/
-   ```
-7. Client builds: pair help bundle with `FlavorConfig.orgId` — see [ONBOARDING_NEW_SCHOOL.md](../ONBOARDING_NEW_SCHOOL.md)
+Legacy root shim files (`assets/help/member_guide.md`, `assets/help/admin_guide.md`) remain for hot-restart compatibility.
 
----
+## Related docs
 
-## In-app entry point
-
-**Settings → Help & Support → Help Center**
-
-Lists guides for the current organization. Subtitle shows the org display name when loaded from Firestore.
-
-**App language:** members change UI language from the **globe dropdown at the top of Home** or **Settings → Appearance → Language**. Picker options always show **English** and **Bisaya / Cebuano** by native name. Help markdown loads `member_guide_ceb.md` (etc.) when that locale is active — see [INTERNATIONALIZATION.md](../INTERNATIONALIZATION.md).
-
----
-
-## Keeping docs in sync
-
-1. Edit `shared/docs/help/orgs/{orgId}/MEMBER_GUIDE.md` (or `_default/`)
-2. Copy to `assets/help/orgs/{orgId}/member_guide.md`
-3. Reload the app:
-   - **Edited existing asset text** — hot restart is usually enough
-   - **Moved/renamed asset paths or changed `pubspec.yaml` assets** — stop `flutter run` (Ctrl+C) and start a **full** `flutter run` (hot restart will error looking for deleted paths)
-
-If you see `PathNotFoundException: assets/help/admin_guide.md`, the dev session is stale from before org-specific folders — run `flutter clean`, then **stop** `flutter run` (Ctrl+C) and start a full `flutter run` again (not hot restart alone).
-
-Legacy shim files at `assets/help/member_guide.md` and `assets/help/admin_guide.md` (copies of `_default`) are kept so Flutter hot restart can sync assets; the app still loads `orgs/{orgId}/` via `HelpAssetResolver`.
-
----
-
-## Related documentation
-
-| Document | Use |
-|----------|-----|
-| [templates/school/README.md](templates/school/README.md) | Canonical school help template source |
-| [DATABASE_DESIGN.md](../DATABASE_DESIGN.md) | Data model reference |
-| [RBAC_ARCHITECTURE.md](../RBAC_ARCHITECTURE.md) | Permissions |
-| [CLIENT_BUILDS.md](../CLIENT_BUILDS.md) | Per-client APK/IPA and `orgId` |
-| [ONBOARDING_NEW_SCHOOL.md](../ONBOARDING_NEW_SCHOOL.md) | New school checklist |
+- [school/README.md](school/README.md)
+- [ONBOARDING_NEW_SCHOOL.md](../ONBOARDING_NEW_SCHOOL.md)
+- [CLIENT_BUILDS.md](../CLIENT_BUILDS.md)

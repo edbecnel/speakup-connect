@@ -93,7 +93,7 @@ flutter:
     - assets/help/member_guide.md
     - assets/help/admin_guide.md
     - assets/help/_default/
-    - assets/help/orgs/monhs-ph-001/
+    - assets/help/school/
 
   # Uncomment to add custom fonts:
   # fonts:

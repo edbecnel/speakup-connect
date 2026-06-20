@@ -10,7 +10,7 @@ import 'package:speakup_connect/features/help/presentation/providers/help_provid
 import 'package:speakup_connect/shared/widgets/app_error_widget.dart';
 import 'package:speakup_connect/shared/widgets/app_loading_indicator.dart';
 
-/// Renders a single org-specific markdown help article.
+/// Renders a single markdown help article with org/school/default fallback.
 class HelpArticleScreen extends ConsumerWidget {
   const HelpArticleScreen({required this.articleId, super.key});
 
@@ -47,7 +47,7 @@ class HelpArticleScreen extends ConsumerWidget {
     final theme = Theme.of(context);
     final contentFuture = HelpAssetResolver.loadMarkdown(
       organizationId: organizationId,
-      articleId: article.id,
+      articleName: article.assetName,
       languageCode: languageCode,
     );
 

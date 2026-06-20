@@ -1007,6 +1007,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get helpAdminGuideSubtitle => 'Roster, groups, reports, and reminders';
 
   @override
+  String get helpMemberTutorialTitle => 'Member Tutorial';
+
+  @override
+  String get helpMemberTutorialSubtitle =>
+      'Step-by-step onboarding for first-time members';
+
+  @override
+  String get helpAdminTutorialTitle => 'Administrator Tutorial';
+
+  @override
+  String get helpAdminTutorialSubtitle =>
+      'Step-by-step onboarding for first-time administrators';
+
+  @override
   String get helpGuideNotFound => 'This guide could not be found.';
 
   @override

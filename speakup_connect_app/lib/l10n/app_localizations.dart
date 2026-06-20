@@ -1832,6 +1832,30 @@ abstract class AppLocalizations {
   /// **'Roster, groups, reports, and reminders'**
   String get helpAdminGuideSubtitle;
 
+  /// No description provided for @helpMemberTutorialTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Member Tutorial'**
+  String get helpMemberTutorialTitle;
+
+  /// No description provided for @helpMemberTutorialSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Step-by-step onboarding for first-time members'**
+  String get helpMemberTutorialSubtitle;
+
+  /// No description provided for @helpAdminTutorialTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Administrator Tutorial'**
+  String get helpAdminTutorialTitle;
+
+  /// No description provided for @helpAdminTutorialSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Step-by-step onboarding for first-time administrators'**
+  String get helpAdminTutorialSubtitle;
+
   /// No description provided for @helpGuideNotFound.
   ///
   /// In en, this message translates to:

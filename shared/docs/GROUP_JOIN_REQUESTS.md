@@ -335,9 +335,9 @@ Member guide will document: closed join → contact adviser; open join → **Bro
 
 ## Help & documentation updates (at implementation)
 
-- `shared/docs/help/orgs/monhs-ph-001/MEMBER_GUIDE.md` — join browse/request; leave vs request-to-leave; removal alerts
-- `shared/docs/help/orgs/monhs-ph-001/ADMIN_GUIDE.md` — policy toggles on create/edit; join + leave review queues
-- Sync `assets/help/` copies
+- `shared/docs/help/school/MEMBER_GUIDE.md` — join browse/request; leave vs request-to-leave; removal alerts
+- `shared/docs/help/school/ADMIN_GUIDE.md` — policy toggles on create/edit; join + leave review queues
+- Sync `speakup_connect_app/assets/help/school/` copies
 
 ---
 

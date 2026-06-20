@@ -303,17 +303,21 @@ Mirror UI locales under assets:
 
 ```
 assets/help/
+  school/
+    member_guide.md
   _default/
     member_guide.md
     member_guide_ceb.md
     member_guide_fil.md
-  orgs/monhs-ph-001/
+  orgs/{orgId}/
     member_guide.md
     member_guide_ceb.md
     member_guide_fil.md
 ```
 
-`HelpAssetResolver` loads `{articleId}_guide_{languageCode}.md` with fallback to `{articleId}_guide.md` then `_default` (see `lib/features/help/data/help_asset_resolver.dart`).
+`HelpAssetResolver` loads help assets with this fallback order:
+`orgs/{orgId} -> school -> _default` and per-locale file before English base
+(see `lib/features/help/data/help_asset_resolver.dart`).
 
 ---
 

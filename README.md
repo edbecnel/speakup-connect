@@ -60,8 +60,8 @@ The platform is designed as a **multi-tenant SaaS solution**, meaning a single c
 | [shared/docs/AI_DEVELOPMENT_WORKFLOW.md](shared/docs/AI_DEVELOPMENT_WORKFLOW.md) | AI-assisted development process |
 | [shared/docs/ONBOARDING_NEW_SCHOOL.md](shared/docs/ONBOARDING_NEW_SCHOOL.md) | **Onboarding a new school** — client app name, flavors, checklist |
 | [shared/docs/CLIENT_BUILDS.md](shared/docs/CLIENT_BUILDS.md) | Gradle/iOS flavors, CI/CD, git branching for client builds |
-| [shared/docs/help/README.md](shared/docs/help/README.md) | Per-organization in-app help layout |
-| [shared/docs/help/orgs/monhs-ph-001/](shared/docs/help/orgs/monhs-ph-001/) | MONHS school-specific member & admin guides |
+| [shared/docs/help/README.md](shared/docs/help/README.md) | In-app help architecture and fallback model |
+| [shared/docs/help/school/](shared/docs/help/school/) | Canonical school help source (guides + tutorials) |
 | [shared/docs/help/_default/](shared/docs/help/_default/) | Generic fallback guides for new tenants |
 
 ---
