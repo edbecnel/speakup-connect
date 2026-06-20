@@ -10,6 +10,8 @@ Organization-type bundles:
 Fallback:
   _default/member_guide.md
   _default/admin_guide.md
+  _default/member_tutorial.md
+  _default/admin_tutorial.md
 
 Localized (phase 1b — English placeholders until translated):
   _default/member_guide_ceb.md

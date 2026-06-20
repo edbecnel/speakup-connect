@@ -11,11 +11,17 @@ import 'package:speakup_connect/features/translations/presentation/providers/tra
 /// When unavailable, resolver falls back to `_default` assets only.
 final activeHelpOrganizationTypeProvider = Provider<String?>((ref) {
   final orgConfig = ref.watch(organizationConfigProvider).value;
-  final type = orgConfig?.type.value.trim();
+  final type = orgConfig?.type.value.trim().toLowerCase();
   if (type == null || type.isEmpty) {
     return null;
   }
-  return type;
+
+  // Help bundles are currently maintained for school organizations only.
+  // Unknown/unsupported org types should fall back to `_default`.
+  if (type == 'school') {
+    return type;
+  }
+  return null;
 });
 
 /// Whether the signed-in user should see administration help content.
