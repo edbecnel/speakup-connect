@@ -1,12 +1,12 @@
-# Administrator Guide
+# Administrator Guide - School
 
-This guide covers administration workflows for school deployments of SpeakUp Connect.
+This guide is for school administrators and delegated staff with administration capabilities.
 
 ---
 
 ## Administration menu
 
-Open **Settings**. Based on your role and capabilities, you may see:
+Open **Settings** and use the administration tools available to your role:
 
 - Admin Dashboard
 - Groups & Clubs (Administration)
@@ -17,38 +17,77 @@ Open **Settings**. Based on your role and capabilities, you may see:
 - School Grades
 - Translations
 
+Visible items vary by assigned capabilities.
+
 ---
 
-## Join applications and member management
+## Join applications
 
-Use **Join Applications** to approve or reject sign-up requests.
+1. Open **Settings -> Join Applications**
+2. Review pending sign-ups
+3. Approve or reject with optional reason
 
-Use **Member Management** to edit profiles, block/unblock, unenroll/re-enroll, and reset passwords.
+---
+
+## Member management
+
+Use **Settings -> Member Management** to:
+
+- edit member profile fields
+- block/unblock access
+- unenroll/re-enroll members
+- reset passwords
+- assign grades when enabled
+
+Official school photos remain separate from member personal profile photos.
 
 ---
 
 ## Student roster and grades
 
-School organizations can manage student records from:
+Use **Student Roster** for student provisioning and roster updates.
 
-- **Student Roster** for account provisioning and official school photo management
-- **School Grades** for grade-level setup
-
----
-
-## Groups, announcements, and alerts
-
-- Manage groups and rosters from **Groups & Clubs (Administration)**.
-- Publish school-wide posts from **Announcements**.
-- Send and review reminder workflows in **Alerts** and **Pending Approvals**.
-
-When approval gating is enabled, non-approver content is queued for admin review.
+Use **School Grades** to define grade levels before heavy roster operations.
 
 ---
 
-## Translation moderation
+## Groups and clubs
 
-Admins or staff with translation permissions can open **Translations** to edit and approve localized UI strings.
+Use **Groups & Clubs (Administration)** to:
 
-Member language switching remains a separate user action in Home/Settings.
+- create and edit groups
+- manage rosters
+- process join/leave requests
+- manage leader/member roles and position labels
+
+---
+
+## Reports
+
+Use **Admin Dashboard** to review reports, update statuses, and add notes.
+
+---
+
+## Announcements and alerts
+
+Announcements are school-wide posts.
+
+Group alerts target specific groups and can include response requests.
+
+If approval gating is enabled, non-approver content appears in **Pending Approvals**.
+
+---
+
+## Roles and translations
+
+Use role assignments to delegate capabilities such as translation moderation.
+
+Use **Translations** to edit and approve localized UI strings while preserving placeholders.
+
+---
+
+## Support
+
+- Follow school policy channels for local decisions.
+- Contact platform deployment leads for technical platform issues.
 

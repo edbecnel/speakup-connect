@@ -309,14 +309,14 @@ assets/help/
     member_guide.md
     member_guide_ceb.md
     member_guide_fil.md
-  orgs/{orgId}/
+  school/
     member_guide.md
     member_guide_ceb.md
     member_guide_fil.md
 ```
 
 `HelpAssetResolver` loads help assets with this fallback order:
-`orgs/{orgId} -> school -> _default` and per-locale file before English base
+`{orgType} -> _default` and per-locale file before English base
 (see `lib/features/help/data/help_asset_resolver.dart`).
 
 ---

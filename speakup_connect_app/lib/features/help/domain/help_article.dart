@@ -58,7 +58,7 @@ extension HelpArticleL10n on HelpArticle {
       };
 }
 
-/// Catalog of in-app help articles (content resolved per org via [HelpAssetResolver]).
+/// Catalog of in-app help articles (content resolved per org type via [HelpAssetResolver]).
 abstract class HelpArticles {
   static const member = HelpArticle(
     id: 'member',

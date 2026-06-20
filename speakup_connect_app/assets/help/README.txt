@@ -1,13 +1,7 @@
 Help assets layout
 ====================
 
-Org-specific guides (used by the app):
-  orgs/{organizationId}/member_guide.md
-  orgs/{organizationId}/admin_guide.md
-  orgs/{organizationId}/member_tutorial.md
-  orgs/{organizationId}/admin_tutorial.md
-
-Canonical school bundle (shared across school orgs):
+Organization-type bundles:
   school/member_guide.md
   school/admin_guide.md
   school/member_tutorial.md
@@ -20,17 +14,22 @@ Fallback:
 Localized (phase 1b — English placeholders until translated):
   _default/member_guide_ceb.md
   _default/admin_guide_ceb.md
-  orgs/{organizationId}/member_guide_ceb.md
-  orgs/{organizationId}/admin_guide_ceb.md
+  school/member_guide_ceb.md
+  school/admin_guide_ceb.md
 
-HelpAssetResolver tries {article}_guide_{locale}.md then {article}_guide.md
-with this order:
-  orgs/{orgId} -> school -> _default
+HelpAssetResolver resolves in this order:
+  {orgType}/{article}_{locale}.md
+  {orgType}/{article}.md
+  _default/{article}_{locale}.md
+  _default/{article}.md
+
+If orgType is unavailable, resolver uses _default only.
+
 Sync docs/help/*_CEB.md when editing Cebuano copies.
 
 Legacy flat files at this folder root (member_guide.md, admin_guide.md):
   Copies of _default — kept so Flutter hot restart does not fail after
-  asset path changes. The app loads org-specific paths via HelpAssetResolver.
+  asset path changes. The app resolves org-type paths via HelpAssetResolver.
 
 Sync from docs/help/ when editing guides.
 

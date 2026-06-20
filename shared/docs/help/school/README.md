@@ -16,7 +16,8 @@ Use these files as the maintained source-of-truth for school onboarding and in-a
 ## Usage model
 
 - Maintain school-generic content here.
-- Add org-specific copies only when truly necessary.
-- In app, Help Center resolves assets in this order: `orgs/{orgId}` -> `school` -> `_default`.
+- In app, Help Center resolves assets in this order: `{orgType}` -> `_default`.
+- Keep school assets under `assets/help/school/` for school organizations.
+- Do not create `help/orgs/{orgId}` overrides.
 - Keep labels user-facing in copy and UI, such as **Member Guide** and **Administrator Guide**.
 

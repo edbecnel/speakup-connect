@@ -126,9 +126,9 @@ Suggested next sprint after Sprint 13 closure: **Sprint 16 — i18n Phase 2** ([
 
 ### Delivered June 20, 2026 — School help canonicalization refactor
 - [x] Moved school help source-of-truth to `shared/docs/help/school/` (`README.md`, guides, tutorials, tutorial QA docs)
-- [x] Updated Help Center model to resolve `org -> school -> _default` assets without requiring per-org school duplication
+- [x] Updated Help Center model to resolve `{orgType} -> _default` assets without per-org overrides
 - [x] Added in-app school tutorial articles and user-facing labels (Member/Administrator Guide and Tutorial)
-- [x] Updated onboarding/help docs to point to canonical school source and optional org overrides only
+- [x] Updated onboarding/help docs to point to canonical school source with no org-specific override folders
 
 ---
 
@@ -187,7 +187,7 @@ Suggested next sprint after Sprint 13 closure: **Sprint 16 — i18n Phase 2** ([
 - [x] Firestore rules: gate `groups` / `members` writes on `manageGroupRoster` (keep `isAdminOrAbove` as fallback), matching `classes` pattern
 - [x] **Student roster:** `AddStudentScreen`, `provisionStudent` Cloud Function, student ID login (ID as password)
 - [x] **Response required** on reminders — recipients must respond before dismissing
-- [x] In-app help: per-org Member + Admin guides (`shared/docs/help/orgs/{orgId}/`, `assets/help/`, Settings → Help Center; `_default` fallback)
+- [x] In-app help: org-type first guides (`shared/docs/help/school/`, `assets/help/school/`, Settings → Help Center; `_default` fallback)
 - [ ] Verify Compose Reminder **group audience** picker populates and publishes → members appear in Alerts feed (on-device smoke test)
 
 #### 📋 Scope (stretch — if time remains)

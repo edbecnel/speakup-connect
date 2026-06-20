@@ -1,25 +1,22 @@
 import 'package:flutter/services.dart';
 
-/// Resolves bundled markdown help assets per organization and locale.
+/// Resolves bundled markdown help assets per organization type and locale.
 ///
 /// Lookup order for non-English [languageCode] (e.g. `ceb`):
-/// 1. `assets/help/orgs/{organizationId}/{articleName}_{languageCode}.md`
-/// 2. `assets/help/orgs/{organizationId}/{articleName}.md`
-/// 3. `assets/help/school/{articleName}_{languageCode}.md`
-/// 4. `assets/help/school/{articleName}.md`
-/// 5. `assets/help/_default/{articleName}_{languageCode}.md`
-/// 6. `assets/help/_default/{articleName}.md`
+/// 1. `assets/help/{organizationType}/{articleName}_{languageCode}.md`
+/// 2. `assets/help/{organizationType}/{articleName}.md`
+/// 3. `assets/help/_default/{articleName}_{languageCode}.md`
+/// 4. `assets/help/_default/{articleName}.md`
 ///
-/// For English (`en`), the same order applies without locale suffix.
+/// If [organizationType] is null/empty, resolution uses `_default` only.
 abstract class HelpAssetResolver {
-  static String orgPath(String organizationId, String articleName, {String? languageCode}) {
+  static String organizationTypePath(
+    String organizationType,
+    String articleName, {
+    String? languageCode,
+  }) {
     final suffix = _filenameSuffix(languageCode);
-    return 'assets/help/orgs/$organizationId/$articleName$suffix.md';
-  }
-
-  static String schoolPath(String articleName, {String? languageCode}) {
-    final suffix = _filenameSuffix(languageCode);
-    return 'assets/help/school/$articleName$suffix.md';
+    return 'assets/help/$organizationType/$articleName$suffix.md';
   }
 
   static String defaultPath(String articleName, {String? languageCode}) {
@@ -33,17 +30,23 @@ abstract class HelpAssetResolver {
   }
 
   static List<String> candidatePaths({
-    required String organizationId,
+    String? organizationType,
     required String articleName,
     required String languageCode,
   }) {
     final paths = <String>[];
+    final normalizedOrgType = _normalizeOrganizationType(organizationType);
 
     void addGroup(String? localizedCode) {
-      if (organizationId.isNotEmpty) {
-        paths.add(orgPath(organizationId, articleName, languageCode: localizedCode));
+      if (normalizedOrgType != null) {
+        paths.add(
+          organizationTypePath(
+            normalizedOrgType,
+            articleName,
+            languageCode: localizedCode,
+          ),
+        );
       }
-      paths.add(schoolPath(articleName, languageCode: localizedCode));
       paths.add(defaultPath(articleName, languageCode: localizedCode));
     }
 
@@ -55,13 +58,19 @@ abstract class HelpAssetResolver {
     return paths;
   }
 
+  static String? _normalizeOrganizationType(String? organizationType) {
+    final normalized = organizationType?.trim().toLowerCase();
+    if (normalized == null || normalized.isEmpty) return null;
+    return normalized;
+  }
+
   static Future<String> loadMarkdown({
-    required String organizationId,
+    String? organizationType,
     required String articleName,
     required String languageCode,
   }) async {
     final candidates = candidatePaths(
-      organizationId: organizationId,
+      organizationType: organizationType,
       articleName: articleName,
       languageCode: languageCode,
     );
@@ -76,7 +85,7 @@ abstract class HelpAssetResolver {
     }
 
     throw HelpAssetNotFoundException(
-      organizationId: organizationId,
+      organizationType: organizationType,
       articleName: articleName,
       languageCode: languageCode,
       cause: lastError,
@@ -86,19 +95,19 @@ abstract class HelpAssetResolver {
 
 class HelpAssetNotFoundException implements Exception {
   HelpAssetNotFoundException({
-    required this.organizationId,
+    this.organizationType,
     required this.articleName,
     required this.languageCode,
     this.cause,
   });
 
-  final String organizationId;
+  final String? organizationType;
   final String articleName;
   final String languageCode;
   final Object? cause;
 
   @override
   String toString() =>
-      'No help article found for org "$organizationId" article "$articleName" '
+      'No help article found for orgType "${organizationType ?? '_default'}" article "$articleName" '
       'language "$languageCode"';
 }

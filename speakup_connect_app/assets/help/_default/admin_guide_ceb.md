@@ -2,8 +2,6 @@
 
 This generic guide describes administration features that may be available in your organization. **Menus and capabilities vary by org type and assigned permissions.**
 
-> Client organizations (schools, LGUs, NGOs, etc.) should ship **org-specific help** under `shared/docs/help/orgs/{orgId}/` with local workflows, UI options, and enabled features.
-
 ---
 
 ## Administration menu
@@ -221,11 +219,6 @@ After setup, school org admins assign translation moderators and handle day-to-d
 
 ---
 
-## Org-specific documentation
+## Local policy notes
 
-When onboarding a new tenant, add tailored guides at:
-
-`shared/docs/help/orgs/{organizationId}/MEMBER_GUIDE.md`  
-`shared/docs/help/orgs/{organizationId}/ADMIN_GUIDE.md`
-
-Copy the same files to `assets/help/orgs/{organizationId}/` for in-app viewing.
+If your organization has local workflows not covered here, record them in school onboarding SOPs and admin operations notes. Keep Help Center canonical content under `shared/docs/help/school/` and `assets/help/school/`, with `_default` as fallback.

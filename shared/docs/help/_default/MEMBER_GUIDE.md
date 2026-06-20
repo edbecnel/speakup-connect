@@ -132,4 +132,4 @@ Your organization’s custom member guide may include local step-by-step instruc
 
 ## Need local details?
 
-Contact your organization administrator. They can provide org-specific processes not covered in this generic guide.
+Contact your organization administrator. They can provide local school policies not covered in this generic guide.

@@ -1,6 +1,6 @@
 # In-App Help — SpeakUp Connect
 
-Help content is organized around a reusable **canonical school source** with optional org overrides.
+Help content is resolved by **organization type first**, with `_default` fallback only.
 
 ## Canonical structure
 
@@ -8,13 +8,11 @@ Help content is organized around a reusable **canonical school source** with opt
 shared/docs/help/
 ├── README.md
 ├── _default/           ← platform fallback docs
-├── school/             ← canonical reusable school docs
-└── orgs/{orgId}/       ← optional org-specific overrides
+└── school/             ← canonical reusable school docs
 
 speakup_connect_app/assets/help/
 ├── _default/
-├── school/
-└── orgs/{orgId}/       ← optional overrides only when necessary
+└── school/
 ```
 
 School source-of-truth: [`school/`](school/).
@@ -23,14 +21,12 @@ School source-of-truth: [`school/`](school/).
 
 `HelpAssetResolver` loads articles in this order:
 
-1. `assets/help/orgs/{organizationId}/{articleName}_{locale}.md`
-2. `assets/help/orgs/{organizationId}/{articleName}.md`
-3. `assets/help/school/{articleName}_{locale}.md`
-4. `assets/help/school/{articleName}.md`
-5. `assets/help/_default/{articleName}_{locale}.md`
-6. `assets/help/_default/{articleName}.md`
+1. `assets/help/{organizationType}/{articleName}_{locale}.md`
+2. `assets/help/{organizationType}/{articleName}.md`
+3. `assets/help/_default/{articleName}_{locale}.md`
+4. `assets/help/_default/{articleName}.md`
 
-This preserves fallback behavior while removing the need for per-org school duplication.
+If `organizationType` is unavailable, the resolver uses `_default` entries only.
 
 ## Article labels and catalog
 
@@ -45,10 +41,10 @@ Use user-facing labels in UI and documentation:
 
 For new schools:
 
-1. Start from `shared/docs/help/school/`.
-2. Add `shared/docs/help/orgs/{orgId}/` only for true org-specific policy differences.
-3. Add matching `assets/help/orgs/{orgId}/` assets only when overrides are required.
-4. Keep `_default/` as global safety fallback.
+1. Maintain school content in `shared/docs/help/school/`.
+2. Keep in-app school assets in `speakup_connect_app/assets/help/school/`.
+3. Keep `_default/` as global safety fallback.
+4. Do not create `help/orgs/{orgId}` folders or org-specific overrides.
 
 ## Sync workflow
 

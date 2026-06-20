@@ -232,13 +232,13 @@ flutter run --flavor {orgId} -t lib/main_{orgId}.dart -d <device-id>
 flutter build appbundle --flavor {orgId} -t lib/main_{orgId}.dart --release
 ```
 
-### 5.5b Organization-specific help (in-app)
+### 5.5b Help Center content (in-app)
 
-School Help Center uses canonical shared assets by default. Add per-org overrides only when truly needed.
+School Help Center uses canonical school assets by organization type with `_default` fallback.
 
 - [ ] Start from canonical source: `shared/docs/help/school/`
-- [ ] Keep org-specific docs only for true local policy differences in `shared/docs/help/orgs/{orgId}/`
-- [ ] If overrides are required, add matching `assets/help/orgs/{orgId}/` files (`member_guide.md`, `admin_guide.md`, optional tutorials)
+- [ ] Keep in-app content under `assets/help/school/` (guides + tutorials)
+- [ ] Do not create `shared/docs/help/orgs/{orgId}/` or `assets/help/orgs/{orgId}/` help overrides
 - [ ] Keep copy user-facing (for example, "Administrator Guide"), not filename-style wording
 - [ ] Remove or tailor school-only sections (student ID login, roster, grades) for non-school org types
 - [ ] Smoke-test **Settings → Help Center** on a device signed into `{orgId}`
@@ -269,7 +269,7 @@ These are configured in **Firestore** (`organizations/{orgId}`) or the **admin p
 | In-app org display name | `displayName` on org document (splash: "SpeakUp {displayName}") |
 | Report categories, roles, permissions | Admin screens |
 | Reminder approval toggle | Admin branding settings |
-| In-app Help Center text | Canonical `shared/docs/help/school/` + `assets/help/school/`, with optional org overrides under `orgs/{orgId}` |
+| In-app Help Center text | Canonical `shared/docs/help/school/` + `assets/help/school/` (fallback: `assets/help/_default/`) |
 
 These **require a new client build** (or reinstall):
 
