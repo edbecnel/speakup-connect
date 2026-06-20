@@ -2,6 +2,8 @@
 
 School-specific in-app help for the MONHS pilot client build.
 
+For new school onboarding, start from `shared/docs/help/templates/school/` and then tailor to each organization. MONHS remains a concrete reference example.
+
 | File | Audience |
 |------|----------|
 | [MEMBER_GUIDE.md](MEMBER_GUIDE.md) | Students and staff — student ID login, reports, alerts |

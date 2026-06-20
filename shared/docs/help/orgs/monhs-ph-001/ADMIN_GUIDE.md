@@ -2,6 +2,7 @@
 
 > **Organization:** `monhs-ph-001` (Misamis Oriental National High School pilot)  
 > This guide is **school-specific** — student roster, grades, SSLG demo groups, and student ID login apply to MONHS. Other tenants maintain separate guides under `shared/docs/help/orgs/{orgId}/`.
+> For new school onboarding, start from `shared/docs/help/templates/school/` and tailor per organization.
 
 This guide is for MONHS administrators and staff with delegated capabilities (report triage, group management, reminders, etc.). Sections note which permissions are required.
 

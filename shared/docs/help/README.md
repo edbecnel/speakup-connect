@@ -3,6 +3,7 @@
 Help content is **organization-specific**. Each tenant (school, LGU, NGO, company, etc.) ships its own guides describing **local setup, UI options, and enabled functionality**.
 
 Generic fallbacks live in [`_default/`](_default/) when an org has no custom bundle yet.
+Reusable school starter docs live in [`templates/school/`](templates/school/).
 
 ---
 
@@ -14,6 +15,12 @@ shared/docs/help/
 ├── _default/                 ← generic platform guides (fallback)
 │   ├── MEMBER_GUIDE.md
 │   └── ADMIN_GUIDE.md
+├── templates/
+│   └── school/               ← canonical school templates for new school onboarding
+│       ├── README.md
+│       ├── MEMBER_GUIDE.md
+│       ├── ADMIN_GUIDE.md
+│       └── *_TUTORIAL.md
 └── orgs/
     └── {organizationId}/     ← one folder per tenant
         ├── README.md         ← optional org notes
@@ -30,7 +37,7 @@ assets/help/                  ← same structure, lowercase filenames for the ap
         └── admin_guide.md
 ```
 
-**Pilot example:** [orgs/monhs-ph-001/](orgs/monhs-ph-001/) — MONHS school (student ID login, roster, SSLG, grades).
+**Reference example:** [orgs/monhs-ph-001/](orgs/monhs-ph-001/) — MONHS school deployment.
 
 ---
 
@@ -64,13 +71,17 @@ Add a third guide only for a clearly different audience (e.g. applicants before 
 ## Onboarding a new organization
 
 1. Create `shared/docs/help/orgs/{organizationId}/`
-2. Copy `_default/` guides as a starting point
-3. Customize for org type and enabled features:
+2. If this is a school org, copy from `shared/docs/help/templates/school/`:
+   - `MEMBER_GUIDE.md`
+   - `ADMIN_GUIDE.md`
+   - Optional tutorials for training (`*_TUTORIAL.md`)
+3. For non-school orgs, copy from `_default/` and tailor terminology
+4. Customize for org type and enabled features:
    - **School:** student ID login, roster, grades, clubs
    - **LGU / municipality:** citizen reports, bulletin workflows
    - **NGO / company:** adjust terminology; omit school-only sections
-4. Copy to `assets/help/orgs/{organizationId}/`
-5. Register the asset folder in `pubspec.yaml`:
+5. Copy guide files to `assets/help/orgs/{organizationId}/`
+6. Register the asset folder in `pubspec.yaml`:
    ```yaml
    flutter:
      assets:
@@ -78,7 +89,7 @@ Add a third guide only for a clearly different audience (e.g. applicants before 
        - assets/help/orgs/monhs-ph-001/
        - assets/help/orgs/{new-org-id}/
    ```
-6. Client builds: pair help bundle with `FlavorConfig.orgId` — see [ONBOARDING_NEW_SCHOOL.md](../ONBOARDING_NEW_SCHOOL.md)
+7. Client builds: pair help bundle with `FlavorConfig.orgId` — see [ONBOARDING_NEW_SCHOOL.md](../ONBOARDING_NEW_SCHOOL.md)
 
 ---
 
@@ -110,6 +121,7 @@ Legacy shim files at `assets/help/member_guide.md` and `assets/help/admin_guide.
 
 | Document | Use |
 |----------|-----|
+| [templates/school/README.md](templates/school/README.md) | Canonical school help template source |
 | [DATABASE_DESIGN.md](../DATABASE_DESIGN.md) | Data model reference |
 | [RBAC_ARCHITECTURE.md](../RBAC_ARCHITECTURE.md) | Permissions |
 | [CLIENT_BUILDS.md](../CLIENT_BUILDS.md) | Per-client APK/IPA and `orgId` |

@@ -234,9 +234,11 @@ flutter build appbundle --flavor {orgId} -t lib/main_{orgId}.dart --release
 
 ### 5.5b Organization-specific help (in-app)
 
-Each tenant ships its own Help Center content — schools, LGUs, and other org types differ in sign-in, menus, and enabled features.
+Each tenant ships its own Help Center content. For school onboarding, use the canonical school templates first, then tailor for local policies and enabled features.
 
-- [ ] Create `shared/docs/help/orgs/{orgId}/MEMBER_GUIDE.md` and `ADMIN_GUIDE.md` (copy from [`shared/docs/help/_default/`](../help/_default/) or [MONHS example](../help/orgs/monhs-ph-001/))
+- [ ] Copy `shared/docs/help/templates/school/MEMBER_GUIDE.md` and `ADMIN_GUIDE.md` to `shared/docs/help/orgs/{orgId}/`
+- [ ] Optional: copy `shared/docs/help/templates/school/*_TUTORIAL.md` for internal training docs (not required for in-app Help Center)
+- [ ] Tailor copied docs for `{orgId}` and local school workflows; keep MONHS-specific data as labeled examples only
 - [ ] Copy to `assets/help/orgs/{orgId}/member_guide.md` and `admin_guide.md`
 - [ ] Register `assets/help/orgs/{orgId}/` in `pubspec.yaml`
 - [ ] Remove or tailor school-only sections (student ID login, roster, grades) for non-school org types

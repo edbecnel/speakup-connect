@@ -2,6 +2,7 @@
 
 > **Organization:** `monhs-ph-001` (Misamis Oriental National High School pilot)  
 > This guide is **school-specific**. Other SpeakUp Connect tenants use their own help files.
+> For new school onboarding, start from `shared/docs/help/templates/school/` and tailor per organization.
 
 Welcome to SpeakUp MONHS. This guide covers everyday use for students, staff, and other approved members.
 

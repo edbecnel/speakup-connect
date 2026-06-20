@@ -1,6 +1,6 @@
 # Sprint Tracker — SpeakUp Connect
 
-> Last Updated: June 17, 2026  
+> Last Updated: June 20, 2026  
 > Current Sprint: **Sprint 13** (Group Membership Requests) — implementation in progress (reliability hardening shipped)  
 > Last completed: **Sprint 15** (i18n Phase 1 + 1b) — June 2026  
 > Sprint Duration: 2 weeks  
@@ -121,6 +121,14 @@ Suggested next sprint after Sprint 13 closure: **Sprint 16 — i18n Phase 2** ([
 - [x] Follow-up path/config/generated-file alignment completed after move (including helper tooling package lock updates)
 - [x] Icon assets relocated to new app/web structure and stale old-root copies removed
 - [ ] Needs confirmation: whether any external automation scripts/CI references outside this repo still point to pre-restructure paths
+
+---
+
+### Delivered June 20, 2026 — School help template refactor
+- [x] Added canonical school templates under `shared/docs/help/templates/school/` (`README.md`, `ADMIN_GUIDE.md`, `MEMBER_GUIDE.md`, tutorials)
+- [x] Consolidated stray tutorial draft into canonical help template path and removed old `shared/docs/templates/schools/ADMIN_TUTORIAL.md`
+- [x] Updated `shared/docs/help/README.md` and `shared/docs/ONBOARDING_NEW_SCHOOL.md` to use school templates as onboarding source
+- [x] Kept MONHS org docs intact and usable while adding explicit template-source references
 
 ---
 
