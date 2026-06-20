@@ -24,6 +24,15 @@ import 'package:speakup_connect/shared/widgets/notification_badge_icon.dart';
 class AdminDashboardScreen extends ConsumerWidget {
   const AdminDashboardScreen({super.key});
 
+  static const BoxConstraints _actionConstraints = BoxConstraints(
+    minWidth: 42,
+    minHeight: 42,
+  );
+  static const VisualDensity _actionDensity = VisualDensity(
+    horizontal: -2,
+    vertical: -2,
+  );
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
@@ -35,6 +44,7 @@ class AdminDashboardScreen extends ConsumerWidget {
       length: 6,
       child: Scaffold(
         appBar: AppBar(
+          leadingWidth: 60,
           leading: BackButton(
             onPressed: () {
               if (context.canPop()) {
@@ -44,12 +54,11 @@ class AdminDashboardScreen extends ConsumerWidget {
               }
             },
           ),
-          title: TranslationAnchor(
-            stringKey: 'settingsAdminDashboard',
-            text: l10n.settingsAdminDashboard,
-          ),
           actions: [
             IconButton(
+              constraints: _actionConstraints,
+              visualDensity: _actionDensity,
+              padding: const EdgeInsets.all(6),
               tooltip: l10n.adminDashboardJoinApplicationsTooltip,
               onPressed: () => context.push(Routes.memberApprovals),
               icon: NotificationBadgeIcon(
@@ -58,6 +67,9 @@ class AdminDashboardScreen extends ConsumerWidget {
               ),
             ),
             IconButton(
+              constraints: _actionConstraints,
+              visualDensity: _actionDensity,
+              padding: const EdgeInsets.all(6),
               tooltip: l10n.adminDashboardPendingApprovalsTooltip,
               onPressed: () => context.push(Routes.reminderApprovals),
               icon: NotificationBadgeIcon(
@@ -66,28 +78,43 @@ class AdminDashboardScreen extends ConsumerWidget {
               ),
             ),
             IconButton(
+              constraints: _actionConstraints,
+              visualDensity: _actionDensity,
+              padding: const EdgeInsets.all(6),
               tooltip: l10n.adminDashboardMemberManagementTooltip,
               onPressed: () => context.push(Routes.enrolledUsers),
               icon: const Icon(Icons.people_outline),
             ),
             if (supportsGrades) ...[
               IconButton(
+                constraints: _actionConstraints,
+                visualDensity: _actionDensity,
+                padding: const EdgeInsets.all(6),
                 tooltip: l10n.adminDashboardStudentRosterTooltip,
                 onPressed: () => context.push(Routes.rosterManagement),
                 icon: const Icon(Icons.school_outlined),
               ),
               IconButton(
+                constraints: _actionConstraints,
+                visualDensity: _actionDensity,
+                padding: const EdgeInsets.all(6),
                 tooltip: l10n.adminDashboardSchoolGradesTooltip,
                 onPressed: () => context.push(Routes.schoolGradesSettings),
                 icon: const Icon(Icons.format_list_numbered_outlined),
               ),
             ],
             IconButton(
+              constraints: _actionConstraints,
+              visualDensity: _actionDensity,
+              padding: const EdgeInsets.all(6),
               icon: const Icon(Icons.manage_accounts_outlined),
               tooltip: l10n.adminDashboardRolesTooltip,
               onPressed: () => context.push(Routes.adminRoles),
             ),
             IconButton(
+              constraints: _actionConstraints,
+              visualDensity: _actionDensity,
+              padding: const EdgeInsets.all(6),
               icon: const Icon(Icons.settings_outlined),
               tooltip: l10n.adminDashboardOrgSettingsTooltip,
               onPressed: () => context.push(Routes.adminSettings),

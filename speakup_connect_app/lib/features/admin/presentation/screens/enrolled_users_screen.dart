@@ -98,6 +98,7 @@ class _EnrolledUsersScreenState extends ConsumerState<EnrolledUsersScreen> {
 
     return Scaffold(
       appBar: AppBar(
+        leadingWidth: 20,
         leading: BackButton(onPressed: () => context.pop()),
         title: Text(l10n.settingsMemberManagement),
         actions: [

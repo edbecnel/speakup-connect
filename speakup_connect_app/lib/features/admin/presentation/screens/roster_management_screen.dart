@@ -83,6 +83,7 @@ class _RosterManagementScreenState
 
     return Scaffold(
       appBar: AppBar(
+        leadingWidth: 40,
         leading: BackButton(onPressed: () => context.pop()),
         title: Text(l10n.settingsStudentRoster),
         actions: [
