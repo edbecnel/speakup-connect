@@ -11,16 +11,16 @@ Only students approved by the school through the official roster or pilot roster
 The goal is to protect student privacy, prevent impersonation, prevent unauthorized access, and support MONHS responsibilities under the Data Privacy Act and DepEd child protection policies.
 
 ---
-## Public App, School-Controlled Access  
-  
-Speakup Connect may be publicly available for download from the App Store. However, installing the app must not automatically give anyone access to MONHS or to any other school’s private student reporting system.  
-  
-Speakup Connect is intended to become a multi-school platform. Each school that uses the app should have its own protected school environment, its own approved users, its own student roster, its own staff accounts, and its own privacy and child protection responsibilities.  
-  
-The app provider can supply the technical safeguards, onboarding tools, role-based permissions, and configuration options. However, each participating school remains responsible for deciding who is authorized to use the system, who may access student reports, how reports are handled, and how the school complies with applicable privacy and child protection requirements.  
-  
-For MONHS, this means that MONHS controls who may access the MONHS environment. A student must be approved through the MONHS roster-based onboarding process, and staff access must be approved by MONHS.  
-  
+## Public App, School-Controlled Access
+
+Speakup Connect may be publicly available for download from the App Store. However, installing the app must not automatically give anyone access to MONHS or to any other school’s private student reporting system.
+
+Speakup Connect is intended to become a multi-school platform. Each school that uses the app should have its own protected school environment, its own approved users, its own student roster, its own staff accounts, and its own privacy and child protection responsibilities.
+
+The app provider can supply the technical safeguards, onboarding tools, role-based permissions, and configuration options. However, each participating school remains responsible for deciding who is authorized to use the system, who may access student reports, how reports are handled, and how the school complies with applicable privacy and child protection requirements.
+
+For MONHS, this means that MONHS controls who may access the MONHS environment. A student must be approved through the MONHS roster-based onboarding process, and staff access must be approved by MONHS.
+
 ---
 ## Initial School Organization and Org Admin Setup
 
@@ -188,7 +188,7 @@ Possible Org Admin responsibilities include:
 - Inviting approved staff users
 - Assigning staff roles
 - Uploading or managing approved student rosters
-- Generating student activation codes
+- Generating one-time activation codes for imported Student Login IDs
 - Deactivating users who are no longer authorized
 - Reviewing user access
 - Coordinating with school leadership
@@ -280,6 +280,7 @@ MONHS should provide or approve an official list of students who are allowed to 
 The student roster should include only the information needed for account verification, such as:
 
 - Student name
+- School-provided Student Login ID
 - Student ID or LRN, if approved by MONHS
 - Grade level
 - Section
@@ -301,24 +302,25 @@ This means:
 
 Before a student can activate a Speakup Connect account, MONHS must first approve the student through the official school roster or pilot roster.
 
-During first-time activation, the student should:
+During student onboarding:
 
-1. Open Speakup Connect.
-2. Select the school or scan the school QR code.
-3. Choose “Activate Student Account.”
-4. Enter the Student Login ID.
-5. Enter the one-time activation code.
-6. Create a password, passphrase, or approved PIN.
-7. Complete activation.
+1. MONHS approves the pilot roster or student roster.
+2. Student Login IDs are provided by the school and imported into Speakup Connect. These are typically the school-assigned Student ID.
+3. Speakup Connect generates a one-time activation code for each approved student.
+4. MONHS distributes the Student Login ID and one-time activation code privately, preferably in person.
+5. Student opens the app.
+6. Student selects MONHS or scans a MONHS QR code.
+7. Student chooses “Activate Student Account.”
+8. Student enters the Student Login ID and one-time activation code.
+9. Student creates a password, passphrase, or approved PIN.
+10. The activation code becomes invalid after use.
+11. The student account is linked to the approved roster record.
 
 After activation:
 
-- The one-time activation code becomes invalid.
-- The account is linked to that student’s approved roster record.
 - The student logs in using the school, Student Login ID, and password/PIN.
 - The student does not need an email address.
 - The student cannot create a MONHS account unless MONHS has already approved that student.
-
 ---
 ## School QR Code Use
 
@@ -335,19 +337,20 @@ This prevents someone from gaining access simply because they saw or copied the 
 
 Not all students have email addresses, so Speakup Connect should not require email as the only way for students to activate or log in.
 
-The recommended approach is to use a school-issued Student Login ID and a one-time activation code.
+The recommended approach is to use a school-provided Student Login ID and a one-time activation code generated by Speakup Connect.
 
-For each approved student, the system should generate:
+Speakup Connect will provide a Student Login ID import tool and an automatic one-time activation code generation tool. This allows the school to import its approved student roster and have Speakup Connect assign a one-time activation code to each imported Student Login ID.
 
-- Student Login ID
-- One-time activation code
+For each approved student, the system should store or generate:
+
+- School-provided Student Login ID imported from the approved roster
+- One-time activation code generated by Speakup Connect
 - School organization assignment
 - Expiration date for the activation code
 
-The Student Login ID should be generated by the app and should not simply expose the student’s name, LRN, birthdate, or other sensitive information.
+The Student Login ID is provided by the school and stored in the app. The app should not simply expose the student’s name, LRN, birthdate, or other sensitive information unless MONHS specifically chooses to use one of those identifiers.
 
-The one-time activation code should be distributed by MONHS in person through an adviser, coordinator, or supervised onboarding session.
-
+The Student Login ID and one-time activation code should be distributed by MONHS in person through an adviser, coordinator, or supervised onboarding session.
 ---
 
 ## Automated Activation Code / PIN Generation
@@ -404,10 +407,12 @@ Recommended preparation steps:
 
 1. MONHS approves the student roster or pilot roster.
 2. MONHS decides which students are included in the pilot.
-3. Speakup Connect generates Student Login IDs and one-time activation codes for approved students.
-4. MONHS privately distributes the Student Login IDs and activation codes, preferably in person.
-5. Students activate their own accounts using the Student Onboarding Workflow.
-6. Unused, lost, or expired activation codes are disabled or regenerated as needed.
+3. MONHS provides the Student Login IDs as part of the approved roster.
+4. Speakup Connect imports the approved Student Login IDs.
+5. Speakup Connect generates one-time activation codes for the imported Student Login IDs.
+6. MONHS privately distributes the Student Login IDs and activation codes, preferably in person.
+7. Students activate their own accounts using the Student Onboarding Workflow.
+8. Unused, lost, or expired activation codes are disabled or regenerated as needed.
 
 The school should decide:
 
@@ -427,7 +432,7 @@ Recommended distribution methods:
 - Printed on individual slips
 - Distributed only after the student’s identity is confirmed by school personnel
 
-The activation code should not be sent in a group chat, posted on Facebook, or shared in a public announcement.
+The Student Login ID and activation code should not be sent in a group chat, posted on Facebook, or shared in a public announcement.
 
 Once the student activates the account:
 
@@ -435,7 +440,6 @@ Once the student activates the account:
 - Another user cannot use the same code.
 - The same roster record cannot be claimed again without school approval.
 - Any duplicate claim attempt should be blocked or flagged.
-
 ---
 # Preventing One Student from Logging in as Another Student
 
@@ -624,16 +628,16 @@ For the first pilot, the safest approach is a supervised onboarding session.
 
 1. MONHS selects the pilot group.
 2. MONHS approves the roster for that pilot group.
-3. The app generates one-time activation codes.
-4. Codes are printed individually.
-5. Adviser or coordinator distributes the codes in person.
-6. Students activate accounts during a supervised session.
-7. Staff confirms that each student successfully activated only their own account.
-8. Unused codes are collected, expired, or disabled.
-9. Any failed or suspicious activation attempts are reviewed.
+3. MONHS provides Student Login IDs for the approved students.
+4. Speakup Connect imports the school-provided Student Login IDs and generates one-time activation codes for the approved students.
+5. Student Login IDs and activation codes are printed or prepared individually.
+6. Adviser or coordinator distributes the Student Login IDs and activation codes in person.
+7. Students activate accounts during a supervised session.
+8. Staff confirms that each student successfully activated only their own account.
+9. Unused codes are collected, expired, or disabled.
+10. Any failed or suspicious activation attempts are reviewed.
 
 This is safer than letting students register on their own outside school supervision.
-
 ---
 
 # Handling Special Cases
@@ -669,7 +673,8 @@ This is safer than letting students register on their own outside school supervi
 ## Student Transfers In
 
 - MONHS adds the student to the approved roster.
-- App generates an activation code.
+- MONHS provides the Student Login ID for the new student.
+- Speakup Connect generates an activation code for that Student Login ID.
 - Student activates through the standard process.
 
 ## Student Tries to Use Another Student’s Account
@@ -771,18 +776,18 @@ The app should not trust the mobile app alone to decide who is allowed access. I
 MONHS should be responsible for:
 
 1. Providing or approving the official student roster.
-2. Providing or approving the official staff list.
-3. Deciding who is included in the pilot.
-4. Deciding who may receive staff access.
-5. Deciding what roles staff members should have.
-6. Distributing student activation codes in person.
-7. Verifying student identity during onboarding or recovery.
-8. Approving account resets.
-9. Deactivating students who transfer out or are no longer authorized.
-10. Deactivating staff who leave or no longer need access.
-11. Defining the report access and escalation policy.
-12. Approving the privacy notice and student/parent communication.
-
+2. Providing the Student Login IDs as part of the approved student roster.
+3. Providing or approving the official staff list.
+4. Deciding who is included in the pilot.
+5. Deciding who may receive staff access.
+6. Deciding what roles staff members should have.
+7. Distributing Student Login IDs and one-time activation codes privately, preferably in person.
+8. Verifying student identity during onboarding or recovery.
+9. Approving account resets.
+10. Deactivating students who transfer out or are no longer authorized.
+11. Deactivating staff who leave or no longer need access.
+12. Defining the report access and escalation policy.
+13. Approving the privacy notice and student/parent communication.
 ---
 
 # My Responsibilities
@@ -791,19 +796,19 @@ My responsibilities should be:
 
 1. Build or configure the roster-based onboarding system.
 2. Ensure that open self-registration is disabled.
-3. Generate secure one-time activation codes.
-4. Configure role-based access.
-5. Configure staff permissions based on MONHS instructions.
-6. Implement reasonable login protections.
-7. Implement audit logging where practical.
-8. Support admin training.
-9. Help prepare onboarding instructions.
-10. Help prepare privacy-aware user guidance.
-11. Provide technical support.
-12. Avoid routine access to confidential student reports unless authorized and necessary.
+3. Provide or configure the Student Login ID import process.
+4. Generate secure one-time activation codes for imported Student Login IDs.
+5. Configure role-based access.
+6. Configure staff permissions based on MONHS instructions.
+7. Implement reasonable login protections.
+8. Implement audit logging where practical.
+9. Support admin training.
+10. Help prepare onboarding instructions.
+11. Help prepare privacy-aware user guidance.
+12. Provide technical support.
+13. Avoid routine access to confidential student reports unless authorized and necessary.
 
 I should not decide which students or staff are authorized. MONHS should make those decisions.
-
 ---
 
 # Recommended Statement to the Principal
