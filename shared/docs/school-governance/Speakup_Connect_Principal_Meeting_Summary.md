@@ -77,7 +77,7 @@ The app provider should be responsible for technical support and configuration, 
 1. Configuring the MONHS school environment.
 2. Setting up role-based access.
 3. Supporting secure student and staff onboarding.
-4. Generating student login IDs and activation codes.
+4. Importing school-provided Student Login IDs and generating one-time activation PINs/codes.
 5. Helping configure report categories and routing.
 6. Supporting restricted handling of sensitive reports.
 7. Helping prepare onboarding and training materials.
@@ -111,18 +111,18 @@ Students should not need email addresses to use the app.
 Recommended student onboarding:
 
 1. MONHS approves the pilot roster or student roster.
-2. Student Login IDs are provided by the school and imported into Speakup Connect 
-3. Speakup Connect generates a one-time activation code for each approved student.
-4. MONHS distributes the Student Login ID and one-time activation code privately, preferably in person.
+2. Student Login IDs are provided by the school and imported into Speakup Connect.
+3. Speakup Connect generates a one-time activation PIN/code for each approved student.
+4. MONHS distributes the Student Login ID and one-time activation PIN/code privately, preferably in person.
 5. Student opens the app.
 6. Student selects MONHS or scans a MONHS QR code.
 7. Student chooses “Activate Student Account.”
-8. Student enters the Student Login ID and one-time activation code.
-9. Student creates a password, passphrase, or approved PIN.
-10. The activation code becomes invalid after use.
+8. Student enters the Student Login ID and one-time activation PIN/code.
+9. Student creates a password, passphrase, or approved login PIN.
+10. The one-time activation PIN/code becomes invalid after use.
 11. The student account is linked to the approved roster record.
 
-The school may choose the activation code format, such as a 6-digit numeric code, 8-digit numeric code, or mixed-character code.
+The Student Login ID is assigned by the school, not by Speakup Connect. Speakup Connect only imports the school-provided Student Login IDs and generates the one-time activation PINs/codes. The school may choose the activation PIN/code format, such as a 6-digit numeric code, 8-digit numeric code, or mixed-character code.
 
 ---
 
@@ -139,7 +139,7 @@ Recommended approach:
 - The first Org Admin should be created only after MONHS verifies and approves the person.
 - The app provider should issue a secure, one-time Org Admin invitation to the approved person.
 
-The Org Admin may help manage staff invitations, student rosters, activation codes, and onboarding under MONHS authority.
+The Org Admin may help manage staff invitations, student rosters, imported Student Login IDs, one-time activation PINs/codes, and onboarding under MONHS authority.
 
 ---
 
@@ -186,7 +186,7 @@ The most important meeting outcomes are:
 6. What report categories should be included?
 7. Which categories should be restricted?
 8. What student group should be included in the pilot?
-9. How should students receive activation codes?
+9. How should students receive their school-provided Student Login IDs and one-time activation PINs/codes?
 10. When should admin training be scheduled?
 
 ---
