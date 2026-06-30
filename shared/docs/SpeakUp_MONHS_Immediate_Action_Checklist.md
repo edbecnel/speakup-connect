@@ -1,0 +1,26 @@
+# SpeakUp MONHS: Immediate Action Checklist
+
+- [ ] Identify a small MONHS pilot team.
+- [x] Select one faculty sponsor or coordinator.  Edna T. Magos (school principal)
+- [ ] Get emails working with the app (standard login notice and password reset)
+- [ ] Get IDs of the principal, guidance counselor, and the SSLG coordinator
+- [ ] Pre-set up the principal as the org admin
+- [ ] Pre-set up the guidance counselor as the counselor role
+- [ ] Set up a new SSLG Coordinator role and assign the SSLG coordinator to that role
+- [ ] Meet with principal and SSLG coordinator at MONHS to introduce myself, the software, and get feedback
+	- [ ] Bring laptop or Mac Mini to allow installing apps on their phones and for PowerPoint
+	- [ ] Mention automated student ID processing
+	- [ ] Mention allowing parents to join for notifications/instant messaging regarding their child student(s)
+	- [ ] Bring PDFs of Admin Help, Admin Training, and Admin Quick Start Guide
+	- [ ] Get their emails to send electronic PDF files
+- [ ] Schedule an admin-only training session.
+- [ ] Prepare a short Admin Quick Start Guide.
+- [ ] Use the full tutorial as a reference manual.
+- [ ] Define the first pilot users: admin, guidance, ICT, selected teachers, and selected students.
+- [ ] Agree on the first report categories to test.
+- [ ] Run a limited 2–4 week pilot.
+- [ ] Collect feedback from administrators, teachers, and students.
+- [ ] Fix confusing areas before wider rollout.
+- [ ] Decide who can view, assign, update, and close reports.
+- [ ] Schedule a follow-up meeting after the pilot.
+- [ ] Prepare for a larger rollout if the pilot is successful.
