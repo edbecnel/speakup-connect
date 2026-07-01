@@ -20,6 +20,9 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+# Documents
+shared/docs/school-governance
+
 # Environment and Secrets (Crucial for safety!)
 .env
 .env.*
