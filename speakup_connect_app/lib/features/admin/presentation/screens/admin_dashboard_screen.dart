@@ -6,6 +6,7 @@ import 'package:speakup_connect/config/app_config.dart';
 import 'package:speakup_connect/core/constants/route_constants.dart';
 import 'package:speakup_connect/core/l10n/app_localizations_extension.dart';
 import 'package:speakup_connect/features/admin/presentation/l10n/admin_ui_l10n.dart';
+import 'package:speakup_connect/core/permissions/providers/permission_provider.dart';
 import 'package:speakup_connect/features/admin/presentation/widgets/admin_filter_bar.dart';
 import 'package:speakup_connect/features/auth/presentation/providers/auth_provider.dart';
 import 'package:speakup_connect/features/organization/presentation/providers/organization_provider.dart';
@@ -476,21 +477,32 @@ class _AdminReportsList extends ConsumerWidget {
         }
 
         if (filtered.isEmpty) {
+          final perms = ref.watch(permissionProvider).asData?.value;
+          final noCategoriesAssigned = perms != null &&
+              !perms.hasUnrestrictedReportAccess &&
+              (perms.allowedCategoryIds?.isEmpty ?? false) &&
+              perms.hasReportViewPermission;
+
           return AppEmptyState(
             icon: Icons.assignment_outlined,
-            message: searchQuery.isNotEmpty
-                ? l10n.adminDashboardNoResults
-                : l10n.adminDashboardNoReports,
-            subtitle: searchQuery.isNotEmpty
-                ? l10n.adminDashboardNoReportsMatch(searchQuery)
-                : switch (tab) {
-                    AdminReportsTab.allActive =>
-                      l10n.adminDashboardNoActiveReports,
-                    AdminReportsTab.closed => l10n.adminDashboardNoClosedReports,
-                    _ => l10n.adminDashboardNoTabReports(
-                        localizedAdminReportsTab(l10n, tab),
-                      ),
-                  },
+            message: noCategoriesAssigned
+                ? l10n.adminDashboardNoReportCategories
+                : searchQuery.isNotEmpty
+                    ? l10n.adminDashboardNoResults
+                    : l10n.adminDashboardNoReports,
+            subtitle: noCategoriesAssigned
+                ? l10n.adminDashboardNoReportCategoriesHint
+                : searchQuery.isNotEmpty
+                    ? l10n.adminDashboardNoReportsMatch(searchQuery)
+                    : switch (tab) {
+                        AdminReportsTab.allActive =>
+                          l10n.adminDashboardNoActiveReports,
+                        AdminReportsTab.closed =>
+                          l10n.adminDashboardNoClosedReports,
+                        _ => l10n.adminDashboardNoTabReports(
+                            localizedAdminReportsTab(l10n, tab),
+                          ),
+                      },
           );
         }
 
@@ -700,8 +712,12 @@ List<ReportEntity> _reportsForTab(List<ReportEntity> reports, AdminReportsTab ta
 // --- Providers ---
 
 final allReportsProvider = StreamProvider.family<List<ReportEntity>, AdminReportsTab>(
-  (ref, tab) => ref.watch(reportRepositoryProvider).watchAllReports(
-        organizationId: AppConfig.defaultOrganizationId,
-        filterStatus: tab.statusFilter,
-      ),
+  (ref, tab) {
+    final allowed = ref.watch(allowedReportCategoryIdsProvider);
+    return ref.watch(reportRepositoryProvider).watchAllReports(
+          organizationId: AppConfig.defaultOrganizationId,
+          filterStatus: tab.statusFilter,
+          allowedCategoryIds: allowed?.toList(),
+        );
+  },
 );

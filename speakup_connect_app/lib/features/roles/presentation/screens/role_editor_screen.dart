@@ -7,6 +7,8 @@ import 'package:speakup_connect/core/permissions/app_permission.dart';
 import 'package:speakup_connect/core/permissions/permission_l10n.dart';
 import 'package:speakup_connect/features/roles/domain/entities/custom_capability_entity.dart';
 import 'package:speakup_connect/features/roles/domain/entities/role_entity.dart';
+import 'package:speakup_connect/features/reports/domain/entities/report_category_entity.dart';
+import 'package:speakup_connect/features/reports/presentation/providers/report_provider.dart';
 import 'package:speakup_connect/features/roles/presentation/providers/roles_provider.dart';
 import 'package:speakup_connect/shared/widgets/app_button.dart';
 import 'package:speakup_connect/shared/widgets/app_error_widget.dart';
@@ -44,6 +46,9 @@ class _RoleEditorScreenState extends ConsumerState<RoleEditorScreen> {
   /// Selected custom capability IDs.
   final Set<String> _selectedCustomCaps = {};
 
+  /// Allowed report category IDs for report-related capabilities.
+  final Set<String> _selectedCategories = {};
+
   bool _initialized = false;
 
   @override
@@ -72,12 +77,38 @@ class _RoleEditorScreenState extends ConsumerState<RoleEditorScreen> {
     _selectedCustomCaps
       ..clear()
       ..addAll(role.customCapabilities);
+    _selectedCategories
+      ..clear()
+      ..addAll(role.allowedCategoryIds ?? const []);
+  }
+
+  bool get _hasReportCapability => _selectedCaps.any(
+        (key) => AppPermission.fromKey(key)?.isReportRelated ?? false,
+      );
+
+  bool get _isOrgAdminRole => widget.roleId == 'org-admin';
+
+  List<String>? get _allowedCategoryIdsPayload {
+    if (_isOrgAdminRole) return null;
+    return _selectedCategories.toList();
   }
 
   // ── Save ──────────────────────────────────────────────────────────────────
 
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
+
+    if (_hasReportCapability &&
+        !_isOrgAdminRole &&
+        _selectedCategories.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.l10n.roleEditorReportCategoriesRequired),
+        ),
+      );
+      return;
+    }
+
     final writer = ref.read(roleWriterProvider.notifier);
 
     if (widget.isNewRole) {
@@ -86,6 +117,7 @@ class _RoleEditorScreenState extends ConsumerState<RoleEditorScreen> {
         description: _descCtrl.text.trim(),
         capabilities: _selectedCaps.toList(),
         customCapabilities: _selectedCustomCaps.toList(),
+        allowedCategoryIds: _allowedCategoryIdsPayload,
       );
     } else {
       await writer.updateRole(
@@ -94,6 +126,7 @@ class _RoleEditorScreenState extends ConsumerState<RoleEditorScreen> {
         description: _descCtrl.text.trim(),
         capabilities: _selectedCaps.toList(),
         customCapabilities: _selectedCustomCaps.toList(),
+        allowedCategoryIds: _isOrgAdminRole ? null : _allowedCategoryIdsPayload,
       );
     }
   }
@@ -214,6 +247,34 @@ class _RoleEditorScreenState extends ConsumerState<RoleEditorScreen> {
               }),
             ),
 
+            if (_hasReportCapability && !_isOrgAdminRole) ...[
+              const SizedBox(height: 24),
+              _SectionTitle(title: l10n.roleEditorReportCategories),
+              const SizedBox(height: 4),
+              Text(
+                l10n.roleEditorReportCategoriesHint,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 12),
+              ref.watch(reportCategoriesProvider).when(
+                    loading: () => const AppLoadingIndicator(),
+                    error: (e, _) => AppErrorWidget(message: '$e'),
+                    data: (categories) => _CategoryChipSelector(
+                      categories: categories,
+                      selected: _selectedCategories,
+                      onChanged: (categoryId, checked) => setState(() {
+                        if (checked) {
+                          _selectedCategories.add(categoryId);
+                        } else {
+                          _selectedCategories.remove(categoryId);
+                        }
+                      }),
+                    ),
+                  ),
+            ],
+
             const SizedBox(height: 24),
 
             // ── Custom capabilities ───────────────────────────────────────
@@ -323,6 +384,35 @@ class _CapabilityChecklist extends StatelessWidget {
             }),
             const Divider(height: 1),
           ],
+        );
+      }).toList(),
+    );
+  }
+}
+
+// ── Category Chip Selector ────────────────────────────────────────────────────
+
+class _CategoryChipSelector extends StatelessWidget {
+  const _CategoryChipSelector({
+    required this.categories,
+    required this.selected,
+    required this.onChanged,
+  });
+
+  final List<ReportCategoryEntity> categories;
+  final Set<String> selected;
+  final void Function(String categoryId, bool checked) onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      spacing: 8,
+      runSpacing: 4,
+      children: categories.map((cat) {
+        return FilterChip(
+          label: Text(cat.label),
+          selected: selected.contains(cat.categoryId),
+          onSelected: (v) => onChanged(cat.categoryId, v),
         );
       }).toList(),
     );

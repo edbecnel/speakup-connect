@@ -360,10 +360,17 @@ Pre-loaded registry of valid student names and IDs used for apply-to-join signup
   "isSystemRole": "boolean (system roles cannot be deleted)",
   "capabilities": ["string (AppPermission enum values, e.g. 'viewGroupReports', 'approveReport')"],
   "customCapabilities": ["string (IDs referencing customCapabilities collection)"],
+  "allowedCategoryIds": ["string (categoryIds) | null — report RBAC scope; null on org-admin = all categories; [] = no report access"],
   "createdAt": "Timestamp",
   "updatedAt": "Timestamp"
 }
 ```
+
+**`allowedCategoryIds` notes (Sprint 16):**
+- Report-related capabilities (`viewAllReports`, `viewGroupReports`, `approveReport`, `manageReports`) are enforced against `reports.categoryId`.
+- Omitted on custom roles → treat as `[]` until admin assigns categories.
+- Union across a user's role assignments; synced to JWT as `allowedCategoryIds` (or `["*"]` when unrestricted).
+- See [REPORT_CATEGORY_RBAC.md](REPORT_CATEGORY_RBAC.md).
 
 ---
 

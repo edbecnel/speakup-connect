@@ -10,7 +10,7 @@ import 'package:speakup_connect/core/permissions/org_scope_type.dart';
 ///   1. [scopeType] / [scopeId] — from the role assignment (where does the
 ///      role apply: org-wide, a specific class, group, tag, etc.)
 ///   2. [tagRestriction] — from a custom capability's `tagScope` field
-///      (which content tags the action is further restricted to, if any)
+///      (legacy; report enforcement uses role [allowedCategoryIds] in v1)
 class PermissionGrant {
   const PermissionGrant({
     required this.permission,
@@ -37,27 +37,29 @@ class PermissionGrant {
 ///
 /// Built by the [permissionProvider] from the user's role assignments,
 /// role definitions, and custom capability registry.
-///
-/// Usage:
-/// ```dart
-/// final perms = ref.watch(permissionProvider).valueOrNull;
-///
-/// // Rough check — show/hide a sidebar item:
-/// if (perms?.has(AppPermission.viewAuditLogs) ?? false) ...
-///
-/// // Contextual check — before rendering an action on a specific report:
-/// if (perms?.can(AppPermission.approveReport, tag: report.tag) ?? false) ...
-/// ```
 class EffectivePermissionSet {
-  const EffectivePermissionSet({required this.grants});
+  const EffectivePermissionSet({
+    required this.grants,
+    this.allowedCategoryIds,
+  });
 
   /// An empty set returned when the user has no role assignments.
-  static const EffectivePermissionSet empty =
-      EffectivePermissionSet(grants: []);
+  static const EffectivePermissionSet empty = EffectivePermissionSet(
+    grants: [],
+    allowedCategoryIds: {},
+  );
 
   final List<PermissionGrant> grants;
 
+  /// Union of report category IDs from all role definitions.
+  ///
+  /// `null` = unrestricted (org-admin). Empty set = no report category access.
+  final Set<String>? allowedCategoryIds;
+
   bool get isEmpty => grants.isEmpty;
+
+  /// True when the user may act on reports in any category.
+  bool get hasUnrestrictedReportAccess => allowedCategoryIds == null;
 
   // ── Permission Checks ──────────────────────────────────────────────────────
 
@@ -68,36 +70,58 @@ class EffectivePermissionSet {
   bool has(AppPermission permission) =>
       grants.any((g) => g.permission == permission);
 
+  /// True when the user holds any report read/triage capability.
+  bool get hasReportViewPermission =>
+      has(AppPermission.viewAllReports) ||
+      has(AppPermission.viewGroupReports) ||
+      has(AppPermission.manageReports) ||
+      has(AppPermission.approveReport);
+
+  /// True when the user may open the admin reports dashboard.
+  bool get canAccessAdminReports {
+    if (!hasReportViewPermission) return false;
+    if (hasUnrestrictedReportAccess) return true;
+    return allowedCategoryIds!.isNotEmpty;
+  }
+
+  /// True when [categoryId] is within the user's allowed report categories.
+  bool canAccessReportCategory(String categoryId) {
+    if (hasUnrestrictedReportAccess) return true;
+    return allowedCategoryIds!.contains(categoryId);
+  }
+
+  /// True when the user may view/triage a report in [categoryId].
+  bool canViewReport(String categoryId) {
+    if (!hasReportViewPermission) return false;
+    return canAccessReportCategory(categoryId);
+  }
+
   /// Returns true if the user may perform [permission] in the given context.
   ///
-  /// [tag]      — the content tag of the resource being acted on.
-  /// [scopeType] + [scopeId] — the resource type and ID being acted on
-  ///              (e.g. OrgScopeType.classUnit, "class-7a").
-  ///
-  /// A grant satisfies the context when:
-  ///   - The permission matches, AND
-  ///   - The grant's scope covers the context (org-wide always covers
-  ///     everything; narrower scopes must match exactly), AND
-  ///   - The grant's tag restriction (if any) matches the provided tag.
+  /// [categoryId] — the report's `categoryId` for report-related permissions.
+  /// [tag]        — legacy custom-capability tag (non-report paths).
   bool can(
     AppPermission permission, {
     String? tag,
+    String? categoryId,
     OrgScopeType? scopeType,
     String? scopeId,
   }) {
+    if (permission.isReportRelated &&
+        categoryId != null &&
+        !canAccessReportCategory(categoryId)) {
+      return false;
+    }
+
     for (final grant in grants) {
       if (grant.permission != permission) continue;
 
-      // Scope constraint: org-wide grants cover all contexts.
       final scopeOk = grant.scopeType == OrgScopeType.org ||
-          // Tag-scoped role assignment: the scopeId is the required tag.
           (grant.scopeType == OrgScopeType.tag && grant.scopeId == tag) ||
-          // Resource-scoped: both type and ID must match.
           (scopeType != null &&
               grant.scopeType == scopeType &&
               grant.scopeId == scopeId);
 
-      // Tag restriction: from the custom capability's tagScope field.
       final tagOk =
           grant.tagRestriction == null || grant.tagRestriction == tag;
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:speakup_connect/core/l10n/app_localizations_extension.dart';
+import 'package:speakup_connect/core/permissions/providers/permission_provider.dart';
 import 'package:speakup_connect/features/reports/domain/entities/report_category_entity.dart';
 import 'package:speakup_connect/features/reports/presentation/providers/report_provider.dart';
 
@@ -52,16 +53,26 @@ class AdminFilterBar extends ConsumerWidget {
     final categoriesAsync = ref.watch(reportCategoriesProvider);
     final selectedCategories = ref.watch(adminCategoryFilterProvider);
     final notifier = ref.read(adminCategoryFilterProvider.notifier);
+    final allowedCategories = ref.watch(allowedReportCategoryIdsProvider);
 
     return categoriesAsync.when(
       loading: () => const SizedBox.shrink(),
       error: (_, __) => const SizedBox.shrink(),
-      data: (categories) => _ChipRow(
-        categories: categories,
-        selectedCategories: selectedCategories,
-        onToggle: notifier.toggle,
-        onClearAll: notifier.clearAll,
-      ),
+      data: (categories) {
+        final visible = allowedCategories == null
+            ? categories
+            : categories
+                .where((c) => allowedCategories.contains(c.categoryId))
+                .toList();
+        if (visible.isEmpty) return const SizedBox.shrink();
+
+        return _ChipRow(
+          categories: visible,
+          selectedCategories: selectedCategories,
+          onToggle: notifier.toggle,
+          onClearAll: notifier.clearAll,
+        );
+      },
     );
   }
 }

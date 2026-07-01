@@ -48,7 +48,11 @@ async function fetchByIds(
 async function resolveUserPermissions(
   orgId: string,
   userId: string,
-): Promise<{ permissions: string[]; tagScopes: string[] }> {
+): Promise<{
+  permissions: string[];
+  tagScopes: string[];
+  allowedCategoryIds: string[];
+}> {
   const assignmentsSnap = await db
     .collection('organizations').doc(orgId)
     .collection('users').doc(userId)
@@ -56,7 +60,7 @@ async function resolveUserPermissions(
     .get();
 
   if (assignmentsSnap.empty) {
-    return { permissions: [], tagScopes: [] };
+    return { permissions: [], tagScopes: [], allowedCategoryIds: [] };
   }
 
   // 1. Load all referenced roles (deduplicated).
@@ -109,7 +113,40 @@ async function resolveUserPermissions(
     }
   }
 
-  return { permissions: Array.from(permissions), tagScopes: Array.from(tagScopes) };
+  const allowedCategoryIds = resolveAllowedCategoryIds(roles);
+
+  return {
+    permissions: Array.from(permissions),
+    tagScopes: Array.from(tagScopes),
+    allowedCategoryIds,
+  };
+}
+
+/**
+ * Unions role-level allowedCategoryIds. org-admin null → unrestricted (["*"]).
+ */
+function resolveAllowedCategoryIds(
+  roles: Array<Record<string, unknown>>,
+): string[] {
+  let unrestricted = false;
+  const union = new Set<string>();
+
+  for (const role of roles) {
+    const roleId = role['id'] as string | undefined;
+    const raw = role['allowedCategoryIds'];
+
+    if (raw === undefined || raw === null) {
+      if (roleId === 'org-admin') unrestricted = true;
+      continue;
+    }
+
+    for (const id of raw as string[]) {
+      if (id) union.add(id);
+    }
+  }
+
+  if (unrestricted) return ['*'];
+  return Array.from(union);
 }
 
 // ── Trigger: syncCustomClaims ─────────────────────────────────────────────────
@@ -123,7 +160,7 @@ async function resolveUserPermissions(
  *
  * Custom claims written:
  *   permissions  — string[]  — all AppPermission keys the user currently holds
- *   tagScopes    — string[]  — union of all tag restrictions across all grants
+ *   allowedCategoryIds — string[] — union of role report category scope (["*"] = all)
  *   orgId        — string    — the organization this user belongs to
  *
  * Any pre-existing claims (e.g. 'role', 'organizationId') are preserved via
@@ -142,7 +179,8 @@ export const syncCustomClaims = onDocumentWritten(
     const { orgId, userId } = event.params;
     logger.info('syncCustomClaims triggered', { orgId, userId });
 
-    const { permissions, tagScopes } = await resolveUserPermissions(orgId, userId);
+    const { permissions, tagScopes, allowedCategoryIds } =
+      await resolveUserPermissions(orgId, userId);
 
     // Mirror profile role + org onto JWT so legacy Security Rule helpers
     // (isOrgModerator, isOrgMember) work without an extra Firestore get().
@@ -172,6 +210,7 @@ export const syncCustomClaims = onDocumentWritten(
       ...existingClaims,
       permissions,
       tagScopes,
+      allowedCategoryIds,
       orgId,
       organizationId: profileOrgId,
       role: profileRole,
@@ -181,6 +220,7 @@ export const syncCustomClaims = onDocumentWritten(
       userId,
       permissionCount: permissions.length,
       tagScopeCount: tagScopes.length,
+      allowedCategoryCount: allowedCategoryIds.length,
     });
   },
 );
@@ -230,7 +270,8 @@ export const refreshMyPermissions = onCall(async (request) => {
     );
   }
 
-  const { permissions, tagScopes } = await resolveUserPermissions(orgId, userId);
+  const { permissions, tagScopes, allowedCategoryIds } =
+    await resolveUserPermissions(orgId, userId);
 
   const profile = profileSnap.data() ?? {};
   const profileRole = (profile['role'] as string | undefined) ?? 'user';
@@ -249,6 +290,7 @@ export const refreshMyPermissions = onCall(async (request) => {
     ...existingClaims,
     permissions,
     tagScopes,
+    allowedCategoryIds,
     orgId,
     organizationId: profileOrgId,
     role: profileRole,
@@ -1819,7 +1861,8 @@ export const onMemberApproved = onDocumentUpdated(
 
     // Ensure JWT claims include org membership for Storage rules and RBAC.
     try {
-      const { permissions, tagScopes } = await resolveUserPermissions(
+      const { permissions, tagScopes, allowedCategoryIds } =
+        await resolveUserPermissions(
         orgId,
         userId,
       );
@@ -1838,6 +1881,7 @@ export const onMemberApproved = onDocumentUpdated(
         ...existingClaims,
         permissions,
         tagScopes,
+        allowedCategoryIds,
         orgId,
         organizationId: profileOrgId,
         role: profileRole,
@@ -2064,6 +2108,7 @@ export const provisionStudent = onCall(async (request) => {
     role: 'user',
     permissions: [],
     tagScopes: [],
+    allowedCategoryIds: [],
   });
 
   logger.info('provisionStudent completed', {

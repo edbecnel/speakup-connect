@@ -73,8 +73,36 @@ class _AdminDetailView extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final theme = Theme.of(context);
-    final canManageReports =
-        ref.watch(hasPermissionProvider(AppPermission.manageReports));
+    final canViewReport = ref.watch(
+      canAccessReportCategoryProvider(report.categoryId),
+    );
+    final canManageReports = ref.watch(
+      reportPermissionProvider(
+        ReportPermissionQuery(
+          permission: AppPermission.manageReports,
+          categoryId: report.categoryId,
+        ),
+      ),
+    );
+    final canApproveReport = ref.watch(
+      reportPermissionProvider(
+        ReportPermissionQuery(
+          permission: AppPermission.approveReport,
+          categoryId: report.categoryId,
+        ),
+      ),
+    );
+    final canPerformAdminActions = canManageReports || canApproveReport;
+
+    if (!canViewReport) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: AppErrorWidget(message: l10n.adminReportCategoryAccessDenied),
+        ),
+      );
+    }
+
     final categoryLabel = ref.watch(reportCategoriesProvider).maybeWhen(
       data: (cats) {
         final cat = cats.where((c) => c.categoryId == report.categoryId).firstOrNull;
@@ -229,42 +257,49 @@ class _AdminDetailView extends ConsumerWidget {
           ],
 
           // ── Admin actions ─────────────────────────────────────────────────
-          if (canManageReports) ...[
+          if (canPerformAdminActions) ...[
             const SizedBox(height: 24),
             _SectionHeader(title: l10n.adminReportDetailAdminActions),
             const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    icon: const Icon(Icons.swap_horiz_outlined),
-                    label: Text(l10n.adminReportDetailUpdateStatus),
-                    onPressed: () => _showStatusUpdateDialog(context, ref, report),
+            if (canManageReports || canApproveReport)
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      icon: const Icon(Icons.swap_horiz_outlined),
+                      label: Text(l10n.adminReportDetailUpdateStatus),
+                      onPressed: (canManageReports || canApproveReport)
+                          ? () => _showStatusUpdateDialog(context, ref, report)
+                          : null,
+                    ),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: OutlinedButton.icon(
-                    icon: const Icon(Icons.note_add_outlined),
-                    label: Text(l10n.adminReportDetailAddNote),
-                    onPressed: () => _showAddNoteDialog(context, ref, report),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      icon: const Icon(Icons.note_add_outlined),
+                      label: Text(l10n.adminReportDetailAddNote),
+                      onPressed: canManageReports
+                          ? () => _showAddNoteDialog(context, ref, report)
+                          : null,
+                    ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton.icon(
-                icon: const Icon(Icons.assignment_ind_outlined),
-                label: Text(
-                  report.assignedTo == null
-                      ? l10n.adminReportDetailAssignToAdmin
-                      : l10n.adminReportDetailReassign,
-                ),
-                onPressed: () => _showAssignDialog(context, ref, report),
+                ],
               ),
-            ),
+            if (canManageReports) ...[
+              const SizedBox(height: 8),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  icon: const Icon(Icons.assignment_ind_outlined),
+                  label: Text(
+                    report.assignedTo == null
+                        ? l10n.adminReportDetailAssignToAdmin
+                        : l10n.adminReportDetailReassign,
+                  ),
+                  onPressed: () => _showAssignDialog(context, ref, report),
+                ),
+              ),
+            ],
           ],
 
           // ── Admin notes ───────────────────────────────────────────────────

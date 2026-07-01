@@ -52,10 +52,15 @@ abstract class ReportRepository {
   // --- Admin operations ---
 
   /// Returns a real-time stream of ALL reports for [organizationId] (admin only).
+  ///
+  /// When [allowedCategoryIds] is non-null, only reports in those categories
+  /// are queried (required for Firestore rules). Pass `null` for unrestricted.
+  /// An empty list returns an empty stream.
   Stream<List<ReportEntity>> watchAllReports({
     required String organizationId,
     ReportStatus? filterStatus,
     String? filterCategoryId,
+    List<String>? allowedCategoryIds,
   });
 
   /// Updates the status of a report. Creates a [StatusHistoryEntry].

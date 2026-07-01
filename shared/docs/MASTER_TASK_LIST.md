@@ -1005,6 +1005,19 @@ Optional expiration, notification history, broadcast management, full-screen det
   - `manageGroupRoster` — groups subcollection write
   - `blockUsers` — blockedUsers collection write
 
+#### Epic 2.12 extension — Report Category RBAC *(Sprint 16)*
+
+> Spec: [REPORT_CATEGORY_RBAC.md](REPORT_CATEGORY_RBAC.md)
+
+- [ ] `roles.allowedCategoryIds` schema + domain/models
+- [ ] `EffectivePermissionSet` category-aware `can()` / view checks
+- [ ] JWT `allowedCategoryIds` in `syncCustomClaims` / `refreshMyPermissions`
+- [ ] Firestore rules — report read/update category scope
+- [ ] Role Editor — category multi-select + validation
+- [ ] Admin report list/detail — filter and gate by category
+- [ ] Seed roles — guidance-counselor / discipline-officer category defaults
+- [ ] Unit tests — `EffectivePermissionSet` category matrix
+
 ### Epic 2.13 — Abuse Blocking & Moderation
 
 - [ ] Create `blockedUsers` Firestore collection per org

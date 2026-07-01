@@ -1678,6 +1678,12 @@
   "rolesEdit": "Edit",
   "roleEditorNameHint": "e.g. Guidance Counselor",
   "roleEditorDescriptionHint": "Briefly describe who this role is for",
+  "roleEditorReportCategories": "Allowed Report Categories",
+  "roleEditorReportCategoriesHint": "Select which report categories this role may view and act on. Required when report capabilities are enabled.",
+  "roleEditorReportCategoriesRequired": "Select at least one report category for the report capabilities you chose.",
+  "adminDashboardNoReportCategories": "No report categories assigned",
+  "adminDashboardNoReportCategoriesHint": "Your role includes report permissions but no categories. Ask an org admin to update your role.",
+  "adminReportCategoryAccessDenied": "You do not have permission to view reports in this category.",
 
   "assignRoleSelectUser": "Select User",
   "assignRoleSearchHint": "Search by name or student ID",

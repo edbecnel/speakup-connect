@@ -20,20 +20,6 @@ final permissionsRepositoryProvider = Provider<PermissionsRepository>((ref) {
 
 /// Watches the current user's role assignments and resolves them into a fully
 /// computed [EffectivePermissionSet].
-///
-/// - Emits [EffectivePermissionSet.empty] when the user is signed out or has
-///   no role assignments.
-/// - Re-resolves automatically whenever an admin modifies the user's
-///   assignments in Firestore (e.g. adds/removes a role).
-/// - The [AsyncValue] wrapper lets call sites handle the loading and error
-///   states gracefully without crashing.
-///
-/// Example — watching in a widget:
-/// ```dart
-/// final perms = ref.watch(permissionProvider).valueOrNull
-///     ?? EffectivePermissionSet.empty;
-/// if (perms.has(AppPermission.manageRoles)) { ... }
-/// ```
 final permissionProvider = StreamProvider<EffectivePermissionSet>((ref) async* {
   final user = ref.watch(currentUserProvider);
   if (user == null) {
@@ -52,9 +38,6 @@ final permissionProvider = StreamProvider<EffectivePermissionSet>((ref) async* {
       orgId: orgId,
       assignments: assignments,
     );
-    // Force-refresh the Firebase Auth ID token so Firestore Security Rules
-    // immediately see the updated custom claims written by syncCustomClaims.
-    // Fire-and-forget — the UI update (yield) is not blocked by the refresh.
     FirebaseAuth.instance.currentUser?.getIdToken(true).ignore();
     yield resolved;
   }
@@ -63,19 +46,6 @@ final permissionProvider = StreamProvider<EffectivePermissionSet>((ref) async* {
 // ── Convenience Providers ───────────────────────────────────────────────────
 
 /// Returns true if the current user holds [permission] under any scope.
-///
-/// Defaults to false while permissions are loading or if the user is signed
-/// out. Use for coarse UI gates (show/hide navigation items, action buttons).
-///
-/// For data-access decisions where context matters (e.g. which tag a report
-/// belongs to), use [permissionProvider] directly and call [can()].
-///
-/// Example:
-/// ```dart
-/// final canManageRoles = ref.watch(
-///   hasPermissionProvider(AppPermission.manageRoles),
-/// );
-/// ```
 final hasPermissionProvider =
     Provider.family<bool, AppPermission>((ref, permission) {
   return ref.watch(permissionProvider).asData?.value.has(permission) ?? false;
@@ -85,20 +55,65 @@ final hasPermissionProvider =
 final canAccessAdminReportsProvider = Provider<bool>((ref) {
   final profile = ref.watch(userProfileProvider).value;
   if (profile?.isAdmin == true) return true;
-  return ref.watch(hasPermissionProvider(AppPermission.viewAllReports)) ||
-      ref.watch(hasPermissionProvider(AppPermission.manageReports));
+  return ref.watch(permissionProvider).asData?.value.canAccessAdminReports ??
+      false;
 });
 
+/// Category IDs the current user may access for report triage.
+/// `null` = unrestricted (org admin).
+final allowedReportCategoryIdsProvider = Provider<Set<String>?>((ref) {
+  final profile = ref.watch(userProfileProvider).value;
+  if (profile?.isAdmin == true) return null;
+  return ref.watch(permissionProvider).asData?.value.allowedCategoryIds;
+});
+
+/// True when the user may view/act on a report in [categoryId].
+final canAccessReportCategoryProvider = Provider.family<bool, String>(
+  (ref, categoryId) {
+    final profile = ref.watch(userProfileProvider).value;
+    if (profile?.isAdmin == true) return true;
+    final perms =
+        ref.watch(permissionProvider).asData?.value ?? EffectivePermissionSet.empty;
+    return perms.canViewReport(categoryId);
+  },
+);
+
+/// True when the user may perform [permission] on a report in [categoryId].
+final reportPermissionProvider = Provider.family<bool, ReportPermissionQuery>(
+  (ref, query) {
+    final profile = ref.watch(userProfileProvider).value;
+    if (profile?.isAdmin == true) return true;
+    final perms =
+        ref.watch(permissionProvider).asData?.value ?? EffectivePermissionSet.empty;
+    return perms.can(query.permission, categoryId: query.categoryId);
+  },
+);
+
+/// Query key for [reportPermissionProvider].
+class ReportPermissionQuery {
+  const ReportPermissionQuery({
+    required this.permission,
+    required this.categoryId,
+  });
+
+  final AppPermission permission;
+  final String categoryId;
+
+  @override
+  bool operator ==(Object other) =>
+      other is ReportPermissionQuery &&
+      other.permission == permission &&
+      other.categoryId == categoryId;
+
+  @override
+  int get hashCode => Object.hash(permission, categoryId);
+}
+
 /// True when the user may review reminders in the approval queue.
-///
-/// Org admins always have this ability (mirrors Firestore rules). Other
-/// members need the explicit [AppPermission.approveReminders] grant.
 final canReviewPendingRemindersProvider = Provider<bool>((ref) {
   final profileAsync = ref.watch(userProfileProvider);
   final profile = profileAsync.value;
   if (profile?.isAdmin == true) return true;
-  // While the profile is still loading, avoid denying admins who lack a
-  // separate approveReminders grant — wait for profile before hiding UI.
   if (profileAsync.isLoading && profile == null) return false;
   return ref.watch(hasPermissionProvider(AppPermission.approveReminders));
 });

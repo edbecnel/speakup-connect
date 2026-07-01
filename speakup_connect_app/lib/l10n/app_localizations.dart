@@ -5569,6 +5569,42 @@ abstract class AppLocalizations {
   /// **'Briefly describe who this role is for'**
   String get roleEditorDescriptionHint;
 
+  /// No description provided for @roleEditorReportCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'Allowed Report Categories'**
+  String get roleEditorReportCategories;
+
+  /// No description provided for @roleEditorReportCategoriesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Select which report categories this role may view and act on. Required when report capabilities are enabled.'**
+  String get roleEditorReportCategoriesHint;
+
+  /// No description provided for @roleEditorReportCategoriesRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Select at least one report category for the report capabilities you chose.'**
+  String get roleEditorReportCategoriesRequired;
+
+  /// No description provided for @adminDashboardNoReportCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'No report categories assigned'**
+  String get adminDashboardNoReportCategories;
+
+  /// No description provided for @adminDashboardNoReportCategoriesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Your role includes report permissions but no categories. Ask an org admin to update your role.'**
+  String get adminDashboardNoReportCategoriesHint;
+
+  /// No description provided for @adminReportCategoryAccessDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'You do not have permission to view reports in this category.'**
+  String get adminReportCategoryAccessDenied;
+
   /// No description provided for @assignRoleSelectUser.
   ///
   /// In en, this message translates to:

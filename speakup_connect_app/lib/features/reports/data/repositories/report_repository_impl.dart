@@ -200,9 +200,29 @@ class ReportRepositoryImpl implements ReportRepository {
     required String organizationId,
     ReportStatus? filterStatus,
     String? filterCategoryId,
+    List<String>? allowedCategoryIds,
   }) {
-    Query<Map<String, dynamic>> query = _reportsRef(organizationId)
-        .orderBy(AppConstants.fieldCreatedAt, descending: true);
+    if (allowedCategoryIds != null && allowedCategoryIds.isEmpty) {
+      return Stream.value(const []);
+    }
+
+    Query<Map<String, dynamic>> query = _reportsRef(organizationId);
+
+    if (allowedCategoryIds != null) {
+      if (allowedCategoryIds.length == 1) {
+        query = query.where(
+          AppConstants.fieldCategoryId,
+          isEqualTo: allowedCategoryIds.first,
+        );
+      } else {
+        query = query.where(
+          AppConstants.fieldCategoryId,
+          whereIn: allowedCategoryIds.length > 30
+              ? allowedCategoryIds.sublist(0, 30)
+              : allowedCategoryIds,
+        );
+      }
+    }
 
     if (filterStatus != null) {
       query = query.where(AppConstants.fieldStatus, isEqualTo: filterStatus.value);
@@ -211,9 +231,11 @@ class ReportRepositoryImpl implements ReportRepository {
       query = query.where(AppConstants.fieldCategoryId, isEqualTo: filterCategoryId);
     }
 
-    return query.snapshots().map(
-          (snap) => snap.docs.map(_documentToEntity).toList(),
-        );
+    return query.snapshots().map((snap) {
+      final reports = snap.docs.map(_documentToEntity).toList();
+      reports.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      return reports;
+    });
   }
 
   @override

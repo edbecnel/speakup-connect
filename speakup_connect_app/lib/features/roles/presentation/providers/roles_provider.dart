@@ -72,6 +72,7 @@ class RoleWriter extends Notifier<AsyncValue<void>> {
     required String description,
     required List<String> capabilities,
     required List<String> customCapabilities,
+    List<String>? allowedCategoryIds,
   }) async {
     state = const AsyncLoading();
     try {
@@ -81,6 +82,8 @@ class RoleWriter extends Notifier<AsyncValue<void>> {
         'isSystemRole': false,
         'capabilities': capabilities,
         'customCapabilities': customCapabilities,
+        if (allowedCategoryIds != null)
+          'allowedCategoryIds': allowedCategoryIds,
         'createdAt': FieldValue.serverTimestamp(),
         'updatedAt': FieldValue.serverTimestamp(),
       });
@@ -96,16 +99,21 @@ class RoleWriter extends Notifier<AsyncValue<void>> {
     required String description,
     required List<String> capabilities,
     required List<String> customCapabilities,
+    List<String>? allowedCategoryIds,
   }) async {
     state = const AsyncLoading();
     try {
-      await _rolesRef().doc(roleId).update({
+      final payload = <String, dynamic>{
         'displayName': displayName,
         'description': description,
         'capabilities': capabilities,
         'customCapabilities': customCapabilities,
         'updatedAt': FieldValue.serverTimestamp(),
-      });
+      };
+      if (roleId != 'org-admin') {
+        payload['allowedCategoryIds'] = allowedCategoryIds ?? [];
+      }
+      await _rolesRef().doc(roleId).update(payload);
       state = const AsyncData(null);
     } catch (e, st) {
       state = AsyncError(e, st);
@@ -283,6 +291,7 @@ class SeedRoles extends Notifier<AsyncValue<void>> {
       description: 'Full administrative access to all organization features.',
       isSystemRole: true,
       capabilities: _allPermissions,
+      allowedCategoryIds: null,
     ),
     (
       id: 'member',
@@ -291,6 +300,7 @@ class SeedRoles extends Notifier<AsyncValue<void>> {
           'Standard member. Can submit reports and view their own submissions.',
       isSystemRole: true,
       capabilities: <String>[],
+      allowedCategoryIds: null,
     ),
     // ── MONHS starter roles (editable) ────────────────────────────────────
     (
@@ -304,6 +314,7 @@ class SeedRoles extends Notifier<AsyncValue<void>> {
         'approveReport',
         'postBulletinToGroup',
       ],
+      allowedCategoryIds: ['academic'],
     ),
     (
       id: 'discipline-officer',
@@ -317,6 +328,7 @@ class SeedRoles extends Notifier<AsyncValue<void>> {
         'manageReports',
         'blockUsers',
       ],
+      allowedCategoryIds: ['bullying', 'conduct'],
     ),
     (
       id: 'homeroom-teacher',
@@ -328,6 +340,7 @@ class SeedRoles extends Notifier<AsyncValue<void>> {
         'viewGroupReports',
         'manageClassRoster',
       ],
+      allowedCategoryIds: <String>[],
     ),
     (
       id: 'club-adviser',
@@ -340,6 +353,7 @@ class SeedRoles extends Notifier<AsyncValue<void>> {
         'postBulletinToGroup',
         'broadcastReminders',
       ],
+      allowedCategoryIds: null,
     ),
   ];
 
@@ -363,6 +377,8 @@ class SeedRoles extends Notifier<AsyncValue<void>> {
             'isSystemRole': role.isSystemRole,
             'capabilities': role.capabilities,
             'customCapabilities': <String>[],
+            if (role.allowedCategoryIds != null)
+              'allowedCategoryIds': role.allowedCategoryIds,
             'updatedAt': now,
           },
           SetOptions(merge: true),

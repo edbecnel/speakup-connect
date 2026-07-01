@@ -1,7 +1,7 @@
 # Sprint Tracker — SpeakUp Connect
 
-> Last Updated: June 20, 2026  
-> Current Sprint: **Sprint 13** (Group Membership Requests) — implementation in progress (reliability hardening shipped)  
+> Last Updated: July 1, 2026  
+> Current Sprint: **Sprint 16** (Report Category RBAC) — docs complete; implementation in progress  
 > Last completed: **Sprint 15** (i18n Phase 1 + 1b) — June 2026  
 > Sprint Duration: 2 weeks  
 > **GitHub Issues synced:** June 13, 2026 — closed stale MVP issues (#1–#21 except #13); filed #47–#56 for active work
@@ -12,11 +12,12 @@
 
 | Order | Initiative | Design doc | Epic | GitHub |
 |-------|------------|------------|------|--------|
+| 0 | Report category RBAC (role-scoped report permissions) | [REPORT_CATEGORY_RBAC.md](REPORT_CATEGORY_RBAC.md) | 2.12 | TBD |
 | 1 | Multi-language — Phase 1 + 1b ✅; **next:** Translation Helper MVP, real Cebuano, Tagalog, feature extraction, Firestore sync | [INTERNATIONALIZATION.md](INTERNATIONALIZATION.md) | 2.5 | #48–#53 |
 | 2 | Peer-to-peer + group messaging | TBD | 2.10, 2.11 | #55 |
 | 3 | Parent accounts and login | TBD | 2.13 | #56 |
 
-Suggested next sprint after Sprint 13 closure: **Sprint 16 — i18n Phase 2** ([#48](https://github.com/edbecnel/speakup-connect/issues/48) Translation Helper, [#49](https://github.com/edbecnel/speakup-connect/issues/49) real Cebuano, [#51](https://github.com/edbecnel/speakup-connect/issues/51) feature extraction, [#52](https://github.com/edbecnel/speakup-connect/issues/52) validators/CI). Tagalog ([#50](https://github.com/edbecnel/speakup-connect/issues/50)) and Firestore language sync ([#53](https://github.com/edbecnel/speakup-connect/issues/53)) can follow in Sprint 17+.
+**Active:** **Sprint 16 — Report Category RBAC** (Epic 2.12 extension). **Sprint 17 — i18n Phase 2** ([#48](https://github.com/edbecnel/speakup-connect/issues/48)–[#53](https://github.com/edbecnel/speakup-connect/issues/53)) follows after RBAC ships.
 
 > **Development Velocity Note:** Development has significantly outpaced the original planned schedule. As of May 23, 2026 (day 5 of the project), the codebase covers work originally scoped for Sprints 1–6. Sprint numbering below reflects original plan order but completion dates reflect actual delivery dates.
 
@@ -365,6 +366,54 @@ Suggested next sprint after Sprint 13 closure: **Sprint 16 — i18n Phase 2** ([
 ---
 
 ## Upcoming Sprints
+
+### Sprint 16 — Report Category RBAC *(Epic 2.12 extension)*
+- **Status:** 🔄 In Progress — implementation started July 1, 2026
+- **GitHub Issue(s):** TBD
+- **Milestone:** Sprint 16 — Report Category RBAC
+- **Goal:** Per-role `allowedCategoryIds` so report permissions apply only to reports whose `categoryId` is in the user's resolved allowed set. Server-enforced via custom claims + Firestore rules.
+- **Design:** [REPORT_CATEGORY_RBAC.md](REPORT_CATEGORY_RBAC.md) · [RBAC_ARCHITECTURE.md](RBAC_ARCHITECTURE.md) · [DATABASE_DESIGN.md](DATABASE_DESIGN.md) → `roles`
+- **Source epic:** [MASTER_TASK_LIST.md → Epic 2.12](MASTER_TASK_LIST.md)
+
+#### 🚀 AI Context Prompt
+> "Implement Sprint 16 per `shared/docs/REPORT_CATEGORY_RBAC.md`. Add `allowedCategoryIds` on org roles; extend permission resolution + JWT claims; enforce category scope in Firestore rules for report read/update. Role Editor: multi-select org categories when report capabilities are selected. Admin report list/detail: filter and gate actions by category."
+
+#### 📋 Scope (ship order)
+**Docs first**
+- [x] Create `REPORT_CATEGORY_RBAC.md`
+- [x] Update `DATABASE_DESIGN.md`, `RBAC_ARCHITECTURE.md`, `SPRINT_TRACKER.md`, `MASTER_TASK_LIST.md`
+
+**Domain + data**
+- [x] `RoleEntity` / `RoleModel` — `allowedCategoryIds`
+- [x] `EffectivePermissionSet` — category-aware checks
+- [x] `PermissionsRepositoryImpl` — union `allowedCategoryIds`
+- [x] Report list query — category filter for scoped users
+
+**Backend**
+- [x] `resolveUserPermissions` / `syncCustomClaims` — JWT `allowedCategoryIds`
+- [x] `firestore.rules` — category helpers on report read/update
+- [x] `seed_roles.js` — guidance / discipline defaults
+
+**Presentation**
+- [x] `RoleEditorScreen` — category multi-select + validation
+- [x] `permission_provider.dart` — scoped admin access providers
+- [x] Admin dashboard + report detail enforcement
+- [x] `app_en.arb` strings
+
+**Verification**
+- [x] Unit tests: `EffectivePermissionSet`
+- [ ] Manual smoke matrix (guidance / discipline / org admin)
+- [ ] `flutter analyze` clean (no new errors; pre-existing info/warnings remain)
+
+#### 🚫 Out of scope (v1)
+- Per-user category overrides; bulletin/reminder scoping; replacing `tagScope` entirely
+
+#### 👁️ Stakeholder Demo Asset
+- **Asset Type:** Screen recording
+- **Location:** `./shared/docs/demos/sprint-016-report-category-rbac.mp4`
+- **Stakeholder Note:** Guidance Counselor sees only counseling-category reports; Discipline Officer sees conduct/bullying; org admin sees all.
+
+---
 
 Each sprint entry follows this format:
 

@@ -13,6 +13,7 @@ class RoleEntity {
     required this.isSystemRole,
     required this.capabilities,
     required this.customCapabilities,
+    this.allowedCategoryIds,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -38,6 +39,11 @@ class RoleEntity {
   /// These are resolved to their [AppPermission] at runtime via the
   /// custom capability registry.
   final List<String> customCapabilities;
+
+  /// Report categories this role may access for report-related capabilities.
+  ///
+  /// `null` on [org-admin] = all categories. Empty list = no report access.
+  final List<String>? allowedCategoryIds;
 
   final DateTime createdAt;
   final DateTime updatedAt;

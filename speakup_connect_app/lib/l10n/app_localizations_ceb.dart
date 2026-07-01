@@ -3309,6 +3309,29 @@ class AppLocalizationsCeb extends AppLocalizations {
       'Ilaraw ang hinungdan kung kinsa kini nga papel.';
 
   @override
+  String get roleEditorReportCategories => 'Allowed Report Categories';
+
+  @override
+  String get roleEditorReportCategoriesHint =>
+      'Select which report categories this role may view and act on. Required when report capabilities are enabled.';
+
+  @override
+  String get roleEditorReportCategoriesRequired =>
+      'Select at least one report category for the report capabilities you chose.';
+
+  @override
+  String get adminDashboardNoReportCategories =>
+      'No report categories assigned';
+
+  @override
+  String get adminDashboardNoReportCategoriesHint =>
+      'Your role includes report permissions but no categories. Ask an org admin to update your role.';
+
+  @override
+  String get adminReportCategoryAccessDenied =>
+      'You do not have permission to view reports in this category.';
+
+  @override
   String get assignRoleSelectUser => 'Pili-a ang Gumagamit';
 
   @override

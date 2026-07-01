@@ -59,6 +59,7 @@ const ROLES = [
     isSystemRole: true,
     capabilities: ALL_PERMISSIONS,
     customCapabilities: [],
+    // omitted allowedCategoryIds = unrestricted
   },
   {
     id: 'member',
@@ -81,6 +82,7 @@ const ROLES = [
       'postBulletinToGroup',
     ],
     customCapabilities: [],
+    allowedCategoryIds: ['academic'],
   },
   {
     id: 'discipline-officer',
@@ -94,6 +96,7 @@ const ROLES = [
       'blockUsers',
     ],
     customCapabilities: [],
+    allowedCategoryIds: ['bullying', 'conduct'],
   },
   {
     id: 'homeroom-teacher',
@@ -105,6 +108,7 @@ const ROLES = [
       'manageClassRoster',
     ],
     customCapabilities: [],
+    allowedCategoryIds: [],
   },
   {
     id: 'club-adviser',

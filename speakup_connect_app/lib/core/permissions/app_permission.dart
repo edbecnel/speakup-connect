@@ -66,6 +66,18 @@ enum AppPermission {
   /// View the organization audit log.
   viewAuditLogs;
 
+  /// Capabilities scoped to report [categoryId] when role defines
+  /// [allowedCategoryIds]. See REPORT_CATEGORY_RBAC.md.
+  static const Set<AppPermission> reportRelated = {
+    viewAllReports,
+    viewGroupReports,
+    approveReport,
+    manageReports,
+  };
+
+  /// True when this permission is subject to role-level report category scope.
+  bool get isReportRelated => reportRelated.contains(this);
+
   // ── Serialization ──────────────────────────────────────────────────────────
 
   /// The string key stored in Firestore and written to Firebase Auth Custom

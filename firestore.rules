@@ -85,20 +85,36 @@ service cloud.firestore {
       return isSuperAdmin() || isOrgModerator(orgId);
     }
 
-    // RBAC report triage — holders of viewAllReports / manageReports via JWT
-    // or delegated profile permissions (org-admin role, discipline officer, etc.).
+    // RBAC report triage — holders of viewAllReports / viewGroupReports /
+    // manageReports / approveReport via JWT or delegated profile permissions.
     function canViewOrgReports(orgId) {
       return isModeratorOrAbove(orgId)
           || hasClaimedPermission('viewAllReports')
+          || hasClaimedPermission('viewGroupReports')
           || hasClaimedPermission('manageReports')
+          || hasClaimedPermission('approveReport')
           || hasPermission(orgId, 'viewAllReports')
-          || hasPermission(orgId, 'manageReports');
+          || hasPermission(orgId, 'viewGroupReports')
+          || hasPermission(orgId, 'manageReports')
+          || hasPermission(orgId, 'approveReport');
+    }
+
+    // Sprint 16 — category-scoped report access via JWT allowedCategoryIds.
+    // Absent claim = legacy unrestricted until syncCustomClaims refreshes token.
+    function reportCategoryAllowed(orgId) {
+      return isAdminOrAbove(orgId)
+          || !('allowedCategoryIds' in request.auth.token)
+          || request.auth.token.allowedCategoryIds.hasAny(['*'])
+          || resource.data.categoryId in request.auth.token.allowedCategoryIds;
     }
 
     function canManageOrgReports(orgId) {
       return isModeratorOrAbove(orgId)
-          || hasClaimedPermission('manageReports')
-          || hasPermission(orgId, 'manageReports');
+          || (reportCategoryAllowed(orgId)
+              && (hasClaimedPermission('manageReports')
+                  || hasClaimedPermission('approveReport')
+                  || hasPermission(orgId, 'manageReports')
+                  || hasPermission(orgId, 'approveReport')));
     }
 
     // Returns true when [orgId] member [uid] has [permission] in their
@@ -359,7 +375,7 @@ service cloud.firestore {
       //     (field-level filtering is enforced in app code + Cloud Functions;
       //      Firestore Security Rules do not support field-level redaction natively)
       match /reports/{reportId} {
-        allow read: if canViewOrgReports(orgId)
+        allow read: if (canViewOrgReports(orgId) && reportCategoryAllowed(orgId))
                     || (isOrgMember(orgId)
                         && resource.data.isAnonymous == false
                         && resource.data.submittedBy == request.auth.uid);

@@ -184,6 +184,21 @@ class PermissionsRepositoryImpl implements PermissionsRepository {
       }
     }
 
-    return EffectivePermissionSet(grants: grants);
+    // 4. Union allowedCategoryIds across all roles (org-admin null = unrestricted).
+    var unrestrictedCategories = false;
+    final categoryUnion = <String>{};
+    for (final role in roles) {
+      if (role.allowedCategoryIds == null) {
+        if (role.id == 'org-admin') unrestrictedCategories = true;
+      } else {
+        categoryUnion.addAll(role.allowedCategoryIds!);
+      }
+    }
+
+    return EffectivePermissionSet(
+      grants: grants,
+      allowedCategoryIds:
+          unrestrictedCategories ? null : categoryUnion,
+    );
   }
 }

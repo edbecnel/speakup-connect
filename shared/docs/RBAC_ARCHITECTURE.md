@@ -278,6 +278,25 @@ evaluate('approveReport', report tagged 'discipline') →  ❌ deny (tag scope)
 evaluate('viewGroupReports', report tagged 'guidance') → ✅ allow
 ```
 
+### Role-Level Report Category Scope *(Sprint 16 — primary for reports)*
+
+Each role document may include `allowedCategoryIds: string[] | null`:
+
+| Value | Effect on report permissions |
+|-------|------------------------------|
+| `null` on `org-admin` | All categories |
+| Non-empty array | Only listed `categoryId` values on `reports` |
+| `[]` or omitted on custom roles | No report access despite capabilities |
+
+Resolution merges **union** of category IDs across all role assignments. Written to JWT as `allowedCategoryIds` (`["*"]` when unrestricted). Report read/update rules check `resource.data.categoryId` against this claim.
+
+**Interaction with Tier 2 `tagScope`:** Custom capability `tagScope` remains on capability documents for backward compatibility. **Report enforcement in v1 uses role `allowedCategoryIds` only** — `tagScope` is not intersected for reports. See [REPORT_CATEGORY_RBAC.md](REPORT_CATEGORY_RBAC.md).
+
+```dart
+// Category-aware check (preferred for report actions)
+if (perms.can(AppPermission.approveReport, categoryId: report.categoryId)) ...
+```
+
 ---
 
 ## Enforcement Strategy
@@ -303,10 +322,13 @@ A Cloud Function writes the user's resolved permission array to their Firebase A
 // Custom claim written to token
 {
   "permissions": ["viewGroupReports", "approveReport"],
-  "tagScope": ["guidance"],
+  "allowedCategoryIds": ["bullying", "conduct"],
+  "tagScopes": ["guidance"],
   "orgId": "monhs"
 }
 ```
+
+Report triage rules also require `resource.data.categoryId in request.auth.token.allowedCategoryIds` (or unrestricted / org-admin bypass). See [REPORT_CATEGORY_RBAC.md](REPORT_CATEGORY_RBAC.md).
 
 Security Rules then reference `request.auth.token.permissions`:
 
