@@ -4,6 +4,20 @@ bower_components/
 .pnpm-store/
 .yarn/
 
+# Flutter / Dart generated files
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+
+# Android / Gradle generated files
+.gradle/
+android/.gradle/
+
+# iOS / macOS generated dependency folders
+ios/Pods/
+macos/Pods/
+
 # Build Outputs & Distributions
 dist/
 build/
@@ -12,6 +26,13 @@ out/
 .nuxt/
 bin/
 obj/
+shared/functions/lib/
+
+# Firebase generated/cache files
+.firebase/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
 
 # Logs and Runtime Diagnostics
 *.log
@@ -20,36 +41,47 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Documents
-shared/docs/school-governance
+# Documents intentionally excluded from AI context
+shared/docs/school-governance/
 
-# Environment and Secrets (Crucial for safety!)
+# Environment and Secrets
 .env
 .env.*
 *.pem
 *.key
+*.crt
+*.cer
+*.p12
+*.pfx
+*.jks
+*.keystore
 .vault/
+service-account*.json
+credentials*.json
+shared/scripts/service-account.json
 
 # System / IDE Files
 .DS_Store
 Thumbs.db
 .idea/
-.vscode/
+
+# Ignore VS Code settings except project settings if needed
+.vscode/*
 !.vscode/settings.json
+!.vscode/extensions.json
 
 # Version Control
 .git/
 .hg/
 .svn/
 
-# Large Media / Assets (Massive token drains)
+# Large Media / Assets
 *.mp4
 *.mov
 *.png
 *.jpg
 *.jpeg
 *.gif
-*.svg
 *.pdf
 *.zip
 *.tar.gz
