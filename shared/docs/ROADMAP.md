@@ -82,7 +82,7 @@ This roadmap tracks the evolution from MVP pilot to a full multi-tenant SaaS pla
 **Groups & Organizations**
 - [x] Admin-defined groups and organizations (e.g., Journalism Club, Chess Club, Drum & Lyre Corps)
 - [x] Group member list management (admin/leader adds/removes members, club positions)
-- [~] Group roles: leader, member — leaders send **group alerts**, manage roster; news/chat not yet built
+- [~] Group roles: leader, member — leaders send **group alerts**, manage roster; news board not yet built
 - [ ] **Member photos:** admin-managed official school photo on user/roster record; member-chosen personal badge in Settings (defaults to official photo when present) — see [MASTER_TASK_LIST.md → Epic 2.3 Member photos](MASTER_TASK_LIST.md)
 - [x] Groups visible on home dashboard and Settings (**My Groups & Clubs**)
 - [ ] **Group membership requests** — join: per-group opt-in (`allowJoinRequests`, default closed); leave: `voluntary` or `request_required` (default); removal and denied-leave alerts ([GROUP_JOIN_REQUESTS.md](GROUP_JOIN_REQUESTS.md))
@@ -102,16 +102,10 @@ This roadmap tracks the evolution from MVP pilot to a full multi-tenant SaaS pla
 - [x] Admin approval queue with badge (`Reminder Approvals` in Settings, Admin Dashboard, Alerts)
 - [x] Optional recipient responses — free text, checkboxes, multiple choice; **response required**; **lock after submit** for votes
 
-**Messaging**
-- [ ] Peer-to-peer direct messaging between members
-- [ ] Group messaging for admin-defined groups
-- [ ] Message read receipts
-- [ ] In-app notification for new messages
-
 **Moderation & Safety**
 - [ ] Abuse blocking: block anonymous or authenticated users permanently or for a set period
 - [ ] Admin block management interface
-- [ ] Report-a-message / report-a-post feature
+- [ ] Report-a-post feature (bulletins, news board)
 - [ ] Firebase App Check (anti-abuse)
 - [ ] Rate limiting (max 5 reports per user per day)
 
@@ -158,7 +152,6 @@ This roadmap tracks the evolution from MVP pilot to a full multi-tenant SaaS pla
 - [ ] Performance monitoring (Firebase Performance)
 - [ ] Error tracking (Sentry or Firebase Crashlytics)
 - [ ] Advanced group features: sub-groups, event posts, file sharing
-- [ ] Messaging: media attachments (images) in direct and group messages
 - [ ] Automated abuse detection (spam/inappropriate content screening)
 
 ---
@@ -194,7 +187,7 @@ This roadmap tracks the evolution from MVP pilot to a full multi-tenant SaaS pla
 | M4: Report submission working | Sprint 4 | ⬜ Not Started |
 | M5: Admin dashboard + roster import | Sprint 5 | ⬜ Not Started |
 | M6: Bulletin board + news board + reminders | Sprint 6 | ⬜ Not Started |
-| M7: Messaging (P2P + group) + groups | Sprint 7 | ⬜ Not Started |
+| M7: Groups + news board | Sprint 7 | ⬜ Not Started |
 | M8: MONHS pilot internal launch | Sprint 8–9 | ⬜ Not Started |
 | M9: MONHS pilot public launch | Sprint 10–12 | ⬜ Not Started |
 | M10: Second organization onboarded | Post-pilot | ⬜ Not Started |

@@ -22,10 +22,9 @@
 | # | Initiative | Epic | Architecture | GitHub |
 |---|------------|------|--------------|--------|
 | 1 | **Multi-language support** — Phase 1 + 1b ✅; Translation Helper + real `ceb`/`fil` + feature extraction ⏳ | [2.5](#epic-25--multi-language-support) | [INTERNATIONALIZATION.md](INTERNATIONALIZATION.md) | [#48–#53](https://github.com/edbecnel/speakup-connect/issues?q=is%3Aissue+is%3Aopen+label%3Aepic%3A2.5) |
-| 2 | **Peer-to-peer and group messaging** | [2.10](#epic-210--peer-to-peer-messaging), [2.11](#epic-211--group-messaging) | TBD — `DATABASE_DESIGN.md` § directMessages / messages | [#55](https://github.com/edbecnel/speakup-connect/issues/55) |
-| 3 | **Parent accounts and login** | [2.13](#epic-213--parent-accounts) | TBD | [#56](https://github.com/edbecnel/speakup-connect/issues/56) |
+| 2 | **Parent accounts and login** | [2.13](#epic-213--parent-accounts) | TBD | [#56](https://github.com/edbecnel/speakup-connect/issues/56) |
 
-Suggested implementation order: **i18n → messaging → parents** (messaging is independent; parents may link to student profiles and alerts).
+Suggested implementation order: **i18n → parents** (parents may link to student profiles and alerts).
 
 ---
 
@@ -643,7 +642,7 @@ Suggested implementation order: **i18n → messaging → parents** (messaging is
 
 **Presentation**
 - [x] Build `GroupsListScreen` — all org groups, searchable
-- [ ] Build `GroupDetailScreen` — group info, member list, news posts, group chat
+- [ ] Build `GroupDetailScreen` — group info, member list, news posts
 - [x] Build `CreateGroupScreen` (admin) — name, description, custom club positions
 - [x] Build `GroupMembersScreen` (admin/leader) — add/remove members, assign leader & club position
 - [x] Build `AddGroupMembersScreen` — search, role/position assignment, scroll-safe layout
@@ -893,63 +892,6 @@ Optional expiration, notification history, broadcast management, full-screen det
 - [ ] Unit test: `ReminderResponseConfig` validation
 - [ ] Widget test: `ResponseConfigSection`, `ReminderResponseForm`
 
-### Epic 2.10 — Peer-to-Peer Messaging
-
-> **Priority:** High — see [High-Priority Backlog](#high-priority-backlog). Group chat: [Epic 2.11](#epic-211--group-messaging).
-
-**Domain**
-- [ ] Create `DirectMessageThreadEntity`
-- [ ] Create `MessageEntity`
-- [ ] Create `DirectMessageRepository` abstract interface
-- [ ] Create `SendDirectMessageUseCase`
-- [ ] Create `GetDirectThreadsUseCase`
-- [ ] Create `WatchDirectThreadUseCase` (real-time stream)
-
-**Data**
-- [ ] Create `DirectMessageThreadModel`
-- [ ] Create `MessageModel`
-- [ ] Create `DirectMessageRemoteDataSource`
-- [ ] Create `DirectMessageRepositoryImpl`
-- [ ] Deterministic thread ID generation (`sorted([uidA, uidB]).join('_')`)
-
-**Presentation**
-- [ ] Build `MessagesInboxScreen` — list of DM threads, sorted by `lastMessageAt`
-- [ ] Build `DirectMessageChatScreen` — real-time chat UI for a thread
-- [ ] Compose new message: user picker (org member search)
-- [ ] Message bubble UI (sent/received alignment, timestamp)
-- [ ] Read receipts display
-- [ ] Unread message badge on inbox icon
-- [ ] Push notification for new DM
-
-**Testing**
-- [ ] Unit test: `SendDirectMessageUseCase`
-- [ ] Widget test: `DirectMessageChatScreen`
-
-### Epic 2.11 — Group Messaging
-
-> **Priority:** High — see [High-Priority Backlog](#high-priority-backlog). Ship after or parallel to Epic 2.10; shared inbox UX recommended.
-
-**Domain**
-- [ ] Create `GroupMessageThreadEntity`
-- [ ] Create `GroupMessageRepository` abstract interface
-- [ ] Create `SendGroupMessageUseCase`
-- [ ] Create `WatchGroupMessagesUseCase` (real-time stream)
-
-**Data**
-- [ ] Create `GroupMessageModel`
-- [ ] Create `GroupMessageRemoteDataSource`
-- [ ] Create `GroupMessageRepositoryImpl`
-
-**Presentation**
-- [ ] Build `GroupChatScreen` — real-time group chat (accessible from `GroupDetailScreen`)
-- [ ] Group name and avatar in chat header
-- [ ] Member list accessible from chat
-- [ ] Push notification for new group message (to group members)
-
-**Testing**
-- [ ] Unit test: `SendGroupMessageUseCase`
-- [ ] Widget test: `GroupChatScreen`
-
 ### Epic 2.13 — Parent Accounts
 
 > **Priority:** High — see [High-Priority Backlog](#high-priority-backlog). Architecture doc TBD (links student roster, alerts, consent). Depends partly on org join flow ([Epic 2.3](MASTER_TASK_LIST.md#epic-23--organization-finder--apply-to-join-flow)).
@@ -1026,7 +968,7 @@ Optional expiration, notification history, broadcast management, full-screen det
 - [ ] Enforce block on login: blocked users get a "your account has been restricted" screen
 - [ ] Anonymous user block: device fingerprint or IP hash stored in `targetIdentifier`
 - [ ] Block expiry: Firebase scheduled function to auto-unblock when `expiresAt` passes
-- [ ] Report-a-message feature: users can flag messages for admin review
+- [ ] Report-a-post feature: users can flag bulletin or news posts for admin review
 
 ### Epic 2.14 — Announcements (Original)
 
@@ -1102,13 +1044,6 @@ Optional expiration, notification history, broadcast management, full-screen det
 - [ ] Community / contractor interpreter accounts (language-scoped)
 - [ ] Additional language packs via same pipeline (Hiligaynon, Ilocano, Spanish, …)
 - [ ] Org-level language enablement (subset of platform languages)
-
-### Epic 3.5 — Advanced Messaging
-
-- [ ] Media attachments in DM and group messages (images)
-- [ ] Message deletion (sender can retract)
-- [ ] Message reactions (emoji)
-- [ ] Threaded replies in news posts and bulletins
 
 ---
 

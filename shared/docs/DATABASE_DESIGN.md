@@ -53,8 +53,6 @@ Firestore Root
 │       │   └── {reminderId}/
 │       │       └── responses/   # Per-recipient optional responses
 │       ├── notification_history/  # Archived expired/recalled/dismissed notifications
-│       ├── messages/        # Group chat messages (per group sub-collection)
-│       ├── directMessages/  # Peer-to-peer message threads
 │       ├── blockedUsers/    # Abuse block records
         ├── communityRules/  # Customizable signup/community rules
         └── audit_log/       # Immutable admin activity log (append-only)
@@ -278,7 +276,6 @@ This is the core document of the platform.
   "notificationPreferences": {
     "statusUpdates": "boolean",
     "adminAlerts": "boolean",
-    "messages": "boolean",
     "bulletins": "boolean",
     "reminders": "boolean"
   },
@@ -674,63 +671,6 @@ Server-written when a notification or broadcast is removed (expired, recalled, d
 
 ---
 
-### `organizations/{organizationId}/messages/{threadId}` — Group Chat Messages
-
-Group messages are stored as subcollections under a thread document.
-
-```json
-// Thread document (organizations/{orgId}/messages/{threadId})
-{
-  "threadId": "string",
-  "groupId": "string (references groups collection)",
-  "organizationId": "string",
-  "lastMessage": "string (preview of most recent message)",
-  "lastMessageAt": "Timestamp",
-  "lastMessageBy": "string (UID)"
-}
-
-// Message sub-document (organizations/{orgId}/messages/{threadId}/entries/{messageId})
-{
-  "messageId": "string",
-  "senderId": "string (Firebase Auth UID)",
-  "senderName": "string (denormalized)",
-  "body": "string",
-  "isDeleted": "boolean",
-  "createdAt": "Timestamp"
-}
-```
-
----
-
-### `organizations/{organizationId}/directMessages/{threadId}` — Peer-to-Peer Messages
-
-```json
-// Thread document
-{
-  "threadId": "string (deterministic: sorted UIDs joined with '_')",
-  "participantIds": ["string (UID A)", "string (UID B)"],
-  "participantNames": {"uid": "displayName"},
-  "organizationId": "string",
-  "lastMessage": "string",
-  "lastMessageAt": "Timestamp",
-  "lastMessageBy": "string (UID)"
-}
-
-// Message sub-document (directMessages/{threadId}/entries/{messageId})
-{
-  "messageId": "string",
-  "senderId": "string",
-  "body": "string",
-  "isDeleted": "boolean",
-  "readBy": ["string (UIDs who have read this message)"],
-  "createdAt": "Timestamp"
-}
-```
-
-**Security Note:** Thread IDs use a deterministic format (`sorted([uidA, uidB]).join('_')`) so either participant can look up the shared thread without a full collection scan.
-
----
-
 ### `organizations/{organizationId}/blockedUsers/{blockId}` — Abuse Blocks
 
 ```json
@@ -904,10 +844,6 @@ Collection: organizations/{orgId}/notification_history
 Indexes:
   1. createdBy ASC + removedAt DESC (author history view)
   2. removedAt DESC (admin org-wide view)
-
-Collection: organizations/{orgId}/directMessages
-Indexes:
-  1. participantIds ARRAY_CONTAINS + lastMessageAt DESC
 
 Collection: organizations/{orgId}/blockedUsers
 Indexes:

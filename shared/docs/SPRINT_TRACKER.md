@@ -14,8 +14,7 @@
 |-------|------------|------------|------|--------|
 | 0 | Report category RBAC (role-scoped report permissions) | [REPORT_CATEGORY_RBAC.md](REPORT_CATEGORY_RBAC.md) | 2.12 | TBD |
 | 1 | Multi-language — Phase 1 + 1b ✅; **next:** Translation Helper MVP, real Cebuano, Tagalog, feature extraction, Firestore sync | [INTERNATIONALIZATION.md](INTERNATIONALIZATION.md) | 2.5 | #48–#53 |
-| 2 | Peer-to-peer + group messaging | TBD | 2.10, 2.11 | #55 |
-| 3 | Parent accounts and login | TBD | 2.13 | #56 |
+| 2 | Parent accounts and login | TBD | 2.13 | #56 |
 
 **Active:** **Sprint 16 — Report Category RBAC** (Epic 2.12 extension). **Sprint 17 — i18n Phase 2** ([#48](https://github.com/edbecnel/speakup-connect/issues/48)–[#53](https://github.com/edbecnel/speakup-connect/issues/53)) follows after RBAC ships.
 
@@ -192,13 +191,12 @@
 - [ ] Verify Compose Reminder **group audience** picker populates and publishes → members appear in Alerts feed (on-device smoke test)
 
 #### 📋 Scope (stretch — if time remains)
-- [ ] `GroupDetailScreen` — group info + member list (no chat/news yet)
+- [ ] `GroupDetailScreen` — group info + member list (no news board yet)
 - [x] `MyGroupsScreen` — read-only list with role and club position (Settings + Home)
 - [x] Home dashboard section for "My Groups & Clubs"
 - [ ] Unit test: `CreateGroupUseCase`; widget test: `GroupsListScreen`
 
 #### 🚫 Explicitly out of scope (later sprints)
-- Group chat (Epic 2.11)
 - News board posts per group (Epic 2.8)
 - Bulk member import
 - Classes / homeroom management (separate `classes/` collection — not started in app)
@@ -691,7 +689,7 @@ All foundational work delivered ahead of schedule in the first few days of devel
 | May 19, 2026 | Reference number format: `{ORG_CODE}-{YEAR}-{SEQ}` | Based on wireframe (MONHS-2024-000123) |
 | May 19, 2026 | 3-step report submission wizard | Based on wireframe: Details → Photos → Review |
 | May 19, 2026 | MONHS as first pilot | Originated by MONHS Student Council President |
-| May 20, 2026 | SpeakUp Connect is now a full community communications platform | Added groups, messaging, news board, multi-language, apply-to-join, roster import, etc. |
+| May 20, 2026 | SpeakUp Connect is now a full community communications platform | Added groups, news board, multi-language, apply-to-join, roster import, etc. |
 | May 23, 2026 | 5-second router splash lock via `_AuthStateListenable` | Ensures authenticated users see branded splash (~4s) before auto-redirect to home |
 | May 23, 2026 | `_LoadingScreen` approach for pre-content state | Full blue Scaffold matching native launch background — avoids white flash between native and Flutter |
 | May 23, 2026 | Native spinner in `onCreate()` not `onStart()` | `onStart()` fires after Flutter engine starts on some devices — `onCreate()` guarantees it appears at cold start |

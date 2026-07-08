@@ -17,13 +17,13 @@ The platform provides:
 - Submit anonymous tips when personal safety may be at risk
 
 **Communications & Community**
-- Peer-to-peer direct messaging between members
-- Group messaging for admin-defined groups and organizations
 - News board where school groups and organizations post updates
 - Bulletin board for organization-wide admin announcements
 - Student/member reminders broadcast by teachers, admins, or role-authorized users
 - Admin-defined groups and clubs (e.g., Journalism Club, Chess Club, Drum and Lyre Corps) with customizable club positions (President, Treasurer, etc.)
 - In-app Help Center with **per-organization** member and administrator guides (each tenant ships its own markdown; generic `_default` fallback for new orgs)
+- Events calendar offers a way for admins and group leaders to post events on a calendar which can be viewed organization-wide or by specific groups and organizations
+- Student Engagement - Daily Challenge System designed to encourage student to open Speakup Connect every day, even when there are no new announcements or messages waiting for them. The objective is to make Speakup Connect not only the school's primary communication platform, but also a daily destination for students.
 
 **Organization & Administration**
 - Custom app name per organization (e.g., "SpeakUp MONHSIAN")
@@ -125,7 +125,6 @@ SpeakUp Connect is architected as a **multi-tenant SaaS platform** from day one.
 - Apply to join their organization using their full name and organization-issued ID
 - Can submit reports (authenticated or anonymous)
 - Can track the status of their own reports
-- Can send and receive direct messages and participate in group messaging
 - Receive notifications on status updates and broadcasts
 - Can change their display language via a language selector on the home page
 
@@ -166,7 +165,7 @@ SpeakUp Connect is architected as a **multi-tenant SaaS platform** from day one.
 4. **Configurable Per Organization** — Categories, branding, custom app name, rules, and roles adapt to each organization
 5. **Designed for Minors** — Special considerations for student privacy, safety, and abuse prevention
 6. **Audit-Ready** — Built with audit logging and compliance in mind
-7. **Full Communications Hub** — Not just reporting: direct messaging, group messaging, news board, bulletin board, and reminders
+7. **Full Communications Hub** — Not just reporting: news board, bulletin board, reminders, and group alerts
 8. **Multi-Language** — All UI strings are indexed to a language database; users can switch languages from the home page
 9. **Controlled Onboarding** — Students find and apply to join their organization; signup requires admin-issued ID verification
 10. **Role-Based Broadcasting** — Reminders and news posts are controlled by role permissions, not just admin status
@@ -182,7 +181,7 @@ SpeakUp Connect is architected as a **multi-tenant SaaS platform** from day one.
 - Admin response time under 48 hours per report
 - Zero unauthorized data access incidents
 - Positive feedback from administrators on usability
-- At least 3 active groups/clubs using the news board or group messaging
+- At least 3 active groups/clubs using the news board or group alerts
 
 ### Platform Success (Long-Term)
 
@@ -190,5 +189,5 @@ SpeakUp Connect is architected as a **multi-tenant SaaS platform** from day one.
 - 95%+ uptime SLA
 - Sub-3-second report submission
 - Successful anonymous report delivery rate > 99%
-- Active daily use of messaging and bulletin features
+- Active daily use of alerts, reminders, and bulletin features
 - At least 3 supported languages at public launch

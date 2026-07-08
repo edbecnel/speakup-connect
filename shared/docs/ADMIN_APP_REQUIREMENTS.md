@@ -111,19 +111,7 @@ The following features are **intentionally excluded from the mobile admin app** 
 
 ---
 
-### 5. Direct Messaging — Admin-Initiated
-
-**Who:** All elevated roles  
-**Why on mobile:** Admins may need to reach a specific user directly (e.g., follow up on a report, contact a student's parent representative).
-
-- Initiate a direct message to any member of the org
-- View and continue existing admin DM threads
-- Shared with the main user app's messaging system (same inbox)
-- Admin badge/indicator visible to the recipient (so they know it is an official message)
-
----
-
-### 6. Group & Club Management — Lightweight
+### 5. Group & Club Management — Lightweight
 
 **Who:** Org Admin, Group Leader, Member (view-only)  
 **Why on mobile:** Quick roster and policy actions — no bulk import.
@@ -138,7 +126,7 @@ The following features are **intentionally excluded from the mobile admin app** 
 
 ---
 
-### 7. User Flag & Block Actions
+### 6. User Flag & Block Actions
 
 **Who:** Org Admin, Moderator  
 **Why on mobile:** If a moderator receives an urgent report of abuse, they need to act immediately.
@@ -151,7 +139,7 @@ The following features are **intentionally excluded from the mobile admin app** 
 
 ---
 
-### 8. Dashboard — At-a-Glance Summary
+### 7. Dashboard — At-a-Glance Summary
 
 **Who:** Org Admin  
 **Why on mobile:** A quick health check without needing the full web dashboard.
@@ -165,7 +153,7 @@ The following features are **intentionally excluded from the mobile admin app** 
 
 ---
 
-### 9. Apply-to-Join Approval Queue
+### 8. Apply-to-Join Approval Queue
 
 **Who:** Org Admin  
 **Why on mobile:** New student applications need timely approval so members are not left waiting.
@@ -188,7 +176,6 @@ The following features are **intentionally excluded from the mobile admin app** 
 | Report analytics & trends | ❌ | ✅ |
 | Broadcast reminders | ✅ | ✅ |
 | Broadcast templates & scheduling | Basic | Full |
-| Direct messaging | ✅ | ✅ |
 | Group membership (single actions) | ✅ | ✅ |
 | Bulk group operations | ❌ | ✅ |
 | User flag & suspend | ✅ | ✅ |
@@ -211,7 +198,7 @@ The following features are **intentionally excluded from the mobile admin app** 
 
 Use a `admin` build flavor within the existing `Speakup-Connect` Flutter project rather than a separate repository. This means:
 
-- Shared codebase for auth, Firebase services, messaging, and theming
+- Shared codebase for auth, Firebase services, push notifications, and theming
 - Admin-only features are gated by role checks, not separate builds
 - A single Firebase project serves both apps
 - Admin flavor can have a distinct app icon color/badge (e.g., a shield or different accent) to distinguish it visually

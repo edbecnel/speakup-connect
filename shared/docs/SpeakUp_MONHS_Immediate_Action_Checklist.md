@@ -10,7 +10,7 @@
 - [ ] Meet with principal and SSLG coordinator at MONHS to introduce myself, the software, and get feedback
 	- [ ] Bring laptop or Mac Mini to allow installing apps on their phones and for PowerPoint
 	- [ ] Mention automated student ID processing
-	- [ ] Mention allowing parents to join for notifications/instant messaging regarding their child student(s)
+	- [ ] Mention allowing parents to join for notifications regarding their child student(s)
 	- [ ] Bring PDFs of Admin Help, Admin Training, and Admin Quick Start Guide
 	- [ ] Get their emails to send electronic PDF files
 - [ ] Schedule an admin-only training session.
