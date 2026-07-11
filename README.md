@@ -48,6 +48,7 @@ The platform is designed as a **multi-tenant SaaS solution**, meaning a single c
 
 | Document | Description |
 |---|---|
+| **[DEVELOPMENT_SETUP.md](DEVELOPMENT_SETUP.md)** | **New machine setup** — Flutter, Firebase, tooling, and verification |
 | [shared/docs/PROJECT_OVERVIEW.md](shared/docs/PROJECT_OVERVIEW.md) | Full platform description & vision |
 | [shared/docs/ARCHITECTURE.md](shared/docs/ARCHITECTURE.md) | System architecture & design decisions |
 | [shared/docs/FOLDER_STRUCTURE.md](shared/docs/FOLDER_STRUCTURE.md) | Folder organization & conventions |
@@ -68,105 +69,19 @@ The platform is designed as a **multi-tenant SaaS solution**, meaning a single c
 
 ## Development Setup
 
-### Prerequisites
+**→ See [DEVELOPMENT_SETUP.md](DEVELOPMENT_SETUP.md) for the full new-machine guide** (Flutter SDK install, Android/iOS tooling, Firebase config, Cloud Functions, and verification).
 
-- Flutter SDK `>=3.19.0`
-- Dart SDK `>=3.3.0`
-- Android Studio or VS Code with Flutter extension
-- Firebase CLI (`npm install -g firebase-tools`)
-- Git
-
-### Installation
+Quick start (after Flutter and Firebase CLI are installed):
 
 ```bash
-# 1. Clone the repository
-git clone https://github.com/your-org/speakup-connect.git
-cd speakup-connect
-cd speakup_connect_app
-
-# 2. Install Flutter dependencies
+git clone https://github.com/edbecnel/speakup-connect.git
+cd speakup-connect/speakup_connect_app
 flutter pub get
-
-# 3. Configure Firebase  ← SEE "Firebase Setup" SECTION BELOW — required before running
-
-# 4. Run the application
+# Configure Firebase — required; see DEVELOPMENT_SETUP.md §5
 flutter run
 ```
 
-### Environment Configuration
-
-Copy the environment template and fill in your values:
-
-```bash
-cp .env.example .env
-```
-
-See [shared/docs/ARCHITECTURE.md](shared/docs/ARCHITECTURE.md) for full environment configuration details.
-
----
-
-## 🔴 Firebase Setup — REQUIRED BEFORE RUNNING
-
-> **This step is mandatory. The app will crash on launch without these files.**
->
-> `google-services.json` and `firebase_options.dart` are **intentionally excluded
-> from git** because this is a public repository. They contain API keys and
-> project identifiers that must not be committed to version control.
-
-### Files you need (not in the repo)
-
-| File | Where it goes | What it does |
-|---|---|---|
-| `google-services.json` | `speakup_connect_app/android/app/google-services.json` | Connects the Android app to Firebase |
-| `firebase_options.dart` | `speakup_connect_app/lib/config/firebase_options.dart` | Dart-side Firebase initialization config |
-
-### How to generate them
-
-**Option A — FlutterFire CLI (recommended)**
-
-```bash
-# Install the FlutterFire CLI (once)
-dart pub global activate flutterfire_cli
-
-# Log in to Firebase
-firebase login
-
-# Generate both files for the existing Firebase project
-flutterfire configure --project=speakup-connect-891dd
-```
-
-This writes both files to the correct locations automatically.
-
-**Option B — Manual download**
-
-1. Go to [Firebase Console](https://console.firebase.google.com) → project **speakup-connect-891dd**
-2. **Project Settings → Your Apps → Android app** → Download `google-services.json`
-3. Place it at `speakup_connect_app/android/app/google-services.json`
-4. For `firebase_options.dart`, Option A is still required (it cannot be downloaded manually)
-
-### CI/CD (GitHub Actions)
-
-Store the file contents as repository secrets and write them before building:
-
-```yaml
-- name: Write Firebase config
-  run: |
-    echo "${{ secrets.GOOGLE_SERVICES_JSON }}" > speakup_connect_app/android/app/google-services.json
-    echo "${{ secrets.FIREBASE_OPTIONS_DART }}" > speakup_connect_app/lib/config/firebase_options.dart
-```
-
-Required secrets to add in **GitHub → Settings → Secrets and variables → Actions**:
-- `GOOGLE_SERVICES_JSON` — full content of `speakup_connect_app/android/app/google-services.json`
-- `FIREBASE_OPTIONS_DART` — full content of `speakup_connect_app/lib/config/firebase_options.dart`
-
-### Verify your setup
-
-Before running, confirm both files exist:
-
-```powershell
-Test-Path speakup_connect_app\android\app\google-services.json   # must return True
-Test-Path speakup_connect_app\lib\config\firebase_options.dart    # must return True
-```
+> **Firebase is mandatory before first run.** The app will crash without `google-services.json` and `firebase_options.dart` (git-ignored). Use FlutterFire CLI: `flutterfire configure --project=speakup-connect-891dd`.
 
 ---
 
