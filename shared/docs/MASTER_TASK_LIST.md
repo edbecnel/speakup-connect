@@ -4,6 +4,8 @@
 > Organized by Phase → Epic → Task.  
 > Use this for long-term sprint planning.
 
+> **Last synced with codebase:** July 12, 2026 — checkboxes updated to reflect Sprints 1–16 delivery (see [SPRINT_TRACKER.md](SPRINT_TRACKER.md)). `[~]` = partial or differs from original spec.
+
 ---
 
 ## How to Use This List
@@ -53,21 +55,21 @@ Suggested implementation order: **i18n → parents** (parents may link to studen
 ### Epic 1.2 — Flutter Project Setup
 
 **Frontend**
-- [ ] Initialize Flutter project with package name `com.speakupconnect.app`
-- [ ] Configure pubspec.yaml (all dependencies)
-- [ ] Configure analysis_options.yaml (strict linting rules)
-- [ ] Create full folder structure matching shared/docs/FOLDER_STRUCTURE.md
-- [ ] Create `.gitignore` (Flutter + Firebase rules)
-- [ ] Verify project compiles and runs on Android emulator
-- [ ] Configure build flavors: `development`, `staging`, `production`
-- [ ] Set up `assets/` directory with placeholder images/fonts
-- [ ] Create app launcher icon placeholder
+- [~] Initialize Flutter project — `speakup_connect_app/`; package `com.speakupconnect.speakup_connect` (not exactly `com.speakupconnect.app`)
+- [x] Configure pubspec.yaml (all dependencies)
+- [x] Configure analysis_options.yaml (strict linting rules)
+- [x] Create full folder structure matching shared/docs/FOLDER_STRUCTURE.md
+- [x] Create `.gitignore` (Flutter + Firebase rules)
+- [x] Verify project compiles and runs on Android emulator *(Sprints 1–5; re-verify on new dev machines)*
+- [~] Configure build flavors — `FlavorConfig` (`standard` / `monhs` entry points); not `development` / `staging` / `production` as originally listed
+- [x] Set up `assets/` directory with placeholder images/fonts
+- [x] Create app launcher icon placeholder
 
 **DevOps**
-- [ ] Initialize Git repository
-- [ ] Create initial commit with scaffolded structure
-- [ ] Create GitHub/GitLab repository
-- [ ] Set up branch strategy: `main`, `develop`, `feature/*`
+- [x] Initialize Git repository
+- [x] Create initial commit with scaffolded structure
+- [x] Create GitHub/GitLab repository (`edbecnel/speakup-connect`)
+- [~] Set up branch strategy — uses `master`; not `main` / `develop` / `feature/*` as listed
 - [ ] Add `.github/PULL_REQUEST_TEMPLATE.md`
 
 ---
@@ -75,49 +77,49 @@ Suggested implementation order: **i18n → parents** (parents may link to studen
 ### Epic 1.3 — Core Layer
 
 **Theme System**
-- [ ] Create `app_colors.dart` — base color palette (org-agnostic defaults)
-- [ ] Create `app_typography.dart` — TextTheme with Google Fonts
-- [ ] Create `app_theme.dart` — ThemeData factory (light + dark)
-- [ ] Implement dynamic theme from org config (primary/secondary colors)
-- [ ] Verify dark mode on Android
+- [x] Create `app_colors.dart` — base color palette (org-agnostic defaults)
+- [x] Create `app_typography.dart` — TextTheme with Google Fonts
+- [x] Create `app_theme.dart` — ThemeData factory (light + dark)
+- [x] Implement dynamic theme from org config (primary/secondary colors)
+- [x] Verify dark mode on Android
 
 **Router**
-- [ ] Create `route_constants.dart` — all named route paths as constants
-- [ ] Create `app_router.dart` — GoRouter configuration
-- [ ] Implement auth guard (redirect to login if not authenticated)
-- [ ] Implement admin guard (redirect if not admin role)
-- [ ] Implement org-loading guard (redirect if org config not loaded)
-- [ ] Test all named routes navigate correctly
+- [x] Create `route_constants.dart` — all named route paths as constants
+- [x] Create `app_router.dart` — GoRouter configuration
+- [x] Implement auth guard (redirect to login if not authenticated)
+- [x] Implement admin guard (redirect if not admin role)
+- [x] Implement org-loading guard (redirect if org config not loaded)
+- [x] Test all named routes navigate correctly *(manual QA; no automated route test suite)*
 
 **Constants & Utilities**
-- [ ] Create `app_constants.dart` — app-wide constants
-- [ ] Create `validators.dart` — email, password, required field validators
+- [x] Create `app_constants.dart` — app-wide constants
+- [~] Create `validators.dart` — validation in `core/l10n/form_validators.dart` (l10n-aware); standalone `validators.dart` not as originally named
 - [ ] Create `date_formatter.dart` — date display helpers
-- [ ] Create `context_extensions.dart` — theme/screen size helpers
+- [x] Create `context_extensions.dart` — theme/screen size helpers
 - [ ] Create `string_extensions.dart` — capitalization, truncation helpers
 
 **Errors**
-- [ ] Create `app_exception.dart` — typed exception classes
-- [ ] Create `failure.dart` — sealed Failure class for domain errors
+- [x] Create `app_exception.dart` — typed exception classes
+- [x] Create `failure.dart` — sealed Failure class for domain errors
 
 ---
 
 ### Epic 1.4 — Configuration Layer
 
-- [ ] Create `app_config.dart` — compile-time constants (app name, version)
-- [ ] Create `env_config.dart` — environment selector
-- [ ] Create `firebase_options.dart` placeholder (replaced by FlutterFire CLI)
-- [ ] Document environment setup process
+- [x] Create `app_config.dart` — compile-time constants (app name, version)
+- [x] Create `env_config.dart` — environment selector
+- [x] Create `firebase_options.dart` placeholder (replaced by FlutterFire CLI) — `lib/config/firebase_options.dart`
+- [x] Document environment setup process (README, `CLIENT_BUILDS.md`, onboarding docs)
 
 ---
 
 ### Epic 1.5 — Shared Widgets
 
-- [ ] Create `app_button.dart` — primary, secondary, text button variants
-- [ ] Create `app_text_field.dart` — styled input with label/error/icon support
-- [ ] Create `app_loading_indicator.dart` — centered CircularProgressIndicator
-- [ ] Create `app_error_widget.dart` — error message + retry button
-- [ ] Create `app_empty_state.dart` — empty list illustration + message
+- [x] Create `app_button.dart` — primary, secondary, text button variants
+- [x] Create `app_text_field.dart` — styled input with label/error/icon support
+- [x] Create `app_loading_indicator.dart` — centered CircularProgressIndicator
+- [x] Create `app_error_widget.dart` — error message + retry button
+- [~] Create `app_empty_state.dart` — empty states inline in screens; no dedicated shared widget file
 - [x] Create `app_avatar.dart` — user/org avatar with fallback initials; **official photo** + **personal badge** (`avatarUrl` → `officialPhotoUrl` → initials) per [DATABASE_DESIGN.md](DATABASE_DESIGN.md)
 - [ ] Write widget tests for all shared widgets
 
@@ -126,20 +128,20 @@ Suggested implementation order: **i18n → parents** (parents may link to studen
 ### Epic 1.6 — Organization Feature
 
 **Domain**
-- [ ] Create `OrganizationConfigEntity`
-- [ ] Create `OrganizationRepository` abstract interface
-- [ ] Create `LoadOrganizationConfigUseCase`
+- [x] Create `OrganizationConfigEntity`
+- [x] Create `OrganizationRepository` abstract interface
+- [x] Create `LoadOrganizationConfigUseCase` *(logic in `organizationConfigProvider` / repository)*
 
 **Data**
-- [ ] Create `OrganizationConfigModel` (with `fromJson`/`toJson`)
-- [ ] Create `OrganizationRemoteDataSource` (Firestore reads)
-- [ ] Create `OrganizationRepositoryImpl`
+- [x] Create `OrganizationConfigModel` (with `fromJson`/`toJson`)
+- [x] Create `OrganizationRemoteDataSource` (Firestore reads)
+- [x] Create `OrganizationRepositoryImpl`
 
 **Presentation**
-- [ ] Create `organizationConfigProvider` (AsyncNotifier loading org config)
-- [ ] Apply org colors to theme dynamically
-- [ ] Apply org display name to app bar and splash screen
-- [ ] Cache org config in memory for session
+- [x] Create `organizationConfigProvider` (AsyncNotifier loading org config)
+- [x] Apply org colors to theme dynamically
+- [x] Apply org display name to app bar and splash screen
+- [x] Cache org config in memory for session *(+ `OrgConfigCacheService` for offline branding)*
 
 **Testing**
 - [ ] Unit test: `LoadOrganizationConfigUseCase`
@@ -150,62 +152,62 @@ Suggested implementation order: **i18n → parents** (parents may link to studen
 ### Epic 1.7 — Authentication Feature
 
 **Domain**
-- [ ] Create `UserEntity`
-- [ ] Create `AuthRepository` abstract interface
-- [ ] Create `SignInWithEmailUseCase`
-- [ ] Create `SignUpWithEmailUseCase`
-- [ ] Create `SignInAnonymouslyUseCase`
-- [ ] Create `SignOutUseCase`
-- [ ] Create `GetCurrentUserUseCase`
+- [x] Create `UserEntity`
+- [x] Create `AuthRepository` abstract interface
+- [x] Create `SignInWithEmailUseCase` *(auth repository + `authNotifierProvider`)*
+- [x] Create `SignUpWithEmailUseCase`
+- [x] Create `SignInAnonymouslyUseCase`
+- [x] Create `SignOutUseCase`
+- [x] Create `GetCurrentUserUseCase` *(via `currentUserProvider` / auth state)*
 
 **Data**
-- [ ] Create `UserModel` (with `fromJson`/`toJson`)
-- [ ] Create `AuthRemoteDataSource` (FirebaseAuth calls)
-- [ ] Create `AuthRepositoryImpl`
-- [ ] Create `UserRemoteDataSource` (Firestore user profile reads/writes)
+- [x] Create `UserModel` (with `fromJson`/`toJson`) *(user profile models in organization feature)*
+- [x] Create `AuthRemoteDataSource` (FirebaseAuth calls)
+- [x] Create `AuthRepositoryImpl`
+- [x] Create `UserRemoteDataSource` (Firestore user profile reads/writes) *(user profile repository)*
 
 **Presentation — Providers**
-- [ ] Create `authStateProvider` (StreamProvider watching FirebaseAuth state)
-- [ ] Create `currentUserProvider` (derived from auth state)
-- [ ] Create `authNotifierProvider` (AsyncNotifier for sign-in/sign-up operations)
+- [x] Create `authStateProvider` (StreamProvider watching FirebaseAuth state)
+- [x] Create `currentUserProvider` (derived from auth state)
+- [x] Create `authNotifierProvider` (AsyncNotifier for sign-in/sign-up operations)
 
 **Presentation — Screens**
-- [ ] Build `SplashScreen`
-  - [ ] Display org logo (from config)
-  - [ ] Display org name dynamically (e.g., "SpeakUp MONHS")
-  - [ ] Display tagline dynamically (from org config)
-  - [ ] "Get Started" button
-  - [ ] "Learn More" text link
-  - [ ] Auto-redirect if already logged in
-- [ ] Build `LoginScreen`
-  - [ ] Login / Sign Up tab switcher
-  - [ ] Email / School ID input field
-  - [ ] Password input with show/hide toggle
-  - [ ] "Forgot Password?" link
-  - [ ] Login button
-  - [ ] "Continue with Google" button (placeholder Sprint 2, active Sprint 3)
-  - [ ] Terms & Privacy Policy footer
-  - [ ] Error handling (wrong password, user not found)
-- [ ] Build `RegisterScreen`
-  - [ ] Full name field
-  - [ ] Email / School ID field
-  - [ ] Password + confirm password
-  - [ ] Terms acceptance checkbox
-  - [ ] Submit button
-  - [ ] Validation and error handling
+- [x] Build `SplashScreen`
+  - [x] Display org logo (from config)
+  - [x] Display org name dynamically (e.g., "SpeakUp MONHS")
+  - [x] Display tagline dynamically (from org config)
+  - [x] "Get Started" button
+  - [x] "Learn More" text link
+  - [x] Auto-redirect if already logged in
+- [x] Build `LoginScreen`
+  - [x] Login / Sign Up tab switcher
+  - [x] Email / School ID input field
+  - [x] Password input with show/hide toggle
+  - [~] "Forgot Password?" link — UI label only; navigates nowhere (`TODO` in code)
+  - [x] Login button
+  - [~] "Continue with Google" button (placeholder Sprint 2, active Sprint 3)
+  - [x] Terms & Privacy Policy footer
+  - [x] Error handling (wrong password, user not found)
+- [x] Build `RegisterScreen` *(register tab on `LoginScreen`)*
+  - [x] Full name field
+  - [x] Email / School ID field
+  - [x] Password + confirm password
+  - [x] Terms acceptance checkbox
+  - [x] Submit button
+  - [x] Validation and error handling
 - [ ] Build `ForgotPasswordScreen`
   - [ ] Email input
   - [ ] "Send Reset Link" button
   - [ ] Success confirmation state
 
 **Presentation — Widgets**
-- [ ] Create `AuthTextField` — styled text field for auth forms
-- [ ] Create `AuthFormWrapper` — card wrapper for login/register forms
+- [~] Create `AuthTextField` — uses shared `AppTextField` instead of dedicated widget
+- [~] Create `AuthFormWrapper` — card layout inline in login screen
 
 **Firestore**
-- [ ] Create user profile document on first sign-up
+- [x] Create user profile document on first sign-up
 - [ ] Update `lastLoginAt` on each successful sign-in
-- [ ] Store FCM token on sign-in
+- [ ] Store FCM token on sign-in *(blocked on Epic 1.12 client FCM)*
 
 **Testing**
 - [ ] Unit test: `SignInWithEmailUseCase`
@@ -220,20 +222,20 @@ Suggested implementation order: **i18n → parents** (parents may link to studen
 ### Epic 1.8 — Home Dashboard Feature
 
 **Presentation — Screens**
-- [ ] Build `HomeDashboardScreen`
-  - [ ] App bar: hamburger menu, "Home" title, notification bell
-  - [ ] Welcome card: "Welcome, {name}! How can we help make our {orgType} better?"
-  - [ ] 2×2 feature tile grid
-    - [ ] Submit Concern tile
-    - [ ] My Reports tile
-    - [ ] Announcements tile (placeholder)
-    - [ ] Organization Information tile (placeholder)
-  - [ ] Bottom navigation bar: Home | My Reports | + (FAB) | Alerts | Profile
+- [x] Build `HomeDashboardScreen`
+  - [x] App bar: hamburger menu, "Home" title, notification bell
+  - [x] Welcome card: "Welcome, {name}! How can we help make our {orgType} better?"
+  - [x] 2×2 feature tile grid
+    - [x] Submit Concern tile
+    - [x] My Reports tile
+    - [x] Announcements tile *(live — Epic 2.7)*
+    - [~] Organization Information tile *(may still be placeholder — verify)*
+  - [x] Bottom navigation bar: Home | My Reports | + (FAB) | Alerts | Profile
 
 **Presentation — Widgets**
-- [ ] Create `DashboardTile` — icon + label tile widget
-- [ ] Create `WelcomeCard` — org-branded greeting card
-- [ ] Create `AppBottomNavBar` — persistent bottom navigation
+- [x] Create `DashboardTile` — `_DashboardTile` in `home_dashboard_screen.dart`
+- [x] Create `WelcomeCard` — `_WelcomeCard` in `home_dashboard_screen.dart`
+- [x] Create `AppBottomNavBar` — bottom nav in `home_dashboard_screen.dart`
 
 **Testing**
 - [ ] Widget test: `HomeDashboardScreen`
@@ -244,68 +246,68 @@ Suggested implementation order: **i18n → parents** (parents may link to studen
 ### Epic 1.9 — Report Submission Feature
 
 **Domain**
-- [ ] Create `ReportEntity`
-- [ ] Create `ReportCategoryEntity`
-- [ ] Create `ReportRepository` abstract interface
-- [ ] Create `SubmitReportUseCase`
-- [ ] Create `GenerateReportReferenceUseCase`
-- [ ] Create `GetReportCategoriesUseCase`
-- [ ] Create `UploadReportPhotosUseCase`
+- [x] Create `ReportEntity`
+- [x] Create `ReportCategoryEntity`
+- [x] Create `ReportRepository` abstract interface
+- [x] Create `SubmitReportUseCase` *(report provider / repository)*
+- [x] Create `GenerateReportReferenceUseCase`
+- [x] Create `GetReportCategoriesUseCase`
+- [x] Create `UploadReportPhotosUseCase`
 
 **Data**
-- [ ] Create `ReportModel` (with `fromJson`/`toJson`)
-- [ ] Create `ReportCategoryModel`
-- [ ] Create `ReportRemoteDataSource` (Firestore writes + Storage uploads)
-- [ ] Create `ReportRepositoryImpl`
-- [ ] Implement atomic reference number counter (Firestore transaction)
+- [x] Create `ReportModel` (with `fromJson`/`toJson`) *(entity + Firestore mapping in repository)*
+- [x] Create `ReportCategoryModel`
+- [x] Create `ReportRemoteDataSource` (Firestore writes + Storage uploads) *(in `ReportRepositoryImpl`)*
+- [x] Create `ReportRepositoryImpl`
+- [x] Implement atomic reference number counter (Firestore transaction)
 
 **Presentation — Providers**
-- [ ] Create `reportCategoriesProvider` (FutureProvider loading org categories)
-- [ ] Create `submitReportNotifierProvider` (AsyncNotifier for multi-step form state)
-- [ ] Create `reportPhotosProvider` (StateNotifier for photo picker state)
+- [x] Create `reportCategoriesProvider` (FutureProvider loading org categories)
+- [x] Create `submitReportNotifierProvider` (AsyncNotifier for multi-step form state)
+- [x] Create `reportPhotosProvider` (StateNotifier for photo picker state) *(inline in submit flow)*
 
 **Presentation — Screens**
-- [ ] Build `SubmitReportScreen` (3-step wizard host)
-  - [ ] 3-step progress indicator
-  - [ ] Step navigation (Next/Back/Submit)
-  - [ ] Form state preserved across steps
-- [ ] Build `SubmitReportStep1` (Details)
-  - [ ] "Report as" toggle: Anonymous | With Identity
-  - [ ] Category dropdown (loaded from org config)
-  - [ ] Title text field
-  - [ ] Description text area
-  - [ ] Character count for description
-  - [ ] Validation before proceeding to step 2
-- [ ] Build `SubmitReportStep2` (Photos)
-  - [ ] Up to 3 photo slots with + add buttons
-  - [ ] Camera and gallery picker
-  - [ ] Photo preview with remove option
-  - [ ] "Optional" label
-- [ ] Build `SubmitReportStep3` (Review)
-  - [ ] Summary of all entered details
-  - [ ] Photo thumbnails
-  - [ ] "Back" and "Submit" buttons
-  - [ ] Loading state on submit
-- [ ] Build `ReportConfirmationScreen`
-  - [ ] Success checkmark animation
-  - [ ] "Thank You!" heading
-  - [ ] Reference number display (e.g., `MONHS-2026-000001`)
-  - [ ] "Go to My Reports" button
+- [x] Build `SubmitReportScreen` (3-step wizard host)
+  - [x] 3-step progress indicator
+  - [x] Step navigation (Next/Back/Submit)
+  - [x] Form state preserved across steps
+- [x] Build `SubmitReportStep1` (Details) *(inline steps in `SubmitReportScreen`)*
+  - [~] "Report as" toggle: Anonymous | With Identity — basic anonymous switch; not category `anonymityMode` aware
+  - [x] Category dropdown (loaded from org config)
+  - [x] Title text field
+  - [x] Description text area
+  - [x] Character count for description
+  - [x] Validation before proceeding to step 2
+- [x] Build `SubmitReportStep2` (Photos)
+  - [x] Up to 3 photo slots with + add buttons
+  - [x] Camera and gallery picker
+  - [x] Photo preview with remove option
+  - [x] "Optional" label
+- [x] Build `SubmitReportStep3` (Review)
+  - [x] Summary of all entered details
+  - [x] Photo thumbnails
+  - [x] "Back" and "Submit" buttons
+  - [x] Loading state on submit
+- [x] Build `ReportConfirmationScreen`
+  - [x] Success checkmark animation
+  - [x] "Thank You!" heading
+  - [x] Reference number display (e.g., `MONHS-2026-000001`)
+  - [x] "Go to My Reports" button
 
 **Presentation — Widgets**
-- [ ] Create `CategoryDropdown` — org-category picker
-- [ ] Create `PhotoPickerWidget` — 3-slot photo picker
-- [ ] Create `ReportReviewSummary` — step 3 summary card
-- [ ] Create `StepProgressIndicator` — 1→2→3 progress widget
+- [~] Create `CategoryDropdown` — inline in submit screen
+- [~] Create `PhotoPickerWidget` — inline in submit screen
+- [~] Create `ReportReviewSummary` — inline in submit screen
+- [~] Create `StepProgressIndicator` — inline in submit screen
 - [ ] Create `AnonymousToggle` — Anonymous | With Identity segmented control; hidden entirely when category `anonymityMode` is `identified`; unchanged when `open`; hidden when `voluntary_contact` (report is always anonymous, opt-in offered post-submit)
 - [ ] Show `identifiedNotice` banner on report form when `anonymityMode` is `identified`
 - [ ] Build post-submit `VoluntaryContactSheet` — shown after anonymous submit when `anonymityMode` is `voluntary_contact`; stores opt-in as a separate `counselorContactRequests/{requestId}` document not linked to the report
 
 **Firebase**
-- [ ] Configure Firebase Storage rules for photo uploads
-- [ ] Compress images before upload (max 1MB per photo)
-- [ ] Generate download URLs and store in report document
-- [ ] Implement Firestore transaction for atomic reference number increment
+- [x] Configure Firebase Storage rules for photo uploads
+- [x] Compress images before upload (max 1MB per photo)
+- [x] Generate download URLs and store in report document
+- [x] Implement Firestore transaction for atomic reference number increment
 
 **Testing**
 - [ ] Unit test: `SubmitReportUseCase`
@@ -320,37 +322,37 @@ Suggested implementation order: **i18n → parents** (parents may link to studen
 ### Epic 1.10 — My Reports & Report Details Feature
 
 **Domain**
-- [ ] Create `GetMyReportsUseCase`
-- [ ] Create `WatchMyReportsUseCase` (real-time stream)
-- [ ] Create `GetReportDetailsUseCase`
+- [x] Create `GetMyReportsUseCase` *(report provider)*
+- [x] Create `WatchMyReportsUseCase` (real-time stream)
+- [x] Create `GetReportDetailsUseCase`
 
 **Data**
-- [ ] Create `ReportRemoteDataSource.watchMyReports()` (Firestore stream)
-- [ ] Create `ReportRemoteDataSource.getReportById()`
+- [x] Create `ReportRemoteDataSource.watchMyReports()` (Firestore stream)
+- [x] Create `ReportRemoteDataSource.getReportById()`
 
 **Presentation — Providers**
-- [ ] Create `myReportsProvider` (StreamProvider for real-time updates)
-- [ ] Create `reportDetailProvider` (FutureProvider by reportId)
-- [ ] Create `reportStatusFilterProvider` (StateProvider for tab filtering)
+- [x] Create `myReportsProvider` (StreamProvider for real-time updates)
+- [x] Create `reportDetailProvider` (FutureProvider by reportId)
+- [x] Create `reportStatusFilterProvider` (StateProvider for tab filtering)
 
 **Presentation — Screens**
-- [ ] Build `MyReportsScreen`
-  - [ ] Tab bar: All | Submitted | In Progress | Resolved
-  - [ ] Filtered report list per tab
-  - [ ] Pull-to-refresh
-  - [ ] Empty state per tab
-  - [ ] Pagination
-- [ ] Build `ReportDetailsScreen`
-  - [ ] Full report title, description, category
-  - [ ] Report status with history timeline
-  - [ ] Photo viewer
-  - [ ] Reference number display
-  - [ ] Submission date
+- [x] Build `MyReportsScreen`
+  - [x] Tab bar: All | Submitted | In Progress | Resolved
+  - [x] Filtered report list per tab
+  - [x] Pull-to-refresh
+  - [x] Empty state per tab
+  - [~] Pagination *(cursor pagination not verified — may be full list)*
+- [x] Build `ReportDetailsScreen`
+  - [x] Full report title, description, category
+  - [x] Report status with history timeline
+  - [x] Photo viewer
+  - [x] Reference number display
+  - [x] Submission date
 
 **Presentation — Widgets**
-- [ ] Create `ReportCard` — list item card (ref number, title, status, date)
-- [ ] Create `ReportStatusBadge` — color-coded status chip
-- [ ] Create `StatusTimeline` — vertical status history list
+- [x] Create `ReportCard` — list item card (ref number, title, status, date) *(inline in `MyReportsScreen`)*
+- [x] Create `ReportStatusBadge` — color-coded status chip *(inline)*
+- [x] Create `StatusTimeline` — vertical status history list *(inline in detail screens)*
 
 **Testing**
 - [ ] Unit test: `GetMyReportsUseCase`
@@ -362,17 +364,17 @@ Suggested implementation order: **i18n → parents** (parents may link to studen
 ### Epic 1.11 — Admin Dashboard Feature
 
 **Domain**
-- [ ] Create `AdminEntity` *(using `ReportEntity` directly — separate entity deferred)*
-- [ ] Create `AdminRepository` abstract interface *(admin ops added to `ReportRepository`)*
+- [x] Create `AdminEntity` *(using `ReportEntity` directly — separate entity deferred)*
+- [x] Create `AdminRepository` abstract interface *(admin ops added to `ReportRepository`)*
 - [x] Create `GetAllReportsUseCase` (admin: all org reports) — via `allReportsProvider`
 - [x] Create `UpdateReportStatusUseCase` — `updateReportStatus()` in report provider
 - [x] Create `AddAdminNoteUseCase` — `addAdminNote()` in report provider
-- [ ] Create `AssignReportUseCase`
+- [x] Create `AssignReportUseCase` — `assignReport()` in report repository *(Sprint 7)*
 
 **Data**
-- [ ] Create `AdminModel` *(deferred — using ReportModel)*
+- [x] Create `AdminModel` *(deferred — using ReportModel)*
 - [x] Create `AdminRemoteDataSource` — admin methods added to `ReportRepositoryImpl`
-- [ ] Create `AdminRepositoryImpl` *(deferred — merged into ReportRepositoryImpl)*
+- [x] Create `AdminRepositoryImpl` *(deferred — merged into ReportRepositoryImpl)*
 
 **Presentation — Providers**
 - [x] Create `allReportsProvider` (StreamProvider for all org reports)
@@ -383,14 +385,14 @@ Suggested implementation order: **i18n → parents** (parents may link to studen
 - [x] Build `AdminDashboardScreen`
   - [x] Filter bar (by category — multi-select chips)
   - [x] Filter by status (tab bar: All / Submitted / In Review / Resolved / Closed)
-  - [ ] Search bar
+  - [x] Search bar *(Sprint 7 — `adminSearchQueryProvider`)*
   - [x] Report list (all org reports, tap to navigate to detail)
-  - [ ] Quick stats header (total, pending, in-progress)
+  - [x] Quick stats header (total, pending, in-progress) *(Sprint 7 — `_QuickStatsHeader`)*
 - [x] Build `AdminReportDetailScreen`
   - [x] Full report view (title, ref number, status badge, priority badge, submitter, description)
   - [x] Photo gallery (horizontal scroll, full-screen tap)
   - [x] Status update control (`_StatusUpdateDialog`)
-  - [ ] Assign to dropdown
+  - [x] Assign to dropdown *(Sprint 7 — `_AssignDialog`)*
   - [x] Notes/reply thread (`_AdminNoteCard` list + `_AddNoteDialog`)
   - [x] Status history timeline
 
@@ -403,11 +405,11 @@ Suggested implementation order: **i18n → parents** (parents may link to studen
 **Firestore**
 - [x] Implement admin status update (with `statusHistory` append)
 - [x] Implement admin note creation
-- [ ] Implement assign report to admin user
+- [x] Implement assign report to admin user
 
 **Push Notifications**
 - [ ] Send FCM notification to admin topic on new report
-- [ ] Send FCM notification to reporter on status change (if not anonymous)
+- [x] Send FCM notification to reporter on status change (if not anonymous) *(Sprint 7 — `notifyReporterOnStatusChange` Cloud Function; requires client FCM token for delivery)*
 
 **Testing**
 - [ ] Unit test: `UpdateReportStatusUseCase`
@@ -418,13 +420,13 @@ Suggested implementation order: **i18n → parents** (parents may link to studen
 
 ### Epic 1.12 — Notifications Feature
 
-- [ ] Configure Firebase Cloud Messaging in Flutter
+- [ ] Configure Firebase Cloud Messaging in Flutter *(dependency in pubspec; no `FcmService` yet)*
 - [ ] Request notification permission on first launch (Android 13+)
 - [ ] Save FCM token to user profile in Firestore
 - [ ] Handle FCM token refresh (update Firestore)
 - [ ] Handle foreground notifications (in-app banner)
 - [ ] Handle background notification taps (navigate to correct screen)
-- [ ] Build `AlertsScreen` — list of received notifications
+- [x] Build `AlertsScreen` — list of received notifications *(in-app feed; server push delivery depends on client FCM)*
 - [ ] Admin: subscribe to org admin topic on login
 - [ ] Admin: unsubscribe from topic on logout
 
@@ -432,20 +434,20 @@ Suggested implementation order: **i18n → parents** (parents may link to studen
 
 ### Epic 1.13 — Settings & Profile Feature
 
-- [ ] Build `SettingsScreen`
-  - [ ] Theme toggle (dark/light)
-  - [ ] Notification preferences
-  - [ ] Language selector dropdown (switches app language)
-  - [ ] About section (app version, organization info)
-  - [ ] Sign out button
-- [ ] Build `ProfileScreen`
-  - [ ] Display name
-  - [ ] Email / School ID
-  - [ ] Change password link
-  - [ ] Account info
-  - [ ] Groups membership list
-- [ ] Implement theme persistence (SharedPreferences)
-- [ ] Implement language preference persistence (SharedPreferences + Firestore sync)
+- [x] Build `SettingsScreen`
+  - [x] Theme toggle (dark/light)
+  - [~] Notification preferences *(partial — verify full preferences UI)*
+  - [x] Language selector dropdown (switches app language)
+  - [x] About section (app version, organization info)
+  - [x] Sign out button
+- [~] Build `ProfileScreen` — profile section merged into `SettingsScreen` (no separate route)
+  - [x] Display name
+  - [x] Email / School ID
+  - [x] Change password link (`ChangePasswordScreen`)
+  - [x] Account info
+  - [x] Groups membership list
+- [x] Implement theme persistence (SharedPreferences)
+- [~] Implement language preference persistence (SharedPreferences + Firestore sync) — SharedPreferences done; Firestore `preferredLanguage` sync still open (Epic 2.5)
 
 ---
 
@@ -467,11 +469,11 @@ Suggested implementation order: **i18n → parents** (parents may link to studen
 
 ### Epic 2.2 — Branding Customization
 
-- [ ] In-app branding config editor (admin)
-- [ ] Logo upload via Firebase Storage
-- [ ] Dynamic app theme from org config
-- [ ] Custom tagline per org
-- [ ] Configurable category management UI
+- [x] In-app branding config editor (admin) — `AdminBrandingScreen`
+- [x] Logo upload via Firebase Storage
+- [x] Dynamic app theme from org config
+- [x] Custom tagline per org
+- [x] Configurable category management UI
 
 ### Epic 2.3 — Organization Finder & Apply-to-Join Flow
 
@@ -482,25 +484,25 @@ Suggested implementation order: **i18n → parents** (parents may link to studen
 - [ ] "Apply to Join" button on org card
 
 **Apply-to-Join Signup**
-- [ ] Build `ApplyToJoinScreen` — full name + school-issued ID input
-- [ ] Validate `studentId` against org `roster` collection on submission
-- [ ] Create user with `approvalStatus: 'pending'` if roster match found
-- [ ] Admin notification: new signup application pending review
-- [ ] Build `PendingApprovalScreen` — shown after apply, explains next steps
-- [ ] Admin: view and approve/reject pending applications
-- [ ] Notify user on approval or rejection (push + in-app)
+- [x] Build `ApplyToJoinScreen` — full name + school-issued ID input
+- [x] Validate `studentId` against org `roster` collection on submission
+- [x] Create user with `approvalStatus: 'pending'` if roster match found
+- [x] Admin notification: new signup application pending review *(in-app approval queue)*
+- [x] Build `PendingApprovalScreen` — shown after apply, explains next steps
+- [x] Admin: view and approve/reject pending applications — `MemberApprovalQueueScreen`
+- [~] Notify user on approval or rejection (push + in-app) — in-app alerts; push depends on client FCM
 
 **Roster Management**
-- [ ] Build `RosterManagementScreen` (admin)
+- [x] Build `RosterManagementScreen` (admin)
 - [ ] Import roster from CSV file (parse name + ID columns)
 - [ ] Import roster from plain text (line-by-line or tab-separated)
 - [ ] Import roster from Word (.docx) file
 - [ ] Import roster from PDF file
 - [ ] Import roster by pasting into a text window (auto-parse)
 - [ ] Show import preview before confirming
-- [ ] Bulk write roster entries to Firestore `roster` subcollection
-- [ ] Admin: view, search, and remove roster entries
-- [ ] Mark roster entry `isRegistered: true` when user completes signup
+- [ ] Bulk write roster entries to Firestore `roster` subcollection *(manual add via `AddStudentScreen` / `provisionStudent`; no bulk import)*
+- [x] Admin: view, search, and remove roster entries
+- [x] Mark roster entry `isRegistered: true` when user completes signup
 - [x] Admin: reset member password (`resetOrgMemberPassword` Cloud Function + in-app dialog)
 - [ ] **Future (blocked on email infrastructure) — password reset via email link (preferred):**
   - [ ] When admin requests a member password reset and `profile.email` is set, email a secure, time-limited reset link (Firebase Auth action link or signed custom token)
@@ -565,7 +567,7 @@ Suggested implementation order: **i18n → parents** (parents may link to studen
   - [ ] **Roles:** management, assign, editor, user assignments
   - [ ] **Notifications / alerts** inbox and snackbars
   - [ ] **Settings:** change password and any remaining settings sub-screens
-- [ ] Migrate `lib/core/utils/validators.dart` messages to l10n keys (pass `AppLocalizations` or `BuildContext`)
+- [~] Migrate `lib/core/utils/validators.dart` messages to l10n keys — partial via `core/l10n/form_validators.dart`; full audit still open ([#52](https://github.com/edbecnel/speakup-connect/issues/52))
 - [ ] Audit `intl` date/number formatting — pass active locale, not hardcoded `en_US` (INTERNATIONALIZATION.md §13)
 - [ ] CI: fail build if `app_ceb.arb` or `app_fil.arb` missing keys from `app_en.arb`
 - [ ] CI or custom lint: ban new hardcoded user-facing strings in `lib/features/**/presentation/`
@@ -663,75 +665,75 @@ Suggested implementation order: **i18n → parents** (parents may link to studen
 - [ ] Unit test: `GroupRepositoryImpl`
 - [ ] Widget test: `GroupsListScreen`
 
-### Epic 2.6.1 — Group Membership Requests (Join & Leave) *(planned)*
+### Epic 2.6.1 — Group Membership Requests (Join & Leave) *(Sprint 13 — core shipped; notifications/help/tests pending)*
 
 > **GitHub:** [#47](https://github.com/edbecnel/speakup-connect/issues/47) · **Milestone:** Sprint 13  
 > Design: [GROUP_JOIN_REQUESTS.md](GROUP_JOIN_REQUESTS.md). Join: default **closed** (`allowJoinRequests`). Leave: default **request required** (`memberLeavePolicy`). Admins and group leaders configure both per group.
 
 **Domain**
-- [ ] Add `allowJoinRequests`, `joinRequestHint`, `memberLeavePolicy` to `GroupEntity` / `GroupModel`
-- [ ] Create `GroupJoinRequestEntity`, `GroupLeaveRequestEntity` (`status`: pending | approved | rejected | withdrawn)
-- [ ] Extend `GroupRepository`: join + leave submit, withdraw, list pending, review
-- [ ] Use cases: submit/review/withdraw join; voluntary leave; submit/review/withdraw leave
+- [x] Add `allowJoinRequests`, `joinRequestHint`, `memberLeavePolicy` to `GroupEntity` / `GroupModel`
+- [x] Create `GroupJoinRequestEntity`, `GroupLeaveRequestEntity` (`status`: pending | approved | rejected | withdrawn)
+- [x] Extend `GroupRepository`: join + leave submit, withdraw, list pending, review
+- [x] Use cases: submit/review/withdraw join; voluntary leave; submit/review/withdraw leave *(repository + `groupMembershipActionsProvider`)*
 
 **Data**
-- [ ] `GroupJoinRequestModel`, `GroupLeaveRequestModel` + Firestore codecs
-- [ ] Datasource methods for `joinRequests` and `leaveRequests` subcollections
-- [ ] Denormalize `organizationId`, `groupId`, `groupName` on request docs for admin queue queries
+- [x] `GroupJoinRequestModel`, `GroupLeaveRequestModel` + Firestore codecs
+- [x] Datasource methods for `joinRequests` and `leaveRequests` subcollections
+- [x] Denormalize `organizationId`, `groupId`, `groupName` on request docs for admin queue queries
 
 **Cloud Functions — join**
-- [ ] `submitGroupJoinRequest` — approved member; `allowJoinRequests`; not on roster; idempotent pending check
-- [ ] `reviewGroupJoinRequest` — admin / `manageGroupRoster` / leader; approve adds member + sync index
-- [ ] `withdrawGroupJoinRequest` — requester cancels pending join request
+- [x] `submitGroupJoinRequest` — approved member; `allowJoinRequests`; not on roster; idempotent pending check
+- [x] `reviewGroupJoinRequest` — admin / `manageGroupRoster` / leader; approve adds member + sync index
+- [x] `withdrawGroupJoinRequest` — requester cancels pending join request
 
 **Cloud Functions — leave**
-- [ ] `voluntaryLeaveGroup` — member; `memberLeavePolicy == voluntary`; block sole leader
-- [ ] `submitGroupLeaveRequest` — member; `request_required`; required reason (20–500 chars)
-- [ ] `reviewGroupLeaveRequest` — approve removes member; deny **requires** `rejectionReason`
-- [ ] `withdrawGroupLeaveRequest` — requester cancels pending leave request
-- [ ] Enhance `removeGroupMember` (or server wrapper) — notify removed member; cancel pending leave request
+- [x] `voluntaryLeaveGroup` — member; `memberLeavePolicy == voluntary`; block sole leader
+- [x] `submitGroupLeaveRequest` — member; `request_required`; required reason (20–500 chars)
+- [x] `reviewGroupLeaveRequest` — approve removes member; deny **requires** `rejectionReason`
+- [x] `withdrawGroupLeaveRequest` — requester cancels pending leave request
+- [~] Enhance `removeGroupMember` (or server wrapper) — notify removed member; cancel pending leave request *(verify notification coverage)*
 
 **Cloud Functions — counts**
-- [ ] Optional: maintain `pendingJoinRequestCount`, `pendingLeaveRequestCount` on group doc
+- [x] Optional: maintain `pendingJoinRequestCount`, `pendingLeaveRequestCount` on group doc
 
 **Security**
-- [ ] Firestore rules: `joinRequests` / `leaveRequests` read for requester, leader, admin; writes via callables only
+- [x] Firestore rules: `joinRequests` / `leaveRequests` read for requester, leader, admin; writes via callables only
 - [x] Extend `onlyGroupLeaderGroupUpdate()` for `name`, `description`, `allowJoinRequests`, `joinRequestHint`, `memberLeavePolicy`
-- [ ] Route roster deletes through callables so removal notifications always fire
-- [ ] Composite / collection-group indexes for pending join and leave queues
+- [~] Route roster deletes through callables so removal notifications always fire *(verify)*
+- [x] Composite / collection-group indexes for pending join and leave queues
 
 **Presentation — settings & admin**
-- [ ] **Allow join requests** toggle on `CreateGroupScreen` (default OFF)
-- [ ] **Member leave policy** selector: Leave anytime | Must request to leave (default request)
+- [x] **Allow join requests** toggle on `CreateGroupScreen` (default OFF)
+- [x] **Member leave policy** selector: Leave anytime | Must request to leave (default request)
 - [x] **Edit Group** screen — join toggle, leave policy, hint, name, description (admin + `manageGroupRoster` + leader; leaders cannot edit position lists or active flag)
 - [x] Badge on admin `GroupsListScreen` for pending join + leave counts (subtitle + requests icon)
 
 **Presentation — members (join)**
-- [ ] `BrowseGroupsScreen` — status: Member | Pending | Request to join | Invitation only
-- [ ] `GroupJoinRequestSheet` — optional message
-- [ ] Entry points: Home, Settings (near My Groups)
+- [x] `BrowseGroupsScreen` — status: Member | Pending | Request to join | Invitation only
+- [x] `GroupJoinRequestSheet` — optional message
+- [x] Entry points: Home, Settings (near My Groups)
 
 **Presentation — members (leave)**
-- [ ] `MyGroupsScreen`: **Leave group** when `voluntary`; **Request to leave** when `request_required`
-- [ ] `GroupLeaveRequestSheet` — required reason form (20–500 chars); show **Leave pending** state
-- [ ] Confirmation dialog for voluntary leave
+- [x] `MyGroupsScreen`: **Leave group** when `voluntary`; **Request to leave** when `request_required`
+- [x] `GroupLeaveRequestSheet` — required reason form (20–500 chars); show **Leave pending** state
+- [x] Confirmation dialog for voluntary leave
 
 **Presentation — review queue**
-- [ ] `GroupMembershipRequestsScreen` — **Join** and **Leave** tabs; approve / reject (deny leave requires reason)
-- [ ] Leader badges on `MyGroupsScreen` / `GroupMembersScreen`
+- [x] `GroupMembershipRequestsScreen` — **Join** and **Leave** tabs; approve / reject (deny leave requires reason)
+- [x] Leader badges on `MyGroupsScreen` / `GroupMembersScreen`
 - [ ] Optional: cross-group aggregate screen for admins
 
 **Notifications (in-app alert + push)**
-- [ ] New join / leave request → leaders + roster admins
-- [ ] Join approved / rejected → requester
-- [ ] Leave approved → requester
-- [ ] Leave **denied** → requester with **rejection reason in alert body**
-- [ ] **Removed** by admin/leader → removed member (automated alert)
+- [~] New join / leave request → leaders + roster admins *(verify end-to-end)*
+- [~] Join approved / rejected → requester
+- [~] Leave approved → requester
+- [~] Leave **denied** → requester with **rejection reason in alert body**
+- [~] **Removed** by admin/leader → removed member (automated alert)
 - [ ] Optional: voluntary leave → notify leaders
 
 **Routes & providers**
 - [x] `Routes.browseGroups`, `Routes.editGroupPath(groupId)`, `Routes.groupMembershipRequestsPath(groupId)`
-- [ ] `canReviewGroupMembershipRequestsProvider`, pending join/leave providers, `groupMembershipPolicyProvider`
+- [x] `canReviewGroupMembershipRequestsProvider`, pending join/leave providers, membership policy providers (`group_membership_provider.dart`)
 
 **Documentation & help**
 - [ ] Update `MEMBER_GUIDE` / `ADMIN_GUIDE` — join policies, leave policies, removal/denial alerts
@@ -802,7 +804,7 @@ Suggested implementation order: **i18n → parents** (parents may link to studen
 
 **Permissions**
 - [x] Add `approveReminders` to `AppPermission` enum (group: Reminders)
-- [ ] Update `org-admin` seed role in `SeedRoles` notifier to include `approveReminders`
+- [x] Update `org-admin` seed role in `SeedRoles` notifier to include `approveReminders`
 - [ ] Update `seed_roles.js` script to include `approveReminders` in org-admin
 
 **Org Settings**
@@ -932,8 +934,8 @@ Optional expiration, notification history, broadcast management, full-screen det
 > Architecture fully designed. See **[shared/docs/RBAC_ARCHITECTURE.md](RBAC_ARCHITECTURE.md)** for the two-tier RBAC model, `AppPermission` enum design, custom capabilities, and enforcement strategy.
 
 - [x] Define `AppPermission` enum in `lib/core/permissions/app_permission.dart`
-- [ ] Create `roles` Firestore collection per org — seed default system roles (`org-admin`, `member`)
-- [ ] Create `customCapabilities` Firestore collection per org — seed with org-specific defaults
+- [x] Create `roles` Firestore collection per org — seed default system roles (`org-admin`, `member`) via in-app **Seed Default Roles**
+- [x] Create `customCapabilities` Firestore collection per org — seed with org-specific defaults *(admin UI + scripts)*
 - [x] Build `PermissionProvider` (Riverpod) — resolves effective capabilities from role assignments + custom cap registry
 - [x] Implement Firebase Auth Custom Claims Cloud Function (`syncCustomClaims`, `refreshMyPermissions`)
 - [x] Build `RolesManagementScreen` (admin) — list, edit, delete roles
@@ -951,31 +953,33 @@ Optional expiration, notification history, broadcast management, full-screen det
 
 > Spec: [REPORT_CATEGORY_RBAC.md](REPORT_CATEGORY_RBAC.md)
 
-- [ ] `roles.allowedCategoryIds` schema + domain/models
-- [ ] `EffectivePermissionSet` category-aware `can()` / view checks
-- [ ] JWT `allowedCategoryIds` in `syncCustomClaims` / `refreshMyPermissions`
-- [ ] Firestore rules — report read/update category scope
-- [ ] Role Editor — category multi-select + validation
-- [ ] Admin report list/detail — filter and gate by category
-- [ ] Seed roles — guidance-counselor / discipline-officer category defaults
-- [ ] Unit tests — `EffectivePermissionSet` category matrix
+- [x] `roles.allowedCategoryIds` schema + domain/models
+- [x] `EffectivePermissionSet` category-aware `can()` / view checks
+- [x] JWT `allowedCategoryIds` in `syncCustomClaims` / `refreshMyPermissions`
+- [x] Firestore rules — report read/update category scope
+- [x] Role Editor — category multi-select + validation
+- [x] Admin report list/detail — filter and gate by category
+- [x] Seed roles — guidance-counselor / discipline-officer category defaults
+- [x] Unit tests — `EffectivePermissionSet` category matrix
 
 ### Epic 2.13 — Abuse Blocking & Moderation
 
-- [ ] Create `blockedUsers` Firestore collection per org
-- [ ] Build `BlockUserDialog` — reason, block type (permanent / temporary + duration)
-- [ ] Build `BlockedUsersScreen` (admin) — view, unblock, manage all blocks
-- [ ] Enforce block on login: blocked users get a "your account has been restricted" screen
+- [x] Create `blockedUsers` Firestore collection per org *(schema + rules)*
+- [~] Build `BlockUserDialog` — reason, block type (permanent / temporary + duration) *(verify UI completeness)*
+- [~] Build `BlockedUsersScreen` (admin) — view, unblock, manage all blocks *(may be partial — `EnrolledUsersScreen`)*
+- [x] Enforce block on login: blocked users get a "your account has been restricted" screen — `BlockedAccountScreen`
 - [ ] Anonymous user block: device fingerprint or IP hash stored in `targetIdentifier`
 - [ ] Block expiry: Firebase scheduled function to auto-unblock when `expiresAt` passes
 - [ ] Report-a-post feature: users can flag bulletin or news posts for admin review
 
 ### Epic 2.14 — Announcements (Original)
 
-- [ ] Announcement Firestore collection schema
-- [ ] Admin: create/publish announcement
-- [ ] User: view announcements list
-- [ ] Push notification for new announcements
+> Superseded by [Epic 2.7](#epic-27--organization-wide-announcements-bulletin-board).
+
+- [x] Announcement Firestore collection schema
+- [x] Admin: create/publish announcement
+- [x] User: view announcements list
+- [~] Push notification for new announcements *(server-side; client FCM pending)*
 
 ### Epic 2.15 — Anonymous Report Reference Code
 
@@ -1069,7 +1073,7 @@ Optional expiration, notification history, broadcast management, full-screen det
 
 ## Testing Tasks (All Phases)
 
-- [ ] Set up Flutter test project structure
+- [x] Set up Flutter test project structure (`speakup_connect_app/test/`)
 - [ ] Unit tests: all use cases
 - [ ] Unit tests: all repository implementations (mocked datasources)
 - [ ] Widget tests: all screens
@@ -1085,9 +1089,9 @@ Optional expiration, notification history, broadcast management, full-screen det
 
 ## Security Tasks (All Phases)
 
-- [ ] Write Firestore Security Rules (see shared/docs/DATABASE_DESIGN.md outline)
-- [ ] Write Firebase Storage Security Rules
-- [ ] Deploy and test rules against Firebase emulator
+- [x] Write Firestore Security Rules (see shared/docs/DATABASE_DESIGN.md outline) — `firestore.rules`
+- [x] Write Firebase Storage Security Rules — deployed with pilot
+- [~] Deploy and test rules against Firebase emulator *(rules deployed to pilot; emulator test suite not comprehensive)*
 - [ ] Penetration test: unauthorized cross-org data access
 - [ ] Review all user inputs for XSS-equivalent risks
 - [ ] Enable Firebase App Check (production)
@@ -1099,12 +1103,12 @@ Optional expiration, notification history, broadcast management, full-screen det
 ## Deployment Tasks
 
 - [ ] Create Firebase project: `speakupconnect-dev`
-- [ ] Create Firebase project: `speakupconnect-pilot-monhs`
+- [x] Create Firebase project: `speakupconnect-pilot-monhs` — **`speakup-connect-891dd`** in active use
 - [ ] Create Firebase project: `speakupconnect-production`
-- [ ] Configure Firestore indexes
-- [ ] Configure Firestore Security Rules
-- [ ] Configure Storage Security Rules
-- [ ] Configure FCM topics and permissions
+- [x] Configure Firestore indexes — `firestore.indexes.json` deployed
+- [x] Configure Firestore Security Rules
+- [x] Configure Storage Security Rules
+- [~] Configure FCM topics and permissions *(server payloads exist; client token wiring pending)*
 - [ ] Set up CI/CD pipeline (GitHub Actions)
 - [ ] Android Play Store account setup
 - [ ] App bundle signing configuration
@@ -1124,7 +1128,7 @@ Optional expiration, notification history, broadcast management, full-screen det
 
 ### Dart / Flutter
 
-- [ ] Remove debug logging from `lib/features/settings/presentation/screens/settings_screen.dart` (profile debug `print` statements added in commit `17f6fdb`)
+- [x] Remove debug logging from `lib/features/settings/presentation/screens/settings_screen.dart` (profile debug `print` statements added in commit `17f6fdb`) — removed in Sprint 6
 - [x] Repository split complete: app code moved to `speakup_connect_app/`, shared assets/docs/functions/scripts to `shared/`, and tooling/web artifacts to `speakup_connect_web/` (follow-up config/generated path updates landed)
 
 ### Data / Firebase
