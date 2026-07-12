@@ -7,17 +7,19 @@
 
 ## Quick checklist
 
+> **In-file section links:** Checklist and troubleshooting items include a [Markdown anchor](#1-install-flutter--platform-sdks) (GitHub, VS Code, Cursor) and an Obsidian wikilink (`[[#…]]`) — use whichever works in your viewer. Links to other documents use standard Markdown only (works in both GitHub and Obsidian).
+
 | Step | What | Required for Flutter app |
 |------|------|--------------------------|
-| 1 | [Install Flutter & platform SDKs](#1-install-flutter--platform-sdks) | Yes |
-| 2 | [Install Node.js & Firebase CLI](#2-install-nodejs--firebase-cli) | Yes (Firebase config) |
-| 3 | [Clone the repository](#3-clone-the-repository) | Yes |
-| 4 | [Flutter app dependencies](#4-flutter-app-dependencies) | Yes |
-| 5 | [Firebase setup](#5-firebase-setup--required-before-running) | **Yes — app crashes without this** |
-| 6 | [Run & verify](#6-run--verify) | Yes |
-| 7 | [Cloud Functions](#7-cloud-functions-optional) | Only if working on backend |
-| 8 | [Admin scripts](#8-admin-scripts-optional) | Only for seeding roles / super-admin |
-| 9 | [Translation Helper web tool](#9-translation-helper-web-tool-optional) | Only for localization workflow |
+| 1 | [Install Flutter & platform SDKs](#1-install-flutter--platform-sdks) · [[#1. Install Flutter & platform SDKs]] | Yes |
+| 2 | [Install Node.js & Firebase CLI](#2-install-nodejs--firebase-cli) · [[#2. Install Node.js & Firebase CLI]] | Yes (Firebase config) |
+| 3 | [Clone the repository](#3-clone-the-repository) · [[#3. Clone the repository]] | Yes |
+| 4 | [Flutter app dependencies](#4-flutter-app-dependencies) · [[#4. Flutter app dependencies]] | Yes |
+| 5 | [Firebase setup](#5-firebase-setup--required-before-running) · [[#5. Firebase setup — REQUIRED BEFORE RUNNING]] | **Yes — app crashes without this** |
+| 6 | [Run & verify](#6-run--verify) · [[#6. Run & verify]] | Yes |
+| 7 | [Cloud Functions](#7-cloud-functions-optional) · [[#7. Cloud Functions (optional)]] | Only if working on backend |
+| 8 | [Admin scripts](#8-admin-scripts-optional) · [[#8. Admin scripts (optional)]] | Only for seeding roles / super-admin |
+| 9 | [Translation Helper web tool](#9-translation-helper-web-tool-optional) · [[#9. Translation Helper web tool (optional)]] | Only for localization workflow |
 
 ---
 
@@ -25,7 +27,7 @@
 
 | Tool | Version | Source |
 |------|---------|--------|
-| Flutter SDK | **3.44.0** (stable) recommended; `>=3.19.0` minimum | CI in [shared/docs/CLIENT_BUILDS.md](shared/docs/CLIENT_BUILDS.md) |
+| Flutter SDK | **3.44.0** (stable) recommended; `>=3.19.0` minimum | CI in [CLIENT_BUILDS](shared/docs/CLIENT_BUILDS.md) |
 | Dart SDK | `>=3.3.0 <4.0.0` | `speakup_connect_app/pubspec.yaml` |
 | Node.js | **20.x** | `shared/functions/package.json` |
 | Firebase CLI | Latest via `npm` / `npx` | Project tooling |
@@ -83,7 +85,7 @@ sudo gem install cocoapods
 
 4. Confirm iOS toolchain in `flutter doctor`.
 
-> **Note:** iOS Firebase config for **client flavor builds** (e.g. MONHS) is documented in [shared/docs/CLIENT_BUILDS.md](shared/docs/CLIENT_BUILDS.md). Standard app setup uses FlutterFire CLI (see [§5](#5-firebase-setup--required-before-running)).
+> **Note:** iOS Firebase config for **client flavor builds** (e.g. MONHS) is documented in [CLIENT_BUILDS](shared/docs/CLIENT_BUILDS.md). Standard app setup uses FlutterFire CLI (see [§5](#5-firebase-setup--required-before-running) · [[#5. Firebase setup — REQUIRED BEFORE RUNNING]]).
 
 ### 1.4 IDE
 
@@ -236,7 +238,7 @@ Required secrets (**GitHub → Settings → Secrets and variables → Actions**)
 | `GOOGLE_SERVICES_JSON` | Full content of `speakup_connect_app/android/app/google-services.json` |
 | `FIREBASE_OPTIONS_DART` | Full content of `speakup_connect_app/lib/config/firebase_options.dart` |
 
-Client flavor builds use additional secrets — see [shared/docs/CLIENT_BUILDS.md](shared/docs/CLIENT_BUILDS.md).
+Client flavor builds use additional secrets — see [CLIENT_BUILDS](shared/docs/CLIENT_BUILDS.md).
 
 ---
 
@@ -255,7 +257,7 @@ flutter run
 
 ### Environment configuration
 
-The app supports `development`, `staging`, and `production` environments via `lib/config/env_config.dart`. Firebase project configuration is loaded from `firebase_options.dart`. See [shared/docs/ARCHITECTURE.md](shared/docs/ARCHITECTURE.md) for environment details.
+The app supports `development`, `staging`, and `production` environments via `lib/config/env_config.dart`. Firebase project configuration is loaded from `firebase_options.dart`. See [ARCHITECTURE](shared/docs/ARCHITECTURE.md) for environment details.
 
 ---
 
@@ -291,7 +293,7 @@ npm run deploy
 
 ### Translation AI key (optional)
 
-For AI-powered translation draft functions, copy `shared/functions/.env.example` → `shared/functions/.env` and set `TRANSLATION_AI_API_KEY`. **Do not commit** `.env`. Redeploy after adding the key. Details: [speakup_connect_web/tools/translation-helper/README.md](speakup_connect_web/tools/translation-helper/README.md).
+For AI-powered translation draft functions, copy `shared/functions/.env.example` → `shared/functions/.env` and set `TRANSLATION_AI_API_KEY`. **Do not commit** `.env`. Redeploy after adding the key. Details: [translation-helper README](speakup_connect_web/tools/translation-helper/README.md).
 
 ---
 
@@ -325,9 +327,9 @@ If the key is ever exposed, revoke it in Google Cloud Console and generate a new
 
 Web workspace for managing UI translations. Full setup (Firebase Auth, `firebase-config.js`, deploy steps) is in:
 
-**[speakup_connect_web/tools/translation-helper/README.md](speakup_connect_web/tools/translation-helper/README.md)**
+**[translation-helper README](speakup_connect_web/tools/translation-helper/README.md)**
 
-End-to-end localization workflow: [shared/docs/INTERNATIONALIZATION.md](shared/docs/INTERNATIONALIZATION.md)
+End-to-end localization workflow: [INTERNATIONALIZATION](shared/docs/INTERNATIONALIZATION.md)
 
 ---
 
@@ -335,8 +337,8 @@ End-to-end localization workflow: [shared/docs/INTERNATIONALIZATION.md](shared/d
 
 VIP / pilot schools get separate app store listings via Flutter **build flavors** (e.g. MONHS). That workflow includes per-flavor Firebase apps, icons, and CI secrets:
 
-**[shared/docs/ONBOARDING_NEW_SCHOOL.md](shared/docs/ONBOARDING_NEW_SCHOOL.md)**  
-**[shared/docs/CLIENT_BUILDS.md](shared/docs/CLIENT_BUILDS.md)**
+**[ONBOARDING_NEW_SCHOOL](shared/docs/ONBOARDING_NEW_SCHOOL.md)**  
+**[CLIENT_BUILDS](shared/docs/CLIENT_BUILDS.md)**
 
 ---
 
@@ -344,11 +346,11 @@ VIP / pilot schools get separate app store listings via Flutter **build flavors*
 
 | Symptom | Likely cause | Fix |
 |---------|--------------|-----|
-| App crashes immediately on launch | Missing Firebase config | Complete [§5](#5-firebase-setup--required-before-running) |
+| App crashes immediately on launch | Missing Firebase config | Complete [§5](#5-firebase-setup--required-before-running) · [[#5. Firebase setup — REQUIRED BEFORE RUNNING]] |
 | `flutterfire: command not found` | Pub global bin not on PATH | Add `~/.pub-cache/bin` (macOS/Linux) or `%LOCALAPPDATA%\Pub\Cache\bin` (Windows) to PATH |
 | `flutter doctor` Android errors | SDK / licenses | Install Android Studio SDK; run `flutter doctor --android-licenses` |
 | `flutter pub get` fails | Wrong Flutter/Dart version | Upgrade to Flutter 3.44.x stable |
-| `ENOENT ... service-account.json` | Admin script without key | Complete [§8](#8-admin-scripts-optional) |
+| `ENOENT ... service-account.json` | Admin script without key | Complete [§8](#8-admin-scripts-optional) · [[#8. Admin scripts (optional)]] |
 | `TRANSLATION_AI_API_KEY is not set` | AI functions without `.env` | Add key to `shared/functions/.env` and redeploy |
 | Analyzer errors after pull | Stale generated code | `dart run build_runner build --delete-conflicting-outputs` |
 
@@ -356,8 +358,8 @@ VIP / pilot schools get separate app store listings via Flutter **build flavors*
 
 ## Next steps for contributors
 
-1. [shared/docs/CODING_STANDARDS.md](shared/docs/CODING_STANDARDS.md) — naming and structure rules
-2. [shared/docs/AI_DEVELOPMENT_WORKFLOW.md](shared/docs/AI_DEVELOPMENT_WORKFLOW.md) — documentation-first workflow
-3. [shared/docs/SPRINT_TRACKER.md](shared/docs/SPRINT_TRACKER.md) — current sprint priorities
-4. [shared/docs/ARCHITECTURE.md](shared/docs/ARCHITECTURE.md) — system design
-5. [shared/docs/DATABASE_DESIGN.md](shared/docs/DATABASE_DESIGN.md) — Firestore schema (read before writing data code)
+1. [CODING_STANDARDS](shared/docs/CODING_STANDARDS.md) — naming and structure rules
+2. [AI_DEVELOPMENT_WORKFLOW](shared/docs/AI_DEVELOPMENT_WORKFLOW.md) — documentation-first workflow
+3. [SPRINT_TRACKER](shared/docs/SPRINT_TRACKER.md) — current sprint priorities
+4. [ARCHITECTURE](shared/docs/ARCHITECTURE.md) — system design
+5. [DATABASE_DESIGN](shared/docs/DATABASE_DESIGN.md) — Firestore schema (read before writing data code)
